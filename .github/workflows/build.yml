@@ -4,7 +4,10 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch: # Позволяет запускать вручную из UI GitHub без тегов и коммитов
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build-windows:
@@ -15,9 +18,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Install NSIS
-      run: |
-        choco install nsis -y
-        echo "C:\Program Files (x86)\NSIS" >> $GITHUB_PATH
+      run: choco install nsis
 
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
@@ -32,20 +33,23 @@ jobs:
       run: |
         cmake -B build -DCMAKE_BUILD_TYPE=Release
         cmake --build build --config Release -j $env:NUMBER_OF_PROCESSORS
-        # Принудительно указываем путь к makensis если он всё еще не в PATH
-        $env:PATH += ";C:\Program Files (x86)\NSIS"
+        # Create Portable version
+        mkdir dist/portable
+        cmake --install build --prefix dist/portable
+        Compress-Archive -Path dist/portable/* -DestinationPath dist/LogViewer-Windows-Portable.zip
+        # Create Installer
         cpack --config build/CPackConfig.cmake -B dist/ -C Release
 
-    - name: Upload Artifacts
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: LogViewer-Windows
+        name: LogViewer-Windows-x64
         path: |
           dist/LogViewer-Windows-x64.exe
-          dist/LogViewer-Windows-x64.zip
+          dist/LogViewer-Windows-Portable.zip
 
   build-macos:
-    name: Build macOS (Universal)
+    name: Build macOS (Silicon)
     runs-on: macos-14
     steps:
     - name: Checkout repository
@@ -68,12 +72,18 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
         cmake --build build --config Release -j "$(sysctl -n hw.logicalcpu)"
+        # Install to trigger deployment and signing
+        mkdir -p dist/bundle
+        DESTDIR=$PWD/dist/bundle cmake --install build --prefix /
+        # Final sign for safety
+        codesign --force --deep --sign - dist/bundle/LogViewer.app
+        # Package
         cpack --config build/CPackConfig.cmake -B dist/ -C Release
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: LogViewer-macOS-Universal.dmg
+        name: LogViewer-macOS-Silicon
         path: dist/LogViewer-macOS-Universal.dmg
 
   build-linux:
@@ -95,17 +105,18 @@ jobs:
           libxcb1-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev \
           libxkbcommon-x11-dev binutils qt6-base-dev qt6-declarative-dev \
           qt6-multimedia-dev libqt6svg6-dev libvulkan-dev imagemagick libpng-dev \
-          libxcb-cursor0 libxcb-xinput0
+          qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
+          qml6-module-qtquick-templates qml6-module-qtquick-window qml6-module-qt2d
 
     - name: Build and Package AppImage
       run: |
         cmake -B build -DCMAKE_BUILD_TYPE=Release -Wno-dev
-        cmake --build build --config Release -j "$(nproc)"
+        cmake --build build --config Release -j $(nproc)
         cmake --build build --target appimage
 
     - name: Build and Package DEB
       run: |
-        cpack --config build/CPackConfig.cmake -G DEB -B dist/ -C Release
+        cpack --config build/CPackConfig.cmake -B dist/ -C Release
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
@@ -134,7 +145,7 @@ jobs:
       with:
         files: |
           artifacts/LogViewer-Windows-x64.exe
-          artifacts/LogViewer-Windows-x64.zip
+          artifacts/LogViewer-Windows-Portable.zip
           artifacts/LogViewer-macOS-Universal.dmg
           artifacts/LogViewer-Linux.AppImage
           artifacts/*.deb
