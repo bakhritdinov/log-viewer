@@ -106,7 +106,7 @@ jobs:
           libxkbcommon-x11-dev binutils qt6-base-dev qt6-declarative-dev \
           qt6-multimedia-dev libqt6svg6-dev libvulkan-dev imagemagick libpng-dev \
           qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
-          qml6-module-qtquick-templates qml6-module-qtquick-window qml6-module-qt2d
+          qml6-module-qtquick-templates qml6-module-qtquick-window
 
     - name: Build and Package AppImage
       run: |

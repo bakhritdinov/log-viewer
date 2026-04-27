@@ -82,16 +82,25 @@ install(TARGETS LogViewer
 )
 
 # --- Автоматическое развертывание Qt ---
-if(NOT ANDROID)
-    # Check if deploy script generation is available (Qt 6.3+)
-    if(Qt6_VERSION VERSION_GREATER_EQUAL "6.3.0")
-        qt_generate_deploy_qml_app_script(
-            TARGET LogViewer
-            OUTPUT_SCRIPT deploy_script
-            NO_UNSUPPORTED_PLATFORM_ERROR
-            MACOS_BUNDLE_POST_BUILD
-        )
-        install(SCRIPT ${deploy_script})
+if(Qt6_VERSION VERSION_GREATER_EQUAL "6.3.0")
+    qt_standard_project_setup()
+    
+    if(APPLE)
+        set(deploy_args "--qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/qml" "--ignore-errors")
+    endif()
+
+    qt_generate_deploy_app_script(
+        TARGET LogViewer
+        OUTPUT_SCRIPT deploy_script
+        DEPLOY_TOOL_OPTIONS ${deploy_args}
+        NO_UNSUPPORTED_PLATFORM_ERROR
+    )
+    install(SCRIPT ${deploy_script})
+
+    if(APPLE)
+        install(CODE "
+            execute_process(COMMAND codesign --force --deep --sign - \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/LogViewer.app\")
+        ")
     endif()
 endif()
 
