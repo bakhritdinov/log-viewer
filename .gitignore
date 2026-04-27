@@ -27,3 +27,6 @@ Thumbs.db
 
 # Gradle
 .gradle/
+
+# Gemini
+GEMINI.md
