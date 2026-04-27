@@ -19,6 +19,11 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Quick Network Svg Gui)
 
+# Set Qt policies for compatibility
+if(POLICY QTP0004)
+    cmake_policy(SET QTP0004 NEW)
+endif()
+
 # qt_standard_project_setup() was introduced in Qt 6.3.
 # For compatibility with Qt 6.2 (Ubuntu 22.04), we set the necessary variables manually.
 if(Qt6_VERSION VERSION_GREATER_EQUAL "6.3.0")

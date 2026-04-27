@@ -15,7 +15,9 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Install NSIS
-      run: choco install nsis
+      run: |
+        choco install nsis -y
+        echo "C:\Program Files (x86)\NSIS" >> $GITHUB_PATH
 
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
@@ -30,6 +32,8 @@ jobs:
       run: |
         cmake -B build -DCMAKE_BUILD_TYPE=Release
         cmake --build build --config Release -j $env:NUMBER_OF_PROCESSORS
+        # Принудительно указываем путь к makensis если он всё еще не в PATH
+        $env:PATH += ";C:\Program Files (x86)\NSIS"
         cpack --config build/CPackConfig.cmake -B dist/ -C Release
 
     - name: Upload Artifacts
