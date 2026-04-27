@@ -19,7 +19,13 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Quick Network Svg Gui)
 
-qt_standard_project_setup()
+# qt_standard_project_setup() was introduced in Qt 6.3.
+# For compatibility with Qt 6.2 (Ubuntu 22.04), we set the necessary variables manually.
+if(Qt6_VERSION VERSION_GREATER_EQUAL "6.3.0")
+    qt_standard_project_setup()
+else()
+    set(CMAKE_INCLUDE_CURRENT_DIR ON)
+endif()
 
 qt_add_executable(LogViewer
     MACOSX_BUNDLE
@@ -71,15 +77,17 @@ install(TARGETS LogViewer
 )
 
 # --- Автоматическое развертывание Qt ---
-# Это заменяет ручной запуск windeployqt/macdeployqt
 if(NOT ANDROID)
-    qt_generate_deploy_qml_app_script(
-        TARGET LogViewer
-        OUTPUT_SCRIPT deploy_script
-        NO_UNSUPPORTED_PLATFORM_ERROR
-        MACOS_BUNDLE_POST_BUILD
-    )
-    install(SCRIPT ${deploy_script})
+    # Check if deploy script generation is available (Qt 6.3+)
+    if(Qt6_VERSION VERSION_GREATER_EQUAL "6.3.0")
+        qt_generate_deploy_qml_app_script(
+            TARGET LogViewer
+            OUTPUT_SCRIPT deploy_script
+            NO_UNSUPPORTED_PLATFORM_ERROR
+            MACOS_BUNDLE_POST_BUILD
+        )
+        install(SCRIPT ${deploy_script})
+    endif()
 endif()
 
 # --- Linux Desktop Integration ---
@@ -101,7 +109,6 @@ if(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-macOS-Universal")
 elseif(WIN32)
-    # NSIS для инсталлятора, ZIP для портативной версии
     set(CPACK_GENERATOR "NSIS;ZIP")
     set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-Windows-x64")
 elseif(UNIX AND NOT APPLE)
