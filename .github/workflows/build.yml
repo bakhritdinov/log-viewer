@@ -1,0 +1,132 @@
+name: Build and Release LogViewer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install NSIS
+      run: choco install nsis
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.2'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2022_64'
+
+    - name: Build and Package
+      shell: pwsh
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build --config Release -j $env:NUMBER_OF_PROCESSORS
+        cpack --config build/CPackConfig.cmake -B dist/ -C Release
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LogViewer-Windows-x64.exe
+        path: dist/LogViewer-Windows-x64.exe
+
+  build-macos:
+    name: Build macOS (Universal)
+    runs-on: macos-14
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: brew install ninja brotli zstd
+
+    - name: Install Qt via aqtinstall
+      run: |
+        python3 -m pip install aqtinstall --break-system-packages
+        python3 -m aqt install-qt mac desktop 6.8.2 clang_64 --outputdir ${{ github.workspace }}/qt
+
+    - name: Build and Package
+      run: |
+        cmake -B build -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_PREFIX_PATH="${{ github.workspace }}/qt/6.8.2/macos" \
+          -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+        cmake --build build --config Release -j $(sysctl -n hw.logicalcpu)
+        cpack --config build/CPackConfig.cmake -B dist/ -C Release
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LogViewer-macOS-Universal.dmg
+        path: dist/LogViewer-macOS-Universal.dmg
+
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libegl1-mesa-dev \
+          libdbus-1-dev libfontconfig1-dev libfreetype6-dev libice-dev libsm-dev \
+          libx11-dev libx11-xcb-dev libxcb-icccm4-dev libxcb-image0-dev \
+          libxcb-keysyms1-dev libxcb-randr0-dev libxcb-render-util0-dev \
+          libxcb-render0-dev libxcb-shape0-dev libxcb-shm0-dev libxcb-sync-dev \
+          libxcb-util-dev libxcb-xfixes0-dev libxcb-xinerama0-dev libxcb-xkb-dev \
+          libxcb1-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev \
+          libxkbcommon-x11-dev binutils qt6-base-dev qt6-declarative-dev \
+          qt6-multimedia-dev libqt6svg6-dev libvulkan-dev imagemagick libpng-dev
+
+    - name: Build and Package AppImage
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release -Wno-dev
+        cmake --build build --config Release -j $(nproc)
+        cmake --build build --target appimage
+
+    - name: Build and Package DEB
+      run: |
+        cpack --config build/CPackConfig.cmake -B dist/ -C Release
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: LogViewer-Linux
+        path: |
+          dist/LogViewer-Linux.AppImage
+          dist/*.deb
+
+  release:
+    name: Create GitHub Release
+    needs: [build-windows, build-macos, build-linux]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+        merge-multiple: true
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          artifacts/LogViewer-Windows-x64.exe
+          artifacts/LogViewer-macOS-Universal.dmg
+          artifacts/LogViewer-Linux.AppImage
+          artifacts/*.deb
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

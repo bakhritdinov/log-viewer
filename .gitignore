@@ -1,0 +1,29 @@
+# C++ and CMake
+build/
+build_macos/
+build_linux/
+build_win/
+dist/
+AppDir/
+packaging/windows/installer_packages/*/data/
+linuxdeploy*.AppImage
+log-viewer.desktop
+.cmake/
+.qt/
+CMakeFiles/
+CMakeCache.txt
+*.cmake
+Makefile
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Gradle
+.gradle/
