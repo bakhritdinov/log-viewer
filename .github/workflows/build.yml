@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
+  workflow_dispatch: # Позволяет запускать вручную из UI GitHub без тегов и коммитов
 
 jobs:
   build-windows:
@@ -32,11 +32,13 @@ jobs:
         cmake --build build --config Release -j $env:NUMBER_OF_PROCESSORS
         cpack --config build/CPackConfig.cmake -B dist/ -C Release
 
-    - name: Upload Artifact
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: LogViewer-Windows-x64.exe
-        path: dist/LogViewer-Windows-x64.exe
+        name: LogViewer-Windows
+        path: |
+          dist/LogViewer-Windows-x64.exe
+          dist/LogViewer-Windows-x64.zip
 
   build-macos:
     name: Build macOS (Universal)
@@ -48,18 +50,20 @@ jobs:
     - name: Install Dependencies
       run: brew install ninja brotli zstd
 
-    - name: Install Qt via aqtinstall
-      run: |
-        python3 -m pip install aqtinstall --break-system-packages
-        python3 -m aqt install-qt mac desktop 6.8.2 clang_64 --outputdir ${{ github.workspace }}/qt
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.2'
+        host: 'mac'
+        target: 'desktop'
+        arch: 'clang_64'
 
     - name: Build and Package
       run: |
         cmake -B build -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_PREFIX_PATH="${{ github.workspace }}/qt/6.8.2/macos" \
           -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
-        cmake --build build --config Release -j $(sysctl -n hw.logicalcpu)
+        cmake --build build --config Release -j "$(sysctl -n hw.logicalcpu)"
         cpack --config build/CPackConfig.cmake -B dist/ -C Release
 
     - name: Upload Artifact
@@ -86,17 +90,18 @@ jobs:
           libxcb-util-dev libxcb-xfixes0-dev libxcb-xinerama0-dev libxcb-xkb-dev \
           libxcb1-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev \
           libxkbcommon-x11-dev binutils qt6-base-dev qt6-declarative-dev \
-          qt6-multimedia-dev libqt6svg6-dev libvulkan-dev imagemagick libpng-dev
+          qt6-multimedia-dev libqt6svg6-dev libvulkan-dev imagemagick libpng-dev \
+          libxcb-cursor0 libxcb-xinput0
 
     - name: Build and Package AppImage
       run: |
         cmake -B build -DCMAKE_BUILD_TYPE=Release -Wno-dev
-        cmake --build build --config Release -j $(nproc)
+        cmake --build build --config Release -j "$(nproc)"
         cmake --build build --target appimage
 
     - name: Build and Package DEB
       run: |
-        cpack --config build/CPackConfig.cmake -B dist/ -C Release
+        cpack --config build/CPackConfig.cmake -G DEB -B dist/ -C Release
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
@@ -125,6 +130,7 @@ jobs:
       with:
         files: |
           artifacts/LogViewer-Windows-x64.exe
+          artifacts/LogViewer-Windows-x64.zip
           artifacts/LogViewer-macOS-Universal.dmg
           artifacts/LogViewer-Linux.AppImage
           artifacts/*.deb

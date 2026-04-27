@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/">
+    <file alias="/qt/qml/LogViewerApp">/Users/boburbakhritdinov/Documents/Projects/log-viewer/build_test/LogViewerApp</file>
+
+  </qresource>
+</RCC>
