@@ -86,7 +86,7 @@ if(Qt6_VERSION VERSION_GREATER_EQUAL "6.3.0")
     qt_standard_project_setup()
     
     if(APPLE)
-        set(deploy_args "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/qml" "-ignore-errors")
+        set(deploy_args "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/qml")
     endif()
 
     qt_generate_deploy_app_script(
