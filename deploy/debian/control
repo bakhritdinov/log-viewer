@@ -1,0 +1,25 @@
+Source: log-viewer
+Section: utils
+Priority: optional
+Maintainer: Bobur Bakhritdinov <boburbakhritdinov@gmail.com>
+Build-Depends: debhelper-compat (= 13),
+               cmake,
+               qt6-base-dev,
+               qt6-declarative-dev,
+               libqt6svg6-dev,
+               qt6-l10n-tools,
+               libgl1-mesa-dev
+Standards-Version: 4.5.1
+Homepage: https://github.com/boburbakhritdinov/log-viewer
+
+Package: log-viewer
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         qml6-module-qtquick,
+         qml6-module-qtquick-controls,
+         qml6-module-qtquick-layouts,
+         qml6-module-qtquick-templates,
+         qml6-module-qtquick-window,
+         libqt6svg6
+Description: Reactive Log Viewer for Grafana Loki
+ High-performance desktop application for viewing logs from Grafana Loki.

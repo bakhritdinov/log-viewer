@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>log-viewer</id>
+    <version>[[VERSION]]</version>
+    <packageSourceUrl>https://github.com/boburbakhritdinov/log-viewer</packageSourceUrl>
+    <owners>Bobur Bakhritdinov</owners>
+    <title>LogViewer</title>
+    <authors>Bobur Bakhritdinov</authors>
+    <projectUrl>https://github.com/boburbakhritdinov/log-viewer</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/boburbakhritdinov/log-viewer/main/src/resources/icon.png</iconUrl>
+    <licenseUrl>https://github.com/boburbakhritdinov/log-viewer/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/boburbakhritdinov/log-viewer</projectSourceUrl>
+    <tags>log-viewer grafana loki qt qml</tags>
+    <summary>Reactive Log Viewer for Grafana Loki</summary>
+    <description>A high-performance, reactive desktop application for viewing logs from Grafana Loki, built with Qt 6 and C++20.</description>
+    <releaseNotes>https://github.com/boburbakhritdinov/log-viewer/releases</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
