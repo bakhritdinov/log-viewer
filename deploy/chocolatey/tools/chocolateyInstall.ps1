@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop';
 $packageName= 'log-viewer'
 $toolsDir   = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$url64      = "https://github.com/boburbakhritdinov/log-viewer/releases/download/v[[VERSION]]/LogViewer-Windows-x64.exe"
+$url64      = "https://github.com/bakhritdinov/log-viewer/releases/download/v[[VERSION]]/LogViewer-Windows-x64.exe"
 
 $packageArgs = @{
   packageName   = $packageName

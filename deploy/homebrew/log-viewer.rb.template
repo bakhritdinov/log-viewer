@@ -2,10 +2,10 @@ cask "log-viewer" do
   version "[[VERSION]]"
   sha256 "[[SHA256]]"
 
-  url "https://github.com/boburbakhritdinov/log-viewer/releases/download/v#{version}/LogViewer-macOS-Universal.dmg"
+  url "https://github.com/bakhritdinov/log-viewer/releases/download/v#{version}/LogViewer-macOS-Universal.dmg"
   name "LogViewer"
   desc "Reactive Log Viewer for Grafana Loki"
-  homepage "https://github.com/boburbakhritdinov/log-viewer"
+  homepage "https://github.com/bakhritdinov/log-viewer"
 
   app "LogViewer.app"
 

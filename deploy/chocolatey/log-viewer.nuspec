@@ -3,19 +3,19 @@
   <metadata>
     <id>log-viewer</id>
     <version>[[VERSION]]</version>
-    <packageSourceUrl>https://github.com/boburbakhritdinov/log-viewer</packageSourceUrl>
+    <packageSourceUrl>https://github.com/bakhritdinov/log-viewer</packageSourceUrl>
     <owners>Bobur Bakhritdinov</owners>
     <title>LogViewer</title>
     <authors>Bobur Bakhritdinov</authors>
-    <projectUrl>https://github.com/boburbakhritdinov/log-viewer</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/boburbakhritdinov/log-viewer/main/src/resources/icon.png</iconUrl>
-    <licenseUrl>https://github.com/boburbakhritdinov/log-viewer/blob/main/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/bakhritdinov/log-viewer</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/bakhritdinov/log-viewer/main/src/resources/icon.png</iconUrl>
+    <licenseUrl>https://github.com/bakhritdinov/log-viewer/blob/main/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <projectSourceUrl>https://github.com/boburbakhritdinov/log-viewer</projectSourceUrl>
+    <projectSourceUrl>https://github.com/bakhritdinov/log-viewer</projectSourceUrl>
     <tags>log-viewer grafana loki qt qml</tags>
     <summary>Reactive Log Viewer for Grafana Loki</summary>
     <description>A high-performance, reactive desktop application for viewing logs from Grafana Loki, built with Qt 6 and C++20.</description>
-    <releaseNotes>https://github.com/boburbakhritdinov/log-viewer/releases</releaseNotes>
+    <releaseNotes>https://github.com/bakhritdinov/log-viewer/releases</releaseNotes>
   </metadata>
   <files>
     <file src="tools\**" target="tools" />

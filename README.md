@@ -17,8 +17,7 @@ choco install log-viewer
 
 ### macOS (Homebrew)
 ```bash
-brew tap bakhritdinov/tap
-brew install --cask log-viewer
+brew install --cask bakhritdinov/tap/log-viewer
 ```
 
 ### Ubuntu (PPA)
