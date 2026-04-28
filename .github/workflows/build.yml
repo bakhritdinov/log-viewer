@@ -165,19 +165,30 @@ jobs:
       shell: pwsh
       run: |
         $version = "${{ github.ref_name }}".TrimStart('v')
-        $nuspec = Get-Content deploy/chocolatey/log-viewer.nuspec
-        $nuspec = $nuspec -replace '\[\[VERSION\]\]', $version
-        Set-Content deploy/chocolatey/log-viewer.nuspec $nuspec
+        $nuspecPath = "deploy/chocolatey/log-viewer.nuspec"
+        $nuspec = Get-Content $nuspecPath -Raw
+        $nuspec = $nuspec.Replace("[[VERSION]]", $version)
+        Set-Content $nuspecPath $nuspec
         
-        $script = Get-Content deploy/chocolatey/tools/chocolateyInstall.ps1
-        $script = $script -replace '\[\[VERSION\]\]', $version
-        Set-Content deploy/chocolatey/tools/chocolateyInstall.ps1 $script
+        $scriptPath = "deploy/chocolatey/tools/chocolateyInstall.ps1"
+        $script = Get-Content $scriptPath -Raw
+        $script = $script.Replace("[[VERSION]]", $version)
+        Set-Content $scriptPath $script
         
         New-Item -ItemType Directory -Force -Path dist
-        choco pack deploy/chocolatey/log-viewer.nuspec --outputdirectory dist
+        choco pack $nuspecPath --outputdirectory dist
+        Get-ChildItem dist/
 
     - name: Push to Chocolatey
-      run: choco push dist/*.nupkg --source https://push.chocolatey.org/ --api-key ${{ secrets.CHOCO_API_KEY }}
+      shell: pwsh
+      run: |
+        $package = Get-ChildItem dist/*.nupkg | Select-Object -First 1
+        if ($package) {
+            choco push $package.FullName --source https://push.chocolatey.org/ --api-key ${{ secrets.CHOCO_API_KEY }}
+        } else {
+            Write-Error "No nupkg file found in dist/"
+            exit 1
+        }
       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
 
   publish-homebrew:
