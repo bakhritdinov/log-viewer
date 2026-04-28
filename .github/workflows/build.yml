@@ -173,6 +173,7 @@ jobs:
         $script = $script -replace '\[\[VERSION\]\]', $version
         Set-Content deploy/chocolatey/tools/chocolateyInstall.ps1 $script
         
+        New-Item -ItemType Directory -Force -Path dist
         choco pack deploy/chocolatey/log-viewer.nuspec --outputdirectory dist
 
     - name: Push to Chocolatey
@@ -182,7 +183,7 @@ jobs:
   publish-homebrew:
     name: Publish to Homebrew Tap
     needs: [release]
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -196,7 +197,7 @@ jobs:
     - name: Update Cask
       run: |
         VERSION=$(echo "${{ github.ref_name }}" | sed 's/v//')
-        SHA256=$(shasum -a 256 LogViewer-macOS-Universal.dmg | awk '{print $1}')
+        SHA256=$(sha256sum LogViewer-macOS-Universal.dmg | awk '{print $1}')
         
         sed -e "s/\[\[VERSION\]\]/$VERSION/g" \
             -e "s/\[\[SHA256\]\]/$SHA256/g" \
@@ -222,7 +223,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Prepare Source Package
+    - name: Install Build Tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y devscripts debhelper build-essential
+...
+        
+    - name: Sign and Upload to PPA
       run: |
         VERSION=$(echo "${{ github.ref_name }}" | sed 's/v//')
         mkdir -p build-ppa/log-viewer-$VERSION
