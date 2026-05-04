@@ -9,6 +9,8 @@ $packageArgs = @{
   url64bit      = $url64
   silentArgs    = '/S'
   validExitCodes= @(0)
+  checksum64    = '[[CHECKSUM64]]'
+  checksumType64= 'sha256'
 }
 
 Install-ChocolateyPackage @packageArgs

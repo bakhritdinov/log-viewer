@@ -33,12 +33,21 @@ jobs:
       run: |
         cmake -B build -DCMAKE_BUILD_TYPE=Release
         cmake --build build --config Release -j $env:NUMBER_OF_PROCESSORS
-        # Create Portable version
+        
+        # Create Portable version (CMake now handles windeployqt via install script)
         mkdir dist/portable
         cmake --install build --prefix dist/portable
-        Compress-Archive -Path dist/portable/* -DestinationPath dist/LogViewer-Windows-Portable.zip
-        # Create Installer
+        
+        # CPack will create both EXE (NSIS) and ZIP
         cpack --config build/CPackConfig.cmake -B dist/ -C Release
+        
+        # Organize artifacts
+        if (Test-Path "dist/LogViewer-Windows-x64.zip") {
+            Move-Item dist/LogViewer-Windows-x64.zip dist/LogViewer-Windows-Portable.zip -Force
+        } else {
+            # If CPack didn't create the zip in the expected name, zip the portable dir
+            Compress-Archive -Path dist/portable/* -DestinationPath dist/LogViewer-Windows-Portable.zip -Force
+        }
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -161,10 +170,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: LogViewer-Windows-x64
+        path: artifacts
+
     - name: Prepare Package
       shell: pwsh
       run: |
         $version = "${{ github.ref_name }}".TrimStart('v')
+        $checksum = (Get-FileHash artifacts/LogViewer-Windows-x64.exe -Algorithm SHA256).Hash
+        
         $nuspecPath = "deploy/chocolatey/log-viewer.nuspec"
         $nuspec = Get-Content $nuspecPath -Raw
         $nuspec = $nuspec.Replace("[[VERSION]]", $version)
@@ -172,7 +189,7 @@ jobs:
         
         $scriptPath = "deploy/chocolatey/tools/chocolateyInstall.ps1"
         $script = Get-Content $scriptPath -Raw
-        $script = $script.Replace("[[VERSION]]", $version)
+        $script = $script.Replace("[[VERSION]]", $version).Replace("[[CHECKSUM64]]", $checksum)
         Set-Content $scriptPath $script
         
         New-Item -ItemType Directory -Force -Path dist

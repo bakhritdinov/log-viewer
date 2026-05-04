@@ -83,10 +83,10 @@ install(TARGETS LogViewer
 
 # --- Автоматическое развертывание Qt ---
 if(Qt6_VERSION VERSION_GREATER_EQUAL "6.3.0")
-    qt_standard_project_setup()
+    set(deploy_args "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/qml")
     
-    if(APPLE)
-        set(deploy_args "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/qml")
+    if(WIN32)
+        list(APPEND deploy_args "--no-translations" "--compiler-runtime")
     endif()
 
     qt_generate_deploy_app_script(
