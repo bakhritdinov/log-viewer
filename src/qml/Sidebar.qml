@@ -197,37 +197,18 @@ Rectangle {
 
                 Rectangle {
                     width: 8; height: 8; radius: 4
-                    color: updateManager.updateAvailable ? "#ff7b72" : "#3fb950"
+                    color: "#3fb950"
                 }
 
                 Text {
-                    text: "v" + updateManager.currentVersion
+                    text: "v" + appVersion
                     color: "#8b949e"
                     font.pixelSize: 11; font.family: "Monospace"
                     Layout.fillWidth: true
                 }
-
-                Text {
-                    visible: updateManager.updateAvailable
-                    text: "Update Available"
-                    color: "#58a6ff"
-                    font.pixelSize: 11; font.bold: true
-                }
-            }
-
-            MouseArea {
-                id: footerMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    if (updateManager.updateAvailable) updateDialog.open()
-                    else updateManager.checkForUpdates()
-                }
             }
         }
     }
-
-    UpdateDialog { id: updateDialog }
 
     Dialog {
         id: addFieldDialog

@@ -6,7 +6,6 @@
 #include "GrafanaClient.h"
 #include "LogModel.h"
 #include "ConfigManager.h"
-#include "UpdateManager.h"
 
 int main(int argc, char *argv[]) {
     qputenv("QT_QUICK_CONTROLS_STYLE", "Basic");
@@ -22,7 +21,6 @@ int main(int argc, char *argv[]) {
     GrafanaClient client;
     LogModel model;
     ConfigManager config;
-    UpdateManager updater;
 
     // Connect client to model
     QObject::connect(&client, &GrafanaClient::logsReceived, &model, &LogModel::setEntries);
@@ -31,10 +29,7 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("grafanaClient", &client);
     engine.rootContext()->setContextProperty("logModel", &model);
     engine.rootContext()->setContextProperty("configManager", &config);
-    engine.rootContext()->setContextProperty("updateManager", &updater);
-
-    // Initial check for updates
-    updater.checkForUpdates();
+    engine.rootContext()->setContextProperty("appVersion", APP_VERSION);
 
     const QUrl url(QStringLiteral("qrc:/qt/qml/LogViewerApp/src/qml/Main.qml"));
     if (url.isEmpty()) {

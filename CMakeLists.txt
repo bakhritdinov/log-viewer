@@ -38,7 +38,6 @@ qt_add_executable(LogViewer
     src/GrafanaClient.cpp src/GrafanaClient.h
     src/LogModel.cpp src/LogModel.h
     src/ConfigManager.cpp src/ConfigManager.h
-    src/UpdateManager.cpp src/UpdateManager.h
 )
 
 # Application Icon
@@ -62,7 +61,6 @@ qt_add_qml_module(LogViewer
         src/qml/DetailsArea.qml
         src/qml/Sidebar.qml
         src/qml/SettingsDialog.qml
-        src/qml/UpdateDialog.qml
         src/qml/CalendarPopup.qml
     RESOURCES
         src/resources/icon.png
