@@ -1,9 +1,9 @@
 import QtQuick
-import QtQuick.Controls.Basic as Controls
+import QtQuick.Controls
 import QtQuick.Layouts
 import LogViewerApp
 
-Controls.ApplicationWindow {
+ApplicationWindow {
     id: root
     visible: true
     width: 1200
@@ -107,19 +107,19 @@ Controls.ApplicationWindow {
         }
     }
 
-    footer: Controls.ToolBar {
+    footer: ToolBar {
         background: Rectangle { color: "#010409" }
         RowLayout {
             anchors.fill: parent
             anchors.leftMargin: 15
             anchors.rightMargin: 15
-            Controls.Label {
+            Label {
                 text: logModel.loading ? "⌛ Loading..." : "● Connected (" + configManager.currentEnv + ")"
                 font.pixelSize: 12
                 color: logModel.loading ? "#e3b341" : "#3fb950"
             }
             Item { Layout.fillWidth: true }
-            Controls.Label {
+            Label {
                 text: "Total Logs: " + logModel.count
                 font.pixelSize: 12
                 color: "#8b949e"
@@ -143,15 +143,15 @@ Controls.ApplicationWindow {
         }
     }
 
-    Controls.Dialog {
+    Dialog {
         id: errorDialog
         property string text: ""
         title: "❌ Network Error"
         anchors.centerIn: parent
-        standardButtons: Controls.Dialog.Ok
+        standardButtons: Dialog.Ok
         modal: true
         background: Rectangle { color: "#161b22"; border.color: "#f85149"; radius: 8 }
-        Controls.Label {
+        Label {
             text: errorDialog.text
             color: "#f85149"
             padding: 20

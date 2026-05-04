@@ -3,14 +3,6 @@
 
 ConfigManager::ConfigManager(QObject *parent) : QObject(parent), m_settings("LogViewer", "LogViewer") {
     m_currentEnv = m_settings.value("currentEnv", "DEV").toString();
-    
-    // Set defaults if empty
-    if (m_settings.value("DEV/url").toString().isEmpty()) {
-        saveEnv("DEV", "https://dev02-grafana.ipoint.uz", "fept7ytjacirkc", "", "");
-    }
-    if (m_settings.value("PROD/url").toString().isEmpty()) {
-        saveEnv("PROD", "https://prod01-grafana.ipoint.uz", "bex5rini30agwc", "", "");
-    }
 }
 
 void ConfigManager::setCurrentEnv(const QString& env) {

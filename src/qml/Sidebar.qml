@@ -1,5 +1,5 @@
 import QtQuick
-import QtQuick.Controls.Basic as Controls
+import QtQuick.Controls
 import QtQuick.Layouts
 
 Rectangle {
@@ -21,14 +21,14 @@ Rectangle {
         
         RowLayout {
             Layout.fillWidth: true
-            Controls.Label {
+            Label {
                 text: "AVAILABLE FIELDS"
                 font.bold: true
                 font.pixelSize: 11
                 color: "#8b949e"
                 Layout.fillWidth: true
             }
-            Controls.Button {
+            Button {
                 text: "✕ Clear"
                 visible: fieldSearch.text !== ""
                 font.pixelSize: 11
@@ -43,7 +43,7 @@ Rectangle {
             }
         }
 
-        Controls.TextField {
+        TextField {
             id: fieldSearch
             Layout.fillWidth: true
             placeholderText: "Search fields..."
@@ -150,7 +150,7 @@ Rectangle {
                             }
                             return vKeys.sort((a, b) => fieldGroup.fieldValues[b] - fieldGroup.fieldValues[a]).slice(0, 50);
                         }
-                        delegate: Controls.ItemDelegate {
+                        delegate: ItemDelegate {
                             id: valDelegate
                             width: fieldGroup.width - 20
                             height: 28
@@ -244,24 +244,24 @@ Rectangle {
         }
     }
 
-    Controls.Dialog {
+    Dialog {
         id: addFieldDialog
         title: "Add Field to Search"
         anchors.centerIn: parent
         modal: true
-        standardButtons: Controls.Dialog.Ok | Controls.Dialog.Cancel
+        standardButtons: Dialog.Ok | Dialog.Cancel
         
         ColumnLayout {
             spacing: 10
             width: 300
-            Controls.TextField {
+            TextField {
                 id: customFieldName
                 Layout.fillWidth: true
                 placeholderText: "Field name (e.g. level)"
                 background: Rectangle { color: "#010409"; border.color: "#30363d"; radius: 4 }
                 color: "#c9d1d9"
             }
-            Controls.TextField {
+            TextField {
                 id: customFieldValue
                 Layout.fillWidth: true
                 placeholderText: "Value (e.g. ERROR)"
