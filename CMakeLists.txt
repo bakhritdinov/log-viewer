@@ -47,7 +47,8 @@ if(APPLE)
     target_sources(LogViewer PRIVATE ${MACOS_ICON})
     set_target_properties(LogViewer PROPERTIES MACOSX_BUNDLE_ICON_FILE icon.icns)
 elseif(WIN32)
-    target_sources(LogViewer PRIVATE src/resources/resources.rc)
+    set(WIN_ICON src/resources/resources.rc)
+    target_sources(LogViewer PRIVATE ${WIN_ICON})
 endif()
 
 qt_add_qml_module(LogViewer
