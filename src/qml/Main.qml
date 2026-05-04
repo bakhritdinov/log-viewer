@@ -168,7 +168,9 @@ ApplicationWindow {
         root.lastCount = 0
         logModel.clear()
         
-        let finalQuery = `_stream: {_namespace="${root.currentNamespace}", _appName="${root.currentApp}"} `
+        let nsLabel = configManager.getNsLabel("")
+        let appLabel = configManager.getAppLabel("")
+        let finalQuery = `_stream: {${nsLabel}="${root.currentNamespace}", ${appLabel}="${root.currentApp}"} `
         if (query && query !== "*") finalQuery += ` AND (${query})`
 
         let from = "now-1h", to = "now"
@@ -212,7 +214,9 @@ ApplicationWindow {
             return;
         }
 
-        let finalQuery = `_stream: {_namespace="${root.currentNamespace}", _appName="${root.currentApp}"} `
+        let nsLabel = configManager.getNsLabel("")
+        let appLabel = configManager.getAppLabel("")
+        let finalQuery = `_stream: {${nsLabel}="${root.currentNamespace}", ${appLabel}="${root.currentApp}"} `
         if (header.searchText && header.searchText !== "*") finalQuery += ` AND (${header.searchText})`
 
         let to = (oldest - 1).toString()

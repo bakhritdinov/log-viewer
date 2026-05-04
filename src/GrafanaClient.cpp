@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QDebug>
+#include <QSettings>
 
 GrafanaClient::GrafanaClient(QObject *parent) : QObject(parent) {
     m_manager = new QNetworkAccessManager(this);
@@ -28,7 +29,6 @@ void GrafanaClient::queryLogs(const QString& url, const QString& token, const QS
     query["queryType"] = "range";
     query["maxDataPoints"] = 5000;
     query["limit"] = 1000;
-    // VERY IMPORTANT for pagination: fetch most recent logs from the range
     query["direction"] = "backward";
     
     queries.append(query);
@@ -45,9 +45,7 @@ void GrafanaClient::queryLogs(const QString& url, const QString& token, const QS
 
     QByteArray postData = QJsonDocument(requestBody).toJson();
     qDebug() << ">>> LOG QUERY:" << apiUrl.toString();
-    // qDebug() << ">>> BODY:" << postData;
 
-    // Cancel previous request if it's still running
     if (m_currentReply) {
         m_currentReply->disconnect();
         if (m_currentReply->isRunning()) {
@@ -82,6 +80,11 @@ void GrafanaClient::fetchMappings(const QString& url, const QString& token, cons
     Config config { url, token, uid, user, pass };
     emit loadingChanged(true);
     
+    QSettings settings("LogViewer", "LogViewer");
+    QString env = settings.value("currentEnv", "DEV").toString();
+    QString nsLabel = settings.value(env + "/nsLabel", "_namespace").toString();
+    QString appLabel = settings.value(env + "/appLabel", "_appName").toString();
+
     QJsonObject requestBody;
     requestBody["from"] = "now-24h";
     requestBody["to"] = "now";
@@ -92,7 +95,7 @@ void GrafanaClient::fetchMappings(const QString& url, const QString& token, cons
     QJsonObject datasource;
     datasource["uid"] = config.datasourceUid;
     query["datasource"] = datasource;
-    query["expr"] = "* | stats by (_namespace, _appName) count() total";
+    query["expr"] = QString("* | stats by (%1, %2) count() total").arg(nsLabel, appLabel);
     query["queryType"] = "range";
     queries.append(query);
     requestBody["queries"] = queries;
@@ -126,6 +129,10 @@ void GrafanaClient::fetchMappings(const QString& url, const QString& token, cons
 }
 
 void GrafanaClient::parseLogsResponse(const QByteArray& data, bool append) {
+    QSettings settings("LogViewer", "LogViewer");
+    QString env = settings.value("currentEnv", "DEV").toString();
+    QString appLabel = settings.value(env + "/appLabel", "_appName").toString();
+
     QJsonDocument doc = QJsonDocument::fromJson(data);
     QJsonArray frames = doc.object()["results"].toObject()["A"].toObject()["frames"].toArray();
     
@@ -145,7 +152,7 @@ void GrafanaClient::parseLogsResponse(const QByteArray& data, bool append) {
         
         for (int r = 0; r < rowCount; ++r) {
             LogEntry entry;
-            entry.timestamp = QDateTime::currentDateTime(); // Default
+            entry.timestamp = QDateTime::currentDateTime();
             
             for (auto it = fieldMap.begin(); it != fieldMap.end(); ++it) {
                 QString colName = it.key();
@@ -163,7 +170,7 @@ void GrafanaClient::parseLogsResponse(const QByteArray& data, bool append) {
                         entry.allFields[k] = v;
                         if (k == "trace_id" || k == "traceId") entry.traceId = v;
                         else if (k == "level") entry.level = v;
-                        else if (k == "_appName" || k == "service_name") entry.service = v;
+                        else if (k == appLabel || k == "service_name") entry.service = v;
                         else if (k == "host.name" || k == "pod") entry.pod = v;
                     }
                 } else {
@@ -180,7 +187,6 @@ void GrafanaClient::parseLogsResponse(const QByteArray& data, bool append) {
             entries.append(entry);
         }
     }
-    qDebug() << ">>> LOGS PARSED. Entries count:" << entries.size();
     emit logsReceived(entries, append);
     calculateFacets(entries, append);
 }
@@ -201,12 +207,15 @@ void GrafanaClient::calculateFacets(const QList<LogEntry>& entries, bool append)
             m_currentFacets[key] = fieldData;
         }
     }
-    qDebug() << ">>> FACETS CALCULATED. Fields:" << m_currentFacets.keys().size() << (append ? "(appended)" : "(reset)");
     emit facetsReceived(m_currentFacets);
 }
 
 void GrafanaClient::parseMappingsResponse(const QByteArray& data) {
-    qDebug() << ">>> MAPPINGS DATA RECEIVED. Size:" << data.size();
+    QSettings settings("LogViewer", "LogViewer");
+    QString env = settings.value("currentEnv", "DEV").toString();
+    QString nsLabel = settings.value(env + "/nsLabel", "_namespace").toString();
+    QString appLabel = settings.value(env + "/appLabel", "_appName").toString();
+
     QJsonDocument doc = QJsonDocument::fromJson(data);
     QJsonArray frames = doc.object()["results"].toObject()["A"].toObject()["frames"].toArray();
     
@@ -228,19 +237,17 @@ void GrafanaClient::parseMappingsResponse(const QByteArray& data) {
             QJsonArray lines = dataValues[lineCol].toArray();
             for (const auto& lineRef : lines) {
                 QJsonDocument lineDoc = QJsonDocument::fromJson(lineRef.toString().toUtf8());
-                QString ns = lineDoc.object()["_namespace"].toString();
-                QString app = lineDoc.object()["_appName"].toString();
+                QString ns = lineDoc.object()[nsLabel].toString();
+                QString app = lineDoc.object()[appLabel].toString();
                 if (!ns.isEmpty() && !app.isEmpty()) {
                     QStringList apps = mappings[ns].toStringList();
                     if (!apps.contains(app)) {
                         apps.append(app);
                         mappings[ns] = apps;
-                        qDebug() << "  Found mapping:" << ns << "->" << app;
                     }
                 }
             }
         }
     }
-    qDebug() << ">>> EMITTING MAPPINGS. Count:" << mappings.size();
     emit mappingsReceived(mappings);
 }

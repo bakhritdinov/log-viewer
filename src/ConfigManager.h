@@ -22,8 +22,10 @@ public:
     Q_INVOKABLE QString getUid(const QString& env) { return getVal("uid", env); }
     Q_INVOKABLE QString getUser(const QString& env) { return getVal("user", env); }
     Q_INVOKABLE QString getPass(const QString& env) { return getVal("pass", env); }
+    Q_INVOKABLE QString getNsLabel(const QString& env) { return getVal("nsLabel", env); }
+    Q_INVOKABLE QString getAppLabel(const QString& env) { return getVal("appLabel", env); }
 
-    Q_INVOKABLE void saveEnv(const QString& env, const QString& url, const QString& uid, const QString& user, const QString& pass);
+    Q_INVOKABLE void saveEnv(const QString& env, const QString& url, const QString& uid, const QString& user, const QString& pass, const QString& nsLabel, const QString& appLabel);
     
     QString currentEnv() const { return m_currentEnv; }
     void setCurrentEnv(const QString& env);
