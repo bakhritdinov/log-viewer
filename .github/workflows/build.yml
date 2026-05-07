@@ -166,6 +166,8 @@ jobs:
     name: Publish to Chocolatey
     needs: [release]
     runs-on: windows-latest
+    # Chocolatey moderation can hold a release for days; don't block the rest of the pipeline.
+    continue-on-error: true
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4

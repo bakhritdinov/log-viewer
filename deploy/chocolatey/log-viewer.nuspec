@@ -3,19 +3,39 @@
   <metadata>
     <id>log-viewer</id>
     <version>[[VERSION]]</version>
-    <packageSourceUrl>https://github.com/bakhritdinov/log-viewer</packageSourceUrl>
-    <owners>Bobur Bakhritdinov</owners>
-    <title>LogViewer</title>
+    <packageSourceUrl>https://github.com/bakhritdinov/log-viewer/tree/master/deploy/chocolatey</packageSourceUrl>
+    <owners>bakhritdinov</owners>
+    <title>LogViewer (Install)</title>
     <authors>Bobur Bakhritdinov</authors>
     <projectUrl>https://github.com/bakhritdinov/log-viewer</projectUrl>
-    <iconUrl>https://raw.githubusercontent.com/bakhritdinov/log-viewer/main/src/resources/icon.png</iconUrl>
-    <licenseUrl>https://github.com/bakhritdinov/log-viewer/blob/main/LICENSE</licenseUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <projectSourceUrl>https://github.com/bakhritdinov/log-viewer</projectSourceUrl>
-    <tags>log-viewer grafana loki qt qml</tags>
-    <summary>Reactive Log Viewer for Grafana Loki</summary>
-    <description>A high-performance, reactive desktop application for viewing logs from Grafana Loki, built with Qt 6 and C++20.</description>
-    <releaseNotes>https://github.com/bakhritdinov/log-viewer/releases</releaseNotes>
+    <docsUrl>https://github.com/bakhritdinov/log-viewer/blob/master/README.md</docsUrl>
+    <bugTrackerUrl>https://github.com/bakhritdinov/log-viewer/issues</bugTrackerUrl>
+    <iconUrl>https://raw.githubusercontent.com/bakhritdinov/log-viewer/master/src/resources/icon.png</iconUrl>
+    <licenseUrl>https://github.com/bakhritdinov/log-viewer/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <copyright>Copyright (c) Bobur Bakhritdinov</copyright>
+    <tags>log-viewer grafana loki victorialogs qt qml logs observability admin</tags>
+    <summary>Native desktop log viewer for Grafana with Loki and VictoriaLogs datasources.</summary>
+    <description>
+LogViewer is a native, high-performance desktop application for browsing and analyzing logs served by Grafana with Loki or VictoriaLogs as the datasource. Built with Qt 6 and C++20, it offers a fast, responsive UI with dark and light themes.
+
+## Features
+
+* Browse, filter, and search logs from any Grafana datasource that speaks Loki/LogsQL.
+* Adaptive log table with multi-line message wrapping on narrow windows and inline detail expansion.
+* Quick time-range picker with relative presets (last 5 min — last 7 days, Today) and absolute From/To selection.
+* Stream/namespace/app discovery with auto-detection of common label keys.
+* LogsQL-aware filter syntax with safe escaping for special characters.
+* Page-based pagination with First / Newer / Older / Last navigation.
+* Available-fields drawer for one-click filter toggling.
+* Light and dark themes; choice persists between sessions.
+
+## Source
+
+This is an installer-style Chocolatey package — it downloads the official Windows installer published on the [GitHub Release page](https://github.com/bakhritdinov/log-viewer/releases) and runs it silently. The installer's package source — including the build pipeline that generates this `.nupkg` — lives at https://github.com/bakhritdinov/log-viewer.
+    </description>
+    <releaseNotes>https://github.com/bakhritdinov/log-viewer/releases/tag/v[[VERSION]]</releaseNotes>
   </metadata>
   <files>
     <file src="tools\**" target="tools" />
