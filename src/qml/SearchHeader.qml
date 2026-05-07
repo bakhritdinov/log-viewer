@@ -1,73 +1,115 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import LogViewerApp
 
 Rectangle {
     id: root
-    implicitHeight: layout.implicitHeight + 30
-    color: "#161b22"
-    border.color: "#30363d"
-    
+    implicitHeight: layout.implicitHeight + Theme.sp4 * 2
+    color: Theme.bgRaised
+    border.color: Theme.border
+    border.width: 1
+
     property alias searchText: searchField.text
-    property string timeRange: timeCombo.currentText
-    property string customFrom: fromField.text
-    property string customTo: toField.text
+    property alias timeRange: timeRange.timeRange
+    property alias customFrom: timeRange.customFrom
+    property alias customTo: timeRange.customTo
 
     signal searchTriggered(string query)
     signal namespaceChanged(string ns)
     signal appChanged(string app)
+    signal toggleSidebar()
+
+    property bool sidebarOpen: false
 
     property var mappings: ({})
+
+    function focusSearch() { searchField.forceActiveFocus(); searchField.selectAll() }
 
     ColumnLayout {
         id: layout
         anchors.fill: parent
-        anchors.margins: 15
-        spacing: 12
+        anchors.margins: Theme.sp4
+        spacing: Theme.sp3
 
-        // Row 1: Env, NS, App, Time, Settings
+        // Row 1: Sidebar toggle | Env switcher | NS | App | Time | Settings
         RowLayout {
             Layout.fillWidth: true
-            spacing: 10
+            spacing: Theme.sp2
 
-            RowLayout {
-                spacing: 4
-                Repeater {
-                    model: ["DEV", "PROD"]
-                    Button {
-                        text: modelData
-                        property bool active: (typeof configManager !== "undefined" && configManager !== null) ? configManager.currentEnv === modelData : false
-                        onClicked: {
-                            if (typeof configManager !== "undefined" && configManager !== null) {
-                                configManager.currentEnv = modelData
-                                mappings = {} 
-                                nsCombo.model = []
-                                appCombo.model = []
-                                if (typeof grafanaClient !== "undefined" && grafanaClient !== null) {
-                                    grafanaClient.fetchMappings(configManager.url(), "", configManager.datasourceUid(), configManager.user(), configManager.password())
+            SecondaryButton {
+                text: root.sidebarOpen ? "✕  Fields" : "☰  Fields"
+                Layout.preferredHeight: Theme.hButton + 4
+                font.pixelSize: Theme.fsSm
+                active: root.sidebarOpen
+                ToolTip.visible: hovered
+                ToolTip.text: root.sidebarOpen ? "Hide available fields" : "Show available fields"
+                ToolTip.delay: 400
+                onClicked: root.toggleSidebar()
+            }
+
+            // Env switcher — segmented control look
+            Rectangle {
+                Layout.preferredHeight: Theme.hButton + 4
+                color: Theme.bgInput
+                border.color: Theme.border
+                border.width: 1
+                radius: Theme.rMd
+                implicitWidth: envRow.implicitWidth + 4
+
+                RowLayout {
+                    id: envRow
+                    anchors.fill: parent
+                    anchors.margins: 2
+                    spacing: 0
+                    Repeater {
+                        model: ["DEV", "PROD"]
+                        Rectangle {
+                            id: envChip
+                            required property string modelData
+                            property bool active: (typeof configManager !== "undefined" && configManager !== null) ? configManager.currentEnv === modelData : false
+                            implicitWidth: 56
+                            Layout.fillHeight: true
+                            radius: Theme.rSm
+                            color: active ? Theme.successDim
+                                 : (envMouse.containsMouse ? Theme.bgSubtle : "transparent")
+                            Behavior on color { ColorAnimation { duration: Theme.dFast } }
+                            Text {
+                                anchors.centerIn: parent
+                                text: envChip.modelData
+                                color: envChip.active ? Theme.textOnAccent : Theme.text
+                                font.bold: true
+                                font.pixelSize: Theme.fsXs
+                                font.letterSpacing: 0.5
+                            }
+                            MouseArea {
+                                id: envMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (typeof configManager !== "undefined" && configManager !== null) {
+                                        configManager.currentEnv = envChip.modelData
+                                        root.mappings = {}
+                                        nsCombo.model = []
+                                        appCombo.model = []
+                                        if (typeof grafanaClient !== "undefined" && grafanaClient !== null) {
+                                            grafanaClient.fetchMappings(configManager.url(), "", configManager.datasourceUid(), configManager.user(), configManager.password())
+                                        }
+                                    }
                                 }
                             }
                         }
-                        font.bold: true; font.pixelSize: 11
-                        background: Rectangle {
-                            color: parent.active ? "#238636" : (parent.down ? "#30363d" : "#21262d")
-                            border.color: parent.active ? "#2ea043" : "#30363d"
-                            radius: 6; implicitWidth: 60; implicitHeight: 32
-                        }
-                        contentItem: Text { text: parent.text; color: parent.active ? "#ffffff" : "#c9d1d9"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     }
                 }
             }
 
-            Rectangle { width: 1; height: 20; color: "#30363d"; Layout.leftMargin: 5; Layout.rightMargin: 5 }
+            Rectangle { width: 1; height: 22; color: Theme.border; Layout.leftMargin: Theme.sp1; Layout.rightMargin: Theme.sp1 }
 
-            CustomComboBox {
+            ScopedComboBox {
                 id: nsCombo
-                Layout.preferredWidth: 160
-                contentItem: Text { 
-                    text: nsCombo.displayText; color: "#c9d1d9"
-                    verticalAlignment: Text.AlignVCenter; leftPadding: 12 
-                }
+                Layout.preferredWidth: 170
+                placeholder: "Namespace"
                 onActivated: {
                     namespaceChanged(currentText)
                     let apps = (mappings[currentText] || []).sort()
@@ -79,145 +121,160 @@ Rectangle {
                 }
             }
 
-            CustomComboBox {
+            ScopedComboBox {
                 id: appCombo
-                Layout.preferredWidth: 160
-                contentItem: Text { 
-                    text: appCombo.displayText; color: "#c9d1d9"
-                    verticalAlignment: Text.AlignVCenter; leftPadding: 12 
-                }
+                Layout.preferredWidth: 170
+                placeholder: "App"
                 onActivated: appChanged(currentText)
             }
 
-            CustomComboBox {
-                id: timeCombo
-                Layout.preferredWidth: 100
-                model: ["5m", "15m", "1h", "3h", "6h", "12h", "24h", "Custom"]
-                currentIndex: 2
-                contentItem: Text { 
-                    text: timeCombo.displayText; color: "#c9d1d9"
-                    verticalAlignment: Text.AlignVCenter; leftPadding: 12 
-                }
-                onActivated: {
-                    if (currentText !== "Custom") searchTriggered(searchField.text)
-                }
-            }
+            Rectangle { width: 1; height: 22; color: Theme.border; Layout.leftMargin: Theme.sp1; Layout.rightMargin: Theme.sp1 }
 
-            // Custom Range inline
-            RowLayout {
-                visible: timeCombo.currentText === "Custom"
-                spacing: 5
-                
-                // From field
-                Rectangle {
-                    Layout.preferredWidth: 155; height: 32
-                    color: "#0d1117"; border.color: "#30363d"; radius: 6
-                    RowLayout {
-                        anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 2; spacing: 0
-                        Item {
-                            Layout.fillWidth: true; Layout.fillHeight: true
-                            TextField { anchors.fill: parent; id: fromField; placeholderText: "From"; color: "#c9d1d9"; font.pixelSize: 12; readOnly: true; background: null; verticalAlignment: TextInput.AlignVCenter }
-                            MouseArea { anchors.fill: parent; onClicked: calendarPopup.setTarget(fromField, false) }
-                        }
-                        Button {
-                            text: "✕"; visible: fromField.text !== ""; Layout.preferredWidth: 24; Layout.preferredHeight: 24; Layout.alignment: Qt.AlignVCenter
-                            onClicked: { fromField.text = ""; window.refreshLogs(window.searchHeader.searchText) }
-                            background: null; contentItem: Text { text: parent.text; color: "#f85149"; font.pixelSize: 12; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                        }
-                    }
-                }
-
-                Text { text: "→"; color: "#8b949e"; Layout.alignment: Qt.AlignVCenter }
-
-                // To field
-                Rectangle {
-                    Layout.preferredWidth: 155; height: 32
-                    color: "#0d1117"; border.color: "#30363d"; radius: 6
-                    RowLayout {
-                        anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 2; spacing: 0
-                        Item {
-                            Layout.fillWidth: true; Layout.fillHeight: true
-                            TextField { anchors.fill: parent; id: toField; placeholderText: "To"; color: "#c9d1d9"; font.pixelSize: 12; readOnly: true; background: null; verticalAlignment: TextInput.AlignVCenter }
-                            MouseArea { anchors.fill: parent; onClicked: calendarPopup.setTarget(toField, true) }
-                        }
-                        Button {
-                            text: "✕"; visible: toField.text !== ""; Layout.preferredWidth: 24; Layout.preferredHeight: 24; Layout.alignment: Qt.AlignVCenter
-                            onClicked: { toField.text = ""; window.refreshLogs(window.searchHeader.searchText) }
-                            background: null; contentItem: Text { text: parent.text; color: "#f85149"; font.pixelSize: 12; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                        }
-                    }
-                }
+            TimeRangePicker {
+                id: timeRange
+                onChanged: searchTriggered(searchField.text)
             }
 
             Item { Layout.fillWidth: true }
 
-            Button {
-                text: "⚙"
+            // Theme toggle
+            IconButton {
+                text: Theme.dark ? "🌙" : "☀"
+                tooltipText: Theme.dark ? "Switch to light mode" : "Switch to dark mode"
+                pixel: Theme.fsXl
+                boxSize: Theme.hButton + 4
+                onClicked: Theme.dark = !Theme.dark
+            }
+
+            // Settings — prominent button, not just an icon.
+            SecondaryButton {
+                text: "⚙  Settings"
+                Layout.preferredHeight: Theme.hButton + 4
+                font.pixelSize: Theme.fsSm
                 onClicked: settingsPopup.open()
-                background: Rectangle { color: parent.down ? "#30363d" : "#21262d"; border.color: "#30363d"; radius: 6; implicitWidth: 36; implicitHeight: 36 }
-                contentItem: Text { text: parent.text; color: "#c9d1d9"; font.pixelSize: 18; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
             }
         }
 
         // Row 2: Search & Refresh
         RowLayout {
             Layout.fillWidth: true
-            spacing: 12
+            spacing: Theme.sp3
 
             Rectangle {
                 Layout.fillWidth: true
-                height: 38
-                color: "#0d1117"; border.color: searchField.activeFocus ? "#58a6ff" : "#30363d"; radius: 6
+                Layout.preferredHeight: Theme.hInput + 2
+                color: Theme.bgInput
+                border.color: searchField.activeFocus ? Theme.borderFocus : Theme.border
+                border.width: 1
+                radius: Theme.rMd
+                Behavior on border.color { ColorAnimation { duration: Theme.dFast } }
+
                 RowLayout {
-                    anchors.fill: parent; anchors.leftMargin: 12; anchors.rightMargin: 8
+                    anchors.fill: parent
+                    anchors.leftMargin: Theme.sp3
+                    anchors.rightMargin: Theme.sp2
+                    spacing: Theme.sp2
+
+                    Text {
+                        text: "🔍"
+                        color: searchField.activeFocus ? Theme.accent : Theme.textMuted
+                        font.pixelSize: Theme.fsLg
+                        Layout.alignment: Qt.AlignVCenter
+                    }
                     TextField {
-                        id: searchField; Layout.fillWidth: true; placeholderText: "Search logs (LogQL)..."
-                        color: "#c9d1d9"; font.pixelSize: 14; background: null
+                        id: searchField
+                        Layout.fillWidth: true
+                        placeholderText: "Search logs (LogsQL)…"
+                        color: Theme.text
+                        placeholderTextColor: Theme.textDim
+                        font.pixelSize: Theme.fsLg
+                        background: null
                         onAccepted: searchTriggered(text)
                     }
-                    Button {
-                        text: "✕"; visible: searchField.text !== ""; onClicked: searchField.clear()
-                        background: null; contentItem: Text { text: parent.text; color: "#8b949e"; font.pixelSize: 16 }
+                    IconButton {
+                        text: "✕"
+                        visible: searchField.text !== ""
+                        tooltipText: "Clear"
+                        pixel: Theme.fsLg
+                        boxSize: 26
+                        iconColor: Theme.textMuted
+                        iconHoverColor: Theme.danger
+                        onClicked: searchField.clear()
                     }
                 }
             }
 
             Button {
                 id: refreshButton
+                Layout.preferredHeight: Theme.hInput + 2
+                Layout.preferredWidth: Theme.hInput + 2
                 onClicked: { refreshAnim.start(); searchTriggered(searchField.text) }
-                Layout.preferredHeight: 38; Layout.preferredWidth: 38
-                background: Rectangle { color: parent.down ? "#2ea043" : "#238636"; radius: 6 }
-                contentItem: Text { text: "↻"; color: "#ffffff"; font.pixelSize: 20; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                background: Rectangle {
+                    color: refreshButton.down ? Theme.success : Theme.successDim
+                    radius: Theme.rMd
+                    Behavior on color { ColorAnimation { duration: Theme.dFast } }
+                }
+                contentItem: Text {
+                    text: "↻"
+                    color: Theme.textOnAccent
+                    font.pixelSize: 20
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
                 RotationAnimation { id: refreshAnim; target: refreshButton.contentItem; from: 0; to: 360; duration: 500; running: false }
             }
         }
     }
 
-    CalendarPopup {
-        id: calendarPopup
-    }
-
-    component CustomComboBox : ComboBox {
+    component ScopedComboBox : ComboBox {
         id: cbRoot
-        font.pixelSize: 13
-        background: Rectangle { color: "#0d1117"; border.color: "#30363d"; radius: 6; implicitHeight: 36 }
-        
+        property string placeholder: ""
+        font.pixelSize: Theme.fsMd
+        implicitHeight: Theme.hButton + 4
+
+        background: Rectangle {
+            color: Theme.bgInput
+            border.color: cbRoot.activeFocus ? Theme.borderFocus : Theme.border
+            border.width: 1
+            radius: Theme.rMd
+            Behavior on border.color { ColorAnimation { duration: Theme.dFast } }
+        }
+        contentItem: Text {
+            text: cbRoot.displayText !== "" ? cbRoot.displayText : cbRoot.placeholder
+            color: cbRoot.displayText !== "" ? Theme.text : Theme.textDim
+            font: cbRoot.font
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+            leftPadding: Theme.sp3
+            rightPadding: 24
+        }
+
         delegate: ItemDelegate {
             width: Math.max(cbRoot.width, 120)
             contentItem: Text {
-                text: modelData; color: hovered ? "#ffffff" : "#c9d1d9"
-                font: cbRoot.font; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
+                text: modelData
+                color: hovered ? Theme.textOnAccent : Theme.text
+                font: cbRoot.font
+                elide: Text.ElideRight
+                verticalAlignment: Text.AlignVCenter
+                leftPadding: Theme.sp3
             }
-            background: Rectangle { color: hovered ? "#21262d" : "#0d1117" }
+            background: Rectangle { color: hovered ? Theme.bgSubtle : "transparent" }
         }
-        
+
         popup: Popup {
-            y: cbRoot.height + 1; width: Math.max(cbRoot.width, 120)
-            implicitHeight: Math.min(contentItem.implicitHeight + 2, 400); padding: 1
+            y: cbRoot.height + 2
+            width: Math.max(cbRoot.width, 140)
+            implicitHeight: Math.min(contentItem.implicitHeight + 2, 400)
+            padding: 1
             contentItem: ListView {
-                clip: true; implicitHeight: contentHeight; model: cbRoot.delegateModel; ScrollBar.vertical: ScrollBar { }
+                clip: true
+                implicitHeight: contentHeight
+                model: cbRoot.delegateModel
+                ScrollBar.vertical: ScrollBar { }
             }
-            background: Rectangle { color: "#0d1117"; border.color: "#30363d"; radius: 6 }
+            background: Rectangle { color: Theme.bgRaised; border.color: Theme.border; border.width: 1; radius: Theme.rMd }
         }
     }
 

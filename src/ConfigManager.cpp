@@ -3,6 +3,7 @@
 
 ConfigManager::ConfigManager(QObject *parent) : QObject(parent), m_settings("LogViewer", "LogViewer") {
     m_currentEnv = m_settings.value("currentEnv", "DEV").toString();
+    m_darkTheme = m_settings.value("theme/dark", true).toBool();
 }
 
 void ConfigManager::setCurrentEnv(const QString& env) {
@@ -10,6 +11,13 @@ void ConfigManager::setCurrentEnv(const QString& env) {
     m_currentEnv = env;
     m_settings.setValue("currentEnv", env);
     emit currentEnvChanged();
+}
+
+void ConfigManager::setDarkTheme(bool dark) {
+    if (m_darkTheme == dark) return;
+    m_darkTheme = dark;
+    m_settings.setValue("theme/dark", dark);
+    emit darkThemeChanged();
 }
 
 void ConfigManager::saveEnv(const QString& env, const QString& url, const QString& uid, const QString& user, const QString& pass) {

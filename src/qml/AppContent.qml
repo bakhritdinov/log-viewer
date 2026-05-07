@@ -5,7 +5,7 @@ import LogViewerApp
 
 Rectangle {
     id: root
-    color: "#0d1117"
+    color: Theme.bg
     
     // Properties moved from Main.qml
     property alias searchHeader: header
@@ -43,6 +43,9 @@ Rectangle {
     onCurrentNamespaceChanged: if(currentNamespace) { currentPage = 0; refreshLogs(header.searchText) }
     onCurrentAppChanged: if(currentApp) { currentPage = 0; refreshLogs(header.searchText) }
 
+    // Sidebar is an overlay drawer — closed by default; opened on demand.
+    property bool sidebarOpen: false
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
@@ -50,58 +53,55 @@ Rectangle {
         SearchHeader {
             id: header
             Layout.fillWidth: true
+            sidebarOpen: root.sidebarOpen
             onSearchTriggered: (query) => { root.currentPage = 0; root.refreshLogs(query) }
             onSearchTextChanged: (text) => {
                 if (text === "") { root.currentPage = 0; root.refreshLogs("") }
             }
-            onNamespaceChanged: (ns) => {
-                root.currentNamespace = ns
-            }
-            onAppChanged: (app) => {
-                root.currentApp = app
-            }
+            onNamespaceChanged: (ns) => { root.currentNamespace = ns }
+            onAppChanged: (app) => { root.currentApp = app }
+            onToggleSidebar: root.sidebarOpen = !root.sidebarOpen
         }
 
-        SplitView {
+        // Body — table fills, sidebar slides in over it.
+        Item {
+            id: body
             Layout.fillWidth: true
             Layout.fillHeight: true
-            orientation: Qt.Horizontal
 
-            Sidebar {
-                id: sidebar
-                SplitView.preferredWidth: sidebar.expandedField !== "" ? root.width * 0.5 : 280
-                SplitView.minimumWidth: 200
-                
-                Behavior on SplitView.preferredWidth {
-                    NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
+            LogTableView {
+                id: tableView
+                anchors.fill: parent
+                currentPage: root.currentPage
+                maxPage: root.maxPage
+                onTraceRequested: (traceId) => {
+                    header.searchText = `trace_id: "${traceId}"`
+                    root.currentPage = 0
+                    root.refreshLogs(header.searchText)
                 }
+                onFirstPageRequested: root.gotoPage(0)
+                onPrevPageRequested: root.gotoPage(root.currentPage - 1)
+                onNextPageRequested: root.gotoPage(root.currentPage + 1)
+                onLastPageRequested: root.gotoPage(root.maxPage - 1)
             }
 
-            SplitView {
-                orientation: Qt.Vertical
-                SplitView.fillWidth: true
+            // Backdrop — click outside closes.
+            Rectangle {
+                anchors.fill: parent
+                color: "#000000"
+                opacity: root.sidebarOpen ? 0.4 : 0
+                visible: opacity > 0
+                Behavior on opacity { NumberAnimation { duration: Theme.dBase } }
+                MouseArea { anchors.fill: parent; onClicked: root.sidebarOpen = false }
+            }
 
-                LogTableView {
-                    id: tableView
-                    SplitView.preferredHeight: root.height * 0.7
-                    currentPage: root.currentPage
-                    maxPage: root.maxPage
-                    onRowSelected: (data) => detailsArea.setEntry(data)
-                    onTraceRequested: (traceId) => {
-                        header.searchText = `trace_id: "${traceId}"`
-                        root.currentPage = 0
-                        root.refreshLogs(header.searchText)
-                    }
-                    onFirstPageRequested: root.gotoPage(0)
-                    onPrevPageRequested: root.gotoPage(root.currentPage - 1)
-                    onNextPageRequested: root.gotoPage(root.currentPage + 1)
-                    onLastPageRequested: root.gotoPage(root.maxPage - 1)
-                }
-
-                DetailsArea {
-                    id: detailsArea
-                    SplitView.fillHeight: true
-                }
+            // Sidebar drawer — slides in from the left.
+            Sidebar {
+                id: sidebar
+                width: Math.min(360, root.width * 0.6)
+                height: parent.height
+                x: root.sidebarOpen ? 0 : -width
+                Behavior on x { NumberAnimation { duration: Theme.dBase; easing.type: Easing.OutCubic } }
             }
         }
     }
@@ -123,18 +123,30 @@ Rectangle {
     Dialog {
         id: errorDialog
         property string text: ""
-        title: "❌ Network Error"
+        title: "Network Error"
         anchors.centerIn: parent
         standardButtons: Dialog.Ok
         modal: true
-        background: Rectangle { color: "#161b22"; border.color: "#f85149"; radius: 8 }
+        background: Rectangle { color: Theme.bgRaised; border.color: Theme.danger; border.width: 1; radius: Theme.rLg }
+        header: Rectangle {
+            color: "transparent"
+            implicitHeight: 36
+            Row {
+                anchors.left: parent.left; anchors.leftMargin: Theme.sp4
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: Theme.sp2
+                Text { text: "✕"; color: Theme.danger; font.pixelSize: Theme.fsLg; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: errorDialog.title; color: Theme.text; font.pixelSize: Theme.fsLg; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
+            }
+        }
         Label {
             text: errorDialog.text
-            color: "#f85149"
-            padding: 20
-            font.bold: true
+            color: Theme.text
+            padding: Theme.sp4
             wrapMode: Text.Wrap
-            width: 300
+            width: 360
+            font.pixelSize: Theme.fsSm
+            font.family: "Monospace"
         }
     }
 

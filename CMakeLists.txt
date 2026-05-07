@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(LogViewer VERSION 1.0.1 LANGUAGES CXX)
+project(LogViewer VERSION 2.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -51,19 +51,31 @@ elseif(WIN32)
     target_sources(LogViewer PRIVATE ${WIN_ICON})
 endif()
 
+set_source_files_properties(src/qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+
 qt_add_qml_module(LogViewer
     URI LogViewerApp
     VERSION 1.0
     RESOURCE_PREFIX /qt/qml
-    QML_FILES 
+    QML_FILES
         src/qml/Main.qml
         src/qml/AppContent.qml
         src/qml/SearchHeader.qml
         src/qml/LogTableView.qml
-        src/qml/DetailsArea.qml
         src/qml/Sidebar.qml
         src/qml/SettingsDialog.qml
         src/qml/CalendarPopup.qml
+        src/qml/Theme.qml
+        src/qml/Card.qml
+        src/qml/Badge.qml
+        src/qml/Chip.qml
+        src/qml/SectionHeader.qml
+        src/qml/IconButton.qml
+        src/qml/PageButton.qml
+        src/qml/PrimaryButton.qml
+        src/qml/SecondaryButton.qml
+        src/qml/AppTextField.qml
+        src/qml/TimeRangePicker.qml
     RESOURCES
         src/resources/icon.png
 )

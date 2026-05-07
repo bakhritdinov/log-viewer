@@ -1,12 +1,11 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import LogViewerApp
 
 Rectangle {
     id: root
-    color: "#0d1117"
-    border.color: "#30363d"
-    border.width: 1
+    color: Theme.bgRaised
 
     property var facets: ({})
     property string expandedField: ""
@@ -14,47 +13,36 @@ Rectangle {
 
     signal expansionChanged(bool expanded)
 
+    readonly property int fieldCount: facets ? Object.keys(facets).length : 0
+
+    // Right edge — separator from the table behind.
+    Rectangle {
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: 1
+        color: Theme.border
+    }
+
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 10
-        spacing: 12
-        
-        RowLayout {
+        anchors.margins: Theme.sp3
+        spacing: Theme.sp3
+
+        SectionHeader {
             Layout.fillWidth: true
-            Label {
-                text: "AVAILABLE FIELDS"
-                font.bold: true
-                font.pixelSize: 11
-                color: "#8b949e"
-                Layout.fillWidth: true
-            }
-            Button {
-                text: "✕ Clear"
-                visible: fieldSearch.text !== ""
-                font.pixelSize: 11
-                contentItem: Text {
-                    text: parent.text
-                    color: "#f85149"
-                    font.pixelSize: 11
-                    font.bold: true
-                }
-                background: null
-                onClicked: fieldSearch.clear()
-            }
+            title: "Available Fields"
+            counter: root.fieldCount
+            actionVisible: fieldSearch.text !== ""
+            actionText: "Clear"
+            onActionClicked: fieldSearch.clear()
         }
 
-        TextField {
+        AppTextField {
             id: fieldSearch
             Layout.fillWidth: true
-            placeholderText: "Search fields..."
-            font.pixelSize: 13
-            color: "#c9d1d9"
-            padding: 10
-            background: Rectangle {
-                color: "#010409"
-                border.color: fieldSearch.activeFocus ? "#58a6ff" : "#30363d"
-                radius: 6
-            }
+            implicitHeight: Theme.hInput
+            placeholderText: "Search fields…"
         }
 
         ListView {
@@ -62,9 +50,10 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            spacing: 2
+            spacing: 1
             boundsBehavior: Flickable.StopAtBounds
-            
+            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
             model: {
                 if (!root.facets) return [];
                 let keys = Object.keys(root.facets);
@@ -81,46 +70,50 @@ Rectangle {
             delegate: Column {
                 id: fieldGroup
                 width: fieldsList.width
-                
+
                 property string fieldName: modelData
                 property var fieldValues: root.facets ? root.facets[fieldName] : ({})
+                property int fieldValueCount: fieldValues ? Object.keys(fieldValues).length : 0
                 property bool isExpanded: root.expandedField === fieldName || (root.filterText !== "" && !fieldName.toLowerCase().includes(root.filterText))
 
                 Item {
                     width: parent.width
-                    height: 32
+                    height: 30
 
                     Rectangle {
                         anchors.fill: parent
-                        color: groupMouse.containsMouse ? "#21262d" : "transparent"
-                        radius: 4
+                        color: groupMouse.containsMouse ? Theme.bgRaised : "transparent"
+                        radius: Theme.rSm
+                        Behavior on color { ColorAnimation { duration: Theme.dFast } }
                     }
 
                     RowLayout {
-                        anchors {
-                            fill: parent
-                            leftMargin: 8
-                            rightMargin: 8
-                        }
-                        spacing: 8
+                        anchors.fill: parent
+                        anchors.leftMargin: Theme.sp2
+                        anchors.rightMargin: Theme.sp2
+                        spacing: Theme.sp2
+
                         Text {
-                            text: fieldGroup.isExpanded ? "▼ " + fieldGroup.fieldName : "▶ " + fieldGroup.fieldName
-                            color: fieldGroup.isExpanded ? "#58a6ff" : "#c9d1d9"
-                            font.pixelSize: 13
+                            text: fieldGroup.isExpanded ? "▾" : "▸"
+                            color: fieldGroup.isExpanded ? Theme.accent : Theme.textMuted
+                            font.pixelSize: Theme.fsMd
+                            Layout.preferredWidth: 14
+                        }
+                        Text {
+                            text: fieldGroup.fieldName
+                            color: fieldGroup.isExpanded ? Theme.accent : Theme.text
+                            font.pixelSize: Theme.fsMd
                             font.bold: true
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                         }
-                        Text {
-                            text: fieldGroup.fieldValues ? Object.keys(fieldGroup.fieldValues).length : 0
-                            color: "#8b949e"
-                            font.pixelSize: 11
-                        }
+                        Badge { text: fieldGroup.fieldValueCount }
                     }
                     MouseArea {
                         id: groupMouse
                         anchors.fill: parent
                         hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             if (root.expandedField === fieldGroup.fieldName) {
                                 root.expandedField = "";
@@ -136,10 +129,10 @@ Rectangle {
                 Column {
                     width: parent.width
                     visible: fieldGroup.isExpanded
-                    leftPadding: 15
-                    topPadding: 2
-                    bottomPadding: 5
-                    spacing: 1
+                    leftPadding: Theme.sp4
+                    topPadding: Theme.sp1
+                    bottomPadding: Theme.sp2
+                    spacing: 2
 
                     Repeater {
                         model: {
@@ -150,81 +143,61 @@ Rectangle {
                             }
                             return vKeys.sort((a, b) => fieldGroup.fieldValues[b] - fieldGroup.fieldValues[a]).slice(0, 50);
                         }
-                        delegate: ItemDelegate {
-                            id: valDelegate
-                            width: fieldGroup.width - 20
-                            height: 28
-                            padding: 5
-                            
+                        delegate: Item {
+                            id: valItem
+                            width: fieldGroup.width - Theme.sp4 - Theme.sp1
+                            height: 26
+
                             property bool isActive: window.searchHeader.searchText.indexOf(fieldGroup.fieldName + ":\"" + modelData + "\"") !== -1
-                            
-                            contentItem: RowLayout {
-                                spacing: 8
+
+                            Rectangle {
+                                anchors.fill: parent
+                                color: valItem.isActive
+                                    ? Qt.rgba(0.345, 0.654, 1.0, 0.10)
+                                    : (valMouse.containsMouse ? Theme.bgRaised : "transparent")
+                                radius: Theme.rSm
+                                border.color: valItem.isActive ? Theme.accent : "transparent"
+                                border.width: 1
+                                Behavior on color { ColorAnimation { duration: Theme.dFast } }
+                            }
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: Theme.sp2
+                                anchors.rightMargin: Theme.sp2
+                                spacing: Theme.sp2
+
                                 Text {
                                     text: modelData
-                                    color: valDelegate.isActive ? "#58a6ff" : "#8b949e"
-                                    font.pixelSize: 12
+                                    color: valItem.isActive ? Theme.accent : Theme.text
+                                    font.pixelSize: Theme.fsSm
                                     Layout.fillWidth: true
                                     elide: Text.ElideRight
+                                    font.family: "Monospace"
                                 }
                                 Text {
                                     text: fieldGroup.fieldValues[modelData] || ""
-                                    color: "#484f58"
-                                    font.pixelSize: 11
+                                    color: Theme.textDim
+                                    font.pixelSize: Theme.fsXs
                                 }
                                 Text {
                                     text: "✕"
-                                    color: "#f85149"
+                                    color: Theme.danger
                                     font.pixelSize: 10
-                                    visible: valDelegate.isActive
+                                    visible: valItem.isActive
                                 }
                             }
-                            
-                            background: Rectangle {
-                                color: valDelegate.hovered ? "#161b22" : "transparent"
-                                radius: 4
-                            }
 
-                            onClicked: window.toggleFilter(fieldGroup.fieldName, modelData)
+                            MouseArea {
+                                id: valMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: window.toggleFilter(fieldGroup.fieldName, modelData)
+                            }
                         }
                     }
                 }
-            }
-        }
-
-    }
-
-    Dialog {
-        id: addFieldDialog
-        title: "Add Field to Search"
-        anchors.centerIn: parent
-        modal: true
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        
-        ColumnLayout {
-            spacing: 10
-            width: 300
-            TextField {
-                id: customFieldName
-                Layout.fillWidth: true
-                placeholderText: "Field name (e.g. level)"
-                background: Rectangle { color: "#010409"; border.color: "#30363d"; radius: 4 }
-                color: "#c9d1d9"
-            }
-            TextField {
-                id: customFieldValue
-                Layout.fillWidth: true
-                placeholderText: "Value (e.g. ERROR)"
-                background: Rectangle { color: "#010409"; border.color: "#30363d"; radius: 4 }
-                color: "#c9d1d9"
-            }
-        }
-
-        onAccepted: {
-            if (customFieldName.text && customFieldValue.text) {
-                window.toggleFilter(customFieldName.text, customFieldValue.text)
-                customFieldName.clear()
-                customFieldValue.clear()
             }
         }
     }
@@ -234,4 +207,3 @@ Rectangle {
         function onFacetsReceived(f) { root.facets = f }
     }
 }
-

@@ -1,13 +1,14 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import LogViewerApp
 
 Dialog {
     id: dialog
-    title: "⚙ Environment Configuration"
+    title: "Environment Configuration"
     modal: true
-    
-    width: 500
+
+    width: 540
     contentHeight: mainColumn.implicitHeight
 
     onAboutToShow: {
@@ -16,30 +17,31 @@ Dialog {
     }
 
     background: Rectangle {
-        color: "#161b22"
-        border.color: "#30363d"
-        radius: 12
+        color: Theme.bgRaised
+        border.color: Theme.border
         border.width: 1
+        radius: Theme.rLg
     }
 
     contentItem: ColumnLayout {
         id: mainColumn
         spacing: 0
-        
-        // Draggable Header Area
+
+        // Draggable header
         Rectangle {
             Layout.fillWidth: true
-            height: 60
+            Layout.preferredHeight: 56
             color: "transparent"
-            
-            Label {
-                text: dialog.title
-                font.pixelSize: 18; font.bold: true
-                anchors.fill: parent
-                padding: 20
-                color: "#c9d1d9"
-                verticalAlignment: Text.AlignVCenter
+
+            Row {
+                anchors.left: parent.left; anchors.leftMargin: Theme.sp5
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: Theme.sp2
+                Text { text: "⚙"; color: Theme.textMuted; font.pixelSize: 20; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: dialog.title; color: Theme.text; font.pixelSize: Theme.fs2xl; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
             }
+
+            Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Theme.border }
 
             MouseArea {
                 anchors.fill: parent
@@ -53,91 +55,147 @@ Dialog {
             }
         }
 
-        // TabBar Area (Not covered by MouseArea)
         TabBar {
             id: bar
             Layout.fillWidth: true
-            Layout.leftMargin: 20; Layout.rightMargin: 20
-            Layout.bottomMargin: 10
+            Layout.leftMargin: Theme.sp5
+            Layout.rightMargin: Theme.sp5
+            Layout.topMargin: Theme.sp4
             background: Rectangle { color: "transparent" }
-            
+
             TabButton {
-                text: "🛠 DEV"
-                implicitHeight: 32
-                contentItem: Text { text: parent.text; color: bar.currentIndex === 0 ? "#58a6ff" : "#8b949e"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; font.bold: true }
-                background: Rectangle { color: bar.currentIndex === 0 ? "#21262d" : "transparent"; border.color: bar.currentIndex === 0 ? "#30363d" : "transparent"; radius: 6 }
+                text: "DEV"
+                implicitHeight: Theme.hButton + 4
+                contentItem: Text {
+                    text: parent.text
+                    color: bar.currentIndex === 0 ? Theme.accent : Theme.textMuted
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    font.bold: true
+                    font.pixelSize: Theme.fsMd
+                    font.letterSpacing: 0.5
+                }
+                background: Rectangle {
+                    color: bar.currentIndex === 0 ? Theme.bgSubtle : "transparent"
+                    border.color: bar.currentIndex === 0 ? Theme.border : "transparent"
+                    border.width: 1
+                    radius: Theme.rMd
+                    Behavior on color { ColorAnimation { duration: Theme.dFast } }
+                }
             }
             TabButton {
-                text: "🚀 PROD"
-                implicitHeight: 32
-                contentItem: Text { text: parent.text; color: bar.currentIndex === 1 ? "#58a6ff" : "#8b949e"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; font.bold: true }
-                background: Rectangle { color: bar.currentIndex === 1 ? "#21262d" : "transparent"; border.color: bar.currentIndex === 1 ? "#30363d" : "transparent"; radius: 6 }
+                text: "PROD"
+                implicitHeight: Theme.hButton + 4
+                contentItem: Text {
+                    text: parent.text
+                    color: bar.currentIndex === 1 ? Theme.accent : Theme.textMuted
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    font.bold: true
+                    font.pixelSize: Theme.fsMd
+                    font.letterSpacing: 0.5
+                }
+                background: Rectangle {
+                    color: bar.currentIndex === 1 ? Theme.bgSubtle : "transparent"
+                    border.color: bar.currentIndex === 1 ? Theme.border : "transparent"
+                    border.width: 1
+                    radius: Theme.rMd
+                    Behavior on color { ColorAnimation { duration: Theme.dFast } }
+                }
             }
         }
 
-        // Body
         StackLayout {
             id: stack
             currentIndex: bar.currentIndex
             Layout.fillWidth: true
-            Layout.margins: 20
-            Layout.topMargin: 10
-            
+            Layout.leftMargin: Theme.sp5
+            Layout.rightMargin: Theme.sp5
+            Layout.topMargin: Theme.sp3
+
             EnvSettings { id: devSet; env: "DEV" }
             EnvSettings { id: prodSet; env: "PROD" }
         }
 
         // Footer
-        RowLayout {
+        Rectangle {
             Layout.fillWidth: true
-            Layout.margins: 20; Layout.topMargin: 0
-            spacing: 12
-            Item { Layout.fillWidth: true }
-            Button {
-                text: "Cancel"; onClicked: dialog.reject()
-                contentItem: Text { text: parent.text; color: "#c9d1d9"; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                background: Rectangle { color: parent.down ? "#30363d" : "#21262d"; border.color: "#30363d"; radius: 6; implicitWidth: 110; implicitHeight: 38 }
-            }
-            Button {
-                text: "💾 Save All"
-                onClicked: { devSet.save(); prodSet.save(); dialog.accept() }
-                contentItem: Text { text: parent.text; color: "#ffffff"; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                background: Rectangle { color: parent.down ? "#2ea043" : "#238636"; radius: 6; implicitWidth: 110; implicitHeight: 38 }
+            Layout.preferredHeight: 64
+            color: "transparent"
+
+            Rectangle { anchors.top: parent.top; width: parent.width; height: 1; color: Theme.border }
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: Theme.sp5
+                anchors.rightMargin: Theme.sp5
+                spacing: Theme.sp3
+
+                Item { Layout.fillWidth: true }
+                SecondaryButton {
+                    text: "Cancel"
+                    Layout.preferredWidth: 110
+                    onClicked: dialog.reject()
+                }
+                PrimaryButton {
+                    text: "Save"
+                    Layout.preferredWidth: 110
+                    onClicked: { devSet.save(); prodSet.save(); dialog.accept() }
+                }
             }
         }
     }
 
     component EnvSettings : GridLayout {
         property string env: ""
-        columns: 2; rowSpacing: 15; columnSpacing: 15
+        columns: 2
+        rowSpacing: Theme.sp3
+        columnSpacing: Theme.sp3
         Layout.fillWidth: true
-        function save() { 
+
+        function save() {
             if (typeof configManager !== "undefined" && configManager !== null)
-                configManager.saveEnv(env, urlF.text, uidF.text, userF.text, passF.text) 
+                configManager.saveEnv(env, urlF.text, uidF.text, userF.text, passF.text)
         }
-        Label { text: "URL:"; color: "#8b949e"; font.pixelSize: 13; Layout.alignment: Qt.AlignRight }
-        TextField {
-            id: urlF; Layout.fillWidth: true; text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getUrl(env) : ""
-            color: "#c9d1d9"; font.pixelSize: 13; padding: 10
-            background: Rectangle { color: "#0d1117"; border.color: "#30363d"; radius: 6 }
+
+        FieldLabel { text: "Grafana URL" }
+        AppTextField {
+            id: urlF
+            Layout.fillWidth: true
+            implicitHeight: Theme.hInput
+            text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getUrl(env) : ""
+            placeholderText: "https://grafana.example.com"
         }
-        Label { text: "UID:"; color: "#8b949e"; font.pixelSize: 13; Layout.alignment: Qt.AlignRight }
-        TextField {
-            id: uidF; Layout.fillWidth: true; text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getUid(env) : ""
-            color: "#c9d1d9"; font.pixelSize: 13; padding: 10
-            background: Rectangle { color: "#0d1117"; border.color: "#30363d"; radius: 6 }
+        FieldLabel { text: "Datasource UID" }
+        AppTextField {
+            id: uidF
+            Layout.fillWidth: true
+            implicitHeight: Theme.hInput
+            text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getUid(env) : ""
+            placeholderText: "abcd1234efgh"
         }
-        Label { text: "Login:"; color: "#8b949e"; font.pixelSize: 13; Layout.alignment: Qt.AlignRight }
-        TextField {
-            id: userF; Layout.fillWidth: true; text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getUser(env) : ""
-            color: "#c9d1d9"; font.pixelSize: 13; padding: 10
-            background: Rectangle { color: "#0d1117"; border.color: "#30363d"; radius: 6 }
+        FieldLabel { text: "Login" }
+        AppTextField {
+            id: userF
+            Layout.fillWidth: true
+            implicitHeight: Theme.hInput
+            text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getUser(env) : ""
+            placeholderText: "username (optional)"
         }
-        Label { text: "Password:"; color: "#8b949e"; font.pixelSize: 13; Layout.alignment: Qt.AlignRight }
-        TextField {
-            id: passF; Layout.fillWidth: true; text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getPass(env) : ""; echoMode: TextField.Password
-            color: "#c9d1d9"; font.pixelSize: 13; padding: 10
-            background: Rectangle { color: "#0d1117"; border.color: "#30363d"; radius: 6 }
+        FieldLabel { text: "Password" }
+        AppTextField {
+            id: passF
+            Layout.fillWidth: true
+            implicitHeight: Theme.hInput
+            text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getPass(env) : ""
+            echoMode: TextField.Password
+            placeholderText: "••••••••"
         }
+    }
+
+    component FieldLabel : Label {
+        color: Theme.textMuted
+        font.pixelSize: Theme.fsSm
+        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
     }
 }

@@ -11,18 +11,18 @@ ApplicationWindow {
     title: qsTr("LogViewer")
 
     palette {
-        window: "#0d1117"
-        windowText: "#c9d1d9"
-        base: "#161b22"
-        text: "#c9d1d9"
-        button: "#21262d"
-        buttonText: "#c9d1d9"
-        highlight: "#238636"
-        highlightedText: "#ffffff"
+        window: Theme.bg
+        windowText: Theme.text
+        base: Theme.bgRaised
+        text: Theme.text
+        button: Theme.bgSubtle
+        buttonText: Theme.text
+        highlight: Theme.successDim
+        highlightedText: Theme.textOnAccent
     }
 
     background: Rectangle {
-        color: window.palette.window
+        color: Theme.bg
     }
 
     // Main designable content
@@ -55,29 +55,59 @@ ApplicationWindow {
     }
 
     footer: ToolBar {
-        background: Rectangle { color: "#010409" }
+        height: 30
+        background: Rectangle { color: Theme.bgInput }
         RowLayout {
+            id: statusRow
             anchors.fill: parent
-            anchors.leftMargin: 15
-            anchors.rightMargin: 15
+            anchors.leftMargin: Theme.sp4
+            anchors.rightMargin: Theme.sp4
+            spacing: Theme.sp2
+
+            readonly property bool isLoading: typeof logModel !== "undefined" && logModel !== null && logModel.loading
+
+            Rectangle {
+                width: 8; height: 8; radius: 4
+                color: statusRow.isLoading ? Theme.warnDim : Theme.success
+                SequentialAnimation on opacity {
+                    running: statusRow.isLoading
+                    loops: Animation.Infinite
+                    NumberAnimation { from: 1.0; to: 0.3; duration: 600 }
+                    NumberAnimation { from: 0.3; to: 1.0; duration: 600 }
+                }
+            }
             Label {
-                text: (typeof logModel !== "undefined" && logModel !== null && logModel.loading) ? "⌛ Loading..." : "● Connected (" + (typeof configManager !== "undefined" && configManager !== null ? configManager.currentEnv : "Unknown") + ")"
-                font.pixelSize: 12
-                color: (typeof logModel !== "undefined" && logModel !== null && logModel.loading) ? "#e3b341" : "#3fb950"
+                text: statusRow.isLoading
+                    ? "Loading…"
+                    : "Connected · " + (typeof configManager !== "undefined" && configManager !== null ? configManager.currentEnv : "Unknown")
+                font.pixelSize: Theme.fsSm
+                color: statusRow.isLoading ? Theme.warnDim : Theme.success
             }
             Item { Layout.fillWidth: true }
             Label {
                 text: "v" + (typeof appVersion !== "undefined" ? appVersion : "")
-                font.pixelSize: 12
-                color: "#8b949e"
+                font.pixelSize: Theme.fsSm
+                font.family: "Monospace"
+                color: Theme.textMuted
             }
         }
     }
 
     Component.onCompleted: {
-        if (typeof configManager !== "undefined" && configManager !== null && configManager.url()) {
-            if (typeof grafanaClient !== "undefined" && grafanaClient !== null) {
+        if (typeof configManager !== "undefined" && configManager !== null) {
+            Theme.dark = configManager.darkTheme
+            if (configManager.url() && typeof grafanaClient !== "undefined" && grafanaClient !== null) {
                 grafanaClient.fetchMappings(configManager.url(), "", configManager.datasourceUid(), configManager.user(), configManager.password())
+            }
+        }
+    }
+
+    // Persist theme toggles back to QSettings via ConfigManager.
+    Connections {
+        target: Theme
+        function onDarkChanged() {
+            if (typeof configManager !== "undefined" && configManager !== null) {
+                configManager.darkTheme = Theme.dark
             }
         }
     }

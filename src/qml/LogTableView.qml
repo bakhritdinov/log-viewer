@@ -1,14 +1,14 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import LogViewerApp
 
 Rectangle {
     id: tableRoot
-    color: "#0d1117"
-    border.color: "#30363d"
+    color: Theme.bg
+    border.color: Theme.border
     border.width: 1
 
-    signal rowSelected(var entry)
     signal traceRequested(string traceId)
     signal firstPageRequested()
     signal prevPageRequested()
@@ -18,106 +18,408 @@ Rectangle {
     property int currentPage: 0
     property int maxPage: 1
 
-    readonly property int timeWidth: 180
-    readonly property int levelWidth: 80
-    readonly property int serviceWidth: 150
+    // Adaptive column widths.
+    readonly property bool showService: tableRoot.width >= 900
+    readonly property bool compactTime: tableRoot.width < 1100
+    readonly property bool wrapMessage: tableRoot.width < 1100
+    readonly property int  timeWidth: compactTime ? 92 : 180
+    readonly property int  levelWidth: 78
+    readonly property int  serviceWidth: 150
+
+    // Reset expansion when the model changes (e.g. page or filter switch).
+    Connections {
+        target: logModel
+        function onCountChanged() { logList.expandedIndex = -1 }
+    }
 
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
 
-        // Header
+        // Sticky header
         Rectangle {
-            Layout.fillWidth: true; height: 32; color: "#161b22"
+            Layout.fillWidth: true
+            Layout.preferredHeight: Theme.hHeader
+            color: Theme.bgRaised
             z: 2
             Row {
                 anchors.fill: parent
-                HeaderLabel { text: "Time"; width: timeWidth }
-                HeaderLabel { text: "Level"; width: levelWidth }
-                HeaderLabel { text: "Service"; width: serviceWidth }
-                HeaderLabel { text: "Message"; width: parent.width - timeWidth - levelWidth - serviceWidth }
+                HeaderLabel { width: 22 }
+                HeaderLabel { text: "Time"; width: tableRoot.timeWidth }
+                HeaderLabel { text: "Level"; width: tableRoot.levelWidth }
+                HeaderLabel { visible: tableRoot.showService; text: "Service"; width: tableRoot.showService ? tableRoot.serviceWidth : 0 }
+                HeaderLabel {
+                    text: "Message"
+                    showSeparator: false
+                    width: parent.width - 22 - tableRoot.timeWidth - tableRoot.levelWidth
+                         - (tableRoot.showService ? tableRoot.serviceWidth : 0)
+                }
             }
-            Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: "#30363d" }
+            Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Theme.border }
         }
 
         ListView {
             id: logList
-            Layout.fillWidth: true; Layout.fillHeight: true
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             model: logModel
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+            cacheBuffer: 200
 
-            delegate: Rectangle {
-                width: logList.width; height: 28
-                // Безопасное извлечение уровня
+            // Index of the currently expanded row, or -1 if none.
+            property int expandedIndex: -1
+
+            delegate: Item {
+                id: rowItem
+                width: ListView.view.width
+                height: header.height + (expanded ? detailsLoader.implicitHeight : 0)
+
+                property bool   expanded: logList.expandedIndex === index
                 property string itemLevel: (typeof fields !== "undefined" && fields !== null) ? (fields.level || "") : ""
-                
-                color: logList.currentIndex === index ? "#21262d" : (
-                    itemLevel === "ERROR" ? "rgba(248, 81, 73, 0.1)" : (
-                    itemLevel === "WARN" ? "rgba(210, 153, 34, 0.1)" : "transparent"
-                ))
+                property string itemService: (typeof fields !== "undefined" && fields !== null) ? (fields.service || "") : ""
+                property string traceId: (typeof fields !== "undefined" && fields !== null) ? (fields.traceId || fields.trace_id || "") : ""
+                property var    fieldsObj: (typeof fields !== "undefined" && fields !== null) ? fields : ({})
+                readonly property color levelTint: itemLevel === "ERROR" ? Qt.rgba(0.973, 0.318, 0.286, 0.10)
+                                                : itemLevel === "WARN"  ? Qt.rgba(0.824, 0.600, 0.133, 0.10)
+                                                : "transparent"
 
-                Row {
-                    id: rowItem
-                    anchors.fill: parent
-                    anchors.leftMargin: 5; anchors.rightMargin: 5
-                    
-                    LogText { text: timestamp; width: timeWidth; color: "#8b949e" }
-                    LogText { 
-                        text: itemLevel; width: levelWidth
-                        color: itemLevel === "ERROR" ? "#f85149" : (itemLevel === "WARN" ? "#d29922" : "#c9d1d9")
-                        font.bold: true; horizontalAlignment: Text.AlignHCenter
+                Behavior on height { NumberAnimation { duration: Theme.dBase; easing.type: Easing.InOutCubic } }
+
+                // ── Header row ─────────────────────────────────────────────
+                Rectangle {
+                    id: header
+                    width: parent.width
+                    height: Math.max(Theme.hRow, messageText.implicitHeight + Theme.sp1 * 2)
+                    color: rowItem.expanded ? Theme.bgRaised
+                         : rowMouse.containsMouse ? Theme.bgRaised
+                         : rowItem.levelTint
+                    Behavior on color { ColorAnimation { duration: Theme.dFast } }
+
+                    // Level accent line
+                    Rectangle {
+                        width: 3
+                        height: parent.height
+                        color: rowItem.itemLevel === "ERROR" ? Theme.danger
+                             : rowItem.itemLevel === "WARN"  ? Theme.warn
+                             : "transparent"
                     }
-                    LogText { 
-                        text: (typeof fields !== "undefined" && fields !== null) ? (fields.service || "") : ""; 
-                        width: serviceWidth; color: "#c9d1d9" 
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.leftMargin: Theme.sp2
+                        anchors.rightMargin: Theme.sp2
+
+                        // Expand chevron
+                        Item {
+                            width: 22
+                            height: parent.height
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.top: parent.top
+                                anchors.topMargin: Theme.sp1
+                                text: rowItem.expanded ? "▾" : "▸"
+                                color: rowItem.expanded ? Theme.accent : Theme.textMuted
+                                font.pixelSize: Theme.fsMd
+                            }
+                        }
+
+                        LogText {
+                            text: tableRoot.compactTime ? timestamp.split(" ")[1].slice(0, 8) : timestamp
+                            width: tableRoot.timeWidth
+                            color: Theme.textMuted
+                            font.family: "Monospace"
+                        }
+
+                        // Level chip
+                        Item {
+                            width: tableRoot.levelWidth
+                            height: parent.height
+                            Rectangle {
+                                visible: rowItem.itemLevel !== ""
+                                anchors.top: parent.top
+                                anchors.topMargin: Theme.sp1 + 1
+                                anchors.left: parent.left; anchors.leftMargin: Theme.sp1
+                                width: chipText.implicitWidth + Theme.sp2 * 2
+                                height: 18
+                                radius: 9
+                                color: rowItem.itemLevel === "ERROR" ? Qt.rgba(0.973, 0.318, 0.286, 0.18)
+                                     : rowItem.itemLevel === "WARN"  ? Qt.rgba(0.824, 0.600, 0.133, 0.18)
+                                     : Theme.bgSubtle
+                                border.color: rowItem.itemLevel === "ERROR" ? Theme.danger
+                                            : rowItem.itemLevel === "WARN"  ? Theme.warn
+                                            : Theme.borderMuted
+                                border.width: 1
+                                Text {
+                                    id: chipText
+                                    anchors.centerIn: parent
+                                    text: rowItem.itemLevel
+                                    color: rowItem.itemLevel === "ERROR" ? Theme.danger
+                                         : rowItem.itemLevel === "WARN"  ? Theme.warn
+                                         : Theme.text
+                                    font.pixelSize: Theme.fsXs
+                                    font.bold: true
+                                    font.letterSpacing: 0.4
+                                }
+                            }
+                        }
+
+                        LogText {
+                            visible: tableRoot.showService
+                            text: rowItem.itemService
+                            width: tableRoot.showService ? tableRoot.serviceWidth : 0
+                            color: Theme.text
+                        }
+
+                        LogText {
+                            id: messageText
+                            text: message.replace(/\n/g, " ")
+                            width: header.width - 22 - tableRoot.timeWidth - tableRoot.levelWidth
+                                 - (tableRoot.showService ? tableRoot.serviceWidth : 0)
+                                 - Theme.sp4
+                            color: Theme.text
+                            clip: true
+                            elide: Text.ElideRight
+                            wrapMode: tableRoot.wrapMessage ? Text.Wrap : Text.NoWrap
+                            maximumLineCount: tableRoot.wrapMessage ? 2 : 1
+
+                            HoverHandler { id: msgHover }
+                            ToolTip.visible: msgHover.hovered && messageText.truncated
+                            ToolTip.text: message
+                            ToolTip.delay: 500
+                        }
                     }
-                    
-                    LogText { 
-                        text: message.replace(/\n/g, " "); 
-                        width: rowItem.width - timeWidth - levelWidth - serviceWidth - 10
-                        color: "#c9d1d9"
-                        clip: true
-                        elide: Text.ElideRight
+
+                    Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Theme.borderMuted; opacity: 0.4 }
+
+                    MouseArea {
+                        id: rowMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        onClicked: (mouse) => {
+                            if (mouse.button === Qt.RightButton && rowItem.traceId !== "") {
+                                contextMenu.currentTraceId = rowItem.traceId
+                                contextMenu.popup()
+                                return
+                            }
+                            logList.expandedIndex = rowItem.expanded ? -1 : index
+                        }
                     }
                 }
 
-                Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: "#21262d"; opacity: 0.3 }
+                // ── Expansion (lazy) ───────────────────────────────────────
+                Loader {
+                    id: detailsLoader
+                    anchors.top: header.bottom
+                    width: rowItem.width
+                    active: rowItem.expanded
+                    visible: rowItem.expanded
+                    sourceComponent: detailsComponent
+                }
 
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                    onClicked: (mouse) => {
-                        logList.currentIndex = index
-                        let currentFields = (typeof fields !== "undefined" && fields !== null) ? fields : {}
-                        rowSelected({
-                            timestamp: timestamp, 
-                            message: message, 
-                            fields: currentFields
-                        })
-                        
-                        if (mouse.button === Qt.RightButton && currentFields.traceId) {
-                            contextMenu.currentTraceId = currentFields.traceId
-                            contextMenu.popup()
+                // Component lives inside the delegate so it can resolve `message`,
+                // model role properties, and rowItem ids through proper scope.
+                Component {
+                    id: detailsComponent
+
+                    Rectangle {
+                        width: detailsLoader.width
+                        color: Theme.bgRaised
+                        border.color: Theme.border
+                        border.width: 1
+                        implicitHeight: detailsCol.implicitHeight + Theme.sp4 * 2
+
+                        ColumnLayout {
+                            id: detailsCol
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.margins: Theme.sp4
+                            spacing: Theme.sp3
+
+                            // Message card with internal scroll for long stacktraces.
+                            Rectangle {
+                                Layout.fillWidth: true
+                                implicitHeight: Math.min(msgEdit.implicitHeight + Theme.sp3 * 2, 280)
+                                color: Theme.bgInput
+                                border.color: Theme.borderMuted
+                                border.width: 1
+                                radius: Theme.rMd
+                                clip: true
+
+                                Flickable {
+                                    anchors.fill: parent
+                                    anchors.margins: Theme.sp3
+                                    anchors.rightMargin: Theme.sp3 + 28 // leave room for copy button
+                                    contentWidth: width
+                                    contentHeight: msgEdit.implicitHeight
+                                    boundsBehavior: Flickable.StopAtBounds
+                                    clip: true
+                                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                                    TextEdit {
+                                        id: msgEdit
+                                        width: parent.width
+                                        text: message
+                                        color: Theme.text
+                                        font.family: "Monospace"
+                                        font.pixelSize: Theme.fsMd
+                                        readOnly: true
+                                        wrapMode: TextEdit.Wrap
+                                        selectByMouse: true
+                                        selectionColor: Theme.accent
+                                        selectedTextColor: Theme.textOnAccent
+                                    }
+                                }
+
+                                IconButton {
+                                    anchors.right: parent.right; anchors.top: parent.top
+                                    anchors.margins: Theme.sp1
+                                    text: "📋"
+                                    tooltipText: "Copy message"
+                                    pixel: Theme.fsSm
+                                    boxSize: 24
+                                    onClicked: {
+                                        tempArea.text = message
+                                        tempArea.selectAll()
+                                        tempArea.copy()
+                                    }
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text {
+                                    text: "FIELDS"
+                                    color: Theme.textMuted
+                                    font.bold: true
+                                    font.pixelSize: Theme.fsXs
+                                    font.capitalization: Font.AllUppercase
+                                    font.letterSpacing: 0.5
+                                }
+                                Badge { text: rowItem.fieldsObj ? Object.keys(rowItem.fieldsObj).length : 0 }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: Theme.sp1
+                                Repeater {
+                                    model: rowItem.fieldsObj ? Object.keys(rowItem.fieldsObj).sort() : []
+                                    delegate: Rectangle {
+                                        id: fieldDelegate
+                                        Layout.fillWidth: true
+                                        implicitHeight: fieldGrid.implicitHeight + Theme.sp3 * 2
+                                        color: fieldMouse.containsMouse ? Theme.bgSubtle : Theme.bgInput
+                                        border.color: fieldMouse.containsMouse ? Theme.border : Theme.borderMuted
+                                        border.width: 1
+                                        radius: Theme.rMd
+                                        Behavior on color { ColorAnimation { duration: Theme.dFast } }
+                                        Behavior on border.color { ColorAnimation { duration: Theme.dFast } }
+
+                                        property string fieldKey: modelData
+                                        property string fieldVal: (typeof logModel !== "undefined" && logModel !== null && rowItem.fieldsObj)
+                                            ? logModel.formatValue(rowItem.fieldsObj[modelData])
+                                            : ""
+                                        readonly property bool stacked: width < 560
+
+                                        MouseArea { id: fieldMouse; anchors.fill: parent; hoverEnabled: true }
+
+                                        GridLayout {
+                                            id: fieldGrid
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.top: parent.top
+                                            anchors.leftMargin: Theme.sp3
+                                            anchors.rightMargin: Theme.sp2
+                                            anchors.topMargin: Theme.sp3
+                                            anchors.bottomMargin: Theme.sp3
+                                            columns: fieldDelegate.stacked ? 2 : 3
+                                            columnSpacing: Theme.sp3
+                                            rowSpacing: Theme.sp2
+
+                                            Text {
+                                                text: fieldDelegate.fieldKey
+                                                color: Theme.accent
+                                                font.pixelSize: Theme.fsMd
+                                                font.bold: true
+                                                font.family: "Monospace"
+                                                Layout.preferredWidth: fieldDelegate.stacked ? -1 : 180
+                                                Layout.fillWidth: fieldDelegate.stacked
+                                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                                elide: Text.ElideRight
+                                            }
+
+                                            // When stacked, actions sit on the same row as the key.
+                                            // When wide, actions go after the value as usual.
+                                            Row {
+                                                visible: fieldDelegate.stacked
+                                                Layout.alignment: Qt.AlignTop | Qt.AlignRight
+                                                spacing: 2
+                                                IconButton {
+                                                    text: "🔍"; tooltipText: "Toggle filter"
+                                                    pixel: Theme.fsSm; boxSize: 24
+                                                    onClicked: window.toggleFilter(fieldDelegate.fieldKey, rowItem.fieldsObj[fieldDelegate.fieldKey])
+                                                }
+                                                IconButton {
+                                                    text: "📋"; tooltipText: "Copy value"
+                                                    pixel: Theme.fsSm; boxSize: 24
+                                                    onClicked: { tempArea.text = fieldDelegate.fieldVal; tempArea.selectAll(); tempArea.copy() }
+                                                }
+                                            }
+
+                                            Text {
+                                                text: fieldDelegate.fieldVal
+                                                color: Theme.text
+                                                font.pixelSize: Theme.fsMd
+                                                font.family: "Monospace"
+                                                Layout.fillWidth: true
+                                                Layout.columnSpan: fieldDelegate.stacked ? 2 : 1
+                                                Layout.alignment: Qt.AlignTop
+                                                wrapMode: Text.Wrap
+                                            }
+
+                                            Row {
+                                                visible: !fieldDelegate.stacked
+                                                Layout.alignment: Qt.AlignTop | Qt.AlignRight
+                                                spacing: 2
+                                                IconButton {
+                                                    text: "🔍"; tooltipText: "Toggle filter"
+                                                    pixel: Theme.fsSm; boxSize: 24
+                                                    onClicked: window.toggleFilter(fieldDelegate.fieldKey, rowItem.fieldsObj[fieldDelegate.fieldKey])
+                                                }
+                                                IconButton {
+                                                    text: "📋"; tooltipText: "Copy value"
+                                                    pixel: Theme.fsSm; boxSize: 24
+                                                    onClicked: { tempArea.text = fieldDelegate.fieldVal; tempArea.selectAll(); tempArea.copy() }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
+        // ── Pagination bar ─────────────────────────────────────────────────
         Rectangle {
             id: pageBar
             Layout.fillWidth: true
-            Layout.preferredHeight: 36
-            color: "#161b22"
+            Layout.preferredHeight: 38
+            color: Theme.bgRaised
 
             readonly property bool busy: typeof logModel !== "undefined" && logModel !== null && logModel.loading
 
-            Rectangle { anchors.top: parent.top; width: parent.width; height: 1; color: "#30363d" }
+            Rectangle { anchors.top: parent.top; width: parent.width; height: 1; color: Theme.border }
 
             BusyIndicator {
-                anchors.left: parent.left; anchors.leftMargin: 12; anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left; anchors.leftMargin: Theme.sp3
+                anchors.verticalCenter: parent.verticalCenter
                 width: 18; height: 18
                 running: pageBar.busy
                 visible: running
@@ -125,87 +427,112 @@ Rectangle {
 
             RowLayout {
                 anchors.centerIn: parent
-                spacing: 8
+                spacing: Theme.sp1
 
                 PageButton {
-                    text: "« First"
+                    text: "«"
+                    ToolTip.visible: hovered; ToolTip.text: "First page"; ToolTip.delay: 400
                     enabled: tableRoot.currentPage > 0 && !pageBar.busy
                     onClicked: tableRoot.firstPageRequested()
                 }
-
                 PageButton {
-                    text: "← Newer"
+                    text: "‹ Newer"
                     enabled: tableRoot.currentPage > 0 && !pageBar.busy
                     onClicked: tableRoot.prevPageRequested()
                 }
 
-                Text {
-                    text: `Page ${tableRoot.currentPage + 1} of ${tableRoot.maxPage}`
-                    color: "#8b949e"; font.pixelSize: 12
-                    Layout.alignment: Qt.AlignVCenter
-                    Layout.leftMargin: 6
-                    Layout.rightMargin: 6
+                Rectangle {
+                    Layout.leftMargin: Theme.sp2
+                    Layout.rightMargin: Theme.sp2
+                    implicitWidth: pageLabel.implicitWidth + Theme.sp3 * 2
+                    implicitHeight: 24
+                    color: Theme.bgInput
+                    border.color: Theme.borderMuted
+                    border.width: 1
+                    radius: 12
+                    Text {
+                        id: pageLabel
+                        anchors.centerIn: parent
+                        text: `Page ${tableRoot.currentPage + 1} of ${tableRoot.maxPage}`
+                        color: Theme.text
+                        font.pixelSize: Theme.fsXs
+                        font.bold: true
+                    }
                 }
 
                 PageButton {
-                    text: "Older →"
+                    text: "Older ›"
                     enabled: tableRoot.currentPage + 1 < tableRoot.maxPage && !pageBar.busy
                     onClicked: tableRoot.nextPageRequested()
                 }
-
                 PageButton {
-                    text: "Last »"
+                    text: "»"
+                    ToolTip.visible: hovered; ToolTip.text: "Last page"; ToolTip.delay: 400
                     enabled: tableRoot.currentPage + 1 < tableRoot.maxPage && !pageBar.busy
                     onClicked: tableRoot.lastPageRequested()
                 }
             }
 
-            Text {
-                anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
-                text: `${(typeof logModel !== "undefined" && logModel !== null) ? logModel.count : 0} logs`
-                color: "#8b949e"; font.pixelSize: 12
+            Row {
+                anchors.right: parent.right; anchors.rightMargin: Theme.sp3
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: Theme.sp1
+                Badge { text: (typeof logModel !== "undefined" && logModel !== null) ? logModel.count : 0; labelColor: Theme.text }
+                Text {
+                    text: "logs"
+                    color: Theme.textMuted
+                    font.pixelSize: Theme.fsXs
+                    anchors.verticalCenter: parent.verticalCenter
+                }
             }
-        }
-    }
-
-    component PageButton : Button {
-        Layout.preferredHeight: 26
-        font.pixelSize: 11
-        background: Rectangle {
-            color: parent.enabled ? (parent.down ? "#30363d" : "#21262d") : "#161b22"
-            border.color: parent.enabled ? "#30363d" : "#21262d"
-            radius: 4
-        }
-        contentItem: Text {
-            text: parent.text
-            color: parent.enabled ? "#c9d1d9" : "#484f58"
-            font: parent.font
-            horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-            leftPadding: 10; rightPadding: 10
         }
     }
 
     Menu {
         id: contextMenu
         property string currentTraceId: ""
-        background: Rectangle { color: "#161b22"; border.color: "#30363d"; radius: 6 }
+        background: Rectangle { color: Theme.bgRaised; border.color: Theme.border; border.width: 1; radius: Theme.rMd }
         MenuItem {
-            text: "🔍 Fetch Trace Context (±5m)"
+            text: "Fetch Trace Context (±5m)"
             onTriggered: traceRequested(contextMenu.currentTraceId)
-            contentItem: Text { text: parent.text; color: "#c9d1d9"; padding: 5 }
-            background: Rectangle { color: parent.highlighted ? "#21262d" : "transparent"; radius: 4 }
+            contentItem: Text { text: parent.text; color: Theme.text; padding: Theme.sp1; font.pixelSize: Theme.fsSm }
+            background: Rectangle { color: parent.highlighted ? Theme.bgSubtle : "transparent"; radius: Theme.rSm }
         }
     }
 
+    TextArea { id: tempArea; visible: false }
+
     component HeaderLabel : Rectangle {
         property alias text: lbl.text
-        height: parent.height; color: "transparent"
-        Text { id: lbl; anchors.centerIn: parent; color: "#8b949e"; font.bold: true; font.pixelSize: 11; font.capitalization: Font.AllUppercase }
-        Rectangle { anchors.right: parent.right; height: parent.height * 0.6; anchors.verticalCenter: parent.verticalCenter; width: 1; color: "#30363d" }
+        property bool showSeparator: true
+        height: parent.height
+        color: "transparent"
+        Text {
+            id: lbl
+            anchors.left: parent.left; anchors.leftMargin: Theme.sp3
+            anchors.verticalCenter: parent.verticalCenter
+            color: Theme.textMuted
+            font.bold: true
+            font.pixelSize: Theme.fsXs
+            font.capitalization: Font.AllUppercase
+            font.letterSpacing: 0.5
+        }
+        Rectangle {
+            visible: parent.showSeparator
+            anchors.right: parent.right
+            height: parent.height * 0.5
+            anchors.verticalCenter: parent.verticalCenter
+            width: 1
+            color: Theme.border
+        }
     }
 
     component LogText : Text {
-        font.pixelSize: 12; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight; padding: 4
+        font.pixelSize: Theme.fsMd
+        verticalAlignment: tableRoot.wrapMessage ? Text.AlignTop : Text.AlignVCenter
+        elide: Text.ElideRight
+        leftPadding: Theme.sp2
+        topPadding: Theme.sp1
         maximumLineCount: 1
         wrapMode: Text.NoWrap
     }

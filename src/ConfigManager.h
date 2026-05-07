@@ -7,6 +7,7 @@
 class ConfigManager : public QObject {
     Q_OBJECT
     Q_PROPERTY(QString currentEnv READ currentEnv WRITE setCurrentEnv NOTIFY currentEnvChanged)
+    Q_PROPERTY(bool darkTheme READ darkTheme WRITE setDarkTheme NOTIFY darkThemeChanged)
 
 public:
     explicit ConfigManager(QObject *parent = nullptr);
@@ -24,16 +25,21 @@ public:
     Q_INVOKABLE QString getPass(const QString& env) { return getVal("pass", env); }
 
     Q_INVOKABLE void saveEnv(const QString& env, const QString& url, const QString& uid, const QString& user, const QString& pass);
-    
+
     QString currentEnv() const { return m_currentEnv; }
     void setCurrentEnv(const QString& env);
 
+    bool darkTheme() const { return m_darkTheme; }
+    void setDarkTheme(bool dark);
+
 signals:
     void currentEnvChanged();
+    void darkThemeChanged();
     void settingsChanged();
 
 private:
     QSettings m_settings;
     QString m_currentEnv;
+    bool m_darkTheme = true;
     QString getVal(const QString& key, QString env = "");
 };
