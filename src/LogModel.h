@@ -26,12 +26,9 @@ public:
     Q_INVOKABLE QString formatValue(const QVariant &value) const;
 
     bool loading() const { return m_loading; }
-    
-    // Get the oldest timestamp in the model (for pagination)
-    Q_INVOKABLE qint64 oldestTimestamp() const;
 
 public slots:
-    void setEntries(const QList<LogEntry>& entries, bool append);
+    void setEntries(const QList<LogEntry>& entries);
     void setLoading(bool loading);
     void clear();
 

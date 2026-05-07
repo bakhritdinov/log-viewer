@@ -192,41 +192,6 @@ Rectangle {
             }
         }
 
-        Rectangle {
-            id: sidebarFooter
-            Layout.fillWidth: true
-            Layout.preferredHeight: 40
-            Layout.leftMargin: -10
-            Layout.rightMargin: -10
-            Layout.bottomMargin: -10
-            color: "#161b22"
-            border.color: "#30363d"
-            border.width: 1
-
-            RowLayout {
-                anchors {
-                    fill: parent
-                    leftMargin: 15
-                    rightMargin: 15
-                }
-                spacing: 8
-
-                Rectangle {
-                    width: 8
-                    height: 8
-                    radius: 4
-                    color: "#3fb950"
-                }
-
-                Text {
-                    text: "v" + appVersion
-                    color: "#8b949e"
-                    font.pixelSize: 11
-                    font.family: "Monospace"
-                    Layout.fillWidth: true
-                }
-            }
-        }
     }
 
     Dialog {

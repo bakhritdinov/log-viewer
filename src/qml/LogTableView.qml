@@ -10,7 +10,13 @@ Rectangle {
 
     signal rowSelected(var entry)
     signal traceRequested(string traceId)
-    signal loadMoreRequested()
+    signal firstPageRequested()
+    signal prevPageRequested()
+    signal nextPageRequested()
+    signal lastPageRequested()
+
+    property int currentPage: 0
+    property int maxPage: 1
 
     readonly property int timeWidth: 180
     readonly property int levelWidth: 80
@@ -41,30 +47,6 @@ Rectangle {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-
-            // Trigger pagination this many pixels before the bottom, so the next
-            // batch is already in flight by the time the user reaches it.
-            readonly property real prefetchMargin: 600
-
-            function _maybeLoadMore() {
-                if (count <= 0 || contentHeight <= 0) return
-                if (typeof logModel === "undefined" || logModel === null || logModel.loading) return
-                if (contentY + height >= contentHeight - prefetchMargin) {
-                    tableRoot.loadMoreRequested()
-                }
-            }
-
-            onContentYChanged: _maybeLoadMore()
-            onContentHeightChanged: _maybeLoadMore()
-
-            footer: Rectangle {
-                width: logList.width; height: 40
-                color: "transparent"
-                visible: (typeof logModel !== "undefined" && logModel !== null && logModel.loading) && logList.count > 0
-                BusyIndicator {
-                    anchors.centerIn: parent; width: 24; height: 24
-                }
-            }
 
             delegate: Rectangle {
                 width: logList.width; height: 28
@@ -122,6 +104,84 @@ Rectangle {
                     }
                 }
             }
+        }
+
+        Rectangle {
+            id: pageBar
+            Layout.fillWidth: true
+            Layout.preferredHeight: 36
+            color: "#161b22"
+
+            readonly property bool busy: typeof logModel !== "undefined" && logModel !== null && logModel.loading
+
+            Rectangle { anchors.top: parent.top; width: parent.width; height: 1; color: "#30363d" }
+
+            BusyIndicator {
+                anchors.left: parent.left; anchors.leftMargin: 12; anchors.verticalCenter: parent.verticalCenter
+                width: 18; height: 18
+                running: pageBar.busy
+                visible: running
+            }
+
+            RowLayout {
+                anchors.centerIn: parent
+                spacing: 8
+
+                PageButton {
+                    text: "« First"
+                    enabled: tableRoot.currentPage > 0 && !pageBar.busy
+                    onClicked: tableRoot.firstPageRequested()
+                }
+
+                PageButton {
+                    text: "← Newer"
+                    enabled: tableRoot.currentPage > 0 && !pageBar.busy
+                    onClicked: tableRoot.prevPageRequested()
+                }
+
+                Text {
+                    text: `Page ${tableRoot.currentPage + 1} of ${tableRoot.maxPage}`
+                    color: "#8b949e"; font.pixelSize: 12
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.leftMargin: 6
+                    Layout.rightMargin: 6
+                }
+
+                PageButton {
+                    text: "Older →"
+                    enabled: tableRoot.currentPage + 1 < tableRoot.maxPage && !pageBar.busy
+                    onClicked: tableRoot.nextPageRequested()
+                }
+
+                PageButton {
+                    text: "Last »"
+                    enabled: tableRoot.currentPage + 1 < tableRoot.maxPage && !pageBar.busy
+                    onClicked: tableRoot.lastPageRequested()
+                }
+            }
+
+            Text {
+                anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
+                text: `${(typeof logModel !== "undefined" && logModel !== null) ? logModel.count : 0} logs`
+                color: "#8b949e"; font.pixelSize: 12
+            }
+        }
+    }
+
+    component PageButton : Button {
+        Layout.preferredHeight: 26
+        font.pixelSize: 11
+        background: Rectangle {
+            color: parent.enabled ? (parent.down ? "#30363d" : "#21262d") : "#161b22"
+            border.color: parent.enabled ? "#30363d" : "#21262d"
+            radius: 4
+        }
+        contentItem: Text {
+            text: parent.text
+            color: parent.enabled ? "#c9d1d9" : "#484f58"
+            font: parent.font
+            horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+            leftPadding: 10; rightPadding: 10
         }
     }
 

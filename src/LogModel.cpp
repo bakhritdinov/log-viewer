@@ -1,6 +1,5 @@
 #include "LogModel.h"
 #include <algorithm>
-#include <QSet>
 
 LogModel::LogModel(QObject *parent) : QAbstractListModel(parent) {}
 
@@ -49,58 +48,13 @@ QString LogModel::formatValue(const QVariant &value) const {
     }
 }
 
-qint64 LogModel::oldestTimestamp() const {
-    if (m_entries.isEmpty()) return 0;
-    // We sort newest first, so the last entry is the oldest.
-    return m_entries.last().timestamp.toMSecsSinceEpoch();
-}
-
-void LogModel::setEntries(const QList<LogEntry>& entries, bool append) {
-    auto sortNewestFirst = [](QList<LogEntry>& list) {
-        std::sort(list.begin(), list.end(), [](const LogEntry& a, const LogEntry& b) {
-            return a.timestamp > b.timestamp;
-        });
-    };
-
-    if (!append) {
-        beginResetModel();
-        m_entries = entries;
-        sortNewestFirst(m_entries);
-        endResetModel();
-        emit countChanged();
-        return;
-    }
-
-    // Pagination append: dedupe against existing rows, then insert at the end.
-    // Using beginInsertRows (instead of beginResetModel) preserves ListView scroll
-    // position so the viewport doesn't snap to the top on every batch.
-    QSet<QString> existingKeys;
-    for (const auto& e : m_entries) {
-        existingKeys.insert(QString::number(e.timestamp.toMSecsSinceEpoch()) + e.message);
-    }
-
-    QList<LogEntry> incoming;
-    incoming.reserve(entries.size());
-    for (const auto& e : entries) {
-        QString key = QString::number(e.timestamp.toMSecsSinceEpoch()) + e.message;
-        if (!existingKeys.contains(key)) {
-            incoming.append(e);
-            existingKeys.insert(key);
-        }
-    }
-
-    if (incoming.isEmpty()) {
-        emit countChanged(); // let QML observers re-evaluate hasMore guards
-        return;
-    }
-
-    sortNewestFirst(incoming); // pagination always fetches strictly older logs, so they go after existing rows
-
-    const int first = m_entries.size();
-    const int last = first + incoming.size() - 1;
-    beginInsertRows(QModelIndex(), first, last);
-    m_entries.append(incoming);
-    endInsertRows();
+void LogModel::setEntries(const QList<LogEntry>& entries) {
+    beginResetModel();
+    m_entries = entries;
+    std::sort(m_entries.begin(), m_entries.end(), [](const LogEntry& a, const LogEntry& b) {
+        return a.timestamp > b.timestamp;
+    });
+    endResetModel();
     emit countChanged();
 }
 

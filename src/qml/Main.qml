@@ -67,7 +67,7 @@ ApplicationWindow {
             }
             Item { Layout.fillWidth: true }
             Label {
-                text: "Total Logs: " + (typeof logModel !== "undefined" && logModel !== null ? logModel.count : 0)
+                text: "v" + (typeof appVersion !== "undefined" ? appVersion : "")
                 font.pixelSize: 12
                 color: "#8b949e"
             }

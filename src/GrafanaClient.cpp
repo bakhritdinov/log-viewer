@@ -13,7 +13,7 @@ GrafanaClient::GrafanaClient(QObject *parent) : QObject(parent) {
     m_manager = new QNetworkAccessManager(this);
 }
 
-void GrafanaClient::queryLogs(const QString& url, const QString& token, const QString& uid, const QString& user, const QString& pass, const QString& logql, const QString& from, const QString& to, bool append) {
+void GrafanaClient::queryLogs(const QString& url, const QString& token, const QString& uid, const QString& user, const QString& pass, const QString& logql, const QString& from, const QString& to) {
     Config config { url, token, uid, user, pass };
     emit loadingChanged(true);
 
@@ -53,16 +53,16 @@ void GrafanaClient::queryLogs(const QString& url, const QString& token, const QS
         old->abort(); // finished() fires synchronously; its lambda captures `old` and cleans up.
     }
 
-    qDebug() << ">>> LOG QUERY:" << apiUrl.toString() << "from:" << from << "to:" << to << "append:" << append;
+    qDebug() << ">>> LOG QUERY:" << apiUrl.toString() << "from:" << from << "to:" << to;
     QNetworkReply* reply = m_manager->post(request, postData);
     m_currentReply = reply;
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, append]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
         emit loadingChanged(false);
         if (reply->error() == QNetworkReply::NoError) {
             QByteArray responseData = reply->readAll();
             qDebug() << "<<< RESPONSE RECEIVED (" << responseData.size() << "bytes)";
-            parseLogsResponse(responseData, append);
+            parseLogsResponse(responseData);
         } else if (reply->error() != QNetworkReply::OperationCanceledError) {
             const QByteArray errBody = reply->readAll();
             qDebug() << "!!! NETWORK ERROR:" << reply->errorString() << "body:" << errBody.left(800);
@@ -242,7 +242,7 @@ void GrafanaClient::fetchMappings(const QString& url, const QString& token, cons
     });
 }
 
-void GrafanaClient::parseLogsResponse(const QByteArray& data, bool append) {
+void GrafanaClient::parseLogsResponse(const QByteArray& data) {
     QJsonDocument doc = QJsonDocument::fromJson(data);
     QJsonObject results = doc.object()["results"].toObject();
     QJsonObject resA = results["A"].toObject();
@@ -297,14 +297,12 @@ void GrafanaClient::parseLogsResponse(const QByteArray& data, bool append) {
         }
     }
     qDebug() << ">>> Total entries parsed:" << entries.size();
-    emit logsReceived(entries, append);
-    calculateFacets(entries, append);
+    emit logsReceived(entries);
+    calculateFacets(entries);
 }
 
-void GrafanaClient::calculateFacets(const QList<LogEntry>& entries, bool append) {
-    if (!append) {
-        m_currentFacets.clear();
-    }
+void GrafanaClient::calculateFacets(const QList<LogEntry>& entries) {
+    m_currentFacets.clear();
 
     for (const auto& entry : entries) {
         for (auto it = entry.allFields.begin(); it != entry.allFields.end(); ++it) {

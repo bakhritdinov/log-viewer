@@ -37,11 +37,11 @@ public:
         }
     };
 
-    Q_INVOKABLE void queryLogs(const QString& url, const QString& token, const QString& uid, const QString& user, const QString& pass, const QString& logql, const QString& from, const QString& to, bool append = false);
+    Q_INVOKABLE void queryLogs(const QString& url, const QString& token, const QString& uid, const QString& user, const QString& pass, const QString& logql, const QString& from, const QString& to);
     Q_INVOKABLE void fetchMappings(const QString& url, const QString& token, const QString& uid, const QString& user, const QString& pass);
 
 signals:
-    void logsReceived(const QList<LogEntry>& entries, bool append);
+    void logsReceived(const QList<LogEntry>& entries);
     void facetsReceived(const QVariantMap& facets);
     void mappingsReceived(const QVariantMap& mappings, const QString& nsLabel, const QString& appLabel);
     void errorOccurred(const QString& error);
@@ -50,8 +50,8 @@ signals:
 private:
     QNetworkAccessManager* m_manager;
     QNetworkReply* m_currentReply = nullptr;
-    void parseLogsResponse(const QByteArray& data, bool append);
-    void calculateFacets(const QList<LogEntry>& entries, bool append);
+    void parseLogsResponse(const QByteArray& data);
+    void calculateFacets(const QList<LogEntry>& entries);
     void parseMappingsResponse(const QByteArray& data);
 
     QVariantMap m_currentFacets;
