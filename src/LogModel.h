@@ -11,12 +11,8 @@ class LogModel : public QAbstractListModel {
 public:
     enum Roles {
         TimestampRole = Qt::UserRole + 1,
-        LevelRole,
         MessageRole,
-        TraceIdRole,
-        ServiceRole,
-        PodRole,
-        AllFieldsRole,
+        FieldsRole,
         RawTimestampRole
     };
 
@@ -25,6 +21,9 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
+
+    // Универсальный форматтер для любых типов данных
+    Q_INVOKABLE QString formatValue(const QVariant &value) const;
 
     bool loading() const { return m_loading; }
     

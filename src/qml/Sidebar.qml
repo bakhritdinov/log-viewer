@@ -185,22 +185,7 @@ Rectangle {
                                 radius: 4
                             }
 
-                            onClicked: {
-                                let current = window.searchHeader.searchText;
-                                let filter = fieldGroup.fieldName + ":\"" + modelData + "\"";
-                                
-                                if (current.indexOf(filter) !== -1) {
-                                    let parts = current.split(" AND ").filter(p => p.trim() !== filter);
-                                    window.searchHeader.searchText = parts.join(" AND ");
-                                } else {
-                                    if (current && current.trim() !== "" && current !== "*") {
-                                        window.searchHeader.searchText = current + " AND " + filter;
-                                    } else {
-                                        window.searchHeader.searchText = filter;
-                                    }
-                                }
-                                window.refreshLogs(window.searchHeader.searchText);
-                            }
+                            onClicked: window.toggleFilter(fieldGroup.fieldName, modelData)
                         }
                     }
                 }
@@ -272,16 +257,9 @@ Rectangle {
 
         onAccepted: {
             if (customFieldName.text && customFieldValue.text) {
-                let filter = `${customFieldName.text}:"${customFieldValue.text}"`;
-                let current = window.searchHeader.searchText;
-                if (current && current !== "*") {
-                    window.searchHeader.searchText = current + " AND " + filter;
-                } else {
-                    window.searchHeader.searchText = filter;
-                }
-                window.refreshLogs(window.searchHeader.searchText);
-                customFieldName.clear();
-                customFieldValue.clear();
+                window.toggleFilter(customFieldName.text, customFieldValue.text)
+                customFieldName.clear()
+                customFieldValue.clear()
             }
         }
     }

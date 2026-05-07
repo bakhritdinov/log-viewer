@@ -32,9 +32,9 @@ Rectangle {
                 visible: currentEntry !== null
                 onClicked: {
                     let text = `MESSAGE: ${currentEntry.message}\n\nFIELDS:\n`
-                    let fields = currentEntry.allFields
-                    Object.keys(fields).sort().forEach(k => {
-                        text += `${k}: ${fields[k]}\n`
+                    let f = currentEntry.fields
+                    Object.keys(f).sort().forEach(k => {
+                        text += `${k}: ${f[k]}\n`
                     })
                     tempTextArea.text = text
                     tempTextArea.selectAll()
@@ -46,16 +46,13 @@ Rectangle {
         }
 
         ScrollView {
-            id: scrollView // <--- 1. Добавили ID для обращения
+            id: scrollView 
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            
-            // <--- 2. Жестко запрещаем контенту быть шире самого ScrollView (отключает горизонтальный скролл)
             contentWidth: availableWidth 
 
             ColumnLayout {
-                // <--- 3. Привязываем ширину макета к доступной ширине ScrollView
                 width: scrollView.availableWidth 
                 spacing: 10
 
@@ -85,10 +82,9 @@ Rectangle {
                     Layout.fillWidth: true
                     spacing: 4
                     Repeater {
-                        model: currentEntry ? Object.keys(currentEntry.allFields).sort() : []
+                        model: currentEntry ? Object.keys(currentEntry.fields).sort() : []
                         delegate: Rectangle {
                             Layout.fillWidth: true
-                            // Динамическая высота на основе контента + отступы
                             implicitHeight: fieldRow.implicitHeight + 8
                             color: index % 2 === 0 ? "transparent" : "rgba(110, 118, 129, 0.05)"
                             radius: 4
@@ -108,7 +104,9 @@ Rectangle {
                                 
                                 Text {
                                     id: fieldValueText
-                                    text: String(currentEntry.allFields[modelData])
+                                    text: (typeof logModel !== "undefined" && logModel !== null && currentEntry !== null)
+                                        ? logModel.formatValue(currentEntry.fields[modelData])
+                                        : ""
                                     color: "#c9d1d9"; font.pixelSize: 12
                                     Layout.fillWidth: true
                                     wrapMode: Text.Wrap
@@ -136,16 +134,7 @@ Rectangle {
                                             color: parent.hovered ? "#21262d" : "transparent"
                                             radius: 4 
                                         }
-                                        onClicked: {
-                                            let filter = modelData + ":\"" + fieldValueText.text + "\""
-                                            let current = window.searchHeader.searchText
-                                            if (current && current !== "*") {
-                                                window.searchHeader.searchText = current + " AND " + filter
-                                            } else {
-                                                window.searchHeader.searchText = filter
-                                            }
-                                            window.refreshLogs(window.searchHeader.searchText)
-                                        }
+                                        onClicked: window.toggleFilter(modelData, currentEntry.fields[modelData])
                                     }
 
                                     // Кнопка копирования значения

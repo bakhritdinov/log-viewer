@@ -11,11 +11,7 @@
 
 struct LogEntry {
     QDateTime timestamp;
-    QString level;
     QString message;
-    QString traceId;
-    QString service;
-    QString pod;
     QVariantMap allFields;
 };
 
@@ -47,7 +43,7 @@ public:
 signals:
     void logsReceived(const QList<LogEntry>& entries, bool append);
     void facetsReceived(const QVariantMap& facets);
-    void mappingsReceived(const QVariantMap& mappings);
+    void mappingsReceived(const QVariantMap& mappings, const QString& nsLabel, const QString& appLabel);
     void errorOccurred(const QString& error);
     void loadingChanged(bool loading);
 

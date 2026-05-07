@@ -36,13 +36,17 @@ Rectangle {
                     model: ["DEV", "PROD"]
                     Button {
                         text: modelData
-                        property bool active: configManager.currentEnv === modelData
+                        property bool active: (typeof configManager !== "undefined" && configManager !== null) ? configManager.currentEnv === modelData : false
                         onClicked: {
-                            configManager.currentEnv = modelData
-                            mappings = {} 
-                            nsCombo.model = []
-                            appCombo.model = []
-                            grafanaClient.fetchMappings(configManager.url(), "", configManager.datasourceUid(), configManager.user(), configManager.password())
+                            if (typeof configManager !== "undefined" && configManager !== null) {
+                                configManager.currentEnv = modelData
+                                mappings = {} 
+                                nsCombo.model = []
+                                appCombo.model = []
+                                if (typeof grafanaClient !== "undefined" && grafanaClient !== null) {
+                                    grafanaClient.fetchMappings(configManager.url(), "", configManager.datasourceUid(), configManager.user(), configManager.password())
+                                }
+                            }
                         }
                         font.bold: true; font.pixelSize: 11
                         background: Rectangle {

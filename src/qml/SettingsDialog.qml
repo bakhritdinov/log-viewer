@@ -111,43 +111,32 @@ Dialog {
         property string env: ""
         columns: 2; rowSpacing: 15; columnSpacing: 15
         Layout.fillWidth: true
-        function save() { configManager.saveEnv(env, urlF.text, uidF.text, userF.text, passF.text, nsF.text, appF.text) }
+        function save() { 
+            if (typeof configManager !== "undefined" && configManager !== null)
+                configManager.saveEnv(env, urlF.text, uidF.text, userF.text, passF.text) 
+        }
         Label { text: "URL:"; color: "#8b949e"; font.pixelSize: 13; Layout.alignment: Qt.AlignRight }
         TextField {
-            id: urlF; Layout.fillWidth: true; text: configManager.getUrl(env)
+            id: urlF; Layout.fillWidth: true; text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getUrl(env) : ""
             color: "#c9d1d9"; font.pixelSize: 13; padding: 10
             background: Rectangle { color: "#0d1117"; border.color: "#30363d"; radius: 6 }
         }
         Label { text: "UID:"; color: "#8b949e"; font.pixelSize: 13; Layout.alignment: Qt.AlignRight }
         TextField {
-            id: uidF; Layout.fillWidth: true; text: configManager.getUid(env)
+            id: uidF; Layout.fillWidth: true; text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getUid(env) : ""
             color: "#c9d1d9"; font.pixelSize: 13; padding: 10
             background: Rectangle { color: "#0d1117"; border.color: "#30363d"; radius: 6 }
         }
         Label { text: "Login:"; color: "#8b949e"; font.pixelSize: 13; Layout.alignment: Qt.AlignRight }
         TextField {
-            id: userF; Layout.fillWidth: true; text: configManager.getUser(env)
+            id: userF; Layout.fillWidth: true; text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getUser(env) : ""
             color: "#c9d1d9"; font.pixelSize: 13; padding: 10
             background: Rectangle { color: "#0d1117"; border.color: "#30363d"; radius: 6 }
         }
         Label { text: "Password:"; color: "#8b949e"; font.pixelSize: 13; Layout.alignment: Qt.AlignRight }
         TextField {
-            id: passF; Layout.fillWidth: true; text: configManager.getPass(env); echoMode: TextField.Password
+            id: passF; Layout.fillWidth: true; text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getPass(env) : ""; echoMode: TextField.Password
             color: "#c9d1d9"; font.pixelSize: 13; padding: 10
-            background: Rectangle { color: "#0d1117"; border.color: "#30363d"; radius: 6 }
-        }
-        Label { text: "NS Label:"; color: "#8b949e"; font.pixelSize: 13; Layout.alignment: Qt.AlignRight }
-        TextField {
-            id: nsF; Layout.fillWidth: true; text: configManager.getNsLabel(env)
-            color: "#c9d1d9"; font.pixelSize: 13; padding: 10
-            placeholderText: "_namespace"
-            background: Rectangle { color: "#0d1117"; border.color: "#30363d"; radius: 6 }
-        }
-        Label { text: "App Label:"; color: "#8b949e"; font.pixelSize: 13; Layout.alignment: Qt.AlignRight }
-        TextField {
-            id: appF; Layout.fillWidth: true; text: configManager.getAppLabel(env)
-            color: "#c9d1d9"; font.pixelSize: 13; padding: 10
-            placeholderText: "_appName"
             background: Rectangle { color: "#0d1117"; border.color: "#30363d"; radius: 6 }
         }
     }

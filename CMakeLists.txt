@@ -57,6 +57,7 @@ qt_add_qml_module(LogViewer
     RESOURCE_PREFIX /qt/qml
     QML_FILES 
         src/qml/Main.qml
+        src/qml/AppContent.qml
         src/qml/SearchHeader.qml
         src/qml/LogTableView.qml
         src/qml/DetailsArea.qml

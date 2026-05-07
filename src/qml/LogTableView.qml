@@ -41,17 +41,26 @@ Rectangle {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-            
-            onAtYEndChanged: {
-                if (atYEnd && count > 0 && !logModel.loading) {
+
+            // Trigger pagination this many pixels before the bottom, so the next
+            // batch is already in flight by the time the user reaches it.
+            readonly property real prefetchMargin: 600
+
+            function _maybeLoadMore() {
+                if (count <= 0 || contentHeight <= 0) return
+                if (typeof logModel === "undefined" || logModel === null || logModel.loading) return
+                if (contentY + height >= contentHeight - prefetchMargin) {
                     tableRoot.loadMoreRequested()
                 }
             }
 
+            onContentYChanged: _maybeLoadMore()
+            onContentHeightChanged: _maybeLoadMore()
+
             footer: Rectangle {
                 width: logList.width; height: 40
                 color: "transparent"
-                visible: logModel.loading && logList.count > 0
+                visible: (typeof logModel !== "undefined" && logModel !== null && logModel.loading) && logList.count > 0
                 BusyIndicator {
                     anchors.centerIn: parent; width: 24; height: 24
                 }
@@ -59,9 +68,12 @@ Rectangle {
 
             delegate: Rectangle {
                 width: logList.width; height: 28
+                // Безопасное извлечение уровня
+                property string itemLevel: (typeof fields !== "undefined" && fields !== null) ? (fields.level || "") : ""
+                
                 color: logList.currentIndex === index ? "#21262d" : (
-                    level === "ERROR" ? "rgba(248, 81, 73, 0.1)" : (
-                    level === "WARN" ? "rgba(210, 153, 34, 0.1)" : "transparent"
+                    itemLevel === "ERROR" ? "rgba(248, 81, 73, 0.1)" : (
+                    itemLevel === "WARN" ? "rgba(210, 153, 34, 0.1)" : "transparent"
                 ))
 
                 Row {
@@ -71,15 +83,17 @@ Rectangle {
                     
                     LogText { text: timestamp; width: timeWidth; color: "#8b949e" }
                     LogText { 
-                        text: level; width: levelWidth
-                        color: level === "ERROR" ? "#f85149" : (level === "WARN" ? "#d29922" : "#c9d1d9")
+                        text: itemLevel; width: levelWidth
+                        color: itemLevel === "ERROR" ? "#f85149" : (itemLevel === "WARN" ? "#d29922" : "#c9d1d9")
                         font.bold: true; horizontalAlignment: Text.AlignHCenter
                     }
-                    LogText { text: service; width: serviceWidth; color: "#c9d1d9" }
-                    
-                    // Сообщение с жестким ограничением
                     LogText { 
-                        text: message.replace(/\n/g, " "); // Убираем переносы строк для компактности
+                        text: (typeof fields !== "undefined" && fields !== null) ? (fields.service || "") : ""; 
+                        width: serviceWidth; color: "#c9d1d9" 
+                    }
+                    
+                    LogText { 
+                        text: message.replace(/\n/g, " "); 
                         width: rowItem.width - timeWidth - levelWidth - serviceWidth - 10
                         color: "#c9d1d9"
                         clip: true
@@ -94,13 +108,15 @@ Rectangle {
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
                     onClicked: (mouse) => {
                         logList.currentIndex = index
-                        let entry = {
-                            timestamp: timestamp, level: level, service: service,
-                            pod: pod, traceId: traceId, message: message, allFields: allFields
-                        }
-                        rowSelected(entry)
-                        if (mouse.button === Qt.RightButton && traceId) {
-                            contextMenu.currentTraceId = traceId
+                        let currentFields = (typeof fields !== "undefined" && fields !== null) ? fields : {}
+                        rowSelected({
+                            timestamp: timestamp, 
+                            message: message, 
+                            fields: currentFields
+                        })
+                        
+                        if (mouse.button === Qt.RightButton && currentFields.traceId) {
+                            contextMenu.currentTraceId = currentFields.traceId
                             contextMenu.popup()
                         }
                     }

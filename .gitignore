@@ -18,6 +18,7 @@ Makefile
 # IDEs
 .idea/
 .vscode/
+.qtcreator/
 *.swp
 *.swo
 
@@ -30,3 +31,7 @@ Thumbs.db
 
 # Gemini
 GEMINI.md
+
+# Claude
+.claude/
+CLAUDE.md

@@ -15,12 +15,8 @@ QVariant LogModel::data(const QModelIndex &index, int role) const {
     const auto& entry = m_entries[index.row()];
     switch (role) {
         case TimestampRole: return entry.timestamp.toString("yyyy-MM-dd HH:mm:ss.zzz");
-        case LevelRole: return entry.level;
         case MessageRole: return entry.message;
-        case TraceIdRole: return entry.traceId;
-        case ServiceRole: return entry.service;
-        case PodRole: return entry.pod;
-        case AllFieldsRole: return entry.allFields;
+        case FieldsRole: return entry.allFields;
         case RawTimestampRole: return entry.timestamp.toMSecsSinceEpoch();
     }
     return {};
@@ -29,14 +25,28 @@ QVariant LogModel::data(const QModelIndex &index, int role) const {
 QHash<int, QByteArray> LogModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[TimestampRole] = "timestamp";
-    roles[LevelRole] = "level";
     roles[MessageRole] = "message";
-    roles[TraceIdRole] = "traceId";
-    roles[ServiceRole] = "service";
-    roles[PodRole] = "pod";
-    roles[AllFieldsRole] = "allFields";
+    roles[FieldsRole] = "fields";
     roles[RawTimestampRole] = "rawTimestamp";
     return roles;
+}
+
+QString LogModel::formatValue(const QVariant &value) const {
+    if (!value.isValid() || value.isNull()) return "";
+    
+    // Элегантная конвертация по типу
+    switch (value.typeId()) {
+        case QMetaType::QDateTime:
+            return value.toDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz");
+        case QMetaType::LongLong:
+        case QMetaType::Int:
+        case QMetaType::Double:
+            return QString::number(value.toDouble(), 'f', 0); // Можно настроить точность
+        case QMetaType::Bool:
+            return value.toBool() ? "true" : "false";
+        default:
+            return value.toString();
+    }
 }
 
 qint64 LogModel::oldestTimestamp() const {
@@ -46,32 +56,51 @@ qint64 LogModel::oldestTimestamp() const {
 }
 
 void LogModel::setEntries(const QList<LogEntry>& entries, bool append) {
-    beginResetModel();
-    if (append) {
-        // Create a set of unique identifiers for existing logs to avoid duplicates
-        // Using timestamp + message hash as a simple unique key
-        QSet<QString> existingKeys;
-        for (const auto& e : m_entries) {
-            existingKeys.insert(QString::number(e.timestamp.toMSecsSinceEpoch()) + e.message);
-        }
+    auto sortNewestFirst = [](QList<LogEntry>& list) {
+        std::sort(list.begin(), list.end(), [](const LogEntry& a, const LogEntry& b) {
+            return a.timestamp > b.timestamp;
+        });
+    };
 
-        for (const auto& e : entries) {
-            QString key = QString::number(e.timestamp.toMSecsSinceEpoch()) + e.message;
-            if (!existingKeys.contains(key)) {
-                m_entries.append(e);
-                existingKeys.insert(key);
-            }
-        }
-    } else {
+    if (!append) {
+        beginResetModel();
         m_entries = entries;
+        sortNewestFirst(m_entries);
+        endResetModel();
+        emit countChanged();
+        return;
     }
 
-    // Always sort: newest first
-    std::sort(m_entries.begin(), m_entries.end(), [](const LogEntry& a, const LogEntry& b) {
-        return a.timestamp > b.timestamp;
-    });
-    
-    endResetModel();
+    // Pagination append: dedupe against existing rows, then insert at the end.
+    // Using beginInsertRows (instead of beginResetModel) preserves ListView scroll
+    // position so the viewport doesn't snap to the top on every batch.
+    QSet<QString> existingKeys;
+    for (const auto& e : m_entries) {
+        existingKeys.insert(QString::number(e.timestamp.toMSecsSinceEpoch()) + e.message);
+    }
+
+    QList<LogEntry> incoming;
+    incoming.reserve(entries.size());
+    for (const auto& e : entries) {
+        QString key = QString::number(e.timestamp.toMSecsSinceEpoch()) + e.message;
+        if (!existingKeys.contains(key)) {
+            incoming.append(e);
+            existingKeys.insert(key);
+        }
+    }
+
+    if (incoming.isEmpty()) {
+        emit countChanged(); // let QML observers re-evaluate hasMore guards
+        return;
+    }
+
+    sortNewestFirst(incoming); // pagination always fetches strictly older logs, so they go after existing rows
+
+    const int first = m_entries.size();
+    const int last = first + incoming.size() - 1;
+    beginInsertRows(QModelIndex(), first, last);
+    m_entries.append(incoming);
+    endInsertRows();
     emit countChanged();
 }
 
