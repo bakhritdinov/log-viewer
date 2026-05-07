@@ -10,7 +10,7 @@ Build-Depends: debhelper-compat (= 13),
                qt6-l10n-tools,
                libgl1-mesa-dev
 Standards-Version: 4.5.1
-Homepage: https://github.com/boburbakhritdinov/log-viewer
+Homepage: https://github.com/bakhritdinov/log-viewer
 
 Package: log-viewer
 Architecture: any
