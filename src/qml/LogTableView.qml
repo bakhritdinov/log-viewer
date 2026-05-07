@@ -93,7 +93,7 @@ Rectangle {
                     width: parent.width
                     height: Math.max(Theme.hRow, messageText.implicitHeight + Theme.sp1 * 2)
                     color: rowItem.expanded ? Theme.bgRaised
-                         : rowMouse.containsMouse ? Theme.bgRaised
+                         : rowMouse.containsMouse ? Theme.rowHover
                          : rowItem.levelTint
                     Behavior on color { ColorAnimation { duration: Theme.dFast } }
 
@@ -312,8 +312,8 @@ Rectangle {
                                         id: fieldDelegate
                                         Layout.fillWidth: true
                                         implicitHeight: fieldGrid.implicitHeight + Theme.sp3 * 2
-                                        color: fieldMouse.containsMouse ? Theme.bgSubtle : Theme.bgInput
-                                        border.color: fieldMouse.containsMouse ? Theme.border : Theme.borderMuted
+                                        color: fieldMouse.containsMouse ? Theme.rowHover : Theme.bgInput
+                                        border.color: fieldMouse.containsMouse ? Theme.accent : Theme.borderMuted
                                         border.width: 1
                                         radius: Theme.rMd
                                         Behavior on color { ColorAnimation { duration: Theme.dFast } }

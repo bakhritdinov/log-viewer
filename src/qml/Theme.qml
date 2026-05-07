@@ -14,6 +14,10 @@ QtObject {
     readonly property color bgSubtle:     dark ? "#21262d" : "#eaeef2"
     readonly property color bgHover:      dark ? "#30363d" : "#d0d7de"
 
+    // Row hover — accent-tinted so it stands out clearly on both backgrounds.
+    readonly property color rowHover:     dark ? Qt.rgba(0.345, 0.654, 1.0, 0.08)
+                                              : Qt.rgba(0.035, 0.412, 0.855, 0.08)
+
     // ── Borders ───────────────────────────────────────────
     readonly property color border:       dark ? "#30363d" : "#d0d7de"
     readonly property color borderMuted:  dark ? "#21262d" : "#eaeef2"
