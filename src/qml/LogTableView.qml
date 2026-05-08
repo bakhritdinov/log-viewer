@@ -61,6 +61,34 @@ Rectangle {
         return "transparent"
     }
 
+    // True if the user wants pretty-printed JSON in the expanded message card.
+    // Persists for the session — reset on next launch.
+    property bool prettyMessage: true
+
+    // If `text` parses as JSON, return a 2-space indented form. Otherwise the original.
+    function prettyFormat(text) {
+        if (!text) return ""
+        let trimmed = String(text).trim()
+        if (trimmed.length < 2) return text
+        let first = trimmed[0]
+        if (first !== "{" && first !== "[") return text
+        try {
+            return JSON.stringify(JSON.parse(trimmed), null, 2)
+        } catch (e) {
+            return text
+        }
+    }
+
+    // True only if the message would actually format differently when prettified.
+    function isPrettifiable(text) {
+        if (!text) return false
+        let trimmed = String(text).trim()
+        if (trimmed.length < 2) return false
+        let first = trimmed[0]
+        if (first !== "{" && first !== "[") return false
+        try { JSON.parse(trimmed); return true } catch (e) { return false }
+    }
+
     // Wrap matched substrings in a HTML span so they're tinted with the accent color.
     // Caller must use textFormat: Text.RichText.
     function highlightMatches(text, terms) {
@@ -217,7 +245,9 @@ Rectangle {
                 readonly property color levelTint: tableRoot._levelTint(itemLevel)
                 readonly property color levelColor: tableRoot._levelColor(itemLevel)
 
-                Behavior on height { NumberAnimation { duration: Theme.dBase; easing.type: Easing.InOutCubic } }
+                // No height animation: animating delegate height pushes every row below
+                // through a continuous reposition, which makes the list re-render every
+                // frame and look like flicker. Instant expand is cleaner.
 
                 // ── Header row ─────────────────────────────────────────────
                 Rectangle {
@@ -404,9 +434,13 @@ Rectangle {
                                     TextEdit {
                                         id: msgEdit
                                         width: parent.width
+                                        // Body text: pretty-printed JSON when applicable, else raw.
+                                        // Highlight pass runs on top of either form.
+                                        readonly property string _displayText:
+                                            tableRoot.prettyMessage ? tableRoot.prettyFormat(message) : message
                                         text: tableRoot.searchTerms.length > 0
-                                            ? tableRoot.highlightMatches(message, tableRoot.searchTerms)
-                                            : message
+                                            ? tableRoot.highlightMatches(_displayText, tableRoot.searchTerms)
+                                            : _displayText
                                         textFormat: tableRoot.searchTerms.length > 0 ? TextEdit.RichText : TextEdit.PlainText
                                         color: Theme.text
                                         font.family: "Monospace"
@@ -419,17 +453,30 @@ Rectangle {
                                     }
                                 }
 
-                                IconButton {
+                                Row {
                                     anchors.right: parent.right; anchors.top: parent.top
                                     anchors.margins: Theme.sp1
-                                    text: "📋"
-                                    tooltipText: "Copy message"
-                                    pixel: Theme.fsSm
-                                    boxSize: 24
-                                    onClicked: {
-                                        tempArea.text = message
-                                        tempArea.selectAll()
-                                        tempArea.copy()
+                                    spacing: 2
+
+                                    IconButton {
+                                        visible: tableRoot.isPrettifiable(message)
+                                        text: "{ }"
+                                        tooltipText: tableRoot.prettyMessage ? "Show raw JSON" : "Pretty-print JSON"
+                                        pixel: Theme.fsSm
+                                        boxSize: 24
+                                        active: tableRoot.prettyMessage
+                                        onClicked: tableRoot.prettyMessage = !tableRoot.prettyMessage
+                                    }
+                                    IconButton {
+                                        text: "📋"
+                                        tooltipText: "Copy message"
+                                        pixel: Theme.fsSm
+                                        boxSize: 24
+                                        onClicked: {
+                                            tempArea.text = msgEdit._displayText
+                                            tempArea.selectAll()
+                                            tempArea.copy()
+                                        }
                                     }
                                 }
                             }

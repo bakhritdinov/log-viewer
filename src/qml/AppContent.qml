@@ -202,7 +202,10 @@ Rectangle {
             header.mappings = m
         }
         function onLogsReceived(entries) {
-            root._handleBatch(entries)
+            // QML connections may fire before the direct C++ slot (LogModel::appendEntries)
+            // has finished updating m_full. Defer one event-loop tick so totalCount reflects
+            // the just-arrived batch.
+            Qt.callLater(root._handleBatch)
         }
         function onErrorOccurred(error) {
             errorDialog.text = error
@@ -385,10 +388,7 @@ Rectangle {
                                 configManager.password(), logql, from, to)
     }
 
-    function _handleBatch(entries) {
-        // entries was already routed to logModel.appendEntries via direct C++ connection
-        // (Qt can't convert a JS-array of opaque QVariant LogEntries back to QList<LogEntry>
-        // through the QML signal hop, so we read everything from the model instead).
+    function _handleBatch() {
         let nowTotal = logModel.totalCount
         let added = nowTotal - _lastTotal
         _lastTotal = nowTotal
@@ -399,6 +399,9 @@ Rectangle {
             _commitLoad()
             return
         }
+
+        // Update facets incrementally so the user sees fields appear as data streams in.
+        _emitFacets()
 
         let oldestMs = logModel.oldestTimestamp()
         if (oldestMs <= 0) { hasMore = false; _commitLoad(); return }
@@ -426,6 +429,10 @@ Rectangle {
         if (!logModel || !sidebar) return
         let facets = {}
         let all = logModel.allFields()
+        if (!all || all.length === 0) {
+            sidebar.facets = facets
+            return
+        }
         for (let i = 0; i < all.length; ++i) {
             let f = all[i]
             if (!f) continue
@@ -438,5 +445,6 @@ Rectangle {
             }
         }
         sidebar.facets = facets
+        console.log(">>> FACETS:", Object.keys(facets).length, "fields from", all.length, "entries")
     }
 }
