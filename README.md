@@ -12,7 +12,7 @@
 
 ### Windows (Chocolatey)
 ```powershell
-choco install log-viewer
+choco install log-viewer --version=2.0.0
 ```
 
 ### macOS (Homebrew)
