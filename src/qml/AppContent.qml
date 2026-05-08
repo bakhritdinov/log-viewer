@@ -15,9 +15,11 @@ Rectangle {
     property string appLabelName: "_appName"
 
     // Page-based pagination. Page 0 = newest window. Each step shifts the window
-    // `pageWindowSec` seconds further into the past via LogsQL `_time:Xs offset Ys`.
+    // `actualPageWindowSec` seconds further into the past via LogsQL `_time:Xs offset Ys`.
     property int currentPage: 0
-    readonly property int pageWindowSec: 600 // 10 minutes per page
+    readonly property int pageWindowSec: 600 // 10 minutes per page (default)
+    // Cap by user-selected timeRange so a single page is never wider than the range itself.
+    readonly property int actualPageWindowSec: Math.min(pageWindowSec, Math.max(1, timeRangeSec))
 
     // Total seconds covered by the user's selected time range — used to cap how far pagination can walk.
     readonly property int timeRangeSec: {
@@ -38,13 +40,47 @@ Rectangle {
         }
         return 3600
     }
-    readonly property int maxPage: Math.max(1, Math.ceil(timeRangeSec / pageWindowSec))
+    readonly property int maxPage: Math.max(1, Math.ceil(timeRangeSec / actualPageWindowSec))
 
-    onCurrentNamespaceChanged: if(currentNamespace) { currentPage = 0; refreshLogs(header.searchText) }
-    onCurrentAppChanged: if(currentApp) { currentPage = 0; refreshLogs(header.searchText) }
+    // Free-text terms extracted from the search bar (excluding `field:"value"` filters).
+    // Used by LogTableView to highlight matched substrings inside the message column.
+    readonly property var searchTerms: {
+        if (!header.searchText) return []
+        return header.searchText.split(/ AND /i)
+            .map(p => p.trim())
+            .filter(p => p !== "" && p !== "*" && p.indexOf(":") === -1)
+    }
+
+    onCurrentNamespaceChanged: {
+        if (!currentNamespace) return
+        currentPage = 0
+        refreshLogs(header.searchText)
+        persistSelection()
+    }
+    onCurrentAppChanged: {
+        if (!currentApp) return
+        currentPage = 0
+        refreshLogs(header.searchText)
+        persistSelection()
+    }
+
+    function persistSelection() {
+        if (typeof configManager === "undefined" || configManager === null) return
+        if (!currentNamespace || !currentApp) return
+        configManager.setLastSelection(currentNamespace, currentApp, header.timeRange)
+    }
+
+    Connections {
+        target: header
+        function onTimeRangeChanged() { root.persistSelection() }
+    }
 
     // Sidebar is an overlay drawer — closed by default; opened on demand.
     property bool sidebarOpen: false
+
+    // Auto-refresh — controlled by SearchHeader's dropdown.
+    property int autoRefreshSec: 0  // 0 = off
+    property bool tailMode: false   // true = always reset to page 0 on tick
 
     ColumnLayout {
         anchors.fill: parent
@@ -54,13 +90,22 @@ Rectangle {
             id: header
             Layout.fillWidth: true
             sidebarOpen: root.sidebarOpen
-            onSearchTriggered: (query) => { root.currentPage = 0; root.refreshLogs(query) }
-            onSearchTextChanged: (text) => {
-                if (text === "") { root.currentPage = 0; root.refreshLogs("") }
+            onSearchTriggered: (query) => {
+                searchDebounce.stop()
+                root.currentPage = 0
+                root.refreshLogs(query)
+                if (typeof configManager !== "undefined" && configManager !== null) {
+                    configManager.addToSearchHistory(query)
+                }
             }
+            onSearchTextChanged: searchDebounce.restart()
             onNamespaceChanged: (ns) => { root.currentNamespace = ns }
             onAppChanged: (app) => { root.currentApp = app }
             onToggleSidebar: root.sidebarOpen = !root.sidebarOpen
+            onAutoRefreshChanged: (seconds, tail) => {
+                root.autoRefreshSec = seconds
+                root.tailMode = tail
+            }
         }
 
         // Body — table fills, sidebar slides in over it.
@@ -74,6 +119,7 @@ Rectangle {
                 anchors.fill: parent
                 currentPage: root.currentPage
                 maxPage: root.maxPage
+                searchTerms: root.searchTerms
                 onTraceRequested: (traceId) => {
                     header.searchText = `trace_id: "${traceId}"`
                     root.currentPage = 0
@@ -106,6 +152,29 @@ Rectangle {
         }
     }
 
+    // Debounce search-text edits — fire ~350ms after the user stops typing.
+    Timer {
+        id: searchDebounce
+        interval: 350
+        repeat: false
+        onTriggered: {
+            root.currentPage = 0
+            root.refreshLogs(header.searchText)
+        }
+    }
+
+    // Auto-refresh / tail mode timer.
+    Timer {
+        id: autoRefreshTimer
+        interval: Math.max(1, root.autoRefreshSec) * 1000
+        repeat: true
+        running: root.autoRefreshSec > 0
+        onTriggered: {
+            if (root.tailMode) root.currentPage = 0
+            root.refreshLogs(header.searchText)
+        }
+    }
+
     Connections {
         target: (typeof grafanaClient !== "undefined" && grafanaClient !== null) ? grafanaClient : null
         ignoreUnknownSignals: true
@@ -123,30 +192,63 @@ Rectangle {
     Dialog {
         id: errorDialog
         property string text: ""
-        title: "Network Error"
+        title: "Request failed"
         anchors.centerIn: parent
-        standardButtons: Dialog.Ok
         modal: true
+        width: 480
+        padding: 0
+
         background: Rectangle { color: Theme.bgRaised; border.color: Theme.danger; border.width: 1; radius: Theme.rLg }
+
         header: Rectangle {
             color: "transparent"
-            implicitHeight: 36
+            implicitHeight: 44
             Row {
                 anchors.left: parent.left; anchors.leftMargin: Theme.sp4
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: Theme.sp2
-                Text { text: "✕"; color: Theme.danger; font.pixelSize: Theme.fsLg; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: "⚠"; color: Theme.danger; font.pixelSize: Theme.fsXl; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
                 Text { text: errorDialog.title; color: Theme.text; font.pixelSize: Theme.fsLg; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
             }
+            Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Theme.border }
         }
-        Label {
-            text: errorDialog.text
-            color: Theme.text
-            padding: Theme.sp4
-            wrapMode: Text.Wrap
-            width: 360
-            font.pixelSize: Theme.fsSm
-            font.family: "Monospace"
+
+        contentItem: ScrollView {
+            implicitHeight: Math.min(errorBody.implicitHeight + Theme.sp4 * 2, 320)
+            clip: true
+            Label {
+                id: errorBody
+                width: errorDialog.width - Theme.sp4 * 2
+                text: errorDialog.text
+                color: Theme.text
+                padding: Theme.sp4
+                wrapMode: Text.Wrap
+                font.pixelSize: Theme.fsSm
+                font.family: "Monospace"
+            }
+        }
+
+        footer: Rectangle {
+            color: "transparent"
+            implicitHeight: 56
+            Rectangle { anchors.top: parent.top; width: parent.width; height: 1; color: Theme.border }
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: Theme.sp4
+                anchors.rightMargin: Theme.sp4
+                spacing: Theme.sp2
+                Item { Layout.fillWidth: true }
+                SecondaryButton {
+                    text: "Close"
+                    Layout.preferredWidth: 90
+                    onClicked: errorDialog.close()
+                }
+                PrimaryButton {
+                    text: "Retry"
+                    Layout.preferredWidth: 90
+                    onClicked: { errorDialog.close(); root.refreshLogs(header.searchText) }
+                }
+            }
         }
     }
 
@@ -199,11 +301,9 @@ Rectangle {
         let labels = `${root.nsLabelName}="${root.currentNamespace}", ${root.appLabelName}="${root.currentApp}"`
         let pipeline = ""
 
-        // Page 0 = newest window (no offset). Subsequent pages shift `pageWindowSec` seconds further
-        // into the past via LogsQL `_time:Xs offset Ys`, which the VictoriaLogs plugin honors.
-        if (root.currentPage > 0) {
-            pipeline += ` _time:${root.pageWindowSec}s offset ${root.currentPage * root.pageWindowSec}s`
-        }
+        // Every page (including 0) is anchored by `_time:Xs offset Ys` so windows don't overlap.
+        // Page 0 takes the newest slice; subsequent pages walk backwards by `actualPageWindowSec`.
+        pipeline += ` _time:${root.actualPageWindowSec}s offset ${root.currentPage * root.actualPageWindowSec}s`
 
         if (query && query !== "*" && query.trim() !== "") {
             let parts = query.split(/ AND /i)
@@ -231,6 +331,6 @@ Rectangle {
             from = `now-${header.timeRange}`
         }
 
-        grafanaClient.queryLogs(configManager.url(), "", configManager.datasourceUid(), configManager.user(), configManager.password(), finalQuery, from, to)
+        grafanaClient.queryLogs(configManager.url(), configManager.token(), configManager.datasourceUid(), configManager.user(), configManager.password(), finalQuery, from, to)
     }
 }

@@ -17,14 +17,42 @@ Rectangle {
 
     property int currentPage: 0
     property int maxPage: 1
+    property var searchTerms: []
+
+    // Wrap matched substrings in a HTML span so they're tinted with the accent color.
+    // Caller must use textFormat: Text.RichText.
+    function highlightMatches(text, terms) {
+        let html = String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+        if (!terms || terms.length === 0) return html
+        let pattern = terms
+            .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+            .filter(t => t !== "")
+            .join("|")
+        if (pattern === "") return html
+        let re = new RegExp("(" + pattern + ")", "gi")
+        return html.replace(re, '<span style="background-color:' + Theme.accent + '33; color:' + Theme.accent + ';">$1</span>')
+    }
 
     // Adaptive column widths.
     readonly property bool showService: tableRoot.width >= 900
     readonly property bool compactTime: tableRoot.width < 1100
     readonly property bool wrapMessage: tableRoot.width < 1100
-    readonly property int  timeWidth: compactTime ? 92 : 180
-    readonly property int  levelWidth: 78
-    readonly property int  serviceWidth: 150
+
+    // User-resizable; initial values fall back to adaptive defaults the first time.
+    property int timeWidth: (typeof configManager !== "undefined" && configManager !== null)
+        ? configManager.columnWidth("time", compactTime ? 92 : 180)
+        : (compactTime ? 92 : 180)
+    property int levelWidth: (typeof configManager !== "undefined" && configManager !== null)
+        ? configManager.columnWidth("level", 78) : 78
+    property int serviceWidth: (typeof configManager !== "undefined" && configManager !== null)
+        ? configManager.columnWidth("service", 150) : 150
+
+    onTimeWidthChanged:    if (typeof configManager !== "undefined" && configManager !== null) configManager.setColumnWidth("time", timeWidth)
+    onLevelWidthChanged:   if (typeof configManager !== "undefined" && configManager !== null) configManager.setColumnWidth("level", levelWidth)
+    onServiceWidthChanged: if (typeof configManager !== "undefined" && configManager !== null) configManager.setColumnWidth("service", serviceWidth)
 
     // Reset expansion when the model changes (e.g. page or filter switch).
     Connections {
@@ -42,9 +70,10 @@ Rectangle {
             Layout.preferredHeight: Theme.hHeader
             color: Theme.bgRaised
             z: 2
+
             Row {
                 anchors.fill: parent
-                HeaderLabel { width: 22 }
+                HeaderLabel { width: 22; showSeparator: false }
                 HeaderLabel { text: "Time"; width: tableRoot.timeWidth }
                 HeaderLabel { text: "Level"; width: tableRoot.levelWidth }
                 HeaderLabel { visible: tableRoot.showService; text: "Service"; width: tableRoot.showService ? tableRoot.serviceWidth : 0 }
@@ -55,17 +84,71 @@ Rectangle {
                          - (tableRoot.showService ? tableRoot.serviceWidth : 0)
                 }
             }
+
+            // Resize handles overlay — exactly on column boundaries, don't change Row layout.
+            ResizeHandle {
+                x: 22 + tableRoot.timeWidth - 3
+                height: parent.height
+                onMoved: (delta) => tableRoot.timeWidth = Math.max(60, Math.min(360, tableRoot.timeWidth + delta))
+            }
+            ResizeHandle {
+                x: 22 + tableRoot.timeWidth + tableRoot.levelWidth - 3
+                height: parent.height
+                onMoved: (delta) => tableRoot.levelWidth = Math.max(50, Math.min(180, tableRoot.levelWidth + delta))
+            }
+            ResizeHandle {
+                visible: tableRoot.showService
+                x: 22 + tableRoot.timeWidth + tableRoot.levelWidth + tableRoot.serviceWidth - 3
+                height: parent.height
+                onMoved: (delta) => tableRoot.serviceWidth = Math.max(60, Math.min(360, tableRoot.serviceWidth + delta))
+            }
+
             Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Theme.border }
         }
 
-        ListView {
-            id: logList
+        Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            // Skeleton placeholder shown during the first load (or when changing
+            // page/filter and the model is briefly empty). Hidden as soon as rows arrive.
+            Column {
+                anchors.fill: parent
+                spacing: 1
+                visible: typeof logModel !== "undefined" && logModel !== null
+                       && logModel.loading && logList.count === 0
+                Repeater {
+                    model: 14
+                    SkeletonRow { width: parent.width; seed: (index * 0.137) % 1.0 }
+                }
+            }
+
+        ListView {
+            id: logList
+            anchors.fill: parent
             model: logModel
             clip: true
             boundsBehavior: Flickable.StopAtBounds
+            focus: true
             ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+            // j/k or arrow keys navigate; Enter toggles row expansion.
+            Keys.onPressed: (event) => {
+                if (count === 0) return
+                if (event.key === Qt.Key_J || event.key === Qt.Key_Down) {
+                    if (currentIndex < count - 1) currentIndex++
+                    else currentIndex = 0
+                    event.accepted = true
+                } else if (event.key === Qt.Key_K || event.key === Qt.Key_Up) {
+                    if (currentIndex > 0) currentIndex--
+                    else currentIndex = count - 1
+                    event.accepted = true
+                } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                    if (currentIndex < 0) currentIndex = 0
+                    expandedIndex = (expandedIndex === currentIndex) ? -1 : currentIndex
+                    event.accepted = true
+                }
+            }
             cacheBuffer: 200
 
             // Index of the currently expanded row, or -1 if none.
@@ -174,7 +257,10 @@ Rectangle {
 
                         LogText {
                             id: messageText
-                            text: message.replace(/\n/g, " ")
+                            text: tableRoot.searchTerms.length > 0
+                                ? tableRoot.highlightMatches(message.replace(/\n/g, " "), tableRoot.searchTerms)
+                                : message.replace(/\n/g, " ")
+                            textFormat: tableRoot.searchTerms.length > 0 ? Text.RichText : Text.PlainText
                             width: header.width - 22 - tableRoot.timeWidth - tableRoot.levelWidth
                                  - (tableRoot.showService ? tableRoot.serviceWidth : 0)
                                  - Theme.sp4
@@ -241,18 +327,31 @@ Rectangle {
                             spacing: Theme.sp3
 
                             // Message card with internal scroll for long stacktraces.
+                            // Uses bgSubtle so it stands apart from the bgInput-colored field cards below.
                             Rectangle {
                                 Layout.fillWidth: true
                                 implicitHeight: Math.min(msgEdit.implicitHeight + Theme.sp3 * 2, 280)
-                                color: Theme.bgInput
+                                color: Theme.bgSubtle
                                 border.color: Theme.borderMuted
                                 border.width: 1
                                 radius: Theme.rMd
                                 clip: true
 
+                                // Quote-style accent stripe on the left edge.
+                                Rectangle {
+                                    anchors.left: parent.left
+                                    anchors.top: parent.top
+                                    anchors.bottom: parent.bottom
+                                    width: 3
+                                    color: Theme.accent
+                                    opacity: 0.6
+                                }
+
                                 Flickable {
                                     anchors.fill: parent
-                                    anchors.margins: Theme.sp3
+                                    anchors.leftMargin: Theme.sp3 + 4 // leave room for accent stripe
+                                    anchors.topMargin: Theme.sp3
+                                    anchors.bottomMargin: Theme.sp3
                                     anchors.rightMargin: Theme.sp3 + 28 // leave room for copy button
                                     contentWidth: width
                                     contentHeight: msgEdit.implicitHeight
@@ -263,7 +362,10 @@ Rectangle {
                                     TextEdit {
                                         id: msgEdit
                                         width: parent.width
-                                        text: message
+                                        text: tableRoot.searchTerms.length > 0
+                                            ? tableRoot.highlightMatches(message, tableRoot.searchTerms)
+                                            : message
+                                        textFormat: tableRoot.searchTerms.length > 0 ? TextEdit.RichText : TextEdit.PlainText
                                         color: Theme.text
                                         font.family: "Monospace"
                                         font.pixelSize: Theme.fsMd
@@ -405,86 +507,19 @@ Rectangle {
                 }
             }
         }
+        } // end of body Item (skeleton + ListView)
 
-        // ── Pagination bar ─────────────────────────────────────────────────
-        Rectangle {
-            id: pageBar
+        PageBar {
             Layout.fillWidth: true
             Layout.preferredHeight: 38
-            color: Theme.bgRaised
-
-            readonly property bool busy: typeof logModel !== "undefined" && logModel !== null && logModel.loading
-
-            Rectangle { anchors.top: parent.top; width: parent.width; height: 1; color: Theme.border }
-
-            BusyIndicator {
-                anchors.left: parent.left; anchors.leftMargin: Theme.sp3
-                anchors.verticalCenter: parent.verticalCenter
-                width: 18; height: 18
-                running: pageBar.busy
-                visible: running
-            }
-
-            RowLayout {
-                anchors.centerIn: parent
-                spacing: Theme.sp1
-
-                PageButton {
-                    text: "«"
-                    ToolTip.visible: hovered; ToolTip.text: "First page"; ToolTip.delay: 400
-                    enabled: tableRoot.currentPage > 0 && !pageBar.busy
-                    onClicked: tableRoot.firstPageRequested()
-                }
-                PageButton {
-                    text: "‹ Newer"
-                    enabled: tableRoot.currentPage > 0 && !pageBar.busy
-                    onClicked: tableRoot.prevPageRequested()
-                }
-
-                Rectangle {
-                    Layout.leftMargin: Theme.sp2
-                    Layout.rightMargin: Theme.sp2
-                    implicitWidth: pageLabel.implicitWidth + Theme.sp3 * 2
-                    implicitHeight: 24
-                    color: Theme.bgInput
-                    border.color: Theme.borderMuted
-                    border.width: 1
-                    radius: 12
-                    Text {
-                        id: pageLabel
-                        anchors.centerIn: parent
-                        text: `Page ${tableRoot.currentPage + 1} of ${tableRoot.maxPage}`
-                        color: Theme.text
-                        font.pixelSize: Theme.fsXs
-                        font.bold: true
-                    }
-                }
-
-                PageButton {
-                    text: "Older ›"
-                    enabled: tableRoot.currentPage + 1 < tableRoot.maxPage && !pageBar.busy
-                    onClicked: tableRoot.nextPageRequested()
-                }
-                PageButton {
-                    text: "»"
-                    ToolTip.visible: hovered; ToolTip.text: "Last page"; ToolTip.delay: 400
-                    enabled: tableRoot.currentPage + 1 < tableRoot.maxPage && !pageBar.busy
-                    onClicked: tableRoot.lastPageRequested()
-                }
-            }
-
-            Row {
-                anchors.right: parent.right; anchors.rightMargin: Theme.sp3
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: Theme.sp1
-                Badge { text: (typeof logModel !== "undefined" && logModel !== null) ? logModel.count : 0; labelColor: Theme.text }
-                Text {
-                    text: "logs"
-                    color: Theme.textMuted
-                    font.pixelSize: Theme.fsXs
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-            }
+            currentPage: tableRoot.currentPage
+            maxPage: tableRoot.maxPage
+            logCount: (typeof logModel !== "undefined" && logModel !== null) ? logModel.count : 0
+            busy: typeof logModel !== "undefined" && logModel !== null && logModel.loading
+            onFirstClicked: tableRoot.firstPageRequested()
+            onPrevClicked:  tableRoot.prevPageRequested()
+            onNextClicked:  tableRoot.nextPageRequested()
+            onLastClicked:  tableRoot.lastPageRequested()
         }
     }
 
@@ -524,6 +559,40 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: 1
             color: Theme.border
+        }
+    }
+
+    component ResizeHandle : Item {
+        signal moved(int delta)
+        width: 6
+        height: parent ? parent.height : 24
+
+        Rectangle {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            width: 1
+            height: parent.height * 0.5
+            color: handleMouse.containsMouse || handleMouse.pressed ? Theme.accent : Theme.border
+            Behavior on color { ColorAnimation { duration: Theme.dFast } }
+        }
+
+        MouseArea {
+            id: handleMouse
+            anchors.fill: parent
+            anchors.leftMargin: -3
+            anchors.rightMargin: -3
+            cursorShape: Qt.SplitHCursor
+            hoverEnabled: true
+            property real lastX: 0
+            onPressed: (mouse) => { lastX = mouse.x }
+            onPositionChanged: (mouse) => {
+                if (!pressed) return
+                let delta = mouse.x - lastX
+                if (delta !== 0) {
+                    parent.moved(delta)
+                    // lastX stays at original press point — Row recomputes layout each tick.
+                }
+            }
         }
     }
 

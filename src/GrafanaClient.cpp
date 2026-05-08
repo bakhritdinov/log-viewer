@@ -9,6 +9,42 @@
 #include <QSettings>
 #include <QSet>
 
+namespace {
+QString formatNetworkError(QNetworkReply* reply, const QByteArray& body) {
+    int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    QString prefix;
+
+    if (httpStatus == 401 || httpStatus == 403) {
+        prefix = QString("Authentication failed (HTTP %1).\nCheck your token or username/password in Settings.").arg(httpStatus);
+    } else if (httpStatus == 404) {
+        prefix = "Endpoint not found (HTTP 404).\nVerify the Grafana URL and datasource UID.";
+    } else if (httpStatus == 429) {
+        prefix = "Rate-limited by the server (HTTP 429). Try again shortly.";
+    } else if (httpStatus >= 400 && httpStatus < 500) {
+        prefix = QString("Request rejected (HTTP %1).").arg(httpStatus);
+    } else if (httpStatus >= 500) {
+        prefix = QString("Server error (HTTP %1). The Grafana datasource may be down.").arg(httpStatus);
+    } else {
+        switch (reply->error()) {
+            case QNetworkReply::TimeoutError:                prefix = "Connection timed out.";                                  break;
+            case QNetworkReply::HostNotFoundError:           prefix = "Cannot resolve the Grafana host. Check the URL or DNS."; break;
+            case QNetworkReply::ConnectionRefusedError:      prefix = "Connection refused — is the server reachable?";          break;
+            case QNetworkReply::SslHandshakeFailedError:     prefix = "TLS handshake failed (certificate problem).";            break;
+            case QNetworkReply::RemoteHostClosedError:       prefix = "The server closed the connection unexpectedly.";         break;
+            case QNetworkReply::TemporaryNetworkFailureError:prefix = "Temporary network failure — retry in a moment.";         break;
+            case QNetworkReply::NetworkSessionFailedError:   prefix = "No network session — are you online?";                   break;
+            default:                                         prefix = "Network error: " + reply->errorString();
+        }
+    }
+
+    if (!body.isEmpty()) {
+        QString trimmed = QString::fromUtf8(body.left(600)).trimmed();
+        if (!trimmed.isEmpty()) prefix += "\n\n" + trimmed;
+    }
+    return prefix;
+}
+}
+
 GrafanaClient::GrafanaClient(QObject *parent) : QObject(parent) {
     m_manager = new QNetworkAccessManager(this);
 }
@@ -66,7 +102,7 @@ void GrafanaClient::queryLogs(const QString& url, const QString& token, const QS
         } else if (reply->error() != QNetworkReply::OperationCanceledError) {
             const QByteArray errBody = reply->readAll();
             qDebug() << "!!! NETWORK ERROR:" << reply->errorString() << "body:" << errBody.left(800);
-            emit errorOccurred(reply->errorString());
+            emit errorOccurred(formatNetworkError(reply, errBody));
         }
         if (m_currentReply == reply) m_currentReply = nullptr;
         reply->deleteLater();
@@ -110,7 +146,7 @@ void GrafanaClient::fetchMappings(const QString& url, const QString& token, cons
         if (reply->error() != QNetworkReply::NoError) {
             qDebug() << "!!! DISCOVERY ERROR:" << reply->errorString() << "body:" << body.left(500);
             emit loadingChanged(false);
-            emit errorOccurred("Namespace discovery failed: " + reply->errorString() + "\n" + QString::fromUtf8(body.left(500)));
+            emit errorOccurred(QString("Namespace discovery failed.\n\n%1").arg(formatNetworkError(reply, body)));
             reply->deleteLater();
             return;
         }

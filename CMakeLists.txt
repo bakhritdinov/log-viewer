@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(LogViewer VERSION 2.0.0 LANGUAGES CXX)
+project(LogViewer VERSION 2.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -76,6 +76,8 @@ qt_add_qml_module(LogViewer
         src/qml/SecondaryButton.qml
         src/qml/AppTextField.qml
         src/qml/TimeRangePicker.qml
+        src/qml/SkeletonRow.qml
+        src/qml/PageBar.qml
     RESOURCES
         src/resources/icon.png
 )

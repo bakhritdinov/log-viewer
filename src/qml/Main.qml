@@ -37,7 +37,7 @@ ApplicationWindow {
     property alias searchHeader: mainContent.searchHeader
 
     Shortcut {
-        sequence: "F5"
+        sequences: ["F5", StandardKey.Refresh]
         onActivated: mainContent.refreshLogs(mainContent.searchHeader.searchText)
     }
 
@@ -52,6 +52,24 @@ ApplicationWindow {
             mainContent.searchHeader.searchText = ""
             mainContent.focusTable()
         }
+    }
+
+    // Page navigation: [ = newer, ] = older.
+    Shortcut {
+        sequence: "["
+        onActivated: mainContent.gotoPage(mainContent.currentPage - 1)
+    }
+    Shortcut {
+        sequence: "]"
+        onActivated: mainContent.gotoPage(mainContent.currentPage + 1)
+    }
+    Shortcut {
+        sequence: "Shift+["
+        onActivated: mainContent.gotoPage(0)
+    }
+    Shortcut {
+        sequence: "Shift+]"
+        onActivated: mainContent.gotoPage(mainContent.maxPage - 1)
     }
 
     footer: ToolBar {
@@ -97,7 +115,7 @@ ApplicationWindow {
         if (typeof configManager !== "undefined" && configManager !== null) {
             Theme.dark = configManager.darkTheme
             if (configManager.url() && typeof grafanaClient !== "undefined" && grafanaClient !== null) {
-                grafanaClient.fetchMappings(configManager.url(), "", configManager.datasourceUid(), configManager.user(), configManager.password())
+                grafanaClient.fetchMappings(configManager.url(), configManager.token(), configManager.datasourceUid(), configManager.user(), configManager.password())
             }
         }
     }

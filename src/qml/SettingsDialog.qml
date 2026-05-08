@@ -155,7 +155,7 @@ Dialog {
 
         function save() {
             if (typeof configManager !== "undefined" && configManager !== null)
-                configManager.saveEnv(env, urlF.text, uidF.text, userF.text, passF.text)
+                configManager.saveEnv(env, urlF.text, uidF.text, userF.text, passF.text, tokenF.text)
         }
 
         FieldLabel { text: "Grafana URL" }
@@ -174,13 +174,22 @@ Dialog {
             text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getUid(env) : ""
             placeholderText: "abcd1234efgh"
         }
+        FieldLabel { text: "API Token" }
+        AppTextField {
+            id: tokenF
+            Layout.fillWidth: true
+            implicitHeight: Theme.hInput
+            text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getToken(env) : ""
+            echoMode: TextField.Password
+            placeholderText: "Bearer token (preferred over Basic auth)"
+        }
         FieldLabel { text: "Login" }
         AppTextField {
             id: userF
             Layout.fillWidth: true
             implicitHeight: Theme.hInput
             text: (typeof configManager !== "undefined" && configManager !== null) ? configManager.getUser(env) : ""
-            placeholderText: "username (optional)"
+            placeholderText: "username (Basic auth fallback)"
         }
         FieldLabel { text: "Password" }
         AppTextField {
