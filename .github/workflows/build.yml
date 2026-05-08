@@ -58,7 +58,7 @@ jobs:
           dist/LogViewer-Windows-Portable.zip
 
   build-macos:
-    name: Build macOS (Silicon)
+    name: Build macOS
     runs-on: macos-14
     steps:
     - name: Checkout repository
@@ -92,7 +92,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: LogViewer-macOS-Silicon
+        name: LogViewer-macOS-Universal
         path: dist/LogViewer-macOS-Universal.dmg
 
   build-linux:
@@ -221,7 +221,7 @@ jobs:
     - name: Download DMG
       uses: actions/download-artifact@v4
       with:
-        name: LogViewer-macOS-Silicon
+        name: LogViewer-macOS-Universal
         path: .
 
     - name: Update Cask

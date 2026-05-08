@@ -11,11 +11,13 @@ Rectangle {
     property int maxPage: 1
     property int logCount: 0
     property bool busy: false
+    property bool hasMore: false
 
     signal firstClicked()
     signal prevClicked()
     signal nextClicked()
     signal lastClicked()
+    signal loadMoreClicked()
 
     Rectangle { anchors.top: parent.top; width: parent.width; height: 1; color: Theme.border }
 
@@ -75,16 +77,35 @@ Rectangle {
         }
     }
 
-    Row {
+    RowLayout {
         anchors.right: parent.right; anchors.rightMargin: Theme.sp3
         anchors.verticalCenter: parent.verticalCenter
-        spacing: Theme.sp1
-        Badge { text: root.logCount; labelColor: Theme.text }
+        spacing: Theme.sp2
+
+        PageButton {
+            visible: root.hasMore
+            text: root.busy ? "Loading…" : "Load more"
+            enabled: root.hasMore && !root.busy
+            ToolTip.visible: hovered
+            ToolTip.text: "Fetch the next 5000 older logs within the same time range"
+            ToolTip.delay: 400
+            Layout.alignment: Qt.AlignVCenter
+            onClicked: root.loadMoreClicked()
+        }
+
+        Badge {
+            text: root.logCount
+            labelColor: Theme.text
+            Layout.alignment: Qt.AlignVCenter
+        }
         Text {
             text: "logs"
             color: Theme.textMuted
             font.pixelSize: Theme.fsXs
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignVCenter
+            // Compensate for the descender in "g" — bounding box includes it,
+            // making the glyph look lower than the Badge optically.
+            bottomPadding: 2
         }
     }
 }

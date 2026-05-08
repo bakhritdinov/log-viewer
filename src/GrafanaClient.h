@@ -51,8 +51,5 @@ private:
     QNetworkAccessManager* m_manager;
     QNetworkReply* m_currentReply = nullptr;
     void parseLogsResponse(const QByteArray& data);
-    void calculateFacets(const QList<LogEntry>& entries);
     void parseMappingsResponse(const QByteArray& data);
-
-    QVariantMap m_currentFacets;
 };

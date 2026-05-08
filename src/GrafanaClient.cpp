@@ -334,22 +334,6 @@ void GrafanaClient::parseLogsResponse(const QByteArray& data) {
     }
     qDebug() << ">>> Total entries parsed:" << entries.size();
     emit logsReceived(entries);
-    calculateFacets(entries);
-}
-
-void GrafanaClient::calculateFacets(const QList<LogEntry>& entries) {
-    m_currentFacets.clear();
-
-    for (const auto& entry : entries) {
-        for (auto it = entry.allFields.begin(); it != entry.allFields.end(); ++it) {
-            QString key = it.key();
-            QString value = it.value().toString();
-            if (key == "Line" || key == "message" || key == "ts" || key == "Time" || value.isEmpty()) continue;
-            
-            QVariantMap fieldData = m_currentFacets[key].toMap();
-            fieldData[value] = fieldData.value(value, 0).toInt() + 1;
-            m_currentFacets[key] = fieldData;
-        }
-    }
-    emit facetsReceived(m_currentFacets);
+    // Facets are now computed in QML over the *full* accumulated set, not per-batch,
+    // so the user can filter by any field that appears anywhere in the loaded data.
 }

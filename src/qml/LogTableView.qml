@@ -14,10 +14,52 @@ Rectangle {
     signal prevPageRequested()
     signal nextPageRequested()
     signal lastPageRequested()
+    signal loadMoreRequested()
 
     property int currentPage: 0
     property int maxPage: 1
+    property bool hasMore: false
     property var searchTerms: []
+
+    // Field-name overrides — passed in from AppContent so we can show the actual app/service
+    // label discovered from Loki/VictoriaLogs (e.g. `_appName`, `service`, `app`, `job`).
+    property string serviceField: "service"
+
+    // Set by AppContent while chained batches are still arriving — list freezes its scroll
+    // and key navigation so jitter from rapid model resets doesn't disorient the user.
+    property bool chainLoading: false
+
+    // Normalize free-form level strings (case- and synonym-insensitive) into a few buckets.
+    function _normalizeLevel(level) {
+        if (!level) return ""
+        let l = String(level).toUpperCase().trim()
+        if (l === "ERR" || l === "ERROR" || l === "FATAL" || l === "CRIT" || l === "CRITICAL" || l === "PANIC") return "ERROR"
+        if (l === "WARN" || l === "WARNING") return "WARN"
+        if (l === "INFO" || l === "NOTICE" || l === "INFORMATION") return "INFO"
+        if (l === "DEBUG" || l === "DBG") return "DEBUG"
+        if (l === "TRACE") return "TRACE"
+        return ""
+    }
+    function _levelColor(key) {
+        switch (key) {
+            case "ERROR": return Theme.levelError
+            case "WARN":  return Theme.levelWarn
+            case "INFO":  return Theme.levelInfo
+            case "DEBUG": return Theme.levelDebug
+            case "TRACE": return Theme.levelTrace
+        }
+        return Theme.text
+    }
+    function _levelTint(key) {
+        switch (key) {
+            case "ERROR": return Qt.rgba(0.973, 0.318, 0.286, 0.10)
+            case "WARN":  return Qt.rgba(0.824, 0.600, 0.133, 0.10)
+            case "INFO":  return Qt.rgba(0.345, 0.654, 1.0, 0.06)
+            case "DEBUG": return Qt.rgba(0.545, 0.580, 0.620, 0.06)
+            case "TRACE": return Qt.rgba(0.430, 0.470, 0.510, 0.05)
+        }
+        return "transparent"
+    }
 
     // Wrap matched substrings in a HTML span so they're tinted with the accent color.
     // Caller must use textFormat: Text.RichText.
@@ -130,6 +172,9 @@ Rectangle {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             focus: true
+            // Freeze scroll/keyboard while batches still streaming in — prevents the
+            // visual jitter from each appendEntries → applySlice cycle.
+            interactive: !tableRoot.chainLoading
             ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
             // j/k or arrow keys navigate; Enter toggles row expansion.
@@ -160,13 +205,17 @@ Rectangle {
                 height: header.height + (expanded ? detailsLoader.implicitHeight : 0)
 
                 property bool   expanded: logList.expandedIndex === index
-                property string itemLevel: (typeof fields !== "undefined" && fields !== null) ? (fields.level || "") : ""
-                property string itemService: (typeof fields !== "undefined" && fields !== null) ? (fields.service || "") : ""
+                property string itemLevelRaw: (typeof fields !== "undefined" && fields !== null)
+                    ? (fields.level || fields.severity || fields.lvl || fields.loglevel || fields.log_level || "")
+                    : ""
+                readonly property string itemLevel: tableRoot._normalizeLevel(rowItem.itemLevelRaw)
+                property string itemService: (typeof fields !== "undefined" && fields !== null)
+                    ? (fields[tableRoot.serviceField] || fields.service || fields.app || fields._appName || fields.job || fields.kubernetes_pod_name || "")
+                    : ""
                 property string traceId: (typeof fields !== "undefined" && fields !== null) ? (fields.traceId || fields.trace_id || "") : ""
                 property var    fieldsObj: (typeof fields !== "undefined" && fields !== null) ? fields : ({})
-                readonly property color levelTint: itemLevel === "ERROR" ? Qt.rgba(0.973, 0.318, 0.286, 0.10)
-                                                : itemLevel === "WARN"  ? Qt.rgba(0.824, 0.600, 0.133, 0.10)
-                                                : "transparent"
+                readonly property color levelTint: tableRoot._levelTint(itemLevel)
+                readonly property color levelColor: tableRoot._levelColor(itemLevel)
 
                 Behavior on height { NumberAnimation { duration: Theme.dBase; easing.type: Easing.InOutCubic } }
 
@@ -184,9 +233,7 @@ Rectangle {
                     Rectangle {
                         width: 3
                         height: parent.height
-                        color: rowItem.itemLevel === "ERROR" ? Theme.danger
-                             : rowItem.itemLevel === "WARN"  ? Theme.warn
-                             : "transparent"
+                        color: rowItem.itemLevel === "" ? "transparent" : rowItem.levelColor
                     }
 
                     Row {
@@ -227,20 +274,14 @@ Rectangle {
                                 width: chipText.implicitWidth + Theme.sp2 * 2
                                 height: 18
                                 radius: 9
-                                color: rowItem.itemLevel === "ERROR" ? Qt.rgba(0.973, 0.318, 0.286, 0.18)
-                                     : rowItem.itemLevel === "WARN"  ? Qt.rgba(0.824, 0.600, 0.133, 0.18)
-                                     : Theme.bgSubtle
-                                border.color: rowItem.itemLevel === "ERROR" ? Theme.danger
-                                            : rowItem.itemLevel === "WARN"  ? Theme.warn
-                                            : Theme.borderMuted
+                                color: Qt.rgba(rowItem.levelColor.r, rowItem.levelColor.g, rowItem.levelColor.b, 0.18)
+                                border.color: rowItem.levelColor
                                 border.width: 1
                                 Text {
                                     id: chipText
                                     anchors.centerIn: parent
                                     text: rowItem.itemLevel
-                                    color: rowItem.itemLevel === "ERROR" ? Theme.danger
-                                         : rowItem.itemLevel === "WARN"  ? Theme.warn
-                                         : Theme.text
+                                    color: rowItem.levelColor
                                     font.pixelSize: Theme.fsXs
                                     font.bold: true
                                     font.letterSpacing: 0.4
@@ -283,7 +324,8 @@ Rectangle {
                         id: rowMouse
                         anchors.fill: parent
                         hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
+                        enabled: !tableRoot.chainLoading
+                        cursorShape: tableRoot.chainLoading ? Qt.WaitCursor : Qt.PointingHandCursor
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
                         onClicked: (mouse) => {
                             if (mouse.button === Qt.RightButton && rowItem.traceId !== "") {
@@ -514,12 +556,14 @@ Rectangle {
             Layout.preferredHeight: 38
             currentPage: tableRoot.currentPage
             maxPage: tableRoot.maxPage
-            logCount: (typeof logModel !== "undefined" && logModel !== null) ? logModel.count : 0
+            logCount: (typeof logModel !== "undefined" && logModel !== null) ? logModel.totalCount : 0
             busy: typeof logModel !== "undefined" && logModel !== null && logModel.loading
+            hasMore: tableRoot.hasMore
             onFirstClicked: tableRoot.firstPageRequested()
             onPrevClicked:  tableRoot.prevPageRequested()
             onNextClicked:  tableRoot.nextPageRequested()
             onLastClicked:  tableRoot.lastPageRequested()
+            onLoadMoreClicked: tableRoot.loadMoreRequested()
         }
     }
 

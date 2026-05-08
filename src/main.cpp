@@ -22,8 +22,11 @@ int main(int argc, char *argv[]) {
     LogModel model;
     ConfigManager config;
 
-    // Connect client to model
-    QObject::connect(&client, &GrafanaClient::logsReceived, &model, &LogModel::setEntries);
+    // Direct C++ wiring — the QML signal hop can't convert JS-array back to
+    // QList<LogEntry> (LogEntry isn't a Q_GADGET), so QML can't call appendEntries
+    // itself. Each batch lands in the model directly; QML handler then decides
+    // whether to fetch the next batch based on totalCount delta.
+    QObject::connect(&client, &GrafanaClient::logsReceived, &model, &LogModel::appendEntries);
     QObject::connect(&client, &GrafanaClient::loadingChanged, &model, &LogModel::setLoading);
 
     engine.rootContext()->setContextProperty("grafanaClient", &client);

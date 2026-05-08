@@ -37,6 +37,13 @@ QtObject {
     readonly property color warnDim:      dark ? "#e3b341" : "#9a6700"
     readonly property color danger:       dark ? "#f85149" : "#cf222e"
 
+    // ── Log level colors ──────────────────────────────────
+    readonly property color levelError:   dark ? "#f85149" : "#cf222e"
+    readonly property color levelWarn:    dark ? "#d29922" : "#bf8700"
+    readonly property color levelInfo:    dark ? "#58a6ff" : "#0969da"
+    readonly property color levelDebug:   dark ? "#8b949e" : "#57606a"
+    readonly property color levelTrace:   dark ? "#6e7681" : "#8c959f"
+
     // ── Spacing — 4px grid ────────────────────────────────
     readonly property int sp1: 4
     readonly property int sp2: 8
