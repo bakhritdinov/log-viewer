@@ -102,9 +102,14 @@ install(TARGETS LogViewer
 )
 
 # --- Автоматическое развертывание Qt ---
-if(Qt6_VERSION VERSION_GREATER_EQUAL "6.3.0")
+# qt_generate_deploy_app_script with OUTPUT_SCRIPT / DEPLOY_TOOL_OPTIONS landed in Qt 6.5.
+# Ubuntu noble ships Qt 6.4.2 which knows the function under a different signature
+# (FILENAME_VARIABLE, no DEPLOY_TOOL_OPTIONS) and rejects our call -- so PPA builds
+# on noble were failing with "Unexpected arguments". On Linux the block is unnecessary
+# anyway: CPack DEB uses install(TARGETS ...) and the AppImage target uses linuxdeploy-qt.
+if(NOT (UNIX AND NOT APPLE) AND Qt6_VERSION VERSION_GREATER_EQUAL "6.5.0")
     set(deploy_args "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/qml")
-    
+
     if(WIN32)
         list(APPEND deploy_args "--no-translations" "--compiler-runtime")
     endif()
