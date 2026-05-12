@@ -537,10 +537,14 @@ Rectangle {
                                                 font.pixelSize: Theme.fsMd
                                                 font.bold: true
                                                 font.family: "Monospace"
-                                                Layout.preferredWidth: fieldDelegate.stacked ? -1 : 180
+                                                // Wide layout keeps the 180px "column" baseline so short keys still align
+                                                // visually, but long keys grow up to ~45% of the row and wrap instead of
+                                                // eliding -- so the full key is always readable.
+                                                Layout.minimumWidth: fieldDelegate.stacked ? 0 : 180
+                                                Layout.maximumWidth: fieldDelegate.stacked ? -1 : Math.max(180, fieldDelegate.width * 0.45)
                                                 Layout.fillWidth: fieldDelegate.stacked
                                                 Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                                elide: Text.ElideRight
+                                                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                                             }
 
                                             // When stacked, actions sit on the same row as the key.
