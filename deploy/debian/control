@@ -1,7 +1,7 @@
 Source: log-viewer
 Section: utils
 Priority: optional
-Maintainer: Bobur Bakhritdinov <boburbakhritdinov@gmail.com>
+Maintainer: Bobur Bakhritdinov <bobur.bakhritdinov@gmail.com>
 Build-Depends: debhelper-compat (= 13),
                cmake,
                qt6-base-dev,

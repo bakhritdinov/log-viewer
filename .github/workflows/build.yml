@@ -288,6 +288,11 @@ jobs:
         echo "GPG_KEY_ID=$KEY_ID" >> "$GITHUB_ENV"
 
     - name: Build source package
+      env:
+        # Must match the UID of LAUNCHPAD_PPA_GPG_KEY -- Launchpad rejects
+        # uploads where the changelog signer's email does not match the key.
+        DEBEMAIL: bobur.bakhritdinov@gmail.com
+        DEBFULLNAME: Bobur Bakhritdinov
       run: |
         VERSION=$(echo "${{ github.ref_name }}" | sed 's/^v//')
         DISTRO=${{ matrix.distro }}
@@ -299,7 +304,9 @@ jobs:
         dch --create --package log-viewer -v "${PPA_REV}" \
             --distribution "${DISTRO}" \
             "Release ${VERSION} to PPA for ${DISTRO}"
-        debuild -S -sa -us -uc
+        # -d skips dpkg-checkbuilddeps: build dependencies (cmake, qt6-*) are
+        # resolved on the Launchpad builder farm, not on this runner.
+        dpkg-buildpackage -S -sa -us -uc -d
 
     - name: Sign and upload to PPA
       run: |
