@@ -45,7 +45,13 @@ if(APPLE)
     set(MACOS_ICON src/resources/icon.icns)
     set_source_files_properties(${MACOS_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(LogViewer PRIVATE ${MACOS_ICON})
-    set_target_properties(LogViewer PROPERTIES MACOSX_BUNDLE_ICON_FILE icon.icns)
+    set_target_properties(LogViewer PROPERTIES
+        MACOSX_BUNDLE_ICON_FILE icon.icns
+        # Must match setOrganizationDomain("logviewer.com") + setApplicationName("LogViewer")
+        # in main.cpp so that QSettings, Cask `quit:` AppleEvent and zap paths
+        # all converge on the same reverse-DNS identifier.
+        MACOSX_BUNDLE_GUI_IDENTIFIER com.logviewer.LogViewer
+    )
 elseif(WIN32)
     set(WIN_ICON src/resources/resources.rc)
     target_sources(LogViewer PRIVATE ${WIN_ICON})
@@ -133,12 +139,23 @@ set(CPACK_PACKAGE_NAME "LogViewer")
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
 set(CPACK_PACKAGE_VENDOR "Bobur Bakhritdinov")
 
+# Without these, CPack defaults to "<name> <version>" — every release would
+# install to C:\Program Files\LogViewer 2.0.0\ and register a separate
+# Add/Remove Programs entry, leaving duplicates after upgrades.
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}")
+set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}")
+
 if(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-macOS-Universal")
 elseif(WIN32)
     set(CPACK_GENERATOR "NSIS;ZIP")
     set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-Windows-x64")
+    # NSIS-specific: visible name in installer UI, and the brand under which
+    # the uninstaller registers itself. Both must be version-free for upgrades
+    # to overwrite cleanly rather than accumulating ghost entries.
+    set(CPACK_NSIS_PACKAGE_NAME "${CPACK_PACKAGE_NAME}")
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_NAME}")
 elseif(UNIX AND NOT APPLE)
     set(CPACK_GENERATOR "DEB")
     set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-Linux-x86_64")

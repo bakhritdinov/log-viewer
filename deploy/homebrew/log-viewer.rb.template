@@ -9,8 +9,15 @@ cask "log-viewer" do
 
   app "LogViewer.app"
 
+  # `uninstall delete:` uses `rm -rf` and does not fail if the path is missing,
+  # which lets `brew upgrade --cask log-viewer` proceed when the user has
+  # manually deleted /Applications/LogViewer.app between installs.
+  uninstall quit:   "com.logviewer.LogViewer",
+            delete: "/Applications/LogViewer.app"
+
   zap trash: [
-    "~/Library/Preferences/com.logviewer.plist",
-    "~/Library/Saved Application State/com.logviewer.savedState",
+    "~/Library/Preferences/com.logviewer.LogViewer.plist",
+    "~/Library/Saved Application State/com.logviewer.LogViewer.savedState",
+    "~/Library/Application Support/LogViewer",
   ]
 end

@@ -178,6 +178,23 @@ jobs:
         name: LogViewer-Windows-x64
         path: artifacts
 
+    - name: Lint Chocolatey scripts (ASCII-only)
+      shell: pwsh
+      run: |
+        # Windows PowerShell 5.1 reads .ps1 without BOM as Windows-1252, so any
+        # non-ASCII byte (em-dash, smart quotes, NBSP) is reinterpreted and can
+        # turn into a stray quote that breaks the parser. Fail the build early.
+        $files = Get-ChildItem -Path 'deploy/chocolatey' -Recurse -Include *.ps1,*.nuspec
+        $bad = $files | Select-String -Pattern '[^\x00-\x7F]'
+        if ($bad) {
+          $bad | ForEach-Object {
+            Write-Host ("::error file={0},line={1}::Non-ASCII byte at column {2}" -f $_.Path, $_.LineNumber, ($_.Matches[0].Index + 1))
+            Write-Host "    $($_.Line)"
+          }
+          throw "Non-ASCII characters found in Chocolatey scripts. PowerShell 5.1 will misparse them on Windows."
+        }
+        Write-Host "OK: all Chocolatey scripts are ASCII-only ($($files.Count) files checked)."
+
     - name: Prepare Package
       shell: pwsh
       run: |
@@ -246,46 +263,46 @@ jobs:
         commit_message: 'Update LogViewer Cask to ${{ github.ref_name }}'
 
   publish-ppa:
-    name: Publish to PPA
+    name: Publish to PPA (${{ matrix.distro }})
     needs: [release]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [jammy, noble]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install Build Tools
+    - name: Install build tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y devscripts debhelper build-essential
-...
-        
-    - name: Sign and Upload to PPA
-      run: |
-        VERSION=$(echo "${{ github.ref_name }}" | sed 's/v//')
-        mkdir -p build-ppa/log-viewer-$VERSION
-        cp -r src CMakeLists.txt build-ppa/log-viewer-$VERSION/
-        cp -r deploy/debian build-ppa/log-viewer-$VERSION/
-        
-        cd build-ppa/log-viewer-$VERSION
-        
-        # Create changelog
-        dch --create --package log-viewer -v $VERSION-1ppa1~jammy --distribution jammy "Release $VERSION to PPA"
-        
-        # Build source package
-        debuild -S -sa -us -uc
-        
-    - name: Sign and Upload to PPA
+        sudo apt-get install -y devscripts debhelper build-essential dput gnupg
+
+    - name: Import GPG key
       env:
         GPG_KEY: ${{ secrets.LAUNCHPAD_PPA_GPG_KEY }}
       run: |
-        # Импорт GPG ключа
         echo "$GPG_KEY" | gpg --import --batch --yes
-        KEY_ID=$(gpg --list-keys --with-colons | grep '^pub' | head -n 1 | cut -d: -f5)
-        
-        # Установка dput
-        sudo apt-get install -y dput
-        
-        # Подпись и загрузка
+        KEY_ID=$(gpg --list-secret-keys --with-colons | awk -F: '/^sec:/ {print $5; exit}')
+        echo "GPG_KEY_ID=$KEY_ID" >> "$GITHUB_ENV"
+
+    - name: Build source package
+      run: |
+        VERSION=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+        DISTRO=${{ matrix.distro }}
+        PPA_REV="${VERSION}-1ppa${{ github.run_number }}~${DISTRO}"
+        mkdir -p "build-ppa/log-viewer-${VERSION}"
+        cp -r src CMakeLists.txt "build-ppa/log-viewer-${VERSION}/"
+        cp -r deploy/debian "build-ppa/log-viewer-${VERSION}/"
+        cd "build-ppa/log-viewer-${VERSION}"
+        dch --create --package log-viewer -v "${PPA_REV}" \
+            --distribution "${DISTRO}" \
+            "Release ${VERSION} to PPA for ${DISTRO}"
+        debuild -S -sa -us -uc
+
+    - name: Sign and upload to PPA
+      run: |
         cd build-ppa
-        debsign -k "$KEY_ID" *.changes
+        debsign -k "${GPG_KEY_ID}" *.changes
         dput ppa:bakhritdinov/log-viewer *.changes

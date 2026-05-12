@@ -11,7 +11,7 @@
     <iconUrl>https://raw.githubusercontent.com/bakhritdinov/log-viewer/master/src/resources/icon.png</iconUrl>
     <licenseUrl>https://github.com/bakhritdinov/log-viewer/blob/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <projectSourceUrl>https://github.com/bakhritdinov/log-viewer</projectSourceUrl>
+    <bugTrackerUrl>https://github.com/bakhritdinov/log-viewer/issues</bugTrackerUrl>
     <tags>log-viewer grafana loki qt qml</tags>
     <summary>Reactive Log Viewer for Grafana Loki</summary>
     <description>A high-performance, reactive desktop application for viewing logs from Grafana Loki, built with Qt 6 and C++20.</description>
