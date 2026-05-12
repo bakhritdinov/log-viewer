@@ -6,9 +6,11 @@ Build-Depends: debhelper-compat (= 13),
                cmake,
                qt6-base-dev,
                qt6-declarative-dev,
+               libqt6opengl6-dev,
                libqt6svg6-dev,
                qt6-l10n-tools,
                libgl1-mesa-dev,
+               libegl1-mesa-dev,
                libxkbcommon-dev,
                libvulkan-dev
 Standards-Version: 4.5.1
