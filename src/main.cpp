@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQmlEngine>
 #include <QStringConverter>
 #include <QIcon>
 #include "GrafanaClient.h"
@@ -15,6 +16,14 @@ int main(int argc, char *argv[]) {
     app.setOrganizationDomain("logviewer.com");
     app.setApplicationName("LogViewer");
     app.setApplicationVersion(APP_VERSION);
+
+    // Регистрируем Theme singleton вручную: QT_QML_SINGLETON_TYPE source-file
+    // свойство неполностью поддерживается в Qt 6.2 (Ubuntu 22.04), из-за чего
+    // qmldir на jammy не получает строку "singleton Theme ..." и Theme.* в QML
+    // резолвится в undefined. Ручная регистрация работает на всех версиях Qt 6.
+    qmlRegisterSingletonType(
+        QUrl(QStringLiteral("qrc:/qt/qml/LogViewerApp/src/qml/Theme.qml")),
+        "LogViewerApp", 1, 0, "Theme");
 
     QQmlApplicationEngine engine;
 

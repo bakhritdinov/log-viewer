@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(LogViewer VERSION 2.2.6 LANGUAGES CXX)
+project(LogViewer VERSION 2.2.7 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -57,7 +57,11 @@ elseif(WIN32)
     target_sources(LogViewer PRIVATE ${WIN_ICON})
 endif()
 
-set_source_files_properties(src/qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+# Theme.qml не указываем как QML_FILES + QT_QML_SINGLETON_TYPE: на Qt 6.2
+# (Ubuntu 22.04) source-file property неполностью поддерживается, qmldir
+# не содержит строку "singleton Theme ..." и Theme.* резолвится в undefined.
+# Файл идёт через RESOURCES (попадает в qrc), а singleton регистрируется
+# вручную через qmlRegisterSingletonType() в main.cpp.
 
 qt_add_qml_module(LogViewer
     URI LogViewerApp
@@ -71,7 +75,6 @@ qt_add_qml_module(LogViewer
         src/qml/Sidebar.qml
         src/qml/SettingsDialog.qml
         src/qml/CalendarPopup.qml
-        src/qml/Theme.qml
         src/qml/Card.qml
         src/qml/Badge.qml
         src/qml/Chip.qml
@@ -86,6 +89,7 @@ qt_add_qml_module(LogViewer
         src/qml/PageBar.qml
     RESOURCES
         src/resources/icon.png
+        src/qml/Theme.qml
 )
 
 target_link_libraries(LogViewer PRIVATE 
