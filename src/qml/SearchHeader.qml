@@ -490,17 +490,22 @@ Rectangle {
             rightPadding: 24
         }
 
-        delegate: ItemDelegate {
-            width: Math.max(cbRoot.width, 120)
-            contentItem: Text {
-                text: modelData
-                color: hovered ? Theme.textOnAccent : Theme.text
-                font: cbRoot.font
-                elide: Text.ElideRight
-                verticalAlignment: Text.AlignVCenter
-                leftPadding: Theme.sp3
+        // Qt 6.2 (Ubuntu 22.04) не делает неявную обёртку Item -> Component
+        // для свойств типа Component на ComboBox. Без явного Component {}
+        // получаем "Cannot assign ItemDelegate to QQmlComponent*".
+        delegate: Component {
+            ItemDelegate {
+                width: Math.max(cbRoot.width, 120)
+                contentItem: Text {
+                    text: modelData
+                    color: hovered ? Theme.textOnAccent : Theme.text
+                    font: cbRoot.font
+                    elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
+                    leftPadding: Theme.sp3
+                }
+                background: Rectangle { color: hovered ? Theme.bgSubtle : "transparent" }
             }
-            background: Rectangle { color: hovered ? Theme.bgSubtle : "transparent" }
         }
 
         popup: Popup {
