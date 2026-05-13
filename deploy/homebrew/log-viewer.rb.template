@@ -9,11 +9,11 @@ cask "log-viewer" do
 
   app "LogViewer.app"
 
-  # `uninstall delete:` uses `rm -rf` and does not fail if the path is missing,
-  # which lets `brew upgrade --cask log-viewer` proceed when the user has
-  # manually deleted /Applications/LogViewer.app between installs.
-  uninstall quit:   "com.logviewer.LogViewer",
-            delete: "/Applications/LogViewer.app"
+  # `delete:` is intentionally NOT set to /Applications/LogViewer.app -- the
+  # `app` stanza already handles uninstall of that path. Duplicating it causes
+  # Homebrew to attempt removal twice during `brew upgrade`, and the second
+  # pass errors with "It seems the App source ... is not there." (#19, May 2026)
+  uninstall quit: "com.logviewer.LogViewer"
 
   zap trash: [
     "~/Library/Preferences/com.logviewer.LogViewer.plist",

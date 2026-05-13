@@ -9,7 +9,9 @@ Dialog {
     modal: true
 
     width: 540
-    contentHeight: mainColumn.implicitHeight
+    // Не задаём contentHeight явно: на Qt 6.2 (Ubuntu 22.04) явная привязка
+    // contentHeight к contentItem.implicitHeight даёт polish-loop -- Dialog сам
+    // вычислит implicitHeight из contentItem.
 
     onAboutToShow: {
         x = Math.max(0, (parent.width - width) / 2)
