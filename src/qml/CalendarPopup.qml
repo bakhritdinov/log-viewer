@@ -78,32 +78,81 @@ Popup {
             }
         }
 
-        DayOfWeekRow {
+        // Заголовок дней недели (Mon-first) и собственная 6×7 сетка дат -
+        // не зависим от MonthGrid/DayOfWeekRow, которых нет в Qt 6.2 на Ubuntu 22.04.
+        RowLayout {
             Layout.fillWidth: true
-            delegate: Text {
-                text: model.shortName; color: "#8b949e"; font.pixelSize: 11; font.bold: true
-                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+            spacing: 2
+            Repeater {
+                model: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+                delegate: Text {
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    text: modelData
+                    color: "#8b949e"; font.pixelSize: 11; font.bold: true
+                }
             }
         }
 
-        MonthGrid {
+        Item {
             id: grid
-            month: new Date().getMonth()
-            year: new Date().getFullYear()
-            Layout.fillWidth: true; Layout.fillHeight: true; spacing: 2
-            delegate: Rectangle {
-                implicitWidth: 35; implicitHeight: 35; radius: 6
-                color: model.date.toDateString() === selectedDate.toDateString() ? "#238636" : 
-                       (mArea.containsMouse ? "#21262d" : "transparent")
-                border.color: model.today ? "#58a6ff" : "transparent"
-                Text {
-                    anchors.centerIn: parent; text: model.day
-                    color: model.month === grid.month ? (model.date.toDateString() === selectedDate.toDateString() ? "#ffffff" : "#c9d1d9") : "#484f58"
-                    font.pixelSize: 12; font.bold: model.today
+            property int year: new Date().getFullYear()
+            property int month: new Date().getMonth()
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            readonly property var cells: {
+                // 42 ячейки начиная с понедельника на/перед 1-м числом месяца.
+                let first = new Date(grid.year, grid.month, 1)
+                let offset = (first.getDay() + 6) % 7
+                let start = new Date(grid.year, grid.month, 1 - offset)
+                let result = []
+                for (let i = 0; i < 42; i++) {
+                    result.push(new Date(start.getFullYear(), start.getMonth(), start.getDate() + i))
                 }
-                MouseArea {
-                    id: mArea; anchors.fill: parent; hoverEnabled: true
-                    onClicked: { selectedDate = model.date }
+                return result
+            }
+
+            GridLayout {
+                anchors.fill: parent
+                columns: 7
+                rowSpacing: 2
+                columnSpacing: 2
+                Repeater {
+                    model: grid.cells
+                    delegate: Rectangle {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        implicitWidth: 35
+                        implicitHeight: 35
+                        radius: 6
+                        readonly property date cellDate: modelData
+                        readonly property bool sameMonth: cellDate.getMonth() === grid.month
+                        readonly property bool isToday: {
+                            let t = new Date()
+                            return cellDate.getFullYear() === t.getFullYear() &&
+                                   cellDate.getMonth() === t.getMonth() &&
+                                   cellDate.getDate() === t.getDate()
+                        }
+                        readonly property bool isSelected: cellDate.toDateString() === selectedDate.toDateString()
+                        color: isSelected ? "#238636" :
+                               (mArea.containsMouse ? "#21262d" : "transparent")
+                        border.color: isToday ? "#58a6ff" : "transparent"
+                        Text {
+                            anchors.centerIn: parent
+                            text: cellDate.getDate()
+                            color: sameMonth ? (isSelected ? "#ffffff" : "#c9d1d9") : "#484f58"
+                            font.pixelSize: 12
+                            font.bold: isToday
+                        }
+                        MouseArea {
+                            id: mArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: { selectedDate = cellDate }
+                        }
+                    }
                 }
             }
         }
