@@ -64,6 +64,37 @@ Item {
         popup.close()
     }
 
+    // Programmatic external update (e.g. restoring state). Refreshes display
+    // and emits changed() so listeners react as if the user picked a value.
+    function applyExternal(tr, cf, ct) {
+        // "Custom" with no dates → fall back to 1h, otherwise chip shows "? → ?".
+        if (tr === "Custom" && (!cf || !ct)) {
+            tr = "1h"
+            cf = ""
+            ct = ""
+        }
+        // For any preset, clear custom dates so popup From/To fields don't
+        // keep showing stale values from a previous Custom session.
+        if (tr !== "Custom") {
+            cf = ""
+            ct = ""
+        }
+        timeRange = tr
+        customFrom = cf || ""
+        customTo = ct || ""
+        // CalendarPopup writes targetField.text directly, which breaks the
+        // `text: root.customFrom` binding on AbsoluteField. A forced reassign
+        // here keeps the visible TextField in sync after such writes.
+        if (fromField) fromField.text = customFrom
+        if (toField)   toField.text   = customTo
+        if (tr === "Custom") {
+            display = customFrom + " → " + customTo
+        } else {
+            display = _labelFor(tr)
+        }
+        changed()
+    }
+
     // ── Trigger button ────────────────────────────────────────────────────
     SecondaryButton {
         id: trigger

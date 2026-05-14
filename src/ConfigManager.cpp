@@ -30,10 +30,13 @@ void ConfigManager::saveEnv(const QString& env, const QString& url, const QStrin
     emit settingsChanged();
 }
 
-void ConfigManager::setLastSelection(const QString& ns, const QString& app, const QString& timeRange) {
+void ConfigManager::setLastSelection(const QString& ns, const QString& app, const QString& timeRange,
+                                     const QString& customFrom, const QString& customTo) {
     m_settings.setValue(m_currentEnv + "/lastNamespace", ns);
     m_settings.setValue(m_currentEnv + "/lastApp", app);
     m_settings.setValue("lastTimeRange", timeRange);
+    m_settings.setValue("lastCustomFrom", customFrom);
+    m_settings.setValue("lastCustomTo", customTo);
 }
 
 void ConfigManager::addToSearchHistory(const QString& query) {

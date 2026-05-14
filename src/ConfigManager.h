@@ -39,7 +39,13 @@ public:
     Q_INVOKABLE QString lastNamespace(const QString& env = "") { return getVal("lastNamespace", env); }
     Q_INVOKABLE QString lastApp(const QString& env = "")       { return getVal("lastApp", env); }
     Q_INVOKABLE QString lastTimeRange()                        { return m_settings.value("lastTimeRange", "1h").toString(); }
-    Q_INVOKABLE void setLastSelection(const QString& ns, const QString& app, const QString& timeRange);
+    // Persisted Custom range. Without this, lastTimeRange="Custom" comes back
+    // with empty customFrom/customTo on restart and the picker shows "? → ?".
+    Q_INVOKABLE QString lastCustomFrom()                       { return m_settings.value("lastCustomFrom", "").toString(); }
+    Q_INVOKABLE QString lastCustomTo()                         { return m_settings.value("lastCustomTo", "").toString(); }
+    Q_INVOKABLE void setLastSelection(const QString& ns, const QString& app, const QString& timeRange,
+                                      const QString& customFrom = QString(),
+                                      const QString& customTo = QString());
 
     // Recent search queries — most recent first, capped at 10.
     Q_INVOKABLE QStringList searchHistory() { return m_settings.value("searchHistory").toStringList(); }
@@ -52,6 +58,27 @@ public:
     }
     Q_INVOKABLE void setColumnWidth(const QString& col, int w) {
         m_settings.setValue("columns/" + col, w);
+    }
+
+    // Histogram visibility + height — persisted so the user's layout survives restart.
+    Q_INVOKABLE bool histogramVisible() {
+        return m_settings.value("histogram/visible", true).toBool();
+    }
+    Q_INVOKABLE void setHistogramVisible(bool v) {
+        m_settings.setValue("histogram/visible", v);
+    }
+    Q_INVOKABLE int  histogramHeight(int fallback) {
+        return m_settings.value("histogram/height", fallback).toInt();
+    }
+    Q_INVOKABLE void setHistogramHeight(int h) {
+        m_settings.setValue("histogram/height", h);
+    }
+    // Forced bucket size in ms (0 = Auto).
+    Q_INVOKABLE int  histogramBucketMs(int fallback) {
+        return m_settings.value("histogram/bucketMs", fallback).toInt();
+    }
+    Q_INVOKABLE void setHistogramBucketMs(int ms) {
+        m_settings.setValue("histogram/bucketMs", ms);
     }
 
 signals:

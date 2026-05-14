@@ -14,12 +14,22 @@ Rectangle {
     property alias timeRange: timeRange.timeRange
     property alias customFrom: timeRange.customFrom
     property alias customTo: timeRange.customTo
+    // Visible label on the time-picker chip. Can be temporarily overridden
+    // (e.g. by the histogram filter to show "12:00 → 12:01").
+    property alias timeRangeDisplay: timeRange.display
 
     signal searchTriggered(string query)
     signal namespaceChanged(string ns)
     signal appChanged(string app)
     signal toggleSidebar()
     signal autoRefreshChanged(int seconds, bool tail)
+
+    // Programmatic time range update (e.g. restoring pre-click state).
+    // Unlike a direct timeRange property write, this also refreshes display
+    // and emits changed().
+    function applyTimeRange(tr, cf, ct) {
+        timeRange.applyExternal(tr, cf, ct)
+    }
 
     property bool sidebarOpen: false
     property int  autoRefreshSec: 0
@@ -111,7 +121,6 @@ Rectangle {
 
             ScopedComboBox {
                 id: nsCombo
-                Layout.preferredWidth: 170
                 placeholder: "Namespace"
                 onActivated: {
                     namespaceChanged(currentText)
@@ -126,7 +135,6 @@ Rectangle {
 
             ScopedComboBox {
                 id: appCombo
-                Layout.preferredWidth: 170
                 placeholder: "App"
                 onActivated: appChanged(currentText)
             }
@@ -473,6 +481,38 @@ Rectangle {
         font.pixelSize: Theme.fsMd
         implicitHeight: Theme.hButton + 4
 
+        // Adaptive width — sized to the widest item in the model so the
+        // dropdown doesn't jump in width when the selection changes.
+        TextMetrics {
+            id: _cbMetrics
+            font: cbRoot.font
+        }
+        property real _widestItem: 0
+        function _recomputeWidest() {
+            let mdl = cbRoot.model
+            let n = 0
+            if (mdl) n = (typeof mdl.length === "number") ? mdl.length
+                       : (typeof mdl.count  === "number") ? mdl.count : 0
+            let m = 0
+            for (let i = 0; i < n; i++) {
+                let item = (typeof mdl.get === "function") ? mdl.get(i) : mdl[i]
+                _cbMetrics.text = String(item)
+                if (_cbMetrics.width > m) m = _cbMetrics.width
+            }
+            if (m === 0 && placeholder) {
+                _cbMetrics.text = placeholder
+                m = _cbMetrics.width
+            }
+            _widestItem = m
+        }
+        onModelChanged: _recomputeWidest()
+        Component.onCompleted: _recomputeWidest()
+        // Width = widest item + padding for the dropdown indicator and a small
+        // buffer for the TextMetrics ↔ Text.contentWidth gap.
+        Layout.preferredWidth: _widestItem + 90
+        Layout.minimumWidth: 80
+        Layout.fillWidth: false
+
         background: Rectangle {
             color: Theme.bgInput
             border.color: cbRoot.activeFocus ? Theme.borderFocus : Theme.border
@@ -490,9 +530,9 @@ Rectangle {
             rightPadding: 24
         }
 
-        // Qt 6.2 (Ubuntu 22.04) не делает неявную обёртку Item -> Component
-        // для свойств типа Component на ComboBox. Без явного Component {}
-        // получаем "Cannot assign ItemDelegate to QQmlComponent*".
+        // Qt 6.2 (Ubuntu 22.04) does NOT auto-wrap an Item into Component
+        // when bound to ComboBox.delegate — without an explicit Component {}
+        // it raises "Cannot assign ItemDelegate to QQmlComponent*".
         delegate: Component {
             ItemDelegate {
                 width: Math.max(cbRoot.width, 120)
@@ -555,10 +595,11 @@ Rectangle {
         // Restore last-used time range as the picker's initial state.
         if (typeof configManager !== "undefined" && configManager !== null) {
             let saved = configManager.lastTimeRange()
-            if (saved && saved !== timeRange.timeRange) {
-                timeRange.timeRange = saved
-                timeRange.display = timeRange._labelFor(saved)
-            }
+            let savedFrom = configManager.lastCustomFrom()
+            let savedTo = configManager.lastCustomTo()
+            // applyExternal sanitizes "Custom" with empty dates → 1h fallback,
+            // otherwise the chip would show "? → ?".
+            timeRange.applyExternal(saved || "1h", savedFrom, savedTo)
         }
     }
 

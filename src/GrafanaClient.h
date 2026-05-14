@@ -13,6 +13,9 @@ struct LogEntry {
     QDateTime timestamp;
     QString message;
     QVariantMap allFields;
+    // Normalized log level: "ERROR" | "WARN" | "INFO" | "DEBUG" | "TRACE" | "".
+    // Populated in GrafanaClient::parseLogsResponse via LogModel::normalizeLevel.
+    QString level;
 };
 
 class GrafanaClient : public QObject {

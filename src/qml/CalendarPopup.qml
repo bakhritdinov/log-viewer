@@ -27,7 +27,7 @@ Popup {
         if (targetField && targetField.text) {
             let d = new Date(targetField.text)
             if (!isNaN(d.getTime())) {
-                // Используем UTC методы, чтобы время не "прыгало" из-за часовых поясов
+                // Use UTC methods so the time doesn't jump due to time zones.
                 selectedDate = d
                 let hh = d.getUTCHours()
                 let mm = d.getUTCMinutes()
@@ -78,8 +78,8 @@ Popup {
             }
         }
 
-        // Заголовок дней недели (Mon-first) и собственная 6×7 сетка дат -
-        // не зависим от MonthGrid/DayOfWeekRow, которых нет в Qt 6.2 на Ubuntu 22.04.
+        // Hand-rolled day-of-week row (Mon-first) and 6x7 date grid — avoids
+        // MonthGrid/DayOfWeekRow which aren't available in Qt 6.2 (Ubuntu 22.04).
         RowLayout {
             Layout.fillWidth: true
             spacing: 2
@@ -103,7 +103,7 @@ Popup {
             Layout.fillHeight: true
 
             readonly property var cells: {
-                // 42 ячейки начиная с понедельника на/перед 1-м числом месяца.
+                // 42 cells starting from the Monday on/before the 1st of the month.
                 let first = new Date(grid.year, grid.month, 1)
                 let offset = (first.getDay() + 6) % 7
                 let start = new Date(grid.year, grid.month, 1 - offset)
@@ -179,7 +179,7 @@ Popup {
                     let m = parseInt(minuteField.text) || 0
                     let s = isToField ? 59 : 0
                     
-                    // Создаем дату именно в UTC
+                    // Build the date in UTC.
                     let finalDate = new Date(Date.UTC(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), h, m, s))
                     let formatted = finalDate.toISOString().split(".")[0] + "Z"
                     

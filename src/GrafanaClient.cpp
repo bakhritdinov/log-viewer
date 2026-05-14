@@ -1,4 +1,5 @@
 #include "GrafanaClient.h"
+#include "LogModel.h"
 #include <QUrl>
 #include <QUrlQuery>
 #include <QNetworkRequest>
@@ -328,7 +329,11 @@ void GrafanaClient::parseLogsResponse(const QByteArray& data) {
                     entry.allFields[colName] = val.toVariant();
                 }
             }
-            
+
+            // Single-pass level extraction so the histogram aggregator and any future
+            // C++ consumer don't have to re-scan the field map.
+            entry.level = LogModel::extractLevel(entry.allFields);
+
             entries.append(entry);
         }
     }

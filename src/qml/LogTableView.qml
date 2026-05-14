@@ -502,7 +502,11 @@ Rectangle {
                                     delegate: Rectangle {
                                         id: fieldDelegate
                                         Layout.fillWidth: true
-                                        implicitHeight: fieldGrid.implicitHeight + Theme.sp3 * 2
+                                        // Use Layout.preferredHeight rather than implicitHeight.
+                                        // On Qt 6.2, an implicitHeight binding inside ColumnLayout
+                                        // whose child GridLayout has Layout.fillWidth + wrapMode
+                                        // children trips the binding-loop detector.
+                                        Layout.preferredHeight: fieldGrid.implicitHeight + Theme.sp3 * 2
                                         color: fieldMouse.containsMouse ? Theme.rowHover : Theme.bgInput
                                         border.color: fieldMouse.containsMouse ? Theme.accent : Theme.borderMuted
                                         border.width: 1

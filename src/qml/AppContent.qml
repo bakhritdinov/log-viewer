@@ -81,12 +81,50 @@ Rectangle {
     function persistSelection() {
         if (typeof configManager === "undefined" || configManager === null) return
         if (!currentNamespace || !currentApp) return
-        configManager.setLastSelection(currentNamespace, currentApp, header.timeRange)
+        configManager.setLastSelection(currentNamespace, currentApp, header.timeRange,
+                                       header.customFrom, header.customTo)
     }
 
     Connections {
         target: header
-        function onTimeRangeChanged() { root.persistSelection() }
+        function onTimeRangeChanged() {
+            root.persistSelection()
+            root._recomputeBucketMs()
+        }
+    }
+
+    // Histogram bucket step. Snaps to readable intervals so tick labels align
+    // on round minutes/hours; aims for ~60 bars per range. Declared on root
+    // (not inside ColumnLayout) so HistogramChart.onBucketClicked can reach it.
+    property int _chartBucketMs: 60000
+    readonly property var _bucketSteps: [
+        60000, 300000, 900000, 1800000,
+        3600000, 21600000, 86400000
+    ]
+
+    property var _histClickPrev: null
+    function _recomputeBucketMs() {
+        let span = timeRangeSec
+        if (span <= 0) { _chartBucketMs = 60000; return }
+        let ideal = span * 1000 / 60
+        let chosen = _bucketSteps[_bucketSteps.length - 1]
+        for (let i = 0; i < _bucketSteps.length; i++) {
+            if (_bucketSteps[i] >= ideal) { chosen = _bucketSteps[i]; break }
+        }
+        _chartBucketMs = chosen
+    }
+    Component.onCompleted: _recomputeBucketMs()
+
+    function _clearHistogramFilter() {
+        if (_histClickPrev === null) return
+        let prev = _histClickPrev
+        _histClickPrev = null
+        if (typeof logModel !== "undefined" && logModel !== null) {
+            logModel.clearTimeLevelFilter()
+        }
+        if (prev.display !== undefined) {
+            header.timeRangeDisplay = prev.display
+        }
     }
 
     // Sidebar is an overlay drawer — closed by default; opened on demand.
@@ -122,6 +160,66 @@ Rectangle {
             }
         }
 
+        HistogramChart {
+            id: histogram
+            Layout.fillWidth: true
+            // Raise z only while a bar is hovered AND sidebar is closed so the
+            // hover card paints above the log table, but the sidebar (which sits
+            // at root level with high z) still wins when open.
+            z: (!root.sidebarOpen && hoverIndex >= 0) ? 10 : 0
+            buckets: []
+            bucketMs: root._chartBucketMs
+            filterActive: root._histClickPrev !== null
+
+            onResetRequested: root._clearHistogramFilter()
+
+            Component.onCompleted: {
+                if (typeof configManager !== "undefined" && configManager !== null) {
+                    chartHeight = configManager.histogramHeight(chartHeight)
+                    collapsed   = !configManager.histogramVisible()
+                    manualBucketMs = configManager.histogramBucketMs(0)
+                }
+            }
+            onCollapsedChanged: {
+                if (typeof configManager !== "undefined" && configManager !== null) {
+                    configManager.setHistogramVisible(!collapsed)
+                }
+            }
+            onChartHeightChanged: {
+                if (typeof configManager !== "undefined" && configManager !== null) {
+                    configManager.setHistogramHeight(chartHeight)
+                }
+            }
+            onBucketSizeChanged: {
+                if (typeof configManager !== "undefined" && configManager !== null) {
+                    configManager.setHistogramBucketMs(manualBucketMs)
+                }
+                root._refreshHistogram()
+            }
+
+            onBucketClicked: (fromMs, toMs, level) => {
+                if (typeof logModel === "undefined" || logModel === null) return
+                // Snapshot only the chip's display text — query state is left
+                // untouched because filtering is purely client-side over m_full.
+                if (root._histClickPrev === null) {
+                    root._histClickPrev = {
+                        timeRange: header.timeRange,
+                        customFrom: header.customFrom,
+                        customTo: header.customTo,
+                        searchText: header.searchText,
+                        display: header.timeRangeDisplay
+                    }
+                }
+                // Client-side filter over m_full — no new Loki query.
+                // This keeps chartCount == tableCount.
+                logModel.applyTimeLevelFilter(Number(fromMs), Number(toMs), level || "")
+
+                let fmt = (ms) => Qt.formatDateTime(new Date(ms), "MMM dd hh:mm:ss")
+                let suffix = level && level !== "" ? "  ·  " + level : ""
+                header.timeRangeDisplay = fmt(fromMs) + " → " + fmt(toMs) + suffix
+            }
+        }
+
         // Body — table fills, sidebar slides in over it.
         Item {
             id: body
@@ -148,26 +246,29 @@ Rectangle {
                 onNextPageRequested: root.gotoPage(root.currentPage + 1)
                 onLastPageRequested: root.gotoPage(root.maxPage - 1)
             }
-
-            // Backdrop — click outside closes.
-            Rectangle {
-                anchors.fill: parent
-                color: "#000000"
-                opacity: root.sidebarOpen ? 0.4 : 0
-                visible: opacity > 0
-                Behavior on opacity { NumberAnimation { duration: Theme.dBase } }
-                MouseArea { anchors.fill: parent; onClicked: root.sidebarOpen = false }
-            }
-
-            // Sidebar drawer — slides in from the left.
-            Sidebar {
-                id: sidebar
-                width: Math.min(360, root.width * 0.6)
-                height: parent.height
-                x: root.sidebarOpen ? 0 : -width
-                Behavior on x { NumberAnimation { duration: Theme.dBase; easing.type: Easing.OutCubic } }
-            }
         }
+    }
+
+    // Backdrop + Sidebar live at root level (outside ColumnLayout) so they
+    // can overlay the entire window, not just the table area.
+    Rectangle {
+        anchors.fill: parent
+        color: "#000000"
+        opacity: root.sidebarOpen ? 0.4 : 0
+        visible: opacity > 0
+        z: 50
+        Behavior on opacity { NumberAnimation { duration: Theme.dBase } }
+        MouseArea { anchors.fill: parent; onClicked: root.sidebarOpen = false }
+    }
+
+    Sidebar {
+        id: sidebar
+        width: Math.min(360, root.width * 0.6)
+        height: root.height
+        y: 0
+        x: root.sidebarOpen ? 0 : -width
+        z: 60
+        Behavior on x { NumberAnimation { duration: Theme.dBase; easing.type: Easing.OutCubic } }
     }
 
     // Debounce search-text edits — fire ~350ms after the user stops typing.
@@ -270,7 +371,20 @@ Rectangle {
                 PrimaryButton {
                     text: "Retry"
                     Layout.preferredWidth: 90
-                    onClicked: { errorDialog.close(); root.refreshLogs(header.searchText) }
+                    onClicked: {
+                        errorDialog.close()
+                        // If discovery never completed (no ns/app), restart it.
+                        // refreshLogs would just return early otherwise.
+                        if (typeof grafanaClient !== "undefined" && grafanaClient !== null
+                         && typeof configManager !== "undefined" && configManager !== null
+                         && (!root.currentNamespace || !root.currentApp)) {
+                            grafanaClient.fetchMappings(configManager.url(), configManager.token(),
+                                                        configManager.datasourceUid(),
+                                                        configManager.user(), configManager.password())
+                        } else {
+                            root.refreshLogs(header.searchText)
+                        }
+                    }
                 }
             }
         }
@@ -306,6 +420,9 @@ Rectangle {
                 header.searchText = trimmed + " AND " + filter
             }
         }
+        // Stop the debounce the searchText change just restarted — we are
+        // already refreshing here. Otherwise the screen flashes twice.
+        searchDebounce.stop()
         refreshLogs(header.searchText)
     }
 
@@ -326,7 +443,12 @@ Rectangle {
                     let kv = p.split(":")
                     let key = kv[0].trim()
                     let val = kv.slice(1).join(":").replace(/"/g, "").trim()
-                    pipeline += ` ${key}:"${_escapeLogsQL(val)}"`
+                    // Leading '~' = regex filter (key:~"pattern" in LogsQL).
+                    if (val.length > 1 && val[0] === "~") {
+                        pipeline += ` ${key}:~"${_escapeLogsQL(val.substring(1))}"`
+                    } else {
+                        pipeline += ` ${key}:"${_escapeLogsQL(val)}"`
+                    }
                 } else {
                     pipeline += ` ~"(?i)${_escapeLogsQL(p)}"`
                 }
@@ -338,10 +460,18 @@ Rectangle {
     // Kicks off a fresh full-window load. Internally chains 1000-row batches until the
     // window is exhausted or maxLogsToLoad is reached, then applies the page slice.
     function refreshLogs(query) {
-        if (!currentNamespace || !currentApp) return;
         if (typeof configManager === "undefined" || configManager === null
          || typeof grafanaClient === "undefined" || grafanaClient === null
          || typeof logModel === "undefined" || logModel === null) return;
+        // Discovery never completed (offline at start / stale VPN): namespace and
+        // app are empty. Pull mappings instead — success populates them, failure
+        // surfaces an errorDialog with Retry.
+        if (!currentNamespace || !currentApp) {
+            grafanaClient.fetchMappings(configManager.url(), configManager.token(),
+                                        configManager.datasourceUid(),
+                                        configManager.user(), configManager.password())
+            return
+        }
 
         // Cancel any in-flight chain by changing correlation id.
         _loadCorrelationId = "load-" + Date.now()
@@ -351,9 +481,14 @@ Rectangle {
         maxLogsToLoad = loadStepSize  // reset cap on every fresh load
         hasMore = false
         chainInProgress = true
+        // Any explicit refresh drops the histogram filter — new data is a fresh state.
+        if (logModel.hasTimeLevelFilter()) logModel.clearTimeLevelFilter()
+        _histClickPrev = null
         logModel.clear()
         _lastTotal = 0
         _loadOffsetSec = 0
+        // Wipe the chart so stale bars don't linger between queries.
+        if (typeof histogram !== "undefined" && histogram !== null) histogram.buckets = []
         _fetchNextBatch(_loadCorrelationId)
     }
 
@@ -397,11 +532,13 @@ Rectangle {
         if (added === 0) {
             hasMore = false
             _commitLoad()
+            _refreshHistogram()
             return
         }
 
         // Update facets incrementally so the user sees fields appear as data streams in.
         _emitFacets()
+        _refreshHistogram()
 
         let oldestMs = logModel.oldestTimestamp()
         if (oldestMs <= 0) { hasMore = false; _commitLoad(); return }
@@ -415,6 +552,14 @@ Rectangle {
         if (nowTotal >= maxLogsToLoad) { hasMore = true;  _commitLoad(); return }
 
         _fetchNextBatch(_loadCorrelationId)
+    }
+
+    function _refreshHistogram() {
+        if (typeof logModel === "undefined" || logModel === null) return
+        if (typeof histogram === "undefined" || histogram === null) return
+        let bucketMs = histogram.manualBucketMs > 0 ? histogram.manualBucketMs : _chartBucketMs
+        histogram.bucketMs = bucketMs
+        histogram.buckets = logModel.aggregateByLevel(bucketMs)
     }
 
     function _commitLoad() {

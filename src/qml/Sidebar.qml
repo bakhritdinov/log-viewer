@@ -11,6 +11,15 @@ Rectangle {
     property string expandedField: ""
     property string filterText: fieldSearch.text.toLowerCase()
 
+    // Parse "key:value" from the search input. When a colon is present the
+    // filter becomes 2D: the key part limits visible fields, the value part
+    // limits values within each field.
+    readonly property var kvFilter: {
+        let m = root.filterText.match(/^\s*([^:]*?)\s*:\s*(.*)\s*$/)
+        if (!m) return null
+        return { key: m[1] || "", value: m[2] || "" }
+    }
+
     signal expansionChanged(bool expanded)
 
     readonly property int fieldCount: facets ? Object.keys(facets).length : 0
@@ -42,7 +51,7 @@ Rectangle {
             id: fieldSearch
             Layout.fillWidth: true
             implicitHeight: Theme.hInput
-            placeholderText: "Search fields…"
+            placeholderText: "Search fields, values or key:value…"
         }
 
         ListView {
@@ -57,7 +66,16 @@ Rectangle {
             model: {
                 if (!root.facets) return [];
                 let keys = Object.keys(root.facets);
-                if (root.filterText !== "") {
+                if (root.kvFilter) {
+                    let kF = root.kvFilter.key
+                    let vF = root.kvFilter.value
+                    keys = keys.filter(k => {
+                        if (kF !== "" && !k.toLowerCase().includes(kF)) return false
+                        if (vF === "") return true
+                        let values = Object.keys(root.facets[k])
+                        return values.some(v => v.toLowerCase().includes(vF))
+                    })
+                } else if (root.filterText !== "") {
                     keys = keys.filter(k => {
                         if (k.toLowerCase().includes(root.filterText)) return true;
                         let values = Object.keys(root.facets[k]);
@@ -74,7 +92,12 @@ Rectangle {
                 property string fieldName: modelData
                 property var fieldValues: root.facets ? root.facets[fieldName] : ({})
                 property int fieldValueCount: fieldValues ? Object.keys(fieldValues).length : 0
-                property bool isExpanded: root.expandedField === fieldName || (root.filterText !== "" && !fieldName.toLowerCase().includes(root.filterText))
+                // Auto-expand when: the user clicked it; the plain filter matched
+                // a value (not the field name); or the kv-filter is active.
+                property bool isExpanded:
+                    root.expandedField === fieldName
+                    || (root.kvFilter !== null)
+                    || (root.kvFilter === null && root.filterText !== "" && !fieldName.toLowerCase().includes(root.filterText))
 
                 Item {
                     width: parent.width
@@ -138,7 +161,10 @@ Rectangle {
                         model: {
                             if (!fieldGroup.isExpanded || !fieldGroup.fieldValues) return [];
                             let vKeys = Object.keys(fieldGroup.fieldValues);
-                            if (root.filterText !== "" && !fieldGroup.fieldName.toLowerCase().includes(root.filterText)) {
+                            if (root.kvFilter) {
+                                let vF = root.kvFilter.value
+                                if (vF !== "") vKeys = vKeys.filter(v => v.toLowerCase().includes(vF))
+                            } else if (root.filterText !== "" && !fieldGroup.fieldName.toLowerCase().includes(root.filterText)) {
                                 vKeys = vKeys.filter(v => v.toLowerCase().includes(root.filterText));
                             }
                             return vKeys.sort((a, b) => fieldGroup.fieldValues[b] - fieldGroup.fieldValues[a]).slice(0, 50);
