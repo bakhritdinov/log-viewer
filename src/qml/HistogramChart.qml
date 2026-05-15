@@ -27,19 +27,15 @@ Rectangle {
     property real hoverCenterX: 0
 
     readonly property var totals: {
-        let t = { ERROR: 0, WARN: 0, INFO: 0, DEBUG: 0, TRACE: 0, EMPTY: 0 }
+        let t = { ERROR: 0, WARN: 0 }
         for (let i = 0; i < buckets.length; i++) {
             let b = buckets[i]
             t.ERROR += (b.ERROR || 0)
             t.WARN  += (b.WARN  || 0)
-            t.INFO  += (b.INFO  || 0)
-            t.DEBUG += (b.DEBUG || 0)
-            t.TRACE += (b.TRACE || 0)
-            t.EMPTY += (b.EMPTY || 0)
         }
         return t
     }
-    readonly property int grandTotal: totals.ERROR + totals.WARN + totals.INFO + totals.DEBUG + totals.TRACE + totals.EMPTY
+    readonly property int grandTotal: totals.ERROR + totals.WARN
 
     signal bucketClicked(real fromMs, real toMs, string level)
     signal resetRequested()
@@ -194,10 +190,7 @@ Rectangle {
         Repeater {
             model: [
                 { name: "ERROR", color: Theme.levelError, count: chart.totals.ERROR },
-                { name: "WARN",  color: Theme.levelWarn,  count: chart.totals.WARN  },
-                { name: "INFO",  color: Theme.levelInfo,  count: chart.totals.INFO  },
-                { name: "DEBUG", color: Theme.levelDebug, count: chart.totals.DEBUG },
-                { name: "TRACE", color: Theme.levelTrace, count: chart.totals.TRACE }
+                { name: "WARN",  color: Theme.levelWarn,  count: chart.totals.WARN  }
             ]
             delegate: Row {
                 spacing: 4
@@ -316,8 +309,7 @@ Rectangle {
             let m = 1
             for (let i = 0; i < chart.buckets.length; i++) {
                 let b = chart.buckets[i]
-                let t = (b.ERROR || 0) + (b.WARN || 0) + (b.INFO || 0)
-                      + (b.DEBUG || 0) + (b.TRACE || 0) + (b.EMPTY || 0)
+                let t = (b.ERROR || 0) + (b.WARN || 0)
                 if (t > m) m = t
             }
             return m
@@ -334,52 +326,16 @@ Rectangle {
 
                 readonly property int cError: modelData.ERROR || 0
                 readonly property int cWarn:  modelData.WARN  || 0
-                readonly property int cInfo:  modelData.INFO  || 0
-                readonly property int cDebug: modelData.DEBUG || 0
-                readonly property int cTrace: modelData.TRACE || 0
-                readonly property int cEmpty: modelData.EMPTY || 0
-                readonly property int total: cError + cWarn + cInfo + cDebug + cTrace + cEmpty
+                readonly property int total: cError + cWarn
                 readonly property real scale: barRow.maxTotal > 0 ? (height - 2) / barRow.maxTotal : 0
 
                 readonly property bool isHovered: chart.hoverIndex === index
 
-                // Stack bottom→top: EMPTY, TRACE, DEBUG, INFO, WARN, ERROR.
-                Rectangle {
-                    id: segEmpty
-                    width: parent.width
-                    anchors.bottom: parent.bottom
-                    height: bar.cEmpty * bar.scale
-                    color: Theme.borderMuted
-                    opacity: bar.isHovered && chart.hoverLevel === "" ? 1.0 : (bar.isHovered ? 0.55 : 1.0)
-                }
-                Rectangle {
-                    id: segTrace
-                    width: parent.width
-                    anchors.bottom: segEmpty.top
-                    height: bar.cTrace * bar.scale
-                    color: Theme.levelTrace
-                    opacity: bar.isHovered && chart.hoverLevel === "TRACE" ? 1.0 : (bar.isHovered ? 0.55 : 1.0)
-                }
-                Rectangle {
-                    id: segDebug
-                    width: parent.width
-                    anchors.bottom: segTrace.top
-                    height: bar.cDebug * bar.scale
-                    color: Theme.levelDebug
-                    opacity: bar.isHovered && chart.hoverLevel === "DEBUG" ? 1.0 : (bar.isHovered ? 0.55 : 1.0)
-                }
-                Rectangle {
-                    id: segInfo
-                    width: parent.width
-                    anchors.bottom: segDebug.top
-                    height: bar.cInfo * bar.scale
-                    color: Theme.levelInfo
-                    opacity: bar.isHovered && chart.hoverLevel === "INFO" ? 1.0 : (bar.isHovered ? 0.55 : 1.0)
-                }
+                // Stack bottom→top: WARN, ERROR.
                 Rectangle {
                     id: segWarn
                     width: parent.width
-                    anchors.bottom: segInfo.top
+                    anchors.bottom: parent.bottom
                     height: bar.cWarn * bar.scale
                     color: Theme.levelWarn
                     opacity: bar.isHovered && chart.hoverLevel === "WARN" ? 1.0 : (bar.isHovered ? 0.55 : 1.0)
@@ -405,23 +361,15 @@ Rectangle {
                         switch (chart.hoverLevel) {
                             case "ERROR": return bar.cError * bar.scale
                             case "WARN":  return bar.cWarn  * bar.scale
-                            case "INFO":  return bar.cInfo  * bar.scale
-                            case "DEBUG": return bar.cDebug * bar.scale
-                            case "TRACE": return bar.cTrace * bar.scale
-                            default:      return bar.cEmpty * bar.scale
+                            default:      return bar.total  * bar.scale
                         }
                     }
                     y: {
                         let bottom = parent.height
-                        let h = 0
                         switch (chart.hoverLevel) {
-                            case "ERROR": h = bar.cError * bar.scale
-                                         return bottom - (bar.cEmpty + bar.cTrace + bar.cDebug + bar.cInfo + bar.cWarn + bar.cError) * bar.scale
-                            case "WARN":  return bottom - (bar.cEmpty + bar.cTrace + bar.cDebug + bar.cInfo + bar.cWarn) * bar.scale
-                            case "INFO":  return bottom - (bar.cEmpty + bar.cTrace + bar.cDebug + bar.cInfo) * bar.scale
-                            case "DEBUG": return bottom - (bar.cEmpty + bar.cTrace + bar.cDebug) * bar.scale
-                            case "TRACE": return bottom - (bar.cEmpty + bar.cTrace) * bar.scale
-                            default:      return bottom - bar.cEmpty * bar.scale
+                            case "ERROR": return bottom - (bar.cWarn + bar.cError) * bar.scale
+                            case "WARN":  return bottom - bar.cWarn * bar.scale
+                            default:      return bottom - bar.total * bar.scale
                         }
                     }
                 }
@@ -434,10 +382,6 @@ Rectangle {
 
                     function _detectLevel(y) {
                         let segs = [
-                            { level: "",      h: bar.cEmpty * bar.scale },
-                            { level: "TRACE", h: bar.cTrace * bar.scale },
-                            { level: "DEBUG", h: bar.cDebug * bar.scale },
-                            { level: "INFO",  h: bar.cInfo  * bar.scale },
                             { level: "WARN",  h: bar.cWarn  * bar.scale },
                             { level: "ERROR", h: bar.cError * bar.scale }
                         ]
@@ -543,9 +487,6 @@ Rectangle {
             switch (chart.hoverLevel) {
                 case "ERROR": return Theme.levelError
                 case "WARN":  return Theme.levelWarn
-                case "INFO":  return Theme.levelInfo
-                case "DEBUG": return Theme.levelDebug
-                case "TRACE": return Theme.levelTrace
                 default:      return Theme.accent
             }
         }
@@ -555,12 +496,7 @@ Rectangle {
             switch (chart.hoverLevel) {
                 case "ERROR": return d.ERROR || 0
                 case "WARN":  return d.WARN  || 0
-                case "INFO":  return d.INFO  || 0
-                case "DEBUG": return d.DEBUG || 0
-                case "TRACE": return d.TRACE || 0
-                default:
-                    return (d.ERROR||0) + (d.WARN||0) + (d.INFO||0)
-                         + (d.DEBUG||0) + (d.TRACE||0) + (d.EMPTY||0)
+                default:      return (d.ERROR || 0) + (d.WARN || 0)
             }
         }
         readonly property string levelLabel: chart.hoverLevel === "" ? "TOTAL" : chart.hoverLevel
