@@ -19,11 +19,21 @@ Homepage: https://github.com/bakhritdinov/log-viewer
 Package: log-viewer
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends},
+         libqt6quickcontrols2-6,
+         libqt6svg6,
+         qt6-qpa-plugins,
+         qt6-wayland,
+         qml6-module-qtqml,
+         qml6-module-qtqml-workerscript,
          qml6-module-qtquick,
          qml6-module-qtquick-controls,
          qml6-module-qtquick-layouts,
          qml6-module-qtquick-templates,
          qml6-module-qtquick-window,
-         libqt6svg6
+         libxcb-cursor0,
+         libxkbcommon-x11-0,
+         libgl1,
+         libegl1,
+         fontconfig
 Description: Reactive Log Viewer for Grafana Loki
  High-performance desktop application for viewing logs from Grafana Loki.

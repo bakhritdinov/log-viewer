@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(LogViewer VERSION 2.4.0 LANGUAGES CXX)
+project(LogViewer VERSION 2.4.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -170,7 +170,25 @@ elseif(UNIX AND NOT APPLE)
     set(CPACK_GENERATOR "DEB")
     set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-Linux-x86_64")
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR}")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6core6, libqt6gui6, libqt6quick6, libqt6network6, libqt6svg6")
+    # Runtime deps for a Qt 6 Quick app on Ubuntu. Beyond the obvious Qt libs we
+    # must list:
+    #   * libqt6quickcontrols2-6 — C++ backing for Controls (Dialog/Popup/Menu).
+    #   * qml6-module-* — QML imports loaded by name at runtime; the linker
+    #     can't see them, so dpkg-shlibdeps won't add them.
+    #   * libxcb-cursor0 — Qt 6.5+ requires it for the xcb platform plugin but
+    #     libqt6gui6 still does not depend on it, so a fresh Ubuntu install
+    #     fails with `Could not find the Qt platform plugin "xcb"`.
+    #   * libxkbcommon-x11-0 — keyboard layout under X11.
+    #   * qt6-qpa-plugins — bundles the xcb (and offscreen/minimal) plugins.
+    #   * qt6-wayland — wayland session fallback so the app launches under
+    #     GNOME/KDE Wayland without forcing XWayland.
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS
+        "libqt6core6, libqt6gui6, libqt6qml6, libqt6quick6, libqt6quickcontrols2-6, libqt6network6, libqt6svg6, \
+qt6-qpa-plugins, qt6-wayland, \
+qml6-module-qtqml, qml6-module-qtqml-workerscript, qml6-module-qtquick, qml6-module-qtquick-controls, \
+qml6-module-qtquick-layouts, qml6-module-qtquick-templates, qml6-module-qtquick-window, \
+libxcb-cursor0, libxkbcommon-x11-0, libgl1, libegl1, \
+fontconfig, libfontconfig1")
     
     find_program(QT_QMAKE_EXECUTABLE NAMES qmake6 qmake PATHS /usr/lib/qt6/bin /usr/bin)
 
