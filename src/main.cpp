@@ -4,9 +4,11 @@
 #include <QQmlEngine>
 #include <QStringConverter>
 #include <QIcon>
+#include <QTimer>
 #include "GrafanaClient.h"
 #include "LogModel.h"
 #include "ConfigManager.h"
+#include "UpdateChecker.h"
 
 int main(int argc, char *argv[]) {
     qputenv("QT_QUICK_CONTROLS_STYLE", "Basic");
@@ -31,6 +33,16 @@ int main(int argc, char *argv[]) {
     GrafanaClient client;
     LogModel model;
     ConfigManager config;
+    UpdateChecker updateChecker;
+
+    // First check 3s after launch so it doesn't compete with initial Loki query;
+    // then re-check every 6h while the app stays open.
+    QTimer::singleShot(3000, &updateChecker, &UpdateChecker::checkForUpdates);
+    QTimer* updateTimer = new QTimer(&app);
+    updateTimer->setInterval(6 * 60 * 60 * 1000);
+    QObject::connect(updateTimer, &QTimer::timeout,
+                     &updateChecker, &UpdateChecker::checkForUpdates);
+    updateTimer->start();
 
     // Direct C++ wiring — the QML signal hop can't convert JS-array back to
     // QList<LogEntry> (LogEntry isn't a Q_GADGET), so QML can't call appendEntries
@@ -42,6 +54,7 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("grafanaClient", &client);
     engine.rootContext()->setContextProperty("logModel", &model);
     engine.rootContext()->setContextProperty("configManager", &config);
+    engine.rootContext()->setContextProperty("updateChecker", &updateChecker);
     engine.rootContext()->setContextProperty("appVersion", APP_VERSION);
 
     const QUrl url(QStringLiteral("qrc:/qt/qml/LogViewerApp/src/qml/Main.qml"));

@@ -138,6 +138,11 @@ Rectangle {
         anchors.fill: parent
         spacing: 0
 
+        UpdateBanner {
+            id: updateBanner
+            Layout.fillWidth: true
+        }
+
         SearchHeader {
             id: header
             Layout.fillWidth: true

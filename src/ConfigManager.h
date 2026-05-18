@@ -81,6 +81,15 @@ public:
         m_settings.setValue("histogram/bucketMs", ms);
     }
 
+    // Version the user dismissed from the update banner — banner stays hidden
+    // until a strictly newer version appears upstream.
+    Q_INVOKABLE QString dismissedUpdateVersion() {
+        return m_settings.value("update/dismissedVersion").toString();
+    }
+    Q_INVOKABLE void setDismissedUpdateVersion(const QString& v) {
+        m_settings.setValue("update/dismissedVersion", v);
+    }
+
 signals:
     void searchHistoryChanged();
 

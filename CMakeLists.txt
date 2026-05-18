@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(LogViewer VERSION 2.4.1 LANGUAGES CXX)
+project(LogViewer VERSION 2.5.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_definitions(-DAPP_VERSION="${PROJECT_VERSION}")
-add_definitions(-DGITHUB_REPO="boburbakhritdinov/log-viewer")
+add_definitions(-DGITHUB_REPO="bakhritdinov/log-viewer")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -38,6 +38,7 @@ qt_add_executable(LogViewer
     src/GrafanaClient.cpp src/GrafanaClient.h
     src/LogModel.cpp src/LogModel.h
     src/ConfigManager.cpp src/ConfigManager.h
+    src/UpdateChecker.cpp src/UpdateChecker.h
 )
 
 # Application Icon
@@ -88,6 +89,7 @@ qt_add_qml_module(LogViewer
         src/qml/SkeletonRow.qml
         src/qml/PageBar.qml
         src/qml/HistogramChart.qml
+        src/qml/UpdateBanner.qml
     RESOURCES
         src/resources/icon.png
         src/qml/Theme.qml
