@@ -25,6 +25,32 @@ ApplicationWindow {
         color: Theme.bg
     }
 
+    menuBar: MenuBar {
+        background: Rectangle { color: Theme.bgRaised; border.color: Theme.borderMuted; border.width: 1 }
+        Menu {
+            title: qsTr("&Tools")
+            Action {
+                text: qsTr("Manage &Ecotone…")
+                shortcut: "Ctrl+E"
+                onTriggered: window.openEcotone()
+            }
+        }
+    }
+
+    // Lazily instantiated to keep startup fast — the window is only paid
+    // for the moment the user opens it the first time.
+    Loader { id: ecotoneLoader; asynchronous: false; source: "" }
+    function openEcotone() {
+        if (ecotoneLoader.source.toString() === "") {
+            ecotoneLoader.source = "qrc:/qt/qml/LogViewerApp/src/ecotone/qml/EcotoneWindow.qml"
+        }
+        if (ecotoneLoader.item) {
+            ecotoneLoader.item.show()
+            ecotoneLoader.item.raise()
+            ecotoneLoader.item.requestActivate()
+        }
+    }
+
     // Main designable content
     AppContent {
         id: mainContent

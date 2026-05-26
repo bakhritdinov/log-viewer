@@ -2,7 +2,6 @@
 
 #include <QObject>
 #include <QSettings>
-#include "GrafanaClient.h"
 
 class ConfigManager : public QObject {
     Q_OBJECT

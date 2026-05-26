@@ -5,10 +5,14 @@
 #include <QStringConverter>
 #include <QIcon>
 #include <QTimer>
-#include "GrafanaClient.h"
-#include "LogModel.h"
 #include "ConfigManager.h"
 #include "UpdateChecker.h"
+#include "logs/GrafanaClient.h"
+#include "logs/LogModel.h"
+#include "ecotone/EcotoneClient.h"
+#include "ecotone/ErrorMessagesModel.h"
+#include "ecotone/EcotoneConfigManager.h"
+#include "ecotone/FifoChannels.h"
 
 int main(int argc, char *argv[]) {
     qputenv("QT_QUICK_CONTROLS_STYLE", "Basic");
@@ -25,15 +29,23 @@ int main(int argc, char *argv[]) {
     // and Theme.* resolves to undefined. Manual registration works on all
     // Qt 6.x versions.
     qmlRegisterSingletonType(
-        QUrl(QStringLiteral("qrc:/qt/qml/LogViewerApp/src/qml/Theme.qml")),
+        QUrl(QStringLiteral("qrc:/qt/qml/LogViewerApp/src/common/qml/Theme.qml")),
         "LogViewerApp", 1, 0, "Theme");
 
     QQmlApplicationEngine engine;
 
-    GrafanaClient client;
-    LogModel model;
     ConfigManager config;
     UpdateChecker updateChecker;
+
+    GrafanaClient client;
+    LogModel model;
+
+    FifoChannels fifoChannels;
+    EcotoneClient ecotoneClient;
+    ecotoneClient.setFifoChannels(&fifoChannels);
+    ErrorMessagesModel errorMessagesModel;
+    errorMessagesModel.setFifoChannels(&fifoChannels);
+    EcotoneConfigManager ecotoneConfig;
 
     // First check 3s after launch so it doesn't compete with initial Loki query;
     // then re-check every 6h while the app stays open.
@@ -51,13 +63,21 @@ int main(int argc, char *argv[]) {
     QObject::connect(&client, &GrafanaClient::logsReceived, &model, &LogModel::appendEntries);
     QObject::connect(&client, &GrafanaClient::loadingChanged, &model, &LogModel::setLoading);
 
+    QObject::connect(&ecotoneClient, &EcotoneClient::errorsReceived,
+                     &errorMessagesModel, &ErrorMessagesModel::setEntries);
+
     engine.rootContext()->setContextProperty("grafanaClient", &client);
     engine.rootContext()->setContextProperty("logModel", &model);
     engine.rootContext()->setContextProperty("configManager", &config);
     engine.rootContext()->setContextProperty("updateChecker", &updateChecker);
     engine.rootContext()->setContextProperty("appVersion", APP_VERSION);
 
-    const QUrl url(QStringLiteral("qrc:/qt/qml/LogViewerApp/src/qml/Main.qml"));
+    engine.rootContext()->setContextProperty("ecotoneClient", &ecotoneClient);
+    engine.rootContext()->setContextProperty("errorMessagesModel", &errorMessagesModel);
+    engine.rootContext()->setContextProperty("ecotoneConfig", &ecotoneConfig);
+    engine.rootContext()->setContextProperty("fifoChannels", &fifoChannels);
+
+    const QUrl url(QStringLiteral("qrc:/qt/qml/LogViewerApp/src/logs/qml/Main.qml"));
     if (url.isEmpty()) {
         qCritical() << "URL is empty!";
     }

@@ -17,7 +17,7 @@ if(APPLE)
     set(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Quick Network Svg Gui)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick Network Svg Gui Sql Concurrent)
 
 # Set Qt policies for compatibility
 if(POLICY QTP0004)
@@ -32,14 +32,34 @@ else()
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
+# --- Module static libraries -------------------------------------------------
+# Code is grouped by concern: logs (Grafana/Loki) and ecotone (DLQ from Postgres).
+# Shared QML lives in src/common/qml and is bundled into the executable's QML
+# module below, so no separate "common" static library is needed at the C++ level.
+
+add_library(LogViewerLogs STATIC
+    src/logs/GrafanaClient.cpp src/logs/GrafanaClient.h
+    src/logs/LogModel.cpp src/logs/LogModel.h
+)
+target_include_directories(LogViewerLogs PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(LogViewerLogs PUBLIC Qt6::Core Qt6::Network)
+
+add_library(LogViewerEcotone STATIC
+    src/ecotone/EcotoneClient.cpp src/ecotone/EcotoneClient.h
+    src/ecotone/ErrorMessagesModel.cpp src/ecotone/ErrorMessagesModel.h
+    src/ecotone/EcotoneConfigManager.cpp src/ecotone/EcotoneConfigManager.h
+    src/ecotone/FifoChannels.cpp src/ecotone/FifoChannels.h
+)
+target_include_directories(LogViewerEcotone PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(LogViewerEcotone PUBLIC Qt6::Core Qt6::Sql Qt6::Concurrent)
+
 qt_add_executable(LogViewer
     MACOSX_BUNDLE
     src/main.cpp
-    src/GrafanaClient.cpp src/GrafanaClient.h
-    src/LogModel.cpp src/LogModel.h
     src/ConfigManager.cpp src/ConfigManager.h
     src/UpdateChecker.cpp src/UpdateChecker.h
 )
+target_include_directories(LogViewer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Application Icon
 if(APPLE)
@@ -69,37 +89,50 @@ qt_add_qml_module(LogViewer
     VERSION 1.0
     RESOURCE_PREFIX /qt/qml
     QML_FILES
-        src/qml/Main.qml
-        src/qml/AppContent.qml
-        src/qml/SearchHeader.qml
-        src/qml/LogTableView.qml
-        src/qml/Sidebar.qml
-        src/qml/SettingsDialog.qml
-        src/qml/CalendarPopup.qml
-        src/qml/Card.qml
-        src/qml/Badge.qml
-        src/qml/Chip.qml
-        src/qml/SectionHeader.qml
-        src/qml/IconButton.qml
-        src/qml/PageButton.qml
-        src/qml/PrimaryButton.qml
-        src/qml/SecondaryButton.qml
-        src/qml/AppTextField.qml
-        src/qml/TimeRangePicker.qml
-        src/qml/SkeletonRow.qml
-        src/qml/PageBar.qml
-        src/qml/HistogramChart.qml
-        src/qml/UpdateBanner.qml
+        # Logs module — Grafana/Loki UI
+        src/logs/qml/Main.qml
+        src/logs/qml/AppContent.qml
+        src/logs/qml/SearchHeader.qml
+        src/logs/qml/LogTableView.qml
+        src/logs/qml/Sidebar.qml
+        src/logs/qml/SettingsDialog.qml
+        src/logs/qml/CalendarPopup.qml
+        src/logs/qml/TimeRangePicker.qml
+        src/logs/qml/SkeletonRow.qml
+        src/logs/qml/PageBar.qml
+        src/logs/qml/PageButton.qml
+        src/logs/qml/HistogramChart.qml
+        src/logs/qml/UpdateBanner.qml
+        # Common module — shared UI primitives
+        src/common/qml/Card.qml
+        src/common/qml/Badge.qml
+        src/common/qml/Chip.qml
+        src/common/qml/SectionHeader.qml
+        src/common/qml/IconButton.qml
+        src/common/qml/PrimaryButton.qml
+        src/common/qml/SecondaryButton.qml
+        src/common/qml/AppTextField.qml
+        src/common/qml/StatusPill.qml
+        # Ecotone module — DLQ viewer
+        src/ecotone/qml/EcotoneWindow.qml
+        src/ecotone/qml/EcotoneTableView.qml
+        src/ecotone/qml/EcotoneDetailsPane.qml
+        src/ecotone/qml/EcotoneSettingsDialog.qml
+        src/ecotone/qml/ReplayConfirmDialog.qml
+        src/ecotone/qml/ReplayFifoGroupDialog.qml
+        src/ecotone/qml/MessageDetailsWindow.qml
     RESOURCES
         src/resources/icon.png
-        src/qml/Theme.qml
+        src/common/qml/Theme.qml
 )
 
-target_link_libraries(LogViewer PRIVATE 
-    Qt6::Core 
-    Qt6::Quick 
-    Qt6::Network 
+target_link_libraries(LogViewer PRIVATE
+    Qt6::Core
+    Qt6::Quick
+    Qt6::Network
     Qt6::Svg
+    LogViewerLogs
+    LogViewerEcotone
 )
 
 include(GNUInstallDirs)
@@ -186,6 +219,7 @@ elseif(UNIX AND NOT APPLE)
     #     GNOME/KDE Wayland without forcing XWayland.
     set(CPACK_DEBIAN_PACKAGE_DEPENDS
         "libqt6core6, libqt6gui6, libqt6qml6, libqt6quick6, libqt6quickcontrols2-6, libqt6network6, libqt6svg6, \
+libqt6sql6-psql, libqt6concurrent6, \
 qt6-qpa-plugins, qt6-wayland, \
 qml6-module-qtqml, qml6-module-qtqml-workerscript, qml6-module-qtquick, qml6-module-qtquick-controls, \
 qml6-module-qtquick-layouts, qml6-module-qtquick-templates, qml6-module-qtquick-window, \
