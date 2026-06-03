@@ -65,6 +65,12 @@ Rectangle {
     // Persists for the session — reset on next launch.
     property bool prettyMessage: true
 
+    // Details view mode for the expanded row: false = structured field cards,
+    // true = a single raw JSON envelope (timestamp + message + fields), the way
+    // the entry roughly looks coming back from Grafana. Like prettyMessage this
+    // is a session-wide preference shared by every row.
+    property bool rawView: false
+
     // If `text` parses as JSON, return a 2-space indented form. Otherwise the original.
     function prettyFormat(text) {
         if (!text) return ""
@@ -87,6 +93,46 @@ Rectangle {
         let first = trimmed[0]
         if (first !== "{" && first !== "[") return false
         try { JSON.parse(trimmed); return true } catch (e) { return false }
+    }
+
+    // Plain-text dump of one row's full details for "Copy all": the message
+    // (pretty/raw per the current toggle) followed by every field as `key: value`,
+    // sorted by key and formatted with the model's formatValue — matching the panel.
+    function buildFullDetails(msg, fieldsObj) {
+        let out = "message: " + (tableRoot.prettyMessage ? tableRoot.prettyFormat(msg) : msg)
+        if (fieldsObj) {
+            let keys = Object.keys(fieldsObj).sort()
+            if (keys.length > 0) out += "\n"
+            for (let i = 0; i < keys.length; i++) {
+                let k = keys[i]
+                let v = (typeof logModel !== "undefined" && logModel !== null)
+                    ? logModel.formatValue(fieldsObj[k])
+                    : String(fieldsObj[k])
+                out += "\n" + k + ": " + v
+            }
+        }
+        return out
+    }
+
+    // Reconstruct one entry as a pretty-printed JSON envelope for the raw view —
+    // { timestamp, message, fields }. When the message is itself JSON it's embedded
+    // parsed (not as an escaped string) so the whole record reads as structured data.
+    function buildRawJson(ts, msg, fieldsObj) {
+        let parsedMsg = null
+        let trimmed = String(msg).trim()
+        if (trimmed.length >= 2 && (trimmed[0] === "{" || trimmed[0] === "[")) {
+            try { parsedMsg = JSON.parse(trimmed) } catch (e) { parsedMsg = null }
+        }
+        let obj = {}
+        if (ts) obj.timestamp = ts
+        obj.message = parsedMsg !== null ? parsedMsg : msg
+        if (fieldsObj) {
+            let fields = {}
+            let keys = Object.keys(fieldsObj).sort()
+            for (let i = 0; i < keys.length; i++) fields[keys[i]] = fieldsObj[keys[i]]
+            obj.fields = fields
+        }
+        try { return JSON.stringify(obj, null, 2) } catch (e) { return String(msg) }
     }
 
     // Wrap matched substrings in a HTML span so they're tinted with the accent color.
@@ -398,10 +444,45 @@ Rectangle {
                             anchors.margins: Theme.sp4
                             spacing: Theme.sp3
 
+                            // View-mode toggle: structured field cards vs. a single raw JSON envelope.
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 0
+
+                                Rectangle {
+                                    Layout.alignment: Qt.AlignLeft
+                                    implicitHeight: 26
+                                    implicitWidth: segRow.implicitWidth + 4
+                                    radius: Theme.rSm
+                                    color: Theme.bgInput
+                                    border.color: Theme.borderMuted
+                                    border.width: 1
+
+                                    Row {
+                                        id: segRow
+                                        anchors.centerIn: parent
+                                        spacing: 2
+                                        SegBtn {
+                                            label: "Structured"
+                                            selected: !tableRoot.rawView
+                                            onClicked: tableRoot.rawView = false
+                                        }
+                                        SegBtn {
+                                            label: "Raw JSON"
+                                            selected: tableRoot.rawView
+                                            onClicked: tableRoot.rawView = true
+                                        }
+                                    }
+                                }
+
+                                Item { Layout.fillWidth: true }
+                            }
+
                             // Message card with internal scroll for long stacktraces.
                             // Uses bgSubtle so it stands apart from the bgInput-colored field cards below.
                             Rectangle {
                                 Layout.fillWidth: true
+                                visible: !tableRoot.rawView
                                 implicitHeight: Math.min(msgEdit.implicitHeight + Theme.sp3 * 2, 280)
                                 color: Theme.bgSubtle
                                 border.color: Theme.borderMuted
@@ -483,6 +564,7 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
+                                visible: !tableRoot.rawView
                                 Text {
                                     text: "FIELDS"
                                     color: Theme.textMuted
@@ -492,10 +574,67 @@ Rectangle {
                                     font.letterSpacing: 0.5
                                 }
                                 Badge { text: rowItem.fieldsObj ? Object.keys(rowItem.fieldsObj).length : 0 }
+
+                                Item { Layout.fillWidth: true } // spacer pushes the action to the right
+
+                                // Copy the whole entry (message + every field) as plain text.
+                                Rectangle {
+                                    id: copyAllBtn
+                                    property bool copied: false
+                                    Layout.alignment: Qt.AlignVCenter
+                                    implicitHeight: 22
+                                    implicitWidth: copyAllRow.implicitWidth + Theme.sp2 * 2
+                                    radius: Theme.rSm
+                                    color: copyAllMouse.containsMouse ? Theme.bgSubtle : "transparent"
+                                    border.width: 1
+                                    border.color: copyAllMouse.containsMouse ? Theme.accent : Theme.borderMuted
+                                    Behavior on color { ColorAnimation { duration: Theme.dFast } }
+                                    Behavior on border.color { ColorAnimation { duration: Theme.dFast } }
+
+                                    Row {
+                                        id: copyAllRow
+                                        anchors.centerIn: parent
+                                        spacing: 4
+                                        Text {
+                                            text: "📋"
+                                            font.pixelSize: Theme.fsSm
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                        Text {
+                                            text: copyAllBtn.copied ? "Copied" : "Copy all"
+                                            color: copyAllBtn.copied ? Theme.accent
+                                                 : (copyAllMouse.containsMouse ? Theme.accent : Theme.textMuted)
+                                            font.pixelSize: Theme.fsXs
+                                            font.bold: true
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: copyAllMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            tempArea.text = tableRoot.buildFullDetails(message, rowItem.fieldsObj)
+                                            tempArea.selectAll()
+                                            tempArea.copy()
+                                            copyAllBtn.copied = true
+                                            copiedReset.restart()
+                                        }
+                                    }
+
+                                    Timer { id: copiedReset; interval: 1200; onTriggered: copyAllBtn.copied = false }
+
+                                    ToolTip.visible: copyAllMouse.containsMouse
+                                    ToolTip.text: "Copy message + all fields"
+                                    ToolTip.delay: 400
+                                }
                             }
 
                             ColumnLayout {
                                 Layout.fillWidth: true
+                                visible: !tableRoot.rawView
                                 spacing: Theme.sp1
                                 Repeater {
                                     model: rowItem.fieldsObj ? Object.keys(rowItem.fieldsObj).sort() : []
@@ -597,6 +736,67 @@ Rectangle {
                                             }
                                         }
                                     }
+                                }
+                            }
+
+                            // Raw view: the whole entry as a JSON envelope (timestamp + message + fields),
+                            // roughly how it looks coming back from Grafana. Read-only, scrollable, copyable.
+                            Rectangle {
+                                Layout.fillWidth: true
+                                visible: tableRoot.rawView
+                                implicitHeight: Math.min(rawEdit.implicitHeight + Theme.sp3 * 2, 420)
+                                color: Theme.bgSubtle
+                                border.color: Theme.borderMuted
+                                border.width: 1
+                                radius: Theme.rMd
+                                clip: true
+
+                                // Quote-style accent stripe on the left edge, matching the message card.
+                                Rectangle {
+                                    anchors.left: parent.left
+                                    anchors.top: parent.top
+                                    anchors.bottom: parent.bottom
+                                    width: 3
+                                    color: Theme.accent
+                                    opacity: 0.6
+                                }
+
+                                Flickable {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: Theme.sp3 + 4 // leave room for accent stripe
+                                    anchors.topMargin: Theme.sp3
+                                    anchors.bottomMargin: Theme.sp3
+                                    anchors.rightMargin: Theme.sp3 + 28 // leave room for copy button
+                                    contentWidth: width
+                                    contentHeight: rawEdit.implicitHeight
+                                    boundsBehavior: Flickable.StopAtBounds
+                                    clip: true
+                                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                                    TextEdit {
+                                        id: rawEdit
+                                        width: parent.width
+                                        text: tableRoot.buildRawJson(timestamp, message, rowItem.fieldsObj)
+                                        color: Theme.text
+                                        font.family: "Monospace"
+                                        font.pixelSize: Theme.fsMd
+                                        readOnly: true
+                                        wrapMode: TextEdit.Wrap
+                                        selectByMouse: true
+                                        selectionColor: Theme.accent
+                                        selectedTextColor: Theme.textOnAccent
+                                    }
+                                }
+
+                                IconButton {
+                                    anchors.right: parent.right
+                                    anchors.top: parent.top
+                                    anchors.margins: Theme.sp1
+                                    text: "📋"
+                                    tooltipText: "Copy raw JSON"
+                                    pixel: Theme.fsSm
+                                    boxSize: 24
+                                    onClicked: { tempArea.text = rawEdit.text; tempArea.selectAll(); tempArea.copy() }
                                 }
                             }
                         }
@@ -703,5 +903,35 @@ Rectangle {
         topPadding: Theme.sp1
         maximumLineCount: 1
         wrapMode: Text.NoWrap
+    }
+
+    // One segment of the Structured / Raw JSON toggle in the details panel.
+    component SegBtn : Rectangle {
+        property string label: ""
+        property bool selected: false
+        signal clicked()
+        implicitHeight: 22
+        implicitWidth: segLbl.implicitWidth + Theme.sp3 * 2
+        radius: Theme.rSm - 1
+        color: selected ? Theme.accent : "transparent"
+        Behavior on color { ColorAnimation { duration: Theme.dFast } }
+
+        Text {
+            id: segLbl
+            anchors.centerIn: parent
+            text: parent.label
+            color: parent.selected ? Theme.textOnAccent
+                 : (segMouse.containsMouse ? Theme.text : Theme.textMuted)
+            font.pixelSize: Theme.fsXs
+            font.bold: true
+        }
+
+        MouseArea {
+            id: segMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: parent.clicked()
+        }
     }
 }
