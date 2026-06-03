@@ -23,6 +23,8 @@ public:
         GroupSizeRole,        // count of rows sharing this row's (channel, contract_id) group
         ReplayStatusRole,     // latest status from ecotone_replay_requests, "" if never queued
         ReplayRequestIdRole,  // latest request id (0 if never queued)
+        ReplayErrorTextRole,  // worker's error text (only populated when status='failed')
+        ReplayProcessedAtRole,// ISO string of latest processed_at, "" if never processed
         PositionRole          // 0-based index, for display only
     };
 

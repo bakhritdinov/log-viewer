@@ -36,6 +36,10 @@ QVariant ErrorMessagesModel::data(const QModelIndex& index, int role) const {
         case GroupSizeRole:        return m_groupSize.value(index.row(), 1);
         case ReplayStatusRole:     return e.replayStatus;
         case ReplayRequestIdRole:  return e.replayRequestId;
+        case ReplayErrorTextRole:  return e.replayErrorText;
+        case ReplayProcessedAtRole:return e.replayProcessedAt.isValid()
+                                          ? e.replayProcessedAt.toString(Qt::ISODate)
+                                          : QString();
         case PositionRole:         return index.row();
         default:                   return {};
     }
@@ -55,6 +59,8 @@ QHash<int, QByteArray> ErrorMessagesModel::roleNames() const {
         {GroupSizeRole,        "groupSize"},
         {ReplayStatusRole,     "replayStatus"},
         {ReplayRequestIdRole,  "replayRequestId"},
+        {ReplayErrorTextRole,  "replayErrorText"},
+        {ReplayProcessedAtRole,"replayProcessedAt"},
         {PositionRole,         "position"},
     };
 }

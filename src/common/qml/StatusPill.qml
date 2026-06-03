@@ -31,6 +31,16 @@ Rectangle {
                               : status === "failed"      ? Qt.rgba(0.97, 0.32, 0.29, 0.22)
                               : Theme.bgSubtle
 
+    // Single source of truth for what each status means — used by the
+    // hover tooltip everywhere a StatusPill appears.
+    readonly property string statusDescription:
+        status === "pending"     ? qsTr("Pending — queued, waiting for the worker to pick it up.")
+      : status === "processing"  ? qsTr("Processing — the worker is currently dispatching it back to its channel.")
+      : status === "done"        ? qsTr("Done — successfully replayed; original failure is resolved.")
+      : status === "failed"      ? qsTr("Failed — the worker attempted replay but the consumer threw again. See error_text in the details pane.")
+      : status === "not_queued"  ? qsTr("Not queued — message exists in the DLQ but no replay request has been created yet.")
+      : ""
+
     implicitHeight: 22
     implicitWidth: pillContent.implicitWidth + Theme.sp3
     radius: Theme.rSm
@@ -39,6 +49,14 @@ Rectangle {
     border.width: 1
     opacity: (root.dimWhenZero && root.count === 0) ? 0.35 : 1.0
     Behavior on opacity { NumberAnimation { duration: Theme.dFast } }
+
+    HoverHandler {
+        id: hover
+        cursorShape: root.statusDescription !== "" ? Qt.WhatsThisCursor : Qt.ArrowCursor
+    }
+    ToolTip.text: root.statusDescription
+    ToolTip.visible: hover.hovered && root.statusDescription !== ""
+    ToolTip.delay: 400
 
     Row {
         id: pillContent

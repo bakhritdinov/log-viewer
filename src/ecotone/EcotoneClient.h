@@ -14,14 +14,16 @@ class FifoChannels;
 // Without this, modelData.failedAt etc. resolve to undefined in QML.
 struct DlqEntry {
     Q_GADGET
-    Q_PROPERTY(QString   messageId       MEMBER messageId)
-    Q_PROPERTY(QDateTime failedAt        MEMBER failedAt)
-    Q_PROPERTY(QString   payload         MEMBER payload)
-    Q_PROPERTY(QString   headers         MEMBER headers)
-    Q_PROPERTY(QString   channel         MEMBER channel)
-    Q_PROPERTY(QString   contractId      MEMBER contractId)
-    Q_PROPERTY(QString   replayStatus    MEMBER replayStatus)
-    Q_PROPERTY(int       replayRequestId MEMBER replayRequestId)
+    Q_PROPERTY(QString   messageId        MEMBER messageId)
+    Q_PROPERTY(QDateTime failedAt         MEMBER failedAt)
+    Q_PROPERTY(QString   payload          MEMBER payload)
+    Q_PROPERTY(QString   headers          MEMBER headers)
+    Q_PROPERTY(QString   channel          MEMBER channel)
+    Q_PROPERTY(QString   contractId       MEMBER contractId)
+    Q_PROPERTY(QString   replayStatus     MEMBER replayStatus)
+    Q_PROPERTY(int       replayRequestId  MEMBER replayRequestId)
+    Q_PROPERTY(QString   replayErrorText  MEMBER replayErrorText)
+    Q_PROPERTY(QDateTime replayProcessedAt MEMBER replayProcessedAt)
 
 public:
     QString   messageId;
@@ -32,6 +34,8 @@ public:
     QString   contractId;       // contract_id from headers (may be empty)
     QString   replayStatus;     // latest status from ecotone_replay_requests, "" if never queued
     int       replayRequestId = 0;  // latest request id, 0 if never queued
+    QString   replayErrorText;  // worker's error message (only populated when replayStatus="failed")
+    QDateTime replayProcessedAt; // when the latest replay attempt finished (NULL while pending/processing)
 };
 
 Q_DECLARE_METATYPE(DlqEntry)
@@ -59,12 +63,16 @@ public:
 
     // Fetches a page of rows ordered by channel ASC, failed_at ASC so the
     // UI can render section headers per channel.
-    //   channelFilter — exact polledChannelName, "" means all channels
-    //   searchText    — substring matched (ILIKE) against message_id, payload,
-    //                   headers and contract_id; "" means no search
+    //   channelFilter   — exact polledChannelName, "" means all channels
+    //   searchText      — substring matched (ILIKE) against message_id, payload,
+    //                     headers and contract_id; "" means no search
+    //   timeRangeHours  — restrict failed_at to NOW() - INTERVAL; 0 = no limit
+    //   replayStatusFilter — "" | "not_queued" | "pending" | "processing" | "done" | "failed"
     Q_INVOKABLE void fetchErrors(int limit, int offset,
                                  const QString& channelFilter,
-                                 const QString& searchText);
+                                 const QString& searchText,
+                                 int timeRangeHours,
+                                 const QString& replayStatusFilter);
 
     // Returns distinct polledChannelName values present in the DLQ table.
     // Used to populate the channel-filter dropdown.
@@ -73,6 +81,14 @@ public:
     // Aggregate replay-request counts across the whole ecotone_replay_requests
     // table. Result arrives via replayStatusSummaryReceived.
     Q_INVOKABLE void fetchReplayStatusSummary();
+
+    // Worker health snapshot — used to decide the freshness colour of the
+    // header health badge. Result arrives via workerHealthReceived.
+    Q_INVOKABLE void fetchWorkerHealth();
+
+    // Most recent N rows from ecotone_replay_requests for the audit dialog.
+    // Result arrives via replayHistoryReceived.
+    Q_INVOKABLE void fetchReplayHistory(int limit);
 
     // Single-message replay — only for non-FIFO channels.
     Q_INVOKABLE void replayOne(const QString& messageId);
@@ -113,6 +129,17 @@ signals:
     // counts: { "pending": N, "processing": N, "done": N, "failed": N }
     void replayStatusSummaryReceived(const QVariantMap& counts);
     void errorOccurred(const QString& message);
+
+    // health: {
+    //   "lastProcessedAt":  QDateTime (invalid if worker never ran),
+    //   "inflight":          int (pending + processing),
+    //   "recentFailures":    int (failed with processed_at >= NOW() - 1h)
+    // }
+    void workerHealthReceived(const QVariantMap& health);
+
+    // Each row is a QVariantMap with: id, messageId, status, failedAt,
+    // processedAt (may be invalid QDateTime), errorText.
+    void replayHistoryReceived(const QVariantList& rows);
 
     // Successful queue: firstRequestId is the lowest id INSERTed; messageCount
     // is the number of rows added (1 for replayOne, N for replayByContract).

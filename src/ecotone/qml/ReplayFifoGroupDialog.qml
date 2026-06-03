@@ -223,8 +223,31 @@ Dialog {
             const p = pagesRepeater.itemAt(i)
             if (p) p.resetState()
         }
-        tabs.currentIndex = 0
+        // Restore last active tab and the per-group remembered search value.
+        // ecotoneConfig might not exist in early QML instantiation; fall back
+        // to tab 0 / empty search in that case.
+        const cfg = typeof ecotoneConfig !== "undefined" ? ecotoneConfig : null
+        const lastTab = cfg ? cfg.fifoLastTabIndex() : 0
+        tabs.currentIndex = (lastTab >= 0 && lastTab < pagesRepeater.count) ? lastTab : 0
+        if (cfg) {
+            for (let i = 0; i < pagesRepeater.count; ++i) {
+                const p = pagesRepeater.itemAt(i)
+                if (!p) continue
+                const v = cfg.fifoSearchValue(p.groupId)
+                if (v && v.length > 0) p.prefillSearch(v)
+            }
+        }
         root.replaying = false
+    }
+
+    // Persist the user's tab choice whenever they switch.
+    Connections {
+        target: tabs
+        function onCurrentIndexChanged() {
+            if (!root.visible) return
+            if (typeof ecotoneConfig === "undefined" || ecotoneConfig === null) return
+            ecotoneConfig.setFifoLastTabIndex(tabs.currentIndex)
+        }
     }
 
     // One tab body — owns its own search, preview and progress state.
@@ -262,6 +285,12 @@ Dialog {
             queuedFirstId = 0
             queuedCount = 0
             statusPoll.stop()
+        }
+        // Restore a remembered search value into the input. We do not auto-fire
+        // Preview — the operator should confirm the value is still relevant
+        // (DLQ state may have changed across sessions).
+        function prefillSearch(v) {
+            inputField.text = v
         }
         function startPolling() { statusPoll.start() }
         function stopPolling()  { statusPoll.stop() }
@@ -309,6 +338,10 @@ Dialog {
                         page.lastQueriedValue = inputField.text.trim()
                         page.previewLoading = true
                         page.previewLoaded = false
+                        // Persist so the next dialog open prefills this value.
+                        if (typeof ecotoneConfig !== "undefined" && ecotoneConfig !== null) {
+                            ecotoneConfig.setFifoSearchValue(page.groupId, page.lastQueriedValue)
+                        }
                         ecotoneClient.previewFifoGroup(page.groupId, page.lastQueriedValue)
                     }
                 }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(LogViewer VERSION 2.6.0 LANGUAGES CXX)
+project(LogViewer VERSION 2.7.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -120,6 +120,7 @@ qt_add_qml_module(LogViewer
         src/ecotone/qml/EcotoneSettingsDialog.qml
         src/ecotone/qml/ReplayConfirmDialog.qml
         src/ecotone/qml/ReplayFifoGroupDialog.qml
+        src/ecotone/qml/ReplayHistoryDialog.qml
         src/ecotone/qml/MessageDetailsWindow.qml
     RESOURCES
         src/resources/icon.png

@@ -166,7 +166,7 @@ void EcotoneClient::replayOne(const QString& messageId) {
         ReplayResult result;
         const QString connName = uniqueConnectionName("replay-one");
         qWarning() << ">>> replayOne start mid=" << messageId;
-        {
+        const auto runSql = [&]() {
             QSqlDatabase d = QSqlDatabase::addDatabase("QPSQL", connName);
             d.setHostName(host);
             d.setPort(port);
@@ -176,68 +176,72 @@ void EcotoneClient::replayOne(const QString& messageId) {
             if (!d.open()) {
                 result.error = d.lastError().text();
                 qWarning() << ">>> replayOne open failed:" << result.error;
-            } else if (!d.transaction()) {
+                return;
+            }
+            if (!d.transaction()) {
                 result.error = d.lastError().text();
                 qWarning() << ">>> replayOne transaction failed:" << result.error;
-            } else {
-                QSqlQuery upd(d);
-                const QString updSql = buildRerouteUpdate(
-                    QStringLiteral("message_id = :mid"), fifoChannels);
-                qWarning() << ">>> replayOne UPDATE SQL:" << updSql;
-                upd.prepare(updSql);
-                upd.bindValue(":mid", messageId);
-                if (!upd.exec()) {
-                    result.error = upd.lastError().text();
-                    qWarning() << ">>> replayOne UPDATE failed:" << result.error;
-                    d.rollback();
-                } else {
-                    QSqlQuery ins(d);
-                    // First try to revive a previously failed request in
-                    // place — keeps the original id (and thus its position in
-                    // the worker's ORDER BY id ASC). If none, fall through to
-                    // INSERT a brand-new row.
-                    ins.prepare(
-                        "WITH reset AS ( "
-                        "    UPDATE public.ecotone_replay_requests "
-                        "    SET status='pending', error_text=NULL, processed_at=NULL "
-                        "    WHERE message_id = :mid AND status='failed' "
-                        "    RETURNING id "
-                        "), inserted AS ( "
-                        "    INSERT INTO public.ecotone_replay_requests (message_id, failed_at) "
-                        "    SELECT em.message_id, em.failed_at "
-                        "    FROM public.ecotone_error_messages em "
-                        "    WHERE em.message_id = :mid "
-                        "      AND NOT EXISTS ( "
-                        "          SELECT 1 FROM public.ecotone_replay_requests "
-                        "          WHERE message_id = :mid "
-                        "            AND status IN ('pending','processing','done','failed') "
-                        "      ) "
-                        "    RETURNING id "
-                        ") "
-                        "SELECT id FROM reset UNION ALL SELECT id FROM inserted");
-                    ins.bindValue(":mid", messageId);
-                    if (!ins.exec()) {
-                        result.error = ins.lastError().text();
-                        qWarning() << ">>> replayOne reset/insert exec failed:" << result.error;
-                        d.rollback();
-                    } else if (!ins.next()) {
-                        result.error = QObject::tr("Already queued (pending or processing) — skipped");
-                        qWarning() << ">>> replayOne already in-flight";
-                        d.rollback();
-                    } else {
-                        result.firstId = ins.value(0).toInt();
-                        result.count   = 1;
-                        if (!d.commit()) {
-                            result.error = d.lastError().text();
-                            qWarning() << ">>> replayOne commit failed:" << result.error;
-                        } else {
-                            qWarning() << ">>> replayOne SUCCESS id=" << result.firstId;
-                        }
-                    }
-                }
-                d.close();
+                return;
             }
-        }
+            QSqlQuery upd(d);
+            const QString updSql = buildRerouteUpdate(
+                QStringLiteral("message_id = :mid"), fifoChannels);
+            qWarning() << ">>> replayOne UPDATE SQL:" << updSql;
+            upd.prepare(updSql);
+            upd.bindValue(":mid", messageId);
+            if (!upd.exec()) {
+                result.error = upd.lastError().text();
+                qWarning() << ">>> replayOne UPDATE failed:" << result.error;
+                d.rollback();
+                return;
+            }
+            QSqlQuery ins(d);
+            // First try to revive a previously failed request in
+            // place — keeps the original id (and thus its position in
+            // the worker's ORDER BY id ASC). If none, fall through to
+            // INSERT a brand-new row.
+            ins.prepare(
+                "WITH reset AS ( "
+                "    UPDATE public.ecotone_replay_requests "
+                "    SET status='pending', error_text=NULL, processed_at=NULL "
+                "    WHERE message_id = :mid AND status='failed' "
+                "    RETURNING id "
+                "), inserted AS ( "
+                "    INSERT INTO public.ecotone_replay_requests (message_id, failed_at) "
+                "    SELECT em.message_id, em.failed_at "
+                "    FROM public.ecotone_error_messages em "
+                "    WHERE em.message_id = :mid "
+                "      AND NOT EXISTS ( "
+                "          SELECT 1 FROM public.ecotone_replay_requests "
+                "          WHERE message_id = :mid "
+                "            AND status IN ('pending','processing','done','failed') "
+                "      ) "
+                "    RETURNING id "
+                ") "
+                "SELECT id FROM reset UNION ALL SELECT id FROM inserted");
+            ins.bindValue(":mid", messageId);
+            if (!ins.exec()) {
+                result.error = ins.lastError().text();
+                qWarning() << ">>> replayOne reset/insert exec failed:" << result.error;
+                d.rollback();
+                return;
+            }
+            if (!ins.next()) {
+                result.error = QObject::tr("Already queued (pending or processing) — skipped");
+                qWarning() << ">>> replayOne already in-flight";
+                d.rollback();
+                return;
+            }
+            result.firstId = ins.value(0).toInt();
+            result.count   = 1;
+            if (!d.commit()) {
+                result.error = d.lastError().text();
+                qWarning() << ">>> replayOne commit failed:" << result.error;
+                return;
+            }
+            qWarning() << ">>> replayOne SUCCESS id=" << result.firstId;
+        };
+        runSql();
         QSqlDatabase::removeDatabase(connName);
         return result;
     });
@@ -444,7 +448,8 @@ void EcotoneClient::replayFifoGroup(const QString& groupId,
             result.count   = totalCount;
             qWarning() << ">>> replayFifoGroup SUCCESS firstId=" << firstId
                        << "count=" << totalCount;
-            d.close();
+            // Let d's destructor close it after QSqlQuery objects are gone —
+            // avoids "Unable to free statement: connection pointer is NULL".
         };
 
         runSql();
@@ -456,7 +461,9 @@ void EcotoneClient::replayFifoGroup(const QString& groupId,
 
 void EcotoneClient::fetchErrors(int limit, int offset,
                                 const QString& channelFilter,
-                                const QString& searchText) {
+                                const QString& searchText,
+                                int timeRangeHours,
+                                const QString& replayStatusFilter) {
     if (!m_connected) {
         emit errorOccurred(tr("Not connected to Ecotone database"));
         return;
@@ -489,10 +496,16 @@ void EcotoneClient::fetchErrors(int limit, int offset,
             });
 
     auto future = QtConcurrent::run(
-        [host, port, db, user, pass, limit, offset, channelFilter, searchText]() -> FetchResult {
+        [host, port, db, user, pass, limit, offset, channelFilter, searchText,
+         timeRangeHours, replayStatusFilter]() -> FetchResult {
             FetchResult result;
             const QString connName = uniqueConnectionName("fetch");
-            {
+
+            // Same IIFE trick as replayFifoGroup: wrap the SQL work so all
+            // locals (QSqlDatabase, QSqlQuery objects) destruct BEFORE we
+            // call QSqlDatabase::removeDatabase. Otherwise QPSQL prints
+            // "connection still in use" on every page load.
+            const auto runSql = [&]() {
                 QSqlDatabase d = QSqlDatabase::addDatabase("QPSQL", connName);
                 d.setHostName(host);
                 d.setPort(port);
@@ -501,8 +514,7 @@ void EcotoneClient::fetchErrors(int limit, int offset,
                 d.setPassword(pass);
                 if (!d.open()) {
                     result.error = d.lastError().text();
-                    QSqlDatabase::removeDatabase(connName);
-                    return result;
+                    return;
                 }
 
                 // Search priority lives in WHERE — match payload only. Numeric
@@ -516,9 +528,30 @@ void EcotoneClient::fetchErrors(int limit, int offset,
                     trimmedSearch.toLongLong(&numericSearch);
                 }
 
+                // The replay-status filter is the only thing that requires the
+                // count query to also know about rr.*; otherwise we'd be
+                // counting rows that won't actually be returned. When such a
+                // filter is set we add the JOIN to the count query too.
+                const bool joinReplayForCount = !replayStatusFilter.isEmpty();
+
+                // Build WHERE with values inlined directly into the SQL
+                // string. We avoid named/positional parameter binding because
+                // QPSQL on Qt 6.11 misbehaves when the same parameter name
+                // appears in two prepared statements run sequentially on the
+                // same connection (count + page) — the server responds with
+                // "unnamed prepared statement does not exist" on the second
+                // exec(). All inputs come from a closed enum (channel from
+                // DISTINCT query, status from a fixed list, ranges are ints),
+                // so SQL injection is not a concern — but we still quote-
+                // escape the strings defensively.
+                auto sqlQuote = [](const QString& s) {
+                    return QStringLiteral("'%1'").arg(QString(s).replace('\'', "''"));
+                };
+
                 QStringList where;
                 if (!channelFilter.isEmpty())
-                    where << QStringLiteral("headers::jsonb->>'polledChannelName' = :channel");
+                    where << QStringLiteral("em.headers::jsonb->>'polledChannelName' = %1")
+                                .arg(sqlQuote(channelFilter));
                 if (!searchText.isEmpty()) {
                     if (numericSearch) {
                         // Numeric searches: most numbers users care about are
@@ -527,77 +560,103 @@ void EcotoneClient::fetchErrors(int limit, int offset,
                         // word-boundary regex on payload to also catch nested
                         // refs like "contract":{"id":16}.
                         where << QStringLiteral(
-                            "(headers::jsonb->>'contract_id' = :num "
-                            " OR payload ~ ('\\m' || :num || '\\M'))");
+                            "(em.headers::jsonb->>'contract_id' = %1 "
+                            " OR em.payload ~ ('\\m' || %1 || '\\M'))")
+                                .arg(sqlQuote(trimmedSearch));
                     } else {
-                        where << QStringLiteral("payload ILIKE :search");
+                        where << QStringLiteral("em.payload ILIKE %1")
+                                    .arg(sqlQuote("%" + searchText + "%"));
                     }
                 }
+                if (timeRangeHours > 0) {
+                    where << QStringLiteral("em.failed_at >= NOW() - INTERVAL '%1 hours'")
+                                .arg(timeRangeHours);
+                }
+                if (replayStatusFilter == QLatin1String("not_queued"))
+                    where << QStringLiteral("rr.status IS NULL");
+                else if (!replayStatusFilter.isEmpty())
+                    where << QStringLiteral("rr.status = %1").arg(sqlQuote(replayStatusFilter));
+
                 const QString whereSql = where.isEmpty()
                                          ? QString()
                                          : QStringLiteral(" WHERE ") + where.join(" AND ");
 
-                auto bindFilters = [&](QSqlQuery& q) {
-                    if (!channelFilter.isEmpty()) q.bindValue(":channel", channelFilter);
-                    if (!searchText.isEmpty()) {
-                        if (numericSearch) q.bindValue(":num", trimmedSearch);
-                        else               q.bindValue(":search", "%" + searchText + "%");
-                    }
-                };
+                // The same LEFT JOIN LATERAL is used by both the count and
+                // page queries when a replay-status filter is active, so
+                // counts stay consistent with the page they describe.
+                const QString joinSql = QStringLiteral(
+                    "FROM public.ecotone_error_messages em "
+                    "LEFT JOIN LATERAL ( "
+                    "    SELECT r.id, r.status, r.error_text, r.processed_at "
+                    "    FROM public.ecotone_replay_requests r "
+                    "    WHERE r.message_id = em.message_id "
+                    "    ORDER BY r.id DESC LIMIT 1 "
+                    ") rr ON TRUE ");
+                const QString countJoinSql = joinReplayForCount
+                    ? joinSql
+                    : QStringLiteral("FROM public.ecotone_error_messages em ");
 
-                QSqlQuery countQ(d);
-                countQ.prepare("SELECT count(*) FROM public.ecotone_error_messages" + whereSql);
-                bindFilters(countQ);
-                if (!countQ.exec()) {
-                    result.error = countQ.lastError().text();
-                    d.close();
-                    QSqlDatabase::removeDatabase(connName);
-                    return result;
+                // COUNT query is scoped so its QSqlQuery destructs (and
+                // QPSQL deallocates its prepared statement) BEFORE we create
+                // the PAGE query below. Without this, when both queries have
+                // the same LEFT JOIN LATERAL + WHERE structure (e.g. when
+                // status-filter is active), QPSQL re-uses the unnamed
+                // prepared-statement slot for the second prepare() and the
+                // server responds with "unnamed prepared statement does not
+                // exist" on exec().
+                {
+                    QSqlQuery countQ(d);
+                    const QString countSql = QStringLiteral("SELECT count(*) ") + countJoinSql + whereSql;
+                    if (!countQ.exec(countSql)) {
+                        result.error = countQ.lastError().text();
+                        return;
+                    }
+                    if (countQ.next()) result.total = countQ.value(0).toInt();
                 }
-                if (countQ.next()) result.total = countQ.value(0).toInt();
 
                 // LEFT JOIN LATERAL pulls the most recent replay request per
-                // message_id (if any). If a message has never been queued, both
-                // replay_* columns come back NULL.
+                // message_id (if any). If a message has never been queued, all
+                // rr.* columns come back NULL.
+                // limit/offset are integers from the QML caller — safe to inline.
                 QSqlQuery q(d);
-                q.prepare("SELECT em.message_id, em.failed_at, em.payload, em.headers, "
+                const QString pageSql = QStringLiteral(
+                          "SELECT em.message_id, em.failed_at, em.payload, em.headers, "
                           "       em.headers::jsonb->>'polledChannelName' AS channel, "
                           "       em.headers::jsonb->>'contract_id'        AS contract_id, "
                           "       rr.status                                  AS replay_status, "
-                          "       COALESCE(rr.id, 0)                         AS replay_request_id "
-                          "FROM public.ecotone_error_messages em "
-                          "LEFT JOIN LATERAL ( "
-                          "    SELECT r.id, r.status FROM public.ecotone_replay_requests r "
-                          "    WHERE r.message_id = em.message_id "
-                          "    ORDER BY r.id DESC LIMIT 1 "
-                          ") rr ON TRUE "
-                          + whereSql + " "
+                          "       COALESCE(rr.id, 0)                         AS replay_request_id, "
+                          "       rr.error_text                              AS replay_error_text, "
+                          "       rr.processed_at                            AS replay_processed_at ")
+                          + joinSql + whereSql + QStringLiteral(
                           "ORDER BY (em.headers::jsonb->>'polledChannelName') ASC NULLS LAST, "
                           "         em.failed_at ASC, em.message_id ASC "
-                          "LIMIT :limit OFFSET :offset");
-                bindFilters(q);
-                q.bindValue(":limit", limit);
-                q.bindValue(":offset", offset);
-                if (!q.exec()) {
+                          "LIMIT %1 OFFSET %2").arg(limit).arg(offset);
+                if (!q.exec(pageSql)) {
                     result.error = q.lastError().text();
-                    d.close();
-                    QSqlDatabase::removeDatabase(connName);
-                    return result;
+                    return;
                 }
                 while (q.next()) {
                     DlqEntry e;
-                    e.messageId       = q.value(0).toString();
-                    e.failedAt        = q.value(1).toDateTime();
-                    e.payload         = q.value(2).toString();
-                    e.headers         = q.value(3).toString();
-                    e.channel         = q.value(4).toString();
-                    e.contractId      = q.value(5).toString();
-                    e.replayStatus    = q.value(6).toString();
-                    e.replayRequestId = q.value(7).toInt();
+                    e.messageId        = q.value(0).toString();
+                    e.failedAt         = q.value(1).toDateTime();
+                    e.payload          = q.value(2).toString();
+                    e.headers          = q.value(3).toString();
+                    e.channel          = q.value(4).toString();
+                    e.contractId       = q.value(5).toString();
+                    e.replayStatus     = q.value(6).toString();
+                    e.replayRequestId  = q.value(7).toInt();
+                    e.replayErrorText  = q.value(8).toString();
+                    e.replayProcessedAt = q.value(9).toDateTime();
                     result.rows.push_back(std::move(e));
                 }
-                d.close();
-            }
+                // NOTE: no explicit d.close() — let the QSqlDatabase
+                // destructor run after QSqlQuery's destructor. Otherwise
+                // QPSQL emits "Unable to free statement: connection pointer
+                // is NULL" when ~QSqlQuery tries to release prepared stmts
+                // against an already-closed connection.
+            };
+
+            runSql();
             QSqlDatabase::removeDatabase(connName);
             return result;
         });
@@ -636,7 +695,7 @@ void EcotoneClient::fetchChannels() {
     auto future = QtConcurrent::run([host, port, db, user, pass]() -> ChannelsResult {
         ChannelsResult result;
         const QString connName = uniqueConnectionName("channels");
-        {
+        const auto runSql = [&]() {
             QSqlDatabase d = QSqlDatabase::addDatabase("QPSQL", connName);
             d.setHostName(host);
             d.setPort(port);
@@ -645,26 +704,22 @@ void EcotoneClient::fetchChannels() {
             d.setPassword(pass);
             if (!d.open()) {
                 result.error = d.lastError().text();
-                QSqlDatabase::removeDatabase(connName);
-                return result;
+                return;
             }
-
             QSqlQuery q(d);
             if (!q.exec("SELECT DISTINCT headers::jsonb->>'polledChannelName' AS channel "
                         "FROM public.ecotone_error_messages "
                         "WHERE headers::jsonb->>'polledChannelName' IS NOT NULL "
                         "ORDER BY channel")) {
                 result.error = q.lastError().text();
-                d.close();
-                QSqlDatabase::removeDatabase(connName);
-                return result;
+                return;
             }
             while (q.next()) {
                 const QString c = q.value(0).toString();
                 if (!c.isEmpty()) result.channels << c;
             }
-            d.close();
-        }
+        };
+        runSql();
         QSqlDatabase::removeDatabase(connName);
         return result;
     });
@@ -703,7 +758,7 @@ void EcotoneClient::fetchReplayStatusSummary() {
         result.counts["failed"]     = 0;
 
         const QString connName = uniqueConnectionName("summary");
-        {
+        const auto runSql = [&]() {
             QSqlDatabase d = QSqlDatabase::addDatabase("QPSQL", connName);
             d.setHostName(host);
             d.setPort(port);
@@ -712,22 +767,168 @@ void EcotoneClient::fetchReplayStatusSummary() {
             d.setPassword(pass);
             if (!d.open()) {
                 result.error = d.lastError().text();
-                QSqlDatabase::removeDatabase(connName);
-                return result;
+                return;
             }
             QSqlQuery q(d);
             if (!q.exec("SELECT status, count(*) FROM public.ecotone_replay_requests "
                         "GROUP BY status")) {
                 result.error = q.lastError().text();
-                d.close();
-                QSqlDatabase::removeDatabase(connName);
-                return result;
+                return;
             }
             while (q.next()) {
                 result.counts[q.value(0).toString()] = q.value(1).toInt();
             }
-            d.close();
-        }
+        };
+        runSql();
+        QSqlDatabase::removeDatabase(connName);
+        return result;
+    });
+    watcher->setFuture(future);
+}
+
+void EcotoneClient::fetchWorkerHealth() {
+    if (!m_connected) return;  // silent — polling call
+
+    struct HealthResult {
+        QDateTime lastProcessedAt;
+        int       inflight       = 0;
+        int       recentFailures = 0;
+        QString   error;
+    };
+
+    const QString host = m_host;
+    const int     port = m_port;
+    const QString db   = m_database;
+    const QString user = m_user;
+    const QString pass = m_password;
+
+    auto* watcher = new QFutureWatcher<HealthResult>(this);
+    connect(watcher, &QFutureWatcher<HealthResult>::finished, this,
+            [this, watcher]() {
+                const HealthResult res = watcher->result();
+                watcher->deleteLater();
+                if (!res.error.isEmpty()) return;
+                QVariantMap m;
+                m["lastProcessedAt"] = res.lastProcessedAt;
+                m["inflight"]        = res.inflight;
+                m["recentFailures"]  = res.recentFailures;
+                emit workerHealthReceived(m);
+            });
+
+    auto future = QtConcurrent::run([host, port, db, user, pass]() -> HealthResult {
+        HealthResult result;
+        const QString connName = uniqueConnectionName("health");
+        const auto runSql = [&]() {
+            QSqlDatabase d = QSqlDatabase::addDatabase("QPSQL", connName);
+            d.setHostName(host);
+            d.setPort(port);
+            d.setDatabaseName(db);
+            d.setUserName(user);
+            d.setPassword(pass);
+            if (!d.open()) {
+                result.error = d.lastError().text();
+                return;
+            }
+            QSqlQuery q(d);
+            // One row, three aggregates — single round-trip.
+            if (!q.exec("SELECT "
+                        "  MAX(processed_at) AS last_processed, "
+                        "  COUNT(*) FILTER (WHERE status IN ('pending','processing')) AS inflight, "
+                        "  COUNT(*) FILTER (WHERE status='failed' "
+                        "                   AND processed_at >= NOW() - INTERVAL '1 hour') AS recent_failures "
+                        "FROM public.ecotone_replay_requests")) {
+                result.error = q.lastError().text();
+                return;
+            }
+            if (q.next()) {
+                result.lastProcessedAt = q.value(0).toDateTime();
+                result.inflight        = q.value(1).toInt();
+                result.recentFailures  = q.value(2).toInt();
+            }
+        };
+        runSql();
+        QSqlDatabase::removeDatabase(connName);
+        return result;
+    });
+    watcher->setFuture(future);
+}
+
+void EcotoneClient::fetchReplayHistory(int limit) {
+    if (!m_connected) {
+        emit errorOccurred(tr("Not connected to Ecotone database"));
+        return;
+    }
+
+    struct HistoryResult {
+        QVariantList rows;
+        QString error;
+    };
+
+    const QString host = m_host;
+    const int     port = m_port;
+    const QString db   = m_database;
+    const QString user = m_user;
+    const QString pass = m_password;
+
+    auto* watcher = new QFutureWatcher<HistoryResult>(this);
+    connect(watcher, &QFutureWatcher<HistoryResult>::finished, this,
+            [this, watcher]() {
+                const HistoryResult res = watcher->result();
+                watcher->deleteLater();
+                if (!res.error.isEmpty()) {
+                    emit errorOccurred(res.error);
+                    return;
+                }
+                emit replayHistoryReceived(res.rows);
+            });
+
+    auto future = QtConcurrent::run([host, port, db, user, pass, limit]() -> HistoryResult {
+        HistoryResult result;
+        const QString connName = uniqueConnectionName("history");
+        const auto runSql = [&]() {
+            QSqlDatabase d = QSqlDatabase::addDatabase("QPSQL", connName);
+            d.setHostName(host);
+            d.setPort(port);
+            d.setDatabaseName(db);
+            d.setUserName(user);
+            d.setPassword(pass);
+            if (!d.open()) {
+                result.error = d.lastError().text();
+                return;
+            }
+            QSqlQuery q(d);
+            q.prepare("SELECT id, message_id, status, failed_at, processed_at, error_text "
+                      "FROM public.ecotone_replay_requests "
+                      "ORDER BY id DESC LIMIT :limit");
+            q.bindValue(":limit", limit);
+            if (!q.exec()) {
+                result.error = q.lastError().text();
+                return;
+            }
+            // Pre-format everything in C++ so the QML delegate just renders
+            // ready-made strings. ListView scroll perf suffered because each
+            // delegate re-bind triggered Qt.formatDateTime + JS substring on
+            // multi-kB error_text values for every recycled row.
+            while (q.next()) {
+                QVariantMap row;
+                row["id"]          = q.value(0).toInt();
+                row["messageId"]   = q.value(1).toString();
+                row["status"]      = q.value(2).toString();
+                const QDateTime failedAt    = q.value(3).toDateTime();
+                const QDateTime processedAt = q.value(4).toDateTime();
+                row["failedAt"]    = failedAt.isValid()
+                                     ? failedAt.toString("yyyy-MM-dd hh:mm:ss")
+                                     : QStringLiteral("—");
+                row["processedAt"] = processedAt.isValid()
+                                     ? processedAt.toString("yyyy-MM-dd hh:mm:ss")
+                                     : QStringLiteral("—");
+                QString error = q.value(5).toString();
+                if (error.length() > 300) error = error.left(300) + QStringLiteral("…");
+                row["errorText"]   = error;
+                result.rows.push_back(row);
+            }
+        };
+        runSql();
         QSqlDatabase::removeDatabase(connName);
         return result;
     });
@@ -784,7 +985,7 @@ void EcotoneClient::previewFifoGroup(const QString& groupId,
             result.groupId     = groupId;
             result.searchValue = searchValue;
             const QString connName = uniqueConnectionName("preview");
-            {
+            const auto runSql = [&]() {
                 QSqlDatabase d = QSqlDatabase::addDatabase("QPSQL", connName);
                 d.setHostName(host);
                 d.setPort(port);
@@ -793,8 +994,7 @@ void EcotoneClient::previewFifoGroup(const QString& groupId,
                 d.setPassword(pass);
                 if (!d.open()) {
                     result.error = d.lastError().text();
-                    QSqlDatabase::removeDatabase(connName);
-                    return result;
+                    return;
                 }
                 // Build IN-list literally from the group's channel names so we
                 // don't need positional bindings for them.
@@ -811,10 +1011,13 @@ void EcotoneClient::previewFifoGroup(const QString& groupId,
                     "       em.headers::jsonb->>'polledChannelName' AS channel, "
                     "       em.headers::jsonb->>'contract_id'        AS contract_id, "
                     "       rr.status                                  AS replay_status, "
-                    "       COALESCE(rr.id, 0)                         AS replay_request_id "
+                    "       COALESCE(rr.id, 0)                         AS replay_request_id, "
+                    "       rr.error_text                              AS replay_error_text, "
+                    "       rr.processed_at                            AS replay_processed_at "
                     "FROM public.ecotone_error_messages em "
                     "LEFT JOIN LATERAL ( "
-                    "    SELECT r.id, r.status FROM public.ecotone_replay_requests r "
+                    "    SELECT r.id, r.status, r.error_text, r.processed_at "
+                    "    FROM public.ecotone_replay_requests r "
                     "    WHERE r.message_id = em.message_id "
                     "    ORDER BY r.id DESC LIMIT 1 "
                     ") rr ON TRUE "
@@ -825,24 +1028,24 @@ void EcotoneClient::previewFifoGroup(const QString& groupId,
                 q.bindValue(":val", searchValue);
                 if (!q.exec()) {
                     result.error = q.lastError().text();
-                    d.close();
-                    QSqlDatabase::removeDatabase(connName);
-                    return result;
+                    return;
                 }
                 while (q.next()) {
                     DlqEntry e;
-                    e.messageId       = q.value(0).toString();
-                    e.failedAt        = q.value(1).toDateTime();
-                    e.payload         = q.value(2).toString();
-                    e.headers         = q.value(3).toString();
-                    e.channel         = q.value(4).toString();
-                    e.contractId      = q.value(5).toString();
-                    e.replayStatus    = q.value(6).toString();
-                    e.replayRequestId = q.value(7).toInt();
+                    e.messageId         = q.value(0).toString();
+                    e.failedAt          = q.value(1).toDateTime();
+                    e.payload           = q.value(2).toString();
+                    e.headers           = q.value(3).toString();
+                    e.channel           = q.value(4).toString();
+                    e.contractId        = q.value(5).toString();
+                    e.replayStatus      = q.value(6).toString();
+                    e.replayRequestId   = q.value(7).toInt();
+                    e.replayErrorText   = q.value(8).toString();
+                    e.replayProcessedAt = q.value(9).toDateTime();
                     result.rows.push_back(std::move(e));
                 }
-                d.close();
-            }
+            };
+            runSql();
             QSqlDatabase::removeDatabase(connName);
             return result;
         });

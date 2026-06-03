@@ -7,14 +7,16 @@ Item {
     id: root
 
     // Selected-row outputs (consumed by EcotoneDetailsPane).
-    property string selectedMessageId:        ""
-    property string selectedFailedAt:         ""
-    property string selectedChannel:          ""
-    property string selectedContractId:       ""
-    property string selectedPayload:          ""
-    property string selectedHeaders:          ""
-    property string selectedReplayStatus:     ""
-    property int    selectedReplayRequestId:  0
+    property string selectedMessageId:         ""
+    property string selectedFailedAt:          ""
+    property string selectedChannel:           ""
+    property string selectedContractId:        ""
+    property string selectedPayload:           ""
+    property string selectedHeaders:           ""
+    property string selectedReplayStatus:      ""
+    property int    selectedReplayRequestId:   0
+    property string selectedReplayErrorText:   ""
+    property string selectedReplayProcessedAt: ""
 
     // Bound by the window — disables channel section headers while a search
     // is active because backend ORDER BY then sorts by match-priority
@@ -141,14 +143,16 @@ Item {
                 anchors.fill: parent
                 onClicked: {
                     list.currentIndex = index
-                    root.selectedMessageId       = messageId
-                    root.selectedFailedAt        = failedAt
-                    root.selectedChannel         = channel
-                    root.selectedContractId     = contractId
-                    root.selectedPayload         = payload
-                    root.selectedHeaders         = headers
-                    root.selectedReplayStatus    = replayStatus
-                    root.selectedReplayRequestId = replayRequestId
+                    root.selectedMessageId         = messageId
+                    root.selectedFailedAt          = failedAt
+                    root.selectedChannel           = channel
+                    root.selectedContractId        = contractId
+                    root.selectedPayload           = payload
+                    root.selectedHeaders           = headers
+                    root.selectedReplayStatus      = replayStatus
+                    root.selectedReplayRequestId   = replayRequestId
+                    root.selectedReplayErrorText   = replayErrorText || ""
+                    root.selectedReplayProcessedAt = replayProcessedAt || ""
                 }
             }
 
@@ -212,10 +216,7 @@ Item {
                             tooltip: enabled
                                      ? qsTr("Replay this single message")
                                      : qsTr("Already queued (status: %1) — wait for worker").arg(replayStatus)
-                            onClicked: {
-                                console.log(">>> QML SmallButton.onClicked for", messageId)
-                                root.replayOneRequested(messageId)
-                            }
+                            onClicked: root.replayOneRequested(messageId)
                         }
                         // FIFO rows: disabled chip; route through Replay by contract.
                         SmallButton {
@@ -303,10 +304,7 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: smallBtn.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-            onClicked: {
-                console.log(">>> SmallButton MouseArea onClicked (enabled=" + smallBtn.enabled + ", text=" + smallBtn.text + ")")
-                smallBtn.clicked()
-            }
+            onClicked: smallBtn.clicked()
         }
     }
 }

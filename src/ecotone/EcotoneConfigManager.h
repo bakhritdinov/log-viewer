@@ -26,6 +26,23 @@ public:
     Q_INVOKABLE int  columnWidth(const QString& col, int fallback) const;
     Q_INVOKABLE void setColumnWidth(const QString& col, int w);
 
+    // EcotoneWindow main-list filters — persisted globally (not per-env) so a
+    // PROD switch keeps the operator's chosen view.
+    Q_INVOKABLE int     timeRangeHours() const;
+    Q_INVOKABLE void    setTimeRangeHours(int h);
+    Q_INVOKABLE QString replayStatusFilter() const;
+    Q_INVOKABLE void    setReplayStatusFilter(const QString& s);
+    Q_INVOKABLE bool    autoRefresh() const;
+    Q_INVOKABLE void    setAutoRefresh(bool on);
+
+    // ReplayFifoGroupDialog persistence — remember last active tab and the
+    // most recent search value entered per group, so reopening doesn't force
+    // the user to retype.
+    Q_INVOKABLE int     fifoLastTabIndex() const;
+    Q_INVOKABLE void    setFifoLastTabIndex(int idx);
+    Q_INVOKABLE QString fifoSearchValue(const QString& groupId) const;
+    Q_INVOKABLE void    setFifoSearchValue(const QString& groupId, const QString& v);
+
 signals:
     void settingsChanged();
 

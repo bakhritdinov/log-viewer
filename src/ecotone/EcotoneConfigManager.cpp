@@ -46,3 +46,43 @@ int EcotoneConfigManager::columnWidth(const QString& col, int fallback) const {
 void EcotoneConfigManager::setColumnWidth(const QString& col, int w) {
     m_settings.setValue(QStringLiteral("ecotone/columns/") + col, w);
 }
+
+int EcotoneConfigManager::timeRangeHours() const {
+    return m_settings.value(QStringLiteral("ecotone/filters/timeRangeHours"), 0).toInt();
+}
+
+void EcotoneConfigManager::setTimeRangeHours(int h) {
+    m_settings.setValue(QStringLiteral("ecotone/filters/timeRangeHours"), h);
+}
+
+QString EcotoneConfigManager::replayStatusFilter() const {
+    return m_settings.value(QStringLiteral("ecotone/filters/replayStatus"), QString()).toString();
+}
+
+void EcotoneConfigManager::setReplayStatusFilter(const QString& s) {
+    m_settings.setValue(QStringLiteral("ecotone/filters/replayStatus"), s);
+}
+
+bool EcotoneConfigManager::autoRefresh() const {
+    return m_settings.value(QStringLiteral("ecotone/filters/autoRefresh"), false).toBool();
+}
+
+void EcotoneConfigManager::setAutoRefresh(bool on) {
+    m_settings.setValue(QStringLiteral("ecotone/filters/autoRefresh"), on);
+}
+
+int EcotoneConfigManager::fifoLastTabIndex() const {
+    return m_settings.value(QStringLiteral("ecotone/fifo/lastTabIndex"), 0).toInt();
+}
+
+void EcotoneConfigManager::setFifoLastTabIndex(int idx) {
+    m_settings.setValue(QStringLiteral("ecotone/fifo/lastTabIndex"), idx);
+}
+
+QString EcotoneConfigManager::fifoSearchValue(const QString& groupId) const {
+    return m_settings.value(QStringLiteral("ecotone/fifo/search/") + groupId, QString()).toString();
+}
+
+void EcotoneConfigManager::setFifoSearchValue(const QString& groupId, const QString& v) {
+    m_settings.setValue(QStringLiteral("ecotone/fifo/search/") + groupId, v);
+}

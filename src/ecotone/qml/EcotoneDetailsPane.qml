@@ -9,14 +9,16 @@ Rectangle {
     border.color: Theme.borderMuted
     border.width: 1
 
-    property string messageId:        ""
-    property string failedAt:         ""
-    property string channel:          ""
-    property string contractId:       ""
-    property string payload:          ""
-    property string headers:          ""
-    property string replayStatus:     ""
-    property int    replayRequestId:  0
+    property string messageId:         ""
+    property string failedAt:          ""
+    property string channel:           ""
+    property string contractId:        ""
+    property string payload:           ""
+    property string headers:           ""
+    property string replayStatus:      ""
+    property int    replayRequestId:   0
+    property string replayErrorText:   ""
+    property string replayProcessedAt: ""
 
     // Default pretty-print used when something isn't valid JSON or when we
     // need the raw text (e.g. for clipboard copy).
@@ -154,6 +156,73 @@ Rectangle {
                     status: root.replayStatus
                     requestId: root.replayRequestId > 0
                                ? String(root.replayRequestId) : ""
+                }
+            }
+        }
+
+        // ── Worker error banner (only for failed replays) ────────────────────
+        // When the worker tried this message and it threw again, surface the
+        // exception text here so the operator doesn't have to dig through
+        // ecotone_replay_requests by hand.
+        Rectangle {
+            id: replayErrorBanner
+            visible: root.messageId !== "" && root.replayStatus === "failed"
+                     && root.replayErrorText !== ""
+            Layout.fillWidth: true
+            implicitHeight: replayErrorCol.implicitHeight + Theme.sp3 * 2
+            color: Qt.rgba(0.97, 0.32, 0.29, 0.10)
+            border.color: Theme.danger
+            border.width: 1
+            radius: Theme.rSm
+
+            ColumnLayout {
+                id: replayErrorCol
+                anchors.fill: parent
+                anchors.margins: Theme.sp3
+                spacing: 4
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.sp2
+                    Label {
+                        text: "⚠"
+                        color: Theme.danger
+                        font.pixelSize: Theme.fsLg
+                        font.bold: true
+                    }
+                    Label {
+                        text: qsTr("Replay request #%1 failed").arg(root.replayRequestId)
+                        color: Theme.danger
+                        font.pixelSize: Theme.fsSm
+                        font.bold: true
+                    }
+                    Label {
+                        visible: root.replayProcessedAt !== ""
+                        text: qsTr("· at %1").arg(root.replayProcessedAt)
+                        color: Theme.textMuted
+                        font.pixelSize: Theme.fsXs
+                    }
+                    Item { Layout.fillWidth: true }
+                    Label {
+                        text: qsTr("⧉ Copy")
+                        color: Theme.textMuted
+                        font.pixelSize: Theme.fsXs
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.copyToClipboard(root.replayErrorText)
+                        }
+                    }
+                }
+                TextEdit {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Math.min(implicitHeight, 110)
+                    text: root.replayErrorText
+                    readOnly: true
+                    selectByMouse: true
+                    wrapMode: TextEdit.Wrap
+                    font.family: "Monospace"
+                    font.pixelSize: Theme.fsXs
+                    color: Theme.text
                 }
             }
         }
