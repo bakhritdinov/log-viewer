@@ -149,7 +149,11 @@ install(TARGETS LogViewer
 # on noble were failing with "Unexpected arguments". On Linux the block is unnecessary
 # anyway: CPack DEB uses install(TARGETS ...) and the AppImage target uses linuxdeploy-qt.
 if(NOT (UNIX AND NOT APPLE) AND Qt6_VERSION VERSION_GREATER_EQUAL "6.5.0")
-    set(deploy_args "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/qml")
+    set(deploy_args
+        "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/logs/qml"
+        "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/common/qml"
+        "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/ecotone/qml"
+    )
 
     if(WIN32)
         list(APPEND deploy_args "--no-translations" "--compiler-runtime")
@@ -234,7 +238,7 @@ fontconfig, libfontconfig1")
         COMMAND DESTDIR=${CMAKE_BINARY_DIR}/AppDir cmake --install ${CMAKE_BINARY_DIR} --prefix /usr
         COMMAND test -f linuxdeploy-x86_64.AppImage || (wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage && chmod +x linuxdeploy-x86_64.AppImage)
         COMMAND test -f linuxdeploy-plugin-qt-x86_64.AppImage || (wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage && chmod +x linuxdeploy-plugin-qt-x86_64.AppImage)
-        COMMAND env QMAKE=${QT_QMAKE_EXECUTABLE} EXTRA_QT_PLUGINS=svg,iconengines QML_SOURCES_PATHS=${CMAKE_CURRENT_SOURCE_DIR}/src/qml ./linuxdeploy-x86_64.AppImage --appdir ${CMAKE_BINARY_DIR}/AppDir --plugin qt --output appimage --desktop-file ${CMAKE_BINARY_DIR}/log-viewer.desktop --icon-file ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/icon.png
+        COMMAND env QMAKE=${QT_QMAKE_EXECUTABLE} EXTRA_QT_PLUGINS=svg,iconengines QML_SOURCES_PATHS=${CMAKE_CURRENT_SOURCE_DIR}/src/logs/qml:${CMAKE_CURRENT_SOURCE_DIR}/src/common/qml:${CMAKE_CURRENT_SOURCE_DIR}/src/ecotone/qml ./linuxdeploy-x86_64.AppImage --appdir ${CMAKE_BINARY_DIR}/AppDir --plugin qt --output appimage --desktop-file ${CMAKE_BINARY_DIR}/log-viewer.desktop --icon-file ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/icon.png
         COMMAND mkdir -p ${CMAKE_SOURCE_DIR}/dist
         COMMAND mv LogViewer*.AppImage ${CMAKE_SOURCE_DIR}/dist/${CPACK_PACKAGE_NAME}-Linux.AppImage
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
