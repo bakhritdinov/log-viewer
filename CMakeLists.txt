@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(LogViewer VERSION 2.7.1 LANGUAGES CXX)
+project(LogViewer VERSION 2.7.2 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -170,12 +170,14 @@ if(NOT (UNIX AND NOT APPLE) AND Qt6_VERSION VERSION_GREATER_EQUAL "6.5.0")
     install(SCRIPT ${deploy_script})
 
     if(APPLE)
-        # macdeployqt has no -extra-plugins flag and its -appstore-compliant mode
-        # (set by the Qt deploy script) explicitly blacklists qsqlpsql, so the
-        # QPSQL driver is never bundled -> "Driver not loaded". Copy the plugin in
-        # ourselves, then re-run macdeployqt with -executable so it pulls in libpq
-        # and its full dependency chain (libssl/libcrypto/libgssapi_krb5/...) and
-        # rewrites the install_names. Finally re-sign the bundle.
+        # Ecotone opens PostgreSQL via the QPSQL driver, but macdeployqt never
+        # ships it: it has no -extra-plugins flag and its -appstore-compliant mode
+        # (set by the Qt deploy script) blacklists qsqlpsql -> "Driver not loaded".
+        # We copy the plugin in ourselves. The official Qt qsqlpsql is also linked
+        # against a libpq at a hard-coded Postgres.app path that does not exist on
+        # users' machines, so when LOGVIEWER_BUNDLE_LIBPQ points at a self-contained
+        # libpq (built from source without OpenSSL — see the macOS CI job) we drop
+        # it into Frameworks and repoint the plugin at it. No external deps remain.
         find_program(MACDEPLOYQT_EXECUTABLE macdeployqt
             HINTS "${QT6_INSTALL_PREFIX}/bin" "${Qt6_DIR}/../../../bin" REQUIRED)
         find_file(QPSQL_PLUGIN_PATH libqsqlpsql.dylib
@@ -193,6 +195,30 @@ if(NOT (UNIX AND NOT APPLE) AND Qt6_VERSION VERSION_GREATER_EQUAL "6.5.0")
             get_filename_component(_src \"${QPSQL_PLUGIN_PATH}\" REALPATH)
             file(MAKE_DIRECTORY \"\${_bundle}/Contents/PlugIns/sqldrivers\")
             execute_process(COMMAND \${CMAKE_COMMAND} -E copy \"\${_src}\" \"\${_dst}\")
+
+            # Bundle our self-contained libpq and repoint the plugin at it BEFORE
+            # macdeployqt runs, so macdeployqt sees the dependency already resolved
+            # inside the bundle and never looks for Qt's hard-coded Postgres.app path.
+            set(_libpq \"${LOGVIEWER_BUNDLE_LIBPQ}\")
+            if(_libpq AND EXISTS \"\${_libpq}\")
+                file(MAKE_DIRECTORY \"\${_bundle}/Contents/Frameworks\")
+                execute_process(COMMAND \${CMAKE_COMMAND} -E copy \"\${_libpq}\" \"\${_bundle}/Contents/Frameworks/libpq.5.dylib\")
+                execute_process(COMMAND install_name_tool -id @rpath/libpq.5.dylib \"\${_bundle}/Contents/Frameworks/libpq.5.dylib\")
+                execute_process(COMMAND otool -L \"\${_dst}\" OUTPUT_VARIABLE _otool)
+                string(REGEX MATCH \"[^ \\t\\r\\n]*libpq[^ \\t\\r\\n]*\\\\.dylib\" _oldref \"\${_otool}\")
+                if(_oldref)
+                    execute_process(COMMAND install_name_tool -change \"\${_oldref}\"
+                        @loader_path/../../Frameworks/libpq.5.dylib \"\${_dst}\")
+                else()
+                    message(WARNING \"Could not find libpq reference in qsqlpsql plugin to repoint\")
+                endif()
+            else()
+                message(WARNING \"LOGVIEWER_BUNDLE_LIBPQ not set or missing; QPSQL may fail at runtime: '\${_libpq}'\")
+            endif()
+
+            # macdeployqt fixes the plugin's QtSql/QtCore references to point at the
+            # frameworks already deployed in the bundle (libpq is left untouched
+            # because it now resolves to our bundled copy).
             execute_process(COMMAND \"${MACDEPLOYQT_EXECUTABLE}\" \"\${_bundle}\" -executable=\"\${_dst}\" -no-strip)
             execute_process(COMMAND codesign --force --deep --sign - \"\${_bundle}\")
         ")

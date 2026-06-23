@@ -75,17 +75,44 @@ jobs:
         target: 'desktop'
         arch: 'clang_64'
 
+    - name: Build self-contained universal libpq
+      id: libpq
+      run: |
+        # The official Qt qsqlpsql plugin links libpq at a hard-coded Postgres.app
+        # path that does not exist on users' machines ("Driver not loaded"). Build
+        # our own libpq from source as a universal (x86_64+arm64), self-contained
+        # dylib — no OpenSSL/krb5/readline/zlib — so the deploy step can bundle it
+        # and repoint the plugin with zero external dependencies.
+        PGVER=17.2
+        curl -sL "https://ftp.postgresql.org/pub/source/v${PGVER}/postgresql-${PGVER}.tar.bz2" -o pg.tar.bz2
+        tar xf pg.tar.bz2
+        cd "postgresql-${PGVER}"
+        ./configure --without-openssl --without-readline --without-zlib \
+          --without-icu --without-gssapi \
+          CFLAGS="-arch x86_64 -arch arm64 -mmacosx-version-min=11.0 -Wno-error=unguarded-availability-new"
+        make -C src/include
+        make -C src/interfaces/libpq all -j "$(sysctl -n hw.logicalcpu)"
+        LIBPQ="$PWD/src/interfaces/libpq/libpq.5.dylib"
+        echo "Built libpq: $(lipo -info "$LIBPQ")"
+        echo "path=$LIBPQ" >> "$GITHUB_OUTPUT"
+
     - name: Build and Package
       run: |
         cmake -B build -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+          -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
+          -DLOGVIEWER_BUNDLE_LIBPQ="${{ steps.libpq.outputs.path }}"
         cmake --build build --config Release -j "$(sysctl -n hw.logicalcpu)"
         # Install to trigger deployment and signing
         mkdir -p dist/bundle
         DESTDIR=$PWD/dist/bundle cmake --install build --prefix /
         # Final sign for safety
         codesign --force --deep --sign - dist/bundle/LogViewer.app
+        # Sanity check: the QPSQL plugin must have no external (non-bundle) deps
+        PLUGIN=dist/bundle/LogViewer.app/Contents/PlugIns/sqldrivers/libqsqlpsql.dylib
+        if otool -L "$PLUGIN" | grep -E "/Applications|/usr/local|/opt/homebrew|Postgres"; then
+          echo "::error::qsqlpsql still references an external libpq"; exit 1
+        fi
         # Package
         cpack --config build/CPackConfig.cmake -B dist/ -C Release
 
