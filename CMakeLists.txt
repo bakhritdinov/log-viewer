@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(LogViewer VERSION 2.7.0 LANGUAGES CXX)
+project(LogViewer VERSION 2.7.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -156,7 +156,10 @@ if(NOT (UNIX AND NOT APPLE) AND Qt6_VERSION VERSION_GREATER_EQUAL "6.5.0")
     )
 
     if(WIN32)
-        list(APPEND deploy_args "--no-translations" "--compiler-runtime")
+        # Ecotone talks to PostgreSQL via the QPSQL driver. windeployqt does not
+        # bundle sql drivers unless asked, so without this the released build
+        # fails with "Driver not loaded". (macOS handled separately below.)
+        list(APPEND deploy_args "--no-translations" "--compiler-runtime" "-extra-plugins=sqldrivers")
     endif()
 
     qt_generate_deploy_app_script(
@@ -168,8 +171,31 @@ if(NOT (UNIX AND NOT APPLE) AND Qt6_VERSION VERSION_GREATER_EQUAL "6.5.0")
     install(SCRIPT ${deploy_script})
 
     if(APPLE)
+        # macdeployqt has no -extra-plugins flag and its -appstore-compliant mode
+        # (set by the Qt deploy script) explicitly blacklists qsqlpsql, so the
+        # QPSQL driver is never bundled -> "Driver not loaded". Copy the plugin in
+        # ourselves, then re-run macdeployqt with -executable so it pulls in libpq
+        # and its full dependency chain (libssl/libcrypto/libgssapi_krb5/...) and
+        # rewrites the install_names. Finally re-sign the bundle.
+        find_program(MACDEPLOYQT_EXECUTABLE macdeployqt
+            HINTS "${QT6_INSTALL_PREFIX}/bin" "${Qt6_DIR}/../../../bin" REQUIRED)
+        find_file(QPSQL_PLUGIN_PATH libqsqlpsql.dylib
+            HINTS
+                "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_PLUGINS}/sqldrivers"
+                "${QT6_INSTALL_PREFIX}/plugins/sqldrivers"
+                "${QT6_INSTALL_PREFIX}/share/qt/plugins/sqldrivers"
+            REQUIRED)
+
         install(CODE "
-            execute_process(COMMAND codesign --force --deep --sign - \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/LogViewer.app\")
+            set(_bundle \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/LogViewer.app\")
+            set(_dst \"\${_bundle}/Contents/PlugIns/sqldrivers/libqsqlpsql.dylib\")
+            # Resolve symlinks (Homebrew ships the plugin as a symlink into Cellar)
+            # so we copy the real Mach-O, not a link that breaks inside the bundle.
+            get_filename_component(_src \"${QPSQL_PLUGIN_PATH}\" REALPATH)
+            file(MAKE_DIRECTORY \"\${_bundle}/Contents/PlugIns/sqldrivers\")
+            execute_process(COMMAND \${CMAKE_COMMAND} -E copy \"\${_src}\" \"\${_dst}\")
+            execute_process(COMMAND \"${MACDEPLOYQT_EXECUTABLE}\" \"\${_bundle}\" -executable=\"\${_dst}\" -no-strip)
+            execute_process(COMMAND codesign --force --deep --sign - \"\${_bundle}\")
         ")
     endif()
 endif()
@@ -238,7 +264,7 @@ fontconfig, libfontconfig1")
         COMMAND DESTDIR=${CMAKE_BINARY_DIR}/AppDir cmake --install ${CMAKE_BINARY_DIR} --prefix /usr
         COMMAND test -f linuxdeploy-x86_64.AppImage || (wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage && chmod +x linuxdeploy-x86_64.AppImage)
         COMMAND test -f linuxdeploy-plugin-qt-x86_64.AppImage || (wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage && chmod +x linuxdeploy-plugin-qt-x86_64.AppImage)
-        COMMAND env QMAKE=${QT_QMAKE_EXECUTABLE} EXTRA_QT_PLUGINS=svg,iconengines QML_SOURCES_PATHS=${CMAKE_CURRENT_SOURCE_DIR}/src/logs/qml:${CMAKE_CURRENT_SOURCE_DIR}/src/common/qml:${CMAKE_CURRENT_SOURCE_DIR}/src/ecotone/qml ./linuxdeploy-x86_64.AppImage --appdir ${CMAKE_BINARY_DIR}/AppDir --plugin qt --output appimage --desktop-file ${CMAKE_BINARY_DIR}/log-viewer.desktop --icon-file ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/icon.png
+        COMMAND env QMAKE=${QT_QMAKE_EXECUTABLE} EXTRA_QT_PLUGINS=svg,iconengines,sqldrivers QML_SOURCES_PATHS=${CMAKE_CURRENT_SOURCE_DIR}/src/logs/qml:${CMAKE_CURRENT_SOURCE_DIR}/src/common/qml:${CMAKE_CURRENT_SOURCE_DIR}/src/ecotone/qml ./linuxdeploy-x86_64.AppImage --appdir ${CMAKE_BINARY_DIR}/AppDir --plugin qt --output appimage --desktop-file ${CMAKE_BINARY_DIR}/log-viewer.desktop --icon-file ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/icon.png
         COMMAND mkdir -p ${CMAKE_SOURCE_DIR}/dist
         COMMAND mv LogViewer*.AppImage ${CMAKE_SOURCE_DIR}/dist/${CPACK_PACKAGE_NAME}-Linux.AppImage
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
