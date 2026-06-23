@@ -156,10 +156,9 @@ if(NOT (UNIX AND NOT APPLE) AND Qt6_VERSION VERSION_GREATER_EQUAL "6.5.0")
     )
 
     if(WIN32)
-        # Ecotone talks to PostgreSQL via the QPSQL driver. windeployqt does not
-        # bundle sql drivers unless asked, so without this the released build
-        # fails with "Driver not loaded". (macOS handled separately below.)
-        list(APPEND deploy_args "--no-translations" "--compiler-runtime" "-extra-plugins=sqldrivers")
+        # windeployqt auto-deploys plugins for the linked Qt modules, so it ships
+        # the sqldrivers (incl. QPSQL) on its own — it has no -extra-plugins flag.
+        list(APPEND deploy_args "--no-translations" "--compiler-runtime")
     endif()
 
     qt_generate_deploy_app_script(
