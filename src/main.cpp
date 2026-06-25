@@ -77,11 +77,17 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("ecotoneConfig", &ecotoneConfig);
     engine.rootContext()->setContextProperty("fifoChannels", &fifoChannels);
 
+    // Make the compiled-in module resolvable by `import LogViewerApp`.
+    // Main.qml is loaded by direct qrc URL, so the qmldir applied is the one next
+    // to Main.qml (src/logs/qml/, which has none). Without the module's own qmldir
+    // (at qrc:/qt/qml/LogViewerApp/) on the import path, `import LogViewerApp` and
+    // its subdirectory types (PrimaryButton, AppContent, ...) fail to resolve from
+    // the qrc — the app only worked when run next to the on-disk build module.
+    // Adding the resource module root to the import path fixes it on Qt 6.2 too
+    // (QQmlApplicationEngine::loadFromModule() is only available since Qt 6.5).
+    engine.addImportPath(QStringLiteral("qrc:/qt/qml"));
+
     const QUrl url(QStringLiteral("qrc:/qt/qml/LogViewerApp/src/logs/qml/Main.qml"));
-    if (url.isEmpty()) {
-        qCritical() << "URL is empty!";
-    }
-    
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
