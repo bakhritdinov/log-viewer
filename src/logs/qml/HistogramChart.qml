@@ -16,6 +16,9 @@ Rectangle {
     readonly property int maxChartHeight: 360
 
     property bool filterActive: false
+    // Extra badge shown next to "Reset filter" — e.g. "ERROR only" once a level filter
+    // has been pushed into the query.
+    property string filterLabel: ""
 
     // 0 = Auto — AppContent computes from timeRangeSec.
     property int manualBucketMs: 0
@@ -208,6 +211,24 @@ Rectangle {
                     font.pixelSize: Theme.fsXs
                     anchors.verticalCenter: parent.verticalCenter
                 }
+            }
+        }
+
+        Rectangle {
+            Layout.preferredHeight: 20
+            Layout.preferredWidth: filterBadge.implicitWidth + 14
+            visible: chart.filterActive && chart.filterLabel !== ""
+            radius: 4
+            color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.18)
+            border.color: Theme.accent
+            border.width: 1
+            Text {
+                id: filterBadge
+                anchors.centerIn: parent
+                text: chart.filterLabel
+                color: Theme.accent
+                font.pixelSize: Theme.fsXs
+                font.bold: true
             }
         }
 

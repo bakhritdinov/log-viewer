@@ -12,6 +12,8 @@ Rectangle {
     property int logCount: 0
     property bool busy: false
     property bool hasMore: false
+    // Non-empty when an active filter (e.g. a level) will be applied to the next fetch.
+    property string filterLabel: ""
 
     signal firstClicked()
     signal prevClicked()
@@ -84,10 +86,14 @@ Rectangle {
 
         PageButton {
             visible: root.hasMore
-            text: root.busy ? "Loading…" : "Load more"
+            text: root.busy ? "Loading…"
+                : root.filterLabel !== "" ? `Load more (${root.filterLabel})`
+                : "Load more"
             enabled: root.hasMore && !root.busy
             ToolTip.visible: hovered
-            ToolTip.text: "Fetch the next 5000 older logs within the same time range"
+            ToolTip.text: root.filterLabel !== ""
+                ? `Fetch the next 5000 ${root.filterLabel} logs within the same time range`
+                : "Fetch the next 5000 older logs within the same time range"
             ToolTip.delay: 400
             Layout.alignment: Qt.AlignVCenter
             onClicked: root.loadMoreClicked()

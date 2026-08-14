@@ -33,6 +33,10 @@ public:
     // When the histogram filter is active, "visible" count = size of the
     // filtered subset (drives both the table view and pagination).
     int  totalCount() const { return m_filterActive ? filteredBase().size() : m_full.size(); }
+    // Size of the raw loaded set, ignoring any active filter. The chained loader uses
+    // this to tell "server returned a short batch" (= window exhausted) apart from
+    // "batch was full but few rows passed the filter".
+    Q_INVOKABLE int fullCount() const { return m_full.size(); }
 
     // QML reads this when computing sidebar facets — full unsorted set across the load.
     Q_INVOKABLE QVariantList allFields() const;
@@ -46,8 +50,12 @@ public:
     // shows exactly the loaded entries that fall into the bucket window and
     // (optionally) match the normalized level. Guarantees chartCount == tableCount.
     Q_INVOKABLE void applyTimeLevelFilter(qint64 fromMs, qint64 toMs, const QString& level);
+    // Level-only variant (no time bounds) — used once the level filter is pushed into
+    // the server query and "Load more" widens it back to the whole selected range.
+    Q_INVOKABLE void applyLevelFilter(const QString& level);
     Q_INVOKABLE void clearTimeLevelFilter();
     Q_INVOKABLE bool hasTimeLevelFilter() const { return m_filterActive; }
+    Q_INVOKABLE QString filterLevel() const { return m_filterLevel; }
 
     // Canonical "level" normalization. Free-form input → ERROR/WARN/INFO/DEBUG/TRACE/"".
     // Mirrors the old _normalizeLevel() in LogTableView.qml so C++ and QML agree on buckets.

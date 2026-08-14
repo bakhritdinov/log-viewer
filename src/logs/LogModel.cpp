@@ -170,9 +170,11 @@ QList<LogEntry> LogModel::filteredBase() const {
     if (!m_filterActive) return m_full;
     QList<LogEntry> out;
     out.reserve(m_full.size());
+    // m_filterToMs <= 0 means "no time bounds" (level-only filter).
+    const bool timeBounded = m_filterToMs > 0;
     for (const auto& e : m_full) {
         const qint64 ts = e.timestamp.toMSecsSinceEpoch();
-        if (ts < m_filterFromMs || ts >= m_filterToMs) continue;
+        if (timeBounded && (ts < m_filterFromMs || ts >= m_filterToMs)) continue;
         if (!m_filterLevel.isEmpty() && e.level != m_filterLevel) continue;
         out.append(e);
     }
@@ -204,6 +206,15 @@ void LogModel::applyTimeLevelFilter(qint64 fromMs, qint64 toMs, const QString& l
     m_filterActive = true;
     m_filterFromMs = fromMs;
     m_filterToMs   = toMs;
+    m_filterLevel  = level;
+    applySlice();
+}
+
+void LogModel::applyLevelFilter(const QString& level) {
+    if (level.isEmpty()) { clearTimeLevelFilter(); return; }
+    m_filterActive = true;
+    m_filterFromMs = 0;
+    m_filterToMs   = 0;   // unbounded — see filteredBase()
     m_filterLevel  = level;
     applySlice();
 }

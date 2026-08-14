@@ -19,6 +19,8 @@ Rectangle {
     property int currentPage: 0
     property int maxPage: 1
     property bool hasMore: false
+    // Label of the filter the next "Load more" will apply (e.g. "ERROR"), "" when none.
+    property string loadMoreFilterLabel: ""
     property var searchTerms: []
 
     // Field-name overrides — passed in from AppContent so we can show the actual app/service
@@ -814,6 +816,7 @@ Rectangle {
             logCount: (typeof logModel !== "undefined" && logModel !== null) ? logModel.totalCount : 0
             busy: typeof logModel !== "undefined" && logModel !== null && logModel.loading
             hasMore: tableRoot.hasMore
+            filterLabel: tableRoot.loadMoreFilterLabel
             onFirstClicked: tableRoot.firstPageRequested()
             onPrevClicked:  tableRoot.prevPageRequested()
             onNextClicked:  tableRoot.nextPageRequested()

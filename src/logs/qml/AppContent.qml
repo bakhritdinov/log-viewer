@@ -52,6 +52,17 @@ Rectangle {
     property bool chainInProgress: false
     // Snapshot of logModel.totalCount before each batch — used to detect duplicates / empty.
     property int  _lastTotal: 0
+    // Same snapshot over the *unfiltered* set — tells "server returned a short batch"
+    // (window exhausted) apart from "batch was full, but few rows passed the filter".
+    property int  _lastRawTotal: 0
+
+    // Normalized level the user filtered on (histogram click): ERROR/WARN/INFO/DEBUG/TRACE.
+    // Empty = no level filter.
+    property string activeLevel: ""
+    // True once activeLevel is part of the LogsQL query (not just a client-side filter over
+    // already-loaded rows). Set by the first "Load more" press while a level filter is on —
+    // from then on every fetch, including the chain, pulls only rows of that level.
+    property bool _levelServerSide: false
     // True when chain stopped because of the cap and there's potentially more data
     // available within the user's time range. False when the stream actually ended.
     property bool hasMore: false
@@ -118,13 +129,19 @@ Rectangle {
     function _clearHistogramFilter() {
         if (_histClickPrev === null) return
         let prev = _histClickPrev
+        let wasServerSide = _levelServerSide
         _histClickPrev = null
+        activeLevel = ""
+        _levelServerSide = false
         if (typeof logModel !== "undefined" && logModel !== null) {
             logModel.clearTimeLevelFilter()
         }
         if (prev.display !== undefined) {
             header.timeRangeDisplay = prev.display
         }
+        // The loaded set only contains one level — going back to "all levels" needs a
+        // real query, otherwise the table/histogram would show a level-skewed window.
+        if (wasServerSide) refreshLogs(header.searchText)
     }
 
     // Sidebar is an overlay drawer — closed by default; opened on demand.
@@ -175,6 +192,7 @@ Rectangle {
             buckets: []
             bucketMs: root._chartBucketMs
             filterActive: root._histClickPrev !== null
+            filterLabel: (root._levelServerSide && root.activeLevel !== "") ? root.activeLevel + " only" : ""
 
             onResetRequested: root._clearHistogramFilter()
 
@@ -218,6 +236,9 @@ Rectangle {
                 // Client-side filter over m_full — no new Loki query.
                 // This keeps chartCount == tableCount.
                 logModel.applyTimeLevelFilter(Number(fromMs), Number(toMs), level || "")
+                // Remember the level so "Load more" can push it into the query instead of
+                // pulling 5000 rows of every level and then throwing most of them away.
+                root.activeLevel = level || ""
 
                 let fmt = (ms) => Qt.formatDateTime(new Date(ms), "MMM dd hh:mm:ss")
                 let suffix = level && level !== "" ? "  ·  " + level : ""
@@ -238,6 +259,7 @@ Rectangle {
                 maxPage: root.maxPage
                 searchTerms: root.searchTerms
                 hasMore: root.hasMore
+                loadMoreFilterLabel: root.activeLevel
                 serviceField: root.appLabelName
                 chainLoading: root.chainInProgress
                 onLoadMoreRequested: root.loadMore()
@@ -437,9 +459,36 @@ Rectangle {
         if (logModel) logModel.setPage(currentPage, pageSize)
     }
 
+    // Synonyms per normalized level — must stay in sync with LogModel::normalizeLevel(),
+    // otherwise the server-side prefilter and the client-side filter disagree.
+    readonly property var _levelSynonyms: ({
+        "ERROR": ["err", "error", "fatal", "crit", "critical", "panic"],
+        "WARN":  ["warn", "warning"],
+        "INFO":  ["info", "notice", "information"],
+        "DEBUG": ["debug", "dbg"],
+        "TRACE": ["trace"]
+    })
+    // Field names that may carry the level — same list as LogModel::extractLevel().
+    readonly property var _levelFields: ["level", "severity", "lvl", "loglevel", "log_level"]
+
+    // LogsQL predicate matching a normalized level across every field that may hold it:
+    //   (level:~"(?i)^(err|error|…)$" OR severity:~"…" OR …)
+    function _levelFilterExpr(level) {
+        let syn = _levelSynonyms[level]
+        if (!syn) return ""
+        let re = `(?i)^(${syn.join("|")})$`
+        return "(" + _levelFields.map(f => `${f}:~"${_escapeLogsQL(re)}"`).join(" OR ") + ")"
+    }
+
     function _buildLogsQL(query, timeFilter) {
         let labels = `${nsLabelName}="${currentNamespace}", ${appLabelName}="${currentApp}"`
         let pipeline = timeFilter ? " " + timeFilter : ""
+        // Level filter goes into the query only after it has been promoted to server-side,
+        // so a plain histogram click stays instant (pure client-side narrowing).
+        if (_levelServerSide && activeLevel !== "") {
+            let lvlExpr = _levelFilterExpr(activeLevel)
+            if (lvlExpr !== "") pipeline += " " + lvlExpr
+        }
         if (query && query !== "*" && query.trim() !== "") {
             let parts = query.split(/ AND /i)
             parts.forEach(p => {
@@ -487,10 +536,17 @@ Rectangle {
         hasMore = false
         chainInProgress = true
         // Any explicit refresh drops the histogram filter — new data is a fresh state.
-        if (logModel.hasTimeLevelFilter()) logModel.clearTimeLevelFilter()
-        _histClickPrev = null
+        // Exception: a level filter promoted to server-side is query state, not a view
+        // over loaded rows, so it survives refresh/auto-refresh until the user resets it.
+        if (_levelServerSide && activeLevel !== "") {
+            logModel.applyLevelFilter(activeLevel)
+        } else {
+            if (logModel.hasTimeLevelFilter()) logModel.clearTimeLevelFilter()
+            _histClickPrev = null
+        }
         logModel.clear()
         _lastTotal = 0
+        _lastRawTotal = 0
         _loadOffsetSec = 0
         // Wipe the chart so stale bars don't linger between queries.
         if (typeof histogram !== "undefined" && histogram !== null) histogram.buckets = []
@@ -501,8 +557,37 @@ Rectangle {
     function loadMore() {
         if (!hasMore) return
         if (typeof logModel === "undefined" || logModel === null) return
+
+        // A level filter is active but still client-side: the loaded set is a mix of all
+        // levels, so continuing the chain would spend the next 5000 rows on levels the
+        // user filtered out. Promote the filter into the query and reload the whole time
+        // range keeping only matching rows — that is what "load more errors" means.
+        if (activeLevel !== "" && !_levelServerSide) {
+            _levelServerSide = true
+            // Drop the bucket's time narrowing — "load more" asks for matching rows across
+            // the whole selected range, not just the clicked bar. The chip goes back to the
+            // plain range label; the level is shown by the histogram's filter badge.
+            logModel.applyLevelFilter(activeLevel)
+            if (_histClickPrev !== null && _histClickPrev.display !== undefined)
+                header.timeRangeDisplay = _histClickPrev.display
+            console.log(">>> LEVEL FILTER → SERVER SIDE:", activeLevel)
+            refreshLogs(header.searchText)
+            return
+        }
+
+        // Bucket-only filter (bar clicked outside a level segment): every row the next
+        // batch brings is older than that bar, so it would all be hidden. Widen back to
+        // the full range before continuing.
+        if (activeLevel === "" && logModel.hasTimeLevelFilter()) {
+            logModel.clearTimeLevelFilter()
+            if (_histClickPrev !== null && _histClickPrev.display !== undefined)
+                header.timeRangeDisplay = _histClickPrev.display
+            _histClickPrev = null
+        }
+
         maxLogsToLoad = logModel.totalCount + loadStepSize
         _lastTotal = logModel.totalCount
+        _lastRawTotal = logModel.fullCount()
         hasMore = false
         chainInProgress = true
         _fetchNextBatch(_loadCorrelationId)
@@ -532,9 +617,15 @@ Rectangle {
         let nowTotal = logModel.totalCount
         let added = nowTotal - _lastTotal
         _lastTotal = nowTotal
-        console.log(">>> BATCH: added", added, "total", nowTotal)
+        // Raw (unfiltered) delta — how many rows the server actually returned. With a
+        // filter active `added` counts only matching rows, which would otherwise read as
+        // "short batch" and stop the chain early.
+        let nowRaw = logModel.fullCount()
+        let rawAdded = nowRaw - _lastRawTotal
+        _lastRawTotal = nowRaw
+        console.log(">>> BATCH: added", added, "raw", rawAdded, "total", nowTotal)
 
-        if (added === 0) {
+        if (rawAdded === 0) {
             hasMore = false
             _commitLoad()
             _refreshHistogram()
@@ -553,7 +644,7 @@ Rectangle {
         _loadOffsetSec = offsetSec
 
         if (offsetSec >= timeRangeSec) { hasMore = false; _commitLoad(); return }
-        if (added < 1000)              { hasMore = false; _commitLoad(); return }
+        if (rawAdded < 1000)           { hasMore = false; _commitLoad(); return }
         if (nowTotal >= maxLogsToLoad) { hasMore = true;  _commitLoad(); return }
 
         _fetchNextBatch(_loadCorrelationId)
