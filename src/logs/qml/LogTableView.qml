@@ -15,6 +15,7 @@ Rectangle {
     signal nextPageRequested()
     signal lastPageRequested()
     signal loadMoreRequested()
+    signal stopLoadRequested()
 
     property int currentPage: 0
     property int maxPage: 1
@@ -248,9 +249,6 @@ Rectangle {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             focus: true
-            // Freeze scroll/keyboard while batches still streaming in — prevents the
-            // visual jitter from each appendEntries → applySlice cycle.
-            interactive: !tableRoot.chainLoading
             ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
             // j/k or arrow keys navigate; Enter toggles row expansion.
@@ -402,8 +400,7 @@ Rectangle {
                         id: rowMouse
                         anchors.fill: parent
                         hoverEnabled: true
-                        enabled: !tableRoot.chainLoading
-                        cursorShape: tableRoot.chainLoading ? Qt.WaitCursor : Qt.PointingHandCursor
+                        cursorShape: Qt.PointingHandCursor
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
                         onClicked: (mouse) => {
                             if (mouse.button === Qt.RightButton && rowItem.traceId !== "") {
@@ -816,12 +813,14 @@ Rectangle {
             logCount: (typeof logModel !== "undefined" && logModel !== null) ? logModel.totalCount : 0
             busy: typeof logModel !== "undefined" && logModel !== null && logModel.loading
             hasMore: tableRoot.hasMore
+            chainLoading: tableRoot.chainLoading
             filterLabel: tableRoot.loadMoreFilterLabel
             onFirstClicked: tableRoot.firstPageRequested()
             onPrevClicked:  tableRoot.prevPageRequested()
             onNextClicked:  tableRoot.nextPageRequested()
             onLastClicked:  tableRoot.lastPageRequested()
             onLoadMoreClicked: tableRoot.loadMoreRequested()
+            onStopClicked: tableRoot.stopLoadRequested()
         }
     }
 

@@ -41,6 +41,9 @@ public:
     };
 
     Q_INVOKABLE void queryLogs(const QString& url, const QString& token, const QString& uid, const QString& user, const QString& pass, const QString& logql, const QString& from, const QString& to);
+    // Abort the in-flight log query (if any). Its result — including a batch still being
+    // parsed on the worker thread — is dropped, and loadingChanged(false) is emitted.
+    Q_INVOKABLE void cancelQuery();
     Q_INVOKABLE void fetchMappings(const QString& url, const QString& token, const QString& uid, const QString& user, const QString& pass);
 
 signals:
@@ -53,6 +56,10 @@ signals:
 private:
     QNetworkAccessManager* m_manager;
     QNetworkReply* m_currentReply = nullptr;
-    void parseLogsResponse(const QByteArray& data);
+    // Bumped on every queryLogs()/cancelQuery(); a parse result whose generation is stale
+    // belongs to a superseded request and is discarded.
+    quint64 m_queryGeneration = 0;
+    // Pure function — runs on a worker thread so a 1000-row batch doesn't stall the UI.
+    static QList<LogEntry> parseLogsResponse(const QByteArray& data);
     void parseMappingsResponse(const QByteArray& data);
 };

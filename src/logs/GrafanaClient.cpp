@@ -9,6 +9,8 @@
 #include <QDebug>
 #include <QSettings>
 #include <QSet>
+#include <QFutureWatcher>
+#include <QtConcurrent/QtConcurrentRun>
 
 namespace {
 QString formatNetworkError(QNetworkReply* reply, const QByteArray& body) {
@@ -90,24 +92,55 @@ void GrafanaClient::queryLogs(const QString& url, const QString& token, const QS
         old->abort(); // finished() fires synchronously; its lambda captures `old` and cleans up.
     }
 
+    const quint64 generation = ++m_queryGeneration;
+
     qDebug() << ">>> LOG QUERY:" << apiUrl.toString() << "from:" << from << "to:" << to;
     QNetworkReply* reply = m_manager->post(request, postData);
     m_currentReply = reply;
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
-        emit loadingChanged(false);
-        if (reply->error() == QNetworkReply::NoError) {
-            QByteArray responseData = reply->readAll();
-            qDebug() << "<<< RESPONSE RECEIVED (" << responseData.size() << "bytes)";
-            parseLogsResponse(responseData);
-        } else if (reply->error() != QNetworkReply::OperationCanceledError) {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, generation]() {
+        if (m_currentReply == reply) m_currentReply = nullptr;
+        reply->deleteLater();
+
+        if (reply->error() != QNetworkReply::NoError) {
+            // A cancelled reply was superseded by a newer query (or cancelQuery()), which
+            // already owns the loading state — don't flip it off underneath it.
+            if (reply->error() == QNetworkReply::OperationCanceledError) return;
+            emit loadingChanged(false);
             const QByteArray errBody = reply->readAll();
             qDebug() << "!!! NETWORK ERROR:" << reply->errorString() << "body:" << errBody.left(800);
             emit errorOccurred(formatNetworkError(reply, errBody));
+            return;
         }
-        if (m_currentReply == reply) m_currentReply = nullptr;
-        reply->deleteLater();
+
+        QByteArray responseData = reply->readAll();
+        qDebug() << "<<< RESPONSE RECEIVED (" << responseData.size() << "bytes)";
+
+        // JSON → LogEntry conversion of a 1000-row batch is heavy enough to stutter the UI,
+        // so it runs on the thread pool; the result is delivered back on this thread.
+        auto* watcher = new QFutureWatcher<QList<LogEntry>>(this);
+        connect(watcher, &QFutureWatcher<QList<LogEntry>>::finished, this, [this, watcher, generation]() {
+            watcher->deleteLater();
+            if (generation != m_queryGeneration) {
+                qDebug() << ">>> Dropping stale batch (generation" << generation << ")";
+                return;
+            }
+            emit loadingChanged(false);
+            emit logsReceived(watcher->result());
+        });
+        watcher->setFuture(QtConcurrent::run(&GrafanaClient::parseLogsResponse, std::move(responseData)));
     });
+}
+
+void GrafanaClient::cancelQuery() {
+    ++m_queryGeneration;   // drop any batch still being parsed
+    if (m_currentReply) {
+        qDebug() << ">>> CANCELLING log query";
+        QNetworkReply* old = m_currentReply;
+        m_currentReply = nullptr;
+        old->abort();
+    }
+    emit loadingChanged(false);
 }
 
 void GrafanaClient::fetchMappings(const QString& url, const QString& token, const QString& uid, const QString& user, const QString& pass) {
@@ -279,7 +312,7 @@ void GrafanaClient::fetchMappings(const QString& url, const QString& token, cons
     });
 }
 
-void GrafanaClient::parseLogsResponse(const QByteArray& data) {
+QList<LogEntry> GrafanaClient::parseLogsResponse(const QByteArray& data) {
     QJsonDocument doc = QJsonDocument::fromJson(data);
     QJsonObject results = doc.object()["results"].toObject();
     QJsonObject resA = results["A"].toObject();
@@ -338,7 +371,5 @@ void GrafanaClient::parseLogsResponse(const QByteArray& data) {
         }
     }
     qDebug() << ">>> Total entries parsed:" << entries.size();
-    emit logsReceived(entries);
-    // Facets are now computed in QML over the *full* accumulated set, not per-batch,
-    // so the user can filter by any field that appears anywhere in the loaded data.
+    return entries;
 }

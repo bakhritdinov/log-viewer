@@ -42,7 +42,7 @@ add_library(LogViewerLogs STATIC
     src/logs/LogModel.cpp src/logs/LogModel.h
 )
 target_include_directories(LogViewerLogs PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(LogViewerLogs PUBLIC Qt6::Core Qt6::Network)
+target_link_libraries(LogViewerLogs PUBLIC Qt6::Core Qt6::Network Qt6::Concurrent)
 
 add_library(LogViewerEcotone STATIC
     src/ecotone/EcotoneClient.cpp src/ecotone/EcotoneClient.h

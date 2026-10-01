@@ -47,8 +47,7 @@ Rectangle {
     property int  _loadOffsetSec: 0
     property bool _loadCancelled: false
     property string _loadCorrelationId: ""
-    // True from the moment a load starts until _commitLoad fires — used by the table to
-    // freeze scroll/keyboard interaction so the list doesn't jitter while batches arrive.
+    // True from the moment a load starts until _commitLoad fires (or the user stops it).
     property bool chainInProgress: false
     // Snapshot of logModel.totalCount before each batch — used to detect duplicates / empty.
     property int  _lastTotal: 0
@@ -263,6 +262,7 @@ Rectangle {
                 serviceField: root.appLabelName
                 chainLoading: root.chainInProgress
                 onLoadMoreRequested: root.loadMore()
+                onStopLoadRequested: root.cancelLoad()
                 onTraceRequested: (traceId) => {
                     header.searchText = `trace_id: "${traceId}"`
                     root.currentPage = 0
@@ -307,6 +307,23 @@ Rectangle {
             root.currentPage = 0
             root.refreshLogs(header.searchText)
         }
+    }
+
+    // Esc stops a running chained load. Enabled only while loading so it doesn't steal Esc
+    // from dialogs/search the rest of the time.
+    Shortcut {
+        sequence: "Esc"
+        enabled: root.chainInProgress
+        onActivated: root.cancelLoad()
+    }
+
+    // Coalesces facet updates while batches stream in — rebuilding the sidebar on every
+    // 1000-row batch is wasted work, once a second is plenty to watch fields appear.
+    Timer {
+        id: facetsThrottle
+        interval: 1000
+        repeat: false
+        onTriggered: root._emitFacets()
     }
 
     // Auto-refresh / tail mode timer.
@@ -545,6 +562,10 @@ Rectangle {
             _histClickPrev = null
         }
         logModel.clear()
+        // Slice to the page from the very first batch: the table then only ever holds one
+        // page, and since older batches land after it, page 0 stays put while the chain runs.
+        logModel.setPage(0, pageSize)
+        facetsThrottle.stop()
         _lastTotal = 0
         _lastRawTotal = 0
         _loadOffsetSec = 0
@@ -593,6 +614,18 @@ Rectangle {
         _fetchNextBatch(_loadCorrelationId)
     }
 
+    // Stop the running chain, keep what has been loaded so far. "Load more" continues from
+    // the point where it stopped.
+    function cancelLoad() {
+        if (!chainInProgress) return
+        _loadCorrelationId = "cancel-" + Date.now()
+        if (typeof grafanaClient !== "undefined" && grafanaClient !== null) grafanaClient.cancelQuery()
+        hasMore = true
+        _commitLoad()
+        _refreshHistogram()
+        console.log(">>> LOAD CANCELLED at", logModel ? logModel.fullCount() : 0, "entries")
+    }
+
     function _fetchNextBatch(corrId) {
         if (corrId !== _loadCorrelationId) return
 
@@ -614,6 +647,8 @@ Rectangle {
     }
 
     function _handleBatch() {
+        // A batch that landed right before the user pressed Stop.
+        if (!chainInProgress) return
         let nowTotal = logModel.totalCount
         let added = nowTotal - _lastTotal
         _lastTotal = nowTotal
@@ -632,8 +667,8 @@ Rectangle {
             return
         }
 
-        // Update facets incrementally so the user sees fields appear as data streams in.
-        _emitFacets()
+        // Update facets as data streams in (throttled — see facetsThrottle).
+        if (!facetsThrottle.running) facetsThrottle.start()
         _refreshHistogram()
 
         let oldestMs = logModel.oldestTimestamp()
@@ -660,32 +695,18 @@ Rectangle {
 
     function _commitLoad() {
         chainInProgress = false
+        facetsThrottle.stop()
         if (logModel) logModel.setPage(currentPage, pageSize)
         _emitFacets()
         console.log(">>> LOAD COMPLETE:", logModel ? logModel.totalCount : 0, "entries")
     }
 
-    // Aggregate field values across the *full* loaded set and push to Sidebar facets.
+    // Push facets over the *full* loaded set to the Sidebar. Counted incrementally in C++
+    // (LogModel::facets) — re-aggregating every row in JS per batch froze the UI.
     function _emitFacets() {
         if (!logModel || !sidebar) return
-        let facets = {}
-        let all = logModel.allFields()
-        if (!all || all.length === 0) {
-            sidebar.facets = facets
-            return
-        }
-        for (let i = 0; i < all.length; ++i) {
-            let f = all[i]
-            if (!f) continue
-            for (let k in f) {
-                if (k === "Line" || k === "message" || k === "Time" || k === "ts") continue
-                let v = (typeof f[k] === "string") ? f[k] : String(f[k] || "")
-                if (v === "") continue
-                if (!facets[k]) facets[k] = {}
-                facets[k][v] = (facets[k][v] || 0) + 1
-            }
-        }
+        let facets = logModel.facets()
         sidebar.facets = facets
-        console.log(">>> FACETS:", Object.keys(facets).length, "fields from", all.length, "entries")
+        console.log(">>> FACETS:", Object.keys(facets).length, "fields from", logModel.fullCount(), "entries")
     }
 }

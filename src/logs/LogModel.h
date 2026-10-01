@@ -41,6 +41,10 @@ public:
     // QML reads this when computing sidebar facets — full unsorted set across the load.
     Q_INVOKABLE QVariantList allFields() const;
 
+    // Sidebar facets over the full loaded set: { field: { value: count } }. Maintained
+    // incrementally as batches arrive, so reading it costs O(distinct values), not O(rows).
+    Q_INVOKABLE QVariantMap facets() const;
+
     // Bucket loaded entries by time × level. Returns a list of QVariantMap of the form
     // { "tMs": <bucket start, ms>, "ERROR": N, "WARN": M, "INFO": K, "DEBUG": L,
     //   "TRACE": P, "EMPTY": Q }. Used by HistogramChart.qml.
@@ -84,6 +88,7 @@ private:
     // Base set used to build the page slice — equals m_full when no filter
     // is active, otherwise the time-and-level filtered subset.
     QList<LogEntry> filteredBase() const;
+    void countFacets(const QList<LogEntry>& entries);
 
     QList<LogEntry> m_full;       // entire loaded set, sorted newest-first
     QList<LogEntry> m_entries;    // current page slice — what ListView sees
@@ -95,4 +100,6 @@ private:
     qint64 m_filterFromMs = 0;
     qint64 m_filterToMs   = 0;
     QString m_filterLevel;
+
+    QHash<QString, QHash<QString, int>> m_facetCounts;
 };

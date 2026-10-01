@@ -12,6 +12,8 @@ Rectangle {
     property int logCount: 0
     property bool busy: false
     property bool hasMore: false
+    // A chained load is running — shows the Stop button.
+    property bool chainLoading: false
     // Non-empty when an active filter (e.g. a level) will be applied to the next fetch.
     property string filterLabel: ""
 
@@ -20,6 +22,7 @@ Rectangle {
     signal nextClicked()
     signal lastClicked()
     signal loadMoreClicked()
+    signal stopClicked()
 
     Rectangle { anchors.top: parent.top; width: parent.width; height: 1; color: Theme.border }
 
@@ -38,12 +41,12 @@ Rectangle {
         PageButton {
             text: "«"
             ToolTip.visible: hovered; ToolTip.text: "First page"; ToolTip.delay: 400
-            enabled: root.currentPage > 0 && !root.busy
+            enabled: root.currentPage > 0
             onClicked: root.firstClicked()
         }
         PageButton {
             text: "‹ Newer"
-            enabled: root.currentPage > 0 && !root.busy
+            enabled: root.currentPage > 0
             onClicked: root.prevClicked()
         }
 
@@ -68,13 +71,13 @@ Rectangle {
 
         PageButton {
             text: "Older ›"
-            enabled: root.currentPage + 1 < root.maxPage && !root.busy
+            enabled: root.currentPage + 1 < root.maxPage
             onClicked: root.nextClicked()
         }
         PageButton {
             text: "»"
             ToolTip.visible: hovered; ToolTip.text: "Last page"; ToolTip.delay: 400
-            enabled: root.currentPage + 1 < root.maxPage && !root.busy
+            enabled: root.currentPage + 1 < root.maxPage
             onClicked: root.lastClicked()
         }
     }
@@ -85,7 +88,17 @@ Rectangle {
         spacing: Theme.sp2
 
         PageButton {
-            visible: root.hasMore
+            visible: root.chainLoading
+            text: "■ Stop"
+            ToolTip.visible: hovered
+            ToolTip.text: "Stop loading and keep the logs fetched so far (Esc)"
+            ToolTip.delay: 400
+            Layout.alignment: Qt.AlignVCenter
+            onClicked: root.stopClicked()
+        }
+
+        PageButton {
+            visible: root.hasMore && !root.chainLoading
             text: root.busy ? "Loading…"
                 : root.filterLabel !== "" ? `Load more (${root.filterLabel})`
                 : "Load more"

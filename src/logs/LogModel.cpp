@@ -62,6 +62,29 @@ QVariantList LogModel::allFields() const {
     return out;
 }
 
+QVariantMap LogModel::facets() const {
+    QVariantMap out;
+    for (auto fit = m_facetCounts.cbegin(); fit != m_facetCounts.cend(); ++fit) {
+        QVariantMap values;
+        for (auto vit = fit.value().cbegin(); vit != fit.value().cend(); ++vit)
+            values.insert(vit.key(), vit.value());
+        out.insert(fit.key(), values);
+    }
+    return out;
+}
+
+void LogModel::countFacets(const QList<LogEntry>& entries) {
+    for (const auto& e : entries) {
+        for (auto it = e.allFields.cbegin(); it != e.allFields.cend(); ++it) {
+            const QString& k = it.key();
+            if (k == u"Line" || k == u"message" || k == u"Time" || k == u"ts") continue;
+            const QString v = it.value().toString();
+            if (v.isEmpty()) continue;
+            ++m_facetCounts[k][v];
+        }
+    }
+}
+
 QString LogModel::normalizeLevel(const QString& raw) {
     if (raw.isEmpty()) return {};
     const QString l = raw.toUpper().trimmed();
@@ -142,20 +165,28 @@ QVariantList LogModel::aggregateByLevel(qint64 bucketMs) const {
     return out;
 }
 
+namespace {
+bool newerFirst(const LogEntry& a, const LogEntry& b) { return a.timestamp > b.timestamp; }
+}
+
 void LogModel::setEntries(const QList<LogEntry>& entries) {
     m_full = entries;
-    std::sort(m_full.begin(), m_full.end(), [](const LogEntry& a, const LogEntry& b) {
-        return a.timestamp > b.timestamp;
-    });
+    std::stable_sort(m_full.begin(), m_full.end(), newerFirst);
+    m_facetCounts.clear();
+    countFacets(m_full);
     emit totalCountChanged();
     applySlice();
 }
 
 void LogModel::appendEntries(const QList<LogEntry>& entries) {
-    m_full.append(entries);
-    std::sort(m_full.begin(), m_full.end(), [](const LogEntry& a, const LogEntry& b) {
-        return a.timestamp > b.timestamp;
-    });
+    // m_full is already sorted; sort only the batch and merge it in. Chained batches are
+    // older than everything loaded, so the merge is effectively an append.
+    QList<LogEntry> batch = entries;
+    std::stable_sort(batch.begin(), batch.end(), newerFirst);
+    const auto mid = m_full.size();
+    m_full.append(batch);
+    std::inplace_merge(m_full.begin(), m_full.begin() + mid, m_full.end(), newerFirst);
+    countFacets(batch);
     emit totalCountChanged();
     applySlice();
 }
@@ -195,9 +226,26 @@ void LogModel::applySlice() {
         int end = qMin(start + m_pageSize, static_cast<int>(base.size()));
         slice = base.mid(start, end - start);
     }
-    beginResetModel();
-    m_entries = slice;
-    endResetModel();
+    // While a chain streams older batches in, the visible page usually doesn't change at all
+    // (or only grows at the tail). A full reset would throw away the view's scroll position,
+    // current row and expanded rows, so only touch the rows that actually changed.
+    auto sameEntry = [](const LogEntry& a, const LogEntry& b) {
+        return a.timestamp == b.timestamp && a.message == b.message;
+    };
+    const qsizetype oldSize = m_entries.size();
+    const bool keepsPrefix = slice.size() >= oldSize
+        && std::equal(m_entries.cbegin(), m_entries.cend(), slice.cbegin(), sameEntry);
+    if (keepsPrefix) {
+        if (slice.size() > oldSize) {
+            beginInsertRows(QModelIndex(), int(oldSize), int(slice.size() - 1));
+            m_entries = slice;
+            endInsertRows();
+        }
+    } else {
+        beginResetModel();
+        m_entries = slice;
+        endResetModel();
+    }
     emit countChanged();
     emit totalCountChanged();
 }
@@ -236,6 +284,7 @@ void LogModel::setLoading(bool loading) {
 
 void LogModel::clear() {
     m_full.clear();
+    m_facetCounts.clear();
     beginResetModel();
     m_entries.clear();
     endResetModel();
