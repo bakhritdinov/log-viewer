@@ -105,7 +105,10 @@ jobs:
         cmake --build build --config Release -j "$(sysctl -n hw.logicalcpu)"
         # Install to trigger deployment and signing
         mkdir -p dist/bundle
-        DESTDIR=$PWD/dist/bundle cmake --install build --prefix /
+        # Install straight into the bundle dir. `DESTDIR=... --prefix /` broke with the
+        # CMake on the 2026-08 macos-14 image: "/" + BUNDLE DESTINATION "." collapsed to
+        # an empty path ("file INSTALL given no DESTINATION").
+        cmake --install build --prefix "$PWD/dist/bundle"
         # Final sign for safety
         codesign --force --deep --sign - dist/bundle/LogViewer.app
         # Sanity check: the QPSQL plugin must have no external (non-bundle) deps
