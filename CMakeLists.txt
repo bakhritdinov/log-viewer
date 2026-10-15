@@ -4,6 +4,7 @@ project(LogViewer VERSION 2.8.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_definitions(-DAPP_VERSION="${PROJECT_VERSION}")
 add_definitions(-DGITHUB_REPO="bakhritdinov/log-viewer")
@@ -31,6 +32,10 @@ if(Qt6_VERSION VERSION_GREATER_EQUAL "6.3.0")
 else()
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
+
+# --- New core (rewrite) ------------------------------------------------------
+# Built and tested alongside the legacy app until the new UI replaces it.
+add_subdirectory(src/core)
 
 # --- Module static libraries -------------------------------------------------
 # Code is grouped by concern: logs (Grafana/Loki).

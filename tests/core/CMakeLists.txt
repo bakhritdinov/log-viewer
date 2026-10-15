@@ -1,0 +1,5 @@
+logviewer_add_test(tst_core_level      SOURCES tst_level.cpp       LIBS logviewer_core)
+logviewer_add_test(tst_core_timerange  SOURCES tst_timerange.cpp   LIBS logviewer_core)
+logviewer_add_test(tst_core_query      SOURCES tst_query.cpp       LIBS logviewer_core)
+logviewer_add_test(tst_core_golden     SOURCES tst_golden.cpp      LIBS logviewer_core)
+logviewer_add_test(tst_core_suggestions SOURCES tst_suggestions.cpp LIBS logviewer_core)

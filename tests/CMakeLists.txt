@@ -18,3 +18,4 @@ function(logviewer_add_test name)
 endfunction()
 
 add_subdirectory(characterization)
+add_subdirectory(core)

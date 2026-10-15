@@ -38,3 +38,4 @@ CLAUDE.md
 
 # Local build trees (desktop / WebAssembly)
 build-*/
+.clangd
