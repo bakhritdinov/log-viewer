@@ -94,6 +94,15 @@ private slots:
         QCOMPARE(toggleFilterInText(u"x AND -level:error", notLvl), QStringLiteral("x"));
     }
 
+    void removeTerm()
+    {
+        QCOMPARE(removeQueryTerm(u"a and level:error AND * AND  AND b", 1), QStringLiteral("a AND b"));
+        QCOMPARE(removeQueryTerm(u"a AND b", 0), QStringLiteral("b"));
+        QCOMPARE(removeQueryTerm(u"a AND b", 1), QStringLiteral("a"));
+        QCOMPARE(removeQueryTerm(u"a", 0), QString());
+        QCOMPARE(removeQueryTerm(u"a AND b", 5), QStringLiteral("a AND b"));
+    }
+
     void toggleIgnoresIncompleteFilter()
     {
         QCOMPARE(toggleFilterInText(u" timeout ", FieldFilter{ "", "x" }), QStringLiteral(" timeout "));

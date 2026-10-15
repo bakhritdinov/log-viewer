@@ -4,6 +4,7 @@
 #include <QtEndian>
 #include <algorithm>
 
+#include "core/features/Analysis.h"
 #include "core/query/Query.h"
 
 namespace lv {
@@ -31,7 +32,10 @@ bool LogStore::Filter::matches(const LogEntry& e) const
         const qint64 t = e.timeMs();
         if (t < fromMs || t >= toMs) return false;
     }
-    return level == Level::Unknown || e.level == level;
+    if (level != Level::Unknown && e.level != level) return false;
+    if (!messageTemplate.isEmpty())
+        return (templateMessage(e.message).templateText == messageTemplate) != excludeTemplate;
+    return true;
 }
 
 int LogStore::add(const LogEntries& entries)

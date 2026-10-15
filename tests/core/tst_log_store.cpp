@@ -83,6 +83,16 @@ private slots:
         QCOMPARE(s.visible().size(), 5);
     }
 
+    void filterByMessageTemplate()
+    {
+        LogStore s;
+        s.add({ entry(0, "timeout after 5 ms"), entry(1, "timeout after 7 ms"), entry(2, "ok") });
+        s.setFilter({ 0, 0, Level::Unknown, "timeout after * ms" });
+        QCOMPARE(s.visible().size(), 2);
+        s.setFilter({ 0, 0, Level::Unknown, "timeout after * ms", true });
+        QCOMPARE(messages(s.visible()), QStringList{ "ok" });
+    }
+
     void paging()
     {
         LogStore s;

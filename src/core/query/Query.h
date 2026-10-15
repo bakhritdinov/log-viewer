@@ -43,7 +43,10 @@ public:
     // Word term with empty text, meaning "no condition".
     static QueryTerm parseTerm(QStringView part);
 
-    const QList<QueryTerm>& terms() const { return m_terms; }
+    // By reference on lvalues; by value on temporaries, so
+    // `for (auto& t : Query::parse(text).terms())` cannot dangle.
+    const QList<QueryTerm>& terms() const& { return m_terms; }
+    QList<QueryTerm> terms() && { return std::move(m_terms); }
     bool isEmpty() const { return m_terms.isEmpty(); }
     // Free-text words, used for highlighting matches.
     QStringList words() const;
@@ -63,6 +66,10 @@ QStringList splitQueryParts(QStringView text);
 // their original spelling.
 // A filter with an empty field or value leaves the text untouched.
 QString toggleFilterInText(QStringView text, const FieldFilter& filter);
+
+// Removes the `termIndex`-th term (as counted by Query::parse, i.e. skipping
+// empty and "*" parts) from the search text; the other parts keep their spelling.
+QString removeQueryTerm(QStringView text, int termIndex);
 
 // Text of a field value as shown in filters and chips. Integers stay integers,
 // fractions are kept, booleans are "true"/"false", date-times use

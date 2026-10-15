@@ -36,6 +36,7 @@ endif()
 # --- New core (rewrite) ------------------------------------------------------
 # Built and tested alongside the legacy app until the new UI replaces it.
 add_subdirectory(src/core)
+add_subdirectory(src/app)
 
 # --- Module static libraries -------------------------------------------------
 # Code is grouped by concern: logs (Grafana/Loki).

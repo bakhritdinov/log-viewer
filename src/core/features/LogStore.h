@@ -10,13 +10,17 @@ namespace lv {
 // optional view filter (histogram click) and page slicing over the filtered set.
 class LogStore {
 public:
-    // Client-side narrowing; [fromMs, toMs) when toMs > 0, plus an exact level.
+    // Client-side narrowing; [fromMs, toMs) when toMs > 0, an exact level, and a
+    // message template (see templateMessage()) to keep or, with
+    // excludeTemplate, to hide.
     struct Filter {
         qint64 fromMs = 0;
         qint64 toMs = 0;
         Level level = Level::Unknown;
+        QString messageTemplate;
+        bool excludeTemplate = false;
 
-        bool isActive() const { return toMs > 0 || level != Level::Unknown; }
+        bool isActive() const { return toMs > 0 || level != Level::Unknown || !messageTemplate.isEmpty(); }
         bool matches(const LogEntry& e) const;
         bool operator==(const Filter& other) const = default;
     };

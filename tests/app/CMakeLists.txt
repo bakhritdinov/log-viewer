@@ -1,0 +1,1 @@
+logviewer_add_test(tst_app_session SOURCES tst_session.cpp LIBS logviewer_app)

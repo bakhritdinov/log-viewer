@@ -136,6 +136,19 @@ QString toggleFilterInText(QStringView text, const FieldFilter& filter)
     return trimmed + QStringLiteral(" AND ") + filter.toText();
 }
 
+QString removeQueryTerm(QStringView text, int termIndex)
+{
+    QStringList kept;
+    int term = 0;
+    for (const QString& part : splitQueryParts(text.trimmed())) {
+        const QueryTerm t = Query::parseTerm(part);
+        const bool isTerm = !(t.kind == QueryTerm::Kind::Word && t.word.isEmpty());
+        if (isTerm && term++ == termIndex) continue;
+        if (isTerm) kept << part.trimmed();
+    }
+    return kept.join(QStringLiteral(" AND "));
+}
+
 QString formatFieldValue(const QVariant& value)
 {
     if (!value.isValid() || value.isNull()) return {};
