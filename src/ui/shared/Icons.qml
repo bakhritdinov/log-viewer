@@ -18,7 +18,8 @@ QtObject {
         "chevronRight": "M9 18l6-6-6-6",
         "chevronsLeft": "M11 17l-5-5 5-5M18 17l-5-5 5-5",
         "chevronsRight": "M13 17l5-5-5-5M6 17l5-5-5-5",
-        "history": "M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5",
+        // Recent searches: a list with a small clock (not an arrow, which reads as "refresh").
+        "history": "M3 6h12M3 12h6M3 18h5M22 16a5 5 0 1 1-10 0 5 5 0 0 1 10 0zM17 13.6V16l1.6 1.1",
         "star": "M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9L12 3z",
         "link": "M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1",
         "share": "M12 3v12M7 8l5-5 5 5M5 14v6h14v-6",

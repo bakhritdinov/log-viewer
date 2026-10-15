@@ -368,7 +368,8 @@ QList<QVariantMap> savedQueryRows(const QList<SavedQuery>& queries, const QList<
             envName = e.name;
             envColor = e.color;
         }
-        const QString search = q.searchText.isEmpty() ? QStringLiteral("*") : q.searchText;
+        const QString search = q.searchText.trimmed().isEmpty() || q.searchText.trimmed() == u"*"
+            ? QCoreApplication::translate("Presenters", "all entries") : q.searchText;
         rows << QVariantMap{ { "id", q.id }, { "name", q.name }, { "environmentId", q.environmentId },
                              { "environmentName", envName }, { "environmentColor", envColor },
                              { "namespaceName", q.namespaceName }, { "app", q.app },

@@ -1647,6 +1647,10 @@
         <source>%1 s</source>
         <translation>%1 son</translation>
     </message>
+    <message>
+        <source>all entries</source>
+        <translation>barcha yozuvlar</translation>
+    </message>
 </context>
 <context>
     <name>ResultsView</name>
@@ -1861,10 +1865,6 @@
         <translation>Soʻrovni saqlash</translation>
     </message>
     <message>
-        <source>History and saved queries</source>
-        <translation>Tarix va saqlangan soʻrovlar</translation>
-    </message>
-    <message>
         <source>Filters</source>
         <translation>Filtrlar</translation>
     </message>
@@ -1891,6 +1891,10 @@
     <message>
         <source>Close the quote</source>
         <translation>Qoʻshtirnoqni yopish</translation>
+    </message>
+    <message>
+        <source>Recent searches</source>
+        <translation>Soʻnggi qidiruvlar</translation>
     </message>
 </context>
 <context>

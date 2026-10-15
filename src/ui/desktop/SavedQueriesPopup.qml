@@ -20,8 +20,9 @@ Popup {
         nameField.forceActiveFocus()
         nameField.selectAll()
     }
-    function openBrowsing() {
-        tab = 0
+    // The history button: straight to the recent searches (the star saves).
+    function openRecent() {
+        tab = 1
         open()
     }
     // Notices go to the window's toast (with an optional action).

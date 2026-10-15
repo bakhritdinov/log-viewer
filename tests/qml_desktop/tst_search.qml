@@ -125,7 +125,7 @@ TestCase {
     function test_10b_replaceSavedQuery() {
         tryCompare(Session.savedQueries, "count", 1)
         Session.searchText = "level:error"
-        mouseClick(byName(window.contentItem, "История и сохранённые запросы"))
+        mouseClick(byName(window.contentItem, "Сохранить запрос"))
         const more = () => H.find(root(), it => String(it.Accessible.name).startsWith("Ещё действия с") && it.visible)
         tryVerify(() => more() !== null)
         waitForRendering(root())
@@ -135,10 +135,25 @@ TestCase {
         mouseClick(overlayText("Заменить текущим запросом"))
         tryVerify(() => String(Session.savedQueries.get(0).summary).indexOf("level:error") >= 0)
         tryVerify(() => H.find(root(), it => String(it.text).indexOf("теперь содержит текущий поиск") >= 0 && H.isShown(it)) !== null)   // toast
-        mouseClick(byName(window.contentItem, "История и сохранённые запросы"))
+        mouseClick(byName(window.contentItem, "Сохранить запрос"))
         tryVerify(() => H.find(root(), it => it.font && it.font.family === Theme.mono && String(it.text).indexOf("level:error") >= 0 && H.isShown(it)) !== null)
         keyClick(Qt.Key_Escape)
         Session.searchText = ""
+    }
+
+    // The star saves (saved queries, name field focused); the history button
+    // opens the recent searches.
+    function test_10c_starAndHistoryDiffer() {
+        mouseClick(byName(window.contentItem, "Недавние поиски"))
+        const tab = name => H.find(root(), it => it.Accessible.name === name && it.Accessible.role === Accessible.PageTab && H.isShown(it))
+        tryVerify(() => tab("Недавние поиски") !== null)
+        verify(tab("Недавние поиски").Accessible.selected)
+        verify(!H.find(root(), it => it.Accessible.name === "Название запроса" && H.isShown(it)))
+        keyClick(Qt.Key_Escape)
+        mouseClick(byName(window.contentItem, "Сохранить запрос"))
+        tryVerify(() => tab("Сохранённые") !== null && tab("Сохранённые").Accessible.selected)
+        tryVerify(() => H.find(root(), it => it.Accessible.name === "Название запроса" && it.activeFocus) !== null)
+        keyClick(Qt.Key_Escape)
     }
 
     function test_11_contextFocus() {

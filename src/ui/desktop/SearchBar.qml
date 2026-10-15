@@ -63,14 +63,16 @@ Rectangle {
                 label: qsTr("Save query")
                 shortcut: root.saveShortcut
                 iconColor: Theme.warnText
+                showTooltip: !savedPopup.opened         // the hint would cover the open popup
                 onClicked: savedPopup.openSaving()
             }
             IconButton {
                 id: historyButton
                 visible: !root.liveMode
                 iconName: "history"
-                label: qsTr("History and saved queries")
-                onClicked: savedPopup.openBrowsing()
+                label: qsTr("Recent searches")
+                showTooltip: !savedPopup.opened
+                onClicked: savedPopup.openRecent()
 
                 SavedQueriesPopup {
                     id: savedPopup

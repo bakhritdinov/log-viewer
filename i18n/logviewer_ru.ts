@@ -1665,6 +1665,10 @@
         <source>%1 s</source>
         <translation>%1 с</translation>
     </message>
+    <message>
+        <source>all entries</source>
+        <translation>все записи</translation>
+    </message>
 </context>
 <context>
     <name>ResultsView</name>
@@ -1879,10 +1883,6 @@
         <translation>Сохранить запрос</translation>
     </message>
     <message>
-        <source>History and saved queries</source>
-        <translation>История и сохранённые запросы</translation>
-    </message>
-    <message>
         <source>Filters</source>
         <translation>Фильтры</translation>
     </message>
@@ -1909,6 +1909,10 @@
     <message>
         <source>Close the quote</source>
         <translation>Закрыть кавычку</translation>
+    </message>
+    <message>
+        <source>Recent searches</source>
+        <translation>Недавние поиски</translation>
     </message>
 </context>
 <context>
