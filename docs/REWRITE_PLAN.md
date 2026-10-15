@@ -58,6 +58,17 @@ pwa/                PWA shell
 tests/{characterization,core,app,qml}, tests/fixtures/
 ```
 
+## Status
+
+| Stage | State |
+|---|---|
+| 0 Preparation | done |
+| 1 core/domain + query | done |
+| 2 core/data | done |
+| 3 core/features + storage | done (QtKeychain adapter moves to stage 8) |
+| 4 app view-models | done — `LogViewer.App`; core + app line coverage 93 % |
+| 5–9 | pending |
+
 ## Stages
 
 Each stage ends with a green build, green tests and a commit.
