@@ -17,6 +17,12 @@ add_library(logviewer_core STATIC
     features/ChainedLoader.cpp features/ChainedLoader.h
     features/LiveTail.cpp features/LiveTail.h
     features/Focus.cpp features/Focus.h
+    features/ShareLink.cpp features/ShareLink.h
+    storage/KeyValueStore.cpp storage/KeyValueStore.h
+    storage/SecretStore.cpp storage/SecretStore.h
+    storage/Environments.cpp storage/Environments.h
+    storage/UserData.cpp storage/UserData.h
+    storage/Migration.cpp storage/Migration.h
     query/Query.cpp query/Query.h
     query/LogsQL.cpp query/LogsQL.h
     query/Suggestions.cpp query/Suggestions.h
