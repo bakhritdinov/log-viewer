@@ -33,7 +33,7 @@ that rejects networking, query building and parsing in QML.
 | Topic | Decision |
 |---|---|
 | Ecotone | removed |
-| Minimum Qt | 6.5 LTS (applied when new code lands). Ubuntu system-Qt PPA builds are replaced by bundled-Qt AppImage/.deb |
+| Minimum Qt | 6.8 LTS (applied when new code lands). Ubuntu system-Qt PPA builds are replaced by bundled-Qt AppImage/.deb |
 | QML registration | typed `QML_ELEMENT` / `QML_SINGLETON` instead of context properties |
 | Secrets | QtKeychain (Keychain / Credential Manager / Secret Service); PWA falls back to browser storage with a warning |
 | Environments | arbitrary list with name + colour; DEV and PROD by default; old `DEV/*`, `PROD/*` settings migrated |
@@ -42,6 +42,8 @@ that rejects networking, query building and parsing in QML.
 | Live tail | polling every 2 s with a "newer than last entry" cursor, dedupe, 10 000-line buffer, pause on scroll |
 | Share links | PWA: `https://<pwa-host>/#/…`; desktop: `logviewer://` registered by installers |
 | Parsing | off the UI thread (worker thread on desktop, chunked on WASM) |
+| Search trigger | Enter (no search-as-you-type); suggestions update while typing |
+| Languages | Russian (default), Uzbek (Latin), English. Source strings are English in `tr`/`qsTr`/`QCoreApplication::translate`; `i18n/logviewer_{ru,uz}.ts` via `qt_add_translations` (lupdate/lrelease), `.qm` embedded as resources. `Language` singleton (`LogViewer.App`) persists `ui/language`, installs the `QTranslator`, sets the default `QLocale` and calls `QQmlEngine::retranslate()`. Language picker in Settings on every platform. No hard-coded UI texts |
 
 New features in scope: exclude filter (−), context ±N min, trace view, connection
 test, Keychain, "Yesterday" preset, stop loading, SVG icons, share links, saved
@@ -67,7 +69,8 @@ tests/{characterization,core,app,qml}, tests/fixtures/
 | 2 core/data | done |
 | 3 core/features + storage | done (QtKeychain adapter moves to stage 8) |
 | 4 app view-models | done — `LogViewer.App`; core + app line coverage 93 % |
-| 5–9 | pending |
+| 5 ui/shared + i18n | done — `LogViewer.Ui` (25 components, Qt Quick tests), `Language`, ru/uz + en plurals; translations to be reviewed by native speakers |
+| 6–9 | pending |
 
 ## Stages
 
@@ -82,9 +85,11 @@ Each stage ends with a green build, green tests and a commit.
    patterns, live tail, context, share links, environments, Keychain, saved
    queries, settings migration.
 4. app — view-models with scenario tests over a fake HTTP client.
-5. ui/shared — tokens, icons, primitives, components + Qt Quick tests.
-6. ui/desktop per mockups.
-7. ui/mobile per mockups + PWA shell.
+5. ui/shared + i18n — tokens, icons, primitives, components + Qt Quick tests;
+   `Language` singleton, ru/uz translations, `update_translations` target.
+6. ui/desktop per mockups (incl. language picker in Settings; Session rebuilds
+   its presented strings when the language changes).
+7. ui/mobile per mockups (incl. language picker) + PWA shell.
 8. Platforms and release — URL scheme, installers, PWA hosting, CI matrix,
    removal of legacy code (and of the characterization tests that target it).
 9. Stabilization — checklist run against live Grafana (DEV/PROD), 5 000-row

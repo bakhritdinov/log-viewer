@@ -21,6 +21,8 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS Core Quick Network Svg Gui)
 
 # Set Qt policies for compatibility
+# QML modules live under qrc:/qt/qml (the default import path).
+qt_policy(SET QTP0001 NEW)
 if(POLICY QTP0004)
     cmake_policy(SET QTP0004 NEW)
 endif()
@@ -37,6 +39,18 @@ endif()
 # Built and tested alongside the legacy app until the new UI replaces it.
 add_subdirectory(src/core)
 add_subdirectory(src/app)
+add_subdirectory(src/ui/shared)
+
+# --- Translations: Russian (default), Uzbek (Latin), English (source) ---------
+# `cmake --build <dir> --target update_translations` runs lupdate over the new
+# code; the .ts files are compiled to .qm and embedded under :/i18n.
+find_package(Qt6 6.8 REQUIRED COMPONENTS LinguistTools)
+qt_add_translations(logviewer_app
+    TS_FILES i18n/logviewer_ru.ts i18n/logviewer_uz.ts
+    PLURALS_TS_FILE i18n/logviewer_en.ts
+    SOURCE_TARGETS logviewer_app logviewer_ui
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -no-obsolete -locations none)
 
 # --- Module static libraries -------------------------------------------------
 # Code is grouped by concern: logs (Grafana/Loki).

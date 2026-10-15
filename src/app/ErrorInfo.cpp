@@ -4,20 +4,13 @@
 
 namespace lv {
 
-namespace {
-QString tr(const char* text)
-{
-    return QCoreApplication::translate("ErrorInfo", text);
-}
-} // namespace
-
 ErrorInfo ErrorInfo::from(const RequestError& error, const QString& environmentName, const QString& host)
 {
     using RK = RequestError::Kind;
     ErrorInfo e;
     e.detail = error.detail;
     e.httpStatus = error.httpStatus;
-    const QString where = host.isEmpty() ? tr("the server") : host;
+    const QString where = host.isEmpty() ? QCoreApplication::translate("ErrorInfo", "the server") : host;
 
     switch (error.kind) {
         case RK::None:
@@ -25,94 +18,94 @@ ErrorInfo ErrorInfo::from(const RequestError& error, const QString& environmentN
             return {};
         case RK::Unreachable:
             e.kind = Kind::Unreachable;
-            e.title = tr("Cannot reach the server");
-            e.message = tr("Could not connect to %1. It may only be reachable from the internal network — check your VPN.").arg(where);
+            e.title = QCoreApplication::translate("ErrorInfo", "Cannot reach the server");
+            e.message = QCoreApplication::translate("ErrorInfo", "Could not connect to %1. It may only be reachable from the internal network — check your VPN.").arg(where);
             e.primaryAction = Action::Retry;
             e.secondaryAction = Action::OpenSettings;
             break;
         case RK::BlockedByBrowser:
             e.kind = Kind::BlockedByBrowser;
-            e.title = tr("The browser blocked the request");
-            e.message = tr("Either %1 is unreachable (check your VPN) or Grafana does not allow requests from this app (CORS). CORS is configured on the server side.").arg(where);
+            e.title = QCoreApplication::translate("ErrorInfo", "The browser blocked the request");
+            e.message = QCoreApplication::translate("ErrorInfo", "Either %1 is unreachable (check your VPN) or Grafana does not allow requests from this app (CORS). CORS is configured on the server side.").arg(where);
             e.primaryAction = Action::Retry;
             e.secondaryAction = Action::CopyCorsHint;
             break;
         case RK::Tls:
             e.kind = Kind::Tls;
-            e.title = tr("Secure connection failed");
-            e.message = tr("The certificate of %1 was not accepted.").arg(where);
+            e.title = QCoreApplication::translate("ErrorInfo", "Secure connection failed");
+            e.message = QCoreApplication::translate("ErrorInfo", "The certificate of %1 was not accepted.").arg(where);
             e.primaryAction = Action::OpenSettings;
             e.secondaryAction = Action::CopyDetails;
             break;
         case RK::Unauthorized:
             e.kind = Kind::Unauthorized;
-            e.title = tr("Wrong login or password");
+            e.title = QCoreApplication::translate("ErrorInfo", "Wrong login or password");
             e.message = environmentName.isEmpty()
-                ? tr("Grafana rejected the credentials. If the password changed recently, update it.")
-                : tr("Grafana rejected the credentials of %1. If the password changed recently, update it.").arg(environmentName);
+                ? QCoreApplication::translate("ErrorInfo", "Grafana rejected the credentials. If the password changed recently, update it.")
+                : QCoreApplication::translate("ErrorInfo", "Grafana rejected the credentials of %1. If the password changed recently, update it.").arg(environmentName);
             e.primaryAction = Action::OpenSettings;
             e.secondaryAction = Action::Retry;
             break;
         case RK::Forbidden:
             e.kind = Kind::Forbidden;
-            e.title = tr("No access to the datasource");
-            e.message = tr("The account is valid but may not query this datasource.");
+            e.title = QCoreApplication::translate("ErrorInfo", "No access to the datasource");
+            e.message = QCoreApplication::translate("ErrorInfo", "The account is valid but may not query this datasource.");
             e.primaryAction = Action::OpenSettings;
             e.secondaryAction = Action::CopyDetails;
             break;
         case RK::NotFound:
             e.kind = Kind::NotFound;
-            e.title = tr("Datasource not found");
-            e.message = tr("Grafana has no datasource with this UID, or the URL is wrong.");
+            e.title = QCoreApplication::translate("ErrorInfo", "Datasource not found");
+            e.message = QCoreApplication::translate("ErrorInfo", "Grafana has no datasource with this UID, or the URL is wrong.");
             e.primaryAction = Action::OpenSettings;
             e.secondaryAction = Action::Retry;
             break;
         case RK::TooHeavy:
             e.kind = Kind::TooHeavy;
-            e.title = tr("The query is too heavy");
-            e.message = tr("It took too long. Narrow the time range or add a condition.");
+            e.title = QCoreApplication::translate("ErrorInfo", "The query is too heavy");
+            e.message = QCoreApplication::translate("ErrorInfo", "It took too long. Narrow the time range or add a condition.");
             e.primaryAction = Action::NarrowRange;
             e.secondaryAction = Action::EditQuery;
             break;
         case RK::RateLimited:
             e.kind = Kind::RateLimited;
-            e.title = tr("Too many requests");
-            e.message = tr("The server asked to slow down. Try again in a moment.");
+            e.title = QCoreApplication::translate("ErrorInfo", "Too many requests");
+            e.message = QCoreApplication::translate("ErrorInfo", "The server asked to slow down. Try again in a moment.");
             e.primaryAction = Action::Retry;
             break;
         case RK::BadQuery:
             e.kind = Kind::BadQuery;
-            e.title = tr("The query was rejected");
-            e.message = tr("The datasource could not run this search. Check the syntax of the search text.");
+            e.title = QCoreApplication::translate("ErrorInfo", "The query was rejected");
+            e.message = QCoreApplication::translate("ErrorInfo", "The datasource could not run this search. Check the syntax of the search text.");
             e.primaryAction = Action::EditQuery;
             e.secondaryAction = Action::CopyDetails;
             break;
         case RK::Server:
             e.kind = Kind::Server;
-            e.title = tr("Grafana error");
-            e.message = tr("Grafana or the log storage is temporarily unavailable.");
+            e.title = QCoreApplication::translate("ErrorInfo", "Grafana error");
+            e.message = QCoreApplication::translate("ErrorInfo", "Grafana or the log storage is temporarily unavailable.");
             e.primaryAction = Action::Retry;
             e.secondaryAction = Action::CopyDetails;
             break;
         case RK::InvalidResponse:
             e.kind = Kind::InvalidResponse;
-            e.title = tr("Unexpected response");
-            e.message = tr("The server answered with something that is not a Grafana response. Check the URL.");
+            e.title = QCoreApplication::translate("ErrorInfo", "Unexpected response");
+            e.message = QCoreApplication::translate("ErrorInfo", "The server answered with something that is not a Grafana response. Check the URL.");
             e.primaryAction = Action::OpenSettings;
             e.secondaryAction = Action::CopyDetails;
             break;
         case RK::NotConfigured:
             e.kind = Kind::NotConfigured;
-            e.title = tr("Connect to Grafana");
-            e.message = tr("Enter the Grafana URL, the log datasource UID and credentials.");
+            e.title = QCoreApplication::translate("ErrorInfo", "Connect to Grafana");
+            e.message = QCoreApplication::translate("ErrorInfo", "Enter the Grafana URL, the log datasource UID and credentials.");
             e.primaryAction = Action::OpenSettings;
             break;
         case RK::UnknownLabels:
             e.kind = Kind::UnknownLabels;
-            e.title = tr("No namespaces found");
+            e.title = QCoreApplication::translate("ErrorInfo", "No namespaces found");
             e.message = error.detail.isEmpty()
-                ? tr("The datasource returned no log streams for the last 24 hours.")
-                : tr("No namespace/app labels were recognized. Labels seen: %1.").arg(error.detail);
+                ? QCoreApplication::translate("ErrorInfo", "The datasource returned no log streams for the last 24 hours.")
+                : QCoreApplication::translate("ErrorInfo", "No namespace/app labels were recognized. Labels seen: %1.").arg(error.detail);
             e.primaryAction = Action::Retry;
             e.secondaryAction = Action::OpenSettings;
             break;
@@ -120,12 +113,12 @@ ErrorInfo ErrorInfo::from(const RequestError& error, const QString& environmentN
 
     auto label = [](Action a) -> QString {
         switch (a) {
-            case Action::Retry: return tr("Retry");
-            case Action::OpenSettings: return tr("Settings");
-            case Action::NarrowRange: return tr("Last 1 hour");
-            case Action::CopyCorsHint: return tr("Copy instructions for DevOps");
-            case Action::CopyDetails: return tr("Copy details");
-            case Action::EditQuery: return tr("Edit query");
+            case Action::Retry: return QCoreApplication::translate("ErrorInfo", "Retry");
+            case Action::OpenSettings: return QCoreApplication::translate("ErrorInfo", "Settings");
+            case Action::NarrowRange: return QCoreApplication::translate("ErrorInfo", "Last 1 hour");
+            case Action::CopyCorsHint: return QCoreApplication::translate("ErrorInfo", "Copy instructions for DevOps");
+            case Action::CopyDetails: return QCoreApplication::translate("ErrorInfo", "Copy details");
+            case Action::EditQuery: return QCoreApplication::translate("ErrorInfo", "Edit query");
             case Action::None: break;
         }
         return {};

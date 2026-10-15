@@ -8,10 +8,6 @@ namespace lv::presenters {
 
 namespace {
 
-QString tr(const char* text, int n = -1)
-{
-    return QCoreApplication::translate("Presenters", text, nullptr, n);
-}
 
 QString localTime(qint64 ms, const QString& format)
 {
@@ -217,8 +213,8 @@ QList<QVariantMap> savedQueryRows(const QList<SavedQuery>& queries, const QList<
 QString timeRangeLabel(const TimeRange& range)
 {
     switch (range.kind()) {
-        case TimeRange::Kind::Today: return tr("Today");
-        case TimeRange::Kind::Yesterday: return tr("Yesterday");
+        case TimeRange::Kind::Today: return QCoreApplication::translate("Presenters", "Today");
+        case TimeRange::Kind::Yesterday: return QCoreApplication::translate("Presenters", "Yesterday");
         case TimeRange::Kind::Absolute: {
             const QDateTime from = range.absoluteFrom().toLocalTime();
             const QDateTime to = range.absoluteTo().toLocalTime();
@@ -233,27 +229,27 @@ QString timeRangeLabel(const TimeRange& range)
         case TimeRange::Kind::Relative: break;
     }
     const qint64 s = range.relativeSeconds();
-    if (s % 86400 == 0) return tr("Last %n day(s)", int(s / 86400));
-    if (s % 3600 == 0) return tr("Last %n hour(s)", int(s / 3600));
-    if (s % 60 == 0) return tr("Last %n minute(s)", int(s / 60));
-    return tr("Last %n second(s)", int(s));
+    if (s % 86400 == 0) return QCoreApplication::translate("Presenters", "Last %n day(s)", nullptr, int(s / 86400));
+    if (s % 3600 == 0) return QCoreApplication::translate("Presenters", "Last %n hour(s)", nullptr, int(s / 3600));
+    if (s % 60 == 0) return QCoreApplication::translate("Presenters", "Last %n minute(s)", nullptr, int(s / 60));
+    return QCoreApplication::translate("Presenters", "Last %n second(s)", nullptr, int(s));
 }
 
 QString timeRangeShortLabel(const TimeRange& range)
 {
     switch (range.kind()) {
-        case TimeRange::Kind::Today: return tr("Today");
-        case TimeRange::Kind::Yesterday: return tr("Yesterday");
+        case TimeRange::Kind::Today: return QCoreApplication::translate("Presenters", "Today");
+        case TimeRange::Kind::Yesterday: return QCoreApplication::translate("Presenters", "Yesterday");
         case TimeRange::Kind::Absolute:
             return QStringLiteral("%1–%2").arg(range.absoluteFrom().toLocalTime().toString(QStringLiteral("HH:mm")),
                                               range.absoluteTo().toLocalTime().toString(QStringLiteral("HH:mm")));
         case TimeRange::Kind::Relative: break;
     }
     const qint64 s = range.relativeSeconds();
-    if (s % 86400 == 0) return tr("%1 d").arg(s / 86400);
-    if (s % 3600 == 0) return tr("%1 h").arg(s / 3600);
-    if (s % 60 == 0) return tr("%1 min").arg(s / 60);
-    return tr("%1 s").arg(s);
+    if (s % 86400 == 0) return QCoreApplication::translate("Presenters", "%1 d").arg(s / 86400);
+    if (s % 3600 == 0) return QCoreApplication::translate("Presenters", "%1 h").arg(s / 3600);
+    if (s % 60 == 0) return QCoreApplication::translate("Presenters", "%1 min").arg(s / 60);
+    return QCoreApplication::translate("Presenters", "%1 s").arg(s);
 }
 
 } // namespace lv::presenters

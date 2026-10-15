@@ -9,10 +9,6 @@ namespace lv {
 
 namespace {
 
-QString trEditor(const char* text, int n = -1)
-{
-    return QCoreApplication::translate("EnvironmentEditor", text, nullptr, n);
-}
 
 Environment::Auth toCore(EnvironmentEditor::Auth a)
 {
@@ -48,7 +44,7 @@ EnvironmentEditor::EnvironmentEditor(Session& session, QObject* parent)
     connect(m_discovery.get(), &LabelDiscovery::finished, this, [this](const DiscoveryResult& r) {
         const int ms = int(m_testTimer.elapsed());
         setTest(TestState::Passed,
-                trEditor("Found %n namespace(s) · labels %1 / %2 · %3 ms", int(r.streams.size()))
+                QCoreApplication::translate("EnvironmentEditor", "Found %n namespace(s) · labels %1 / %2 · %3 ms", nullptr, int(r.streams.size()))
                     .arg(r.nsLabel, r.appLabel).arg(ms));
     });
     connect(m_discovery.get(), &LabelDiscovery::failed, this, [this](const RequestError& e) {
@@ -134,15 +130,15 @@ Environment EnvironmentEditor::toEnvironment() const
 QString EnvironmentEditor::validationError() const
 {
     const Environment e = toEnvironment();
-    if (e.name.isEmpty()) return trEditor("Give the environment a name.");
+    if (e.name.isEmpty()) return QCoreApplication::translate("EnvironmentEditor", "Give the environment a name.");
     for (const Environment& other : m_session->services().environments().environments()) {
         if (other.id != e.id && other.name.compare(e.name, Qt::CaseInsensitive) == 0)
-            return trEditor("An environment named %1 already exists.").arg(e.name);
+            return QCoreApplication::translate("EnvironmentEditor", "An environment named %1 already exists.").arg(e.name);
     }
     if (!m_url.trimmed().isEmpty()) {
         const QUrl u = e.url;
         if (!u.isValid() || (u.scheme() != u"https" && u.scheme() != u"http") || u.host().isEmpty())
-            return trEditor("The Grafana URL must start with https:// or http://.");
+            return QCoreApplication::translate("EnvironmentEditor", "The Grafana URL must start with https:// or http://.");
     }
     return {};
 }
@@ -173,7 +169,7 @@ void EnvironmentEditor::testConnection()
     }
     const Environment e = toEnvironment();
     m_testTimer.start();
-    setTest(TestState::Testing, trEditor("Connecting…"));
+    setTest(TestState::Testing, QCoreApplication::translate("EnvironmentEditor", "Connecting…"));
     m_discovery->start(e.connection(m_password, m_token));
 }
 

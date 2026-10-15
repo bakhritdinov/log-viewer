@@ -19,10 +19,6 @@ QPointer<Session> g_instance;
 const QString kRecentKey = QStringLiteral("recent/sources");
 constexpr int kRecentCapacity = 5;
 
-QString tr(const char* text)
-{
-    return QCoreApplication::translate("Session", text);
-}
 
 } // namespace
 
@@ -390,7 +386,7 @@ bool Session::setAbsoluteRange(const QString& fromText, const QString& toText)
 {
     const auto r = TimeRange::absolute(TimeRange::parseBound(fromText), TimeRange::parseBound(toText));
     if (!r) {
-        m_rangeError = tr("Check the dates: both are required and the start must be before the end.");
+        m_rangeError = QCoreApplication::translate("Session", "Check the dates: both are required and the start must be before the end.");
         emit rangeErrorChanged();
         return false;
     }
@@ -629,7 +625,7 @@ void Session::showPattern(int index, bool exclude)
     f.messageTemplate = p.value("templateText").toString();
     f.excludeTemplate = exclude;
     m_store.setFilter(f);
-    m_histogramFilterLabel = (exclude ? tr("Without pattern: %1") : tr("Pattern: %1")).arg(f.messageTemplate);
+    m_histogramFilterLabel = (exclude ? QCoreApplication::translate("Session", "Without pattern: %1") : QCoreApplication::translate("Session", "Pattern: %1")).arg(f.messageTemplate);
     m_logs->reload(true);
     setSelectedRow(-1);
     emit histogramFilterChanged();

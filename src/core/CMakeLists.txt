@@ -1,6 +1,6 @@
 # logviewer_core — all application logic, UI-agnostic.
 # Depends on Qt Core and Network only; never on Qt Qml/Quick.
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Network)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Core Network)
 
 add_library(logviewer_core STATIC
     domain/Level.cpp domain/Level.h

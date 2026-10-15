@@ -1,0 +1,46 @@
+pragma Singleton
+import QtQml
+
+// Stroke icon outlines on a 24×24 grid (round caps and joins), drawn by Icon.
+QtObject {
+    readonly property var paths: ({
+        "logs": "M4 6h16M4 12h10M4 18h13",
+        "search": "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5",
+        "clock": "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2",
+        "refresh": "M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7",
+        "settings": "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12h2M3 12h2M12 3v2M12 19v2M17 7l1.5-1.5M5.5 18.5L7 17M17 17l1.5 1.5M5.5 5.5L7 7",
+        "moon": "M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z",
+        "sun": "M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4",
+        "close": "M6 6l12 12M18 6L6 18",
+        "chevronDown": "M6 9l6 6 6-6",
+        "chevronUp": "M6 15l6-6 6 6",
+        "chevronLeft": "M15 18l-6-6 6-6",
+        "chevronRight": "M9 18l6-6-6-6",
+        "chevronsLeft": "M11 17l-5-5 5-5M18 17l-5-5 5-5",
+        "chevronsRight": "M13 17l5-5-5-5M6 17l5-5-5-5",
+        "history": "M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5",
+        "star": "M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9L12 3z",
+        "link": "M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1",
+        "share": "M12 3v12M7 8l5-5 5 5M5 14v6h14v-6",
+        "copy": "M9 9h11v11H9zM5 15V5a2 2 0 0 1 2-2h10",
+        "trace": "M3 12h4l3-8 4 16 3-8h4",
+        "filter": "M4 5h16l-6 8v6l-4-2v-4L4 5z",
+        "chart": "M4 20V10M10 20V4M16 20v-7M22 20H2",
+        "plus": "M12 5v14M5 12h14",
+        "minus": "M5 12h14",
+        "source": "M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 10h18",
+        "lock": "M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4",
+        "eye": "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
+        "warning": "M12 3L2 21h20L12 3zM12 10v5M12 18h.01",
+        "offline": "M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18",
+        "shield": "M12 3L4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z",
+        "server": "M4 4h16v6H4zM4 14h16v6H4zM8 7h.01M8 17h.01",
+        "download": "M12 4v12M6 10l6 6 6-6M4 20h16",
+        "check": "M5 12l5 5L20 7",
+        "pause": "M8 5v14M16 5v14",
+        "play": "M7 4l13 8-13 8z",
+        "more": "M5 12h.01M12 12h.01M19 12h.01",
+        "arrowUp": "M12 19V5M5 12l7-7 7 7",
+        "external": "M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"
+    })
+}
