@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
+<?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="uz" sourcelanguage="en">
 <context>
     <name>AboutPage</name>
@@ -198,10 +197,6 @@
         <translation>Tafsilotlarda chiroyli JSON</translation>
     </message>
     <message>
-        <source>Format messages that are JSON</source>
-        <translation>JSON xabarlarni formatlash</translation>
-    </message>
-    <message>
         <source>Theme</source>
         <translation>Mavzu</translation>
     </message>
@@ -214,12 +209,195 @@
         <translation>Yorugʻ</translation>
     </message>
     <message>
-        <source>The theme changes at once. The moon/sun button in the top bar switches the same.</source>
-        <translation>Mavzu darhol oʻzgaradi. Yuqori paneldagi oy/quyosh tugmasi ham xuddi shuni almashtiradi.</translation>
-    </message>
-    <message>
         <source>Messages</source>
         <translation>Xabarlar</translation>
+    </message>
+    <message>
+        <source>As in the system</source>
+        <translation>Tizimdagidek</translation>
+    </message>
+    <message>
+        <source>The theme changes at once. The moon/sun button in the top bar switches between dark and light.</source>
+        <translation>Mavzu darhol oʻzgaradi. Yuqori paneldagi oy/quyosh tugmasi qorongʻi va yorugʻ mavzuni almashtiradi.</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation>Jadval</translation>
+    </message>
+    <message>
+        <source>Density</source>
+        <translation>Zichlik</translation>
+    </message>
+    <message>
+        <source>Row height: compact fits more rows on the screen</source>
+        <translation>Qator balandligi: ixcham rejimda ekranga koʻproq qator sigʻadi</translation>
+    </message>
+    <message>
+        <source>Compact</source>
+        <translation>Ixcham</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Oddiy</translation>
+    </message>
+    <message>
+        <source>Comfortable</source>
+        <translation>Keng</translation>
+    </message>
+    <message>
+        <source>Log text size</source>
+        <translation>Log matni oʻlchami</translation>
+    </message>
+    <message>
+        <source>Rows and the message in the details; the interface keeps its size</source>
+        <translation>Jadval qatorlari va tafsilotlardagi xabar; interfeys oʻzgarmaydi</translation>
+    </message>
+    <message>
+        <source>Long messages</source>
+        <translation>Uzun xabarlar</translation>
+    </message>
+    <message>
+        <source>Lines of a message shown in a row; the rest is cut with …</source>
+        <translation>Jadvalda xabarning nechta qatori koʻrsatiladi; qolgani … bilan qisqartiriladi</translation>
+    </message>
+    <message>
+        <source>1 line</source>
+        <translation>1 qator</translation>
+    </message>
+    <message>
+        <source>2 lines</source>
+        <translation>2 qator</translation>
+    </message>
+    <message>
+        <source>3 lines</source>
+        <translation>3 qator</translation>
+    </message>
+    <message>
+        <source>Tint ERROR and WARN rows</source>
+        <translation>ERROR va WARN qatorlarini ajratib koʻrsatish</translation>
+    </message>
+    <message>
+        <source>A light red or yellow background, not only the stripe on the left</source>
+        <translation>Faqat chapdagi chiziq emas, balki ochiq qizil yoki sariq fon</translation>
+    </message>
+    <message>
+        <source>A message that is JSON is indented and coloured</source>
+        <translation>JSON koʻrinishidagi xabar chekinishlar va ranglar bilan koʻrsatiladi</translation>
+    </message>
+</context>
+<context>
+    <name>BehaviourPage</name>
+    <message>
+        <source>The last one used</source>
+        <translation>Oxirgi ishlatilgan</translation>
+    </message>
+    <message>
+        <source>Last 15 minutes</source>
+        <translation>Oxirgi 15 daqiqa</translation>
+    </message>
+    <message>
+        <source>Last 1 hour</source>
+        <translation>Oxirgi 1 soat</translation>
+    </message>
+    <message>
+        <source>Last 6 hours</source>
+        <translation>Oxirgi 6 soat</translation>
+    </message>
+    <message>
+        <source>Last 24 hours</source>
+        <translation>Oxirgi 24 soat</translation>
+    </message>
+    <message>
+        <source>Today</source>
+        <translation>Bugun</translation>
+    </message>
+    <message>
+        <source>Loading</source>
+        <translation>Yuklash</translation>
+    </message>
+    <message>
+        <source>Entries at a time</source>
+        <translation>Bir martada yozuvlar</translation>
+    </message>
+    <message>
+        <source>A search loads this many, and “Load more” adds as many again</source>
+        <translation>Qidiruv shuncha yuklaydi, «Yana yuklash» yana shuncha qoʻshadi</translation>
+    </message>
+    <message>
+        <source>Period at start</source>
+        <translation>Ishga tushgandagi davr</translation>
+    </message>
+    <message>
+        <source>What the app shows when it opens</source>
+        <translation>Ilova ochilganda nima koʻrsatiladi</translation>
+    </message>
+    <message>
+        <source>Period at start: %1</source>
+        <translation>Ishga tushgandagi davr: %1</translation>
+    </message>
+    <message>
+        <source>Live tail</source>
+        <translation>Live tail</translation>
+    </message>
+    <message>
+        <source>Ask for new lines every</source>
+        <translation>Yangi qatorlarni soʻrash oraligʻi</translation>
+    </message>
+    <message>
+        <source>More often is closer to real time and loads the server more</source>
+        <translation>Tezroq — real vaqtga yaqinroq, lekin serverga yuk koʻproq</translation>
+    </message>
+    <message>
+        <source>Live tail interval</source>
+        <translation>Live tail oraligʻi</translation>
+    </message>
+    <message>
+        <source>1 s</source>
+        <translation>1 s</translation>
+    </message>
+    <message>
+        <source>2 s</source>
+        <translation>2 s</translation>
+    </message>
+    <message>
+        <source>5 s</source>
+        <translation>5 s</translation>
+    </message>
+    <message>
+        <source>Lines kept</source>
+        <translation>Saqlanadigan qatorlar</translation>
+    </message>
+    <message>
+        <source>Older lines leave the live view when there are more</source>
+        <translation>Qatorlar koʻpayganda eskilari live koʻrinishdan chiqadi</translation>
+    </message>
+    <message>
+        <source>Live tail lines kept</source>
+        <translation>Live tail saqlaydigan qatorlar</translation>
+    </message>
+    <message>
+        <source>Live tail settings apply the next time it starts.</source>
+        <translation>Live tail sozlamalari keyingi ishga tushirishda qoʻllanadi.</translation>
+    </message>
+    <message>
+        <source>Default settings</source>
+        <translation>Standart sozlamalar</translation>
+    </message>
+    <message>
+        <source>Appearance, table and behaviour back as they were; connections, saved queries and history stay</source>
+        <translation>Koʻrinish, jadval va xatti-harakat asl holiga qaytadi; ulanishlar, saqlangan soʻrovlar va tarix qoladi</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation>Tiklash</translation>
+    </message>
+    <message>
+        <source>Reset the settings?</source>
+        <translation>Sozlamalarni tiklaysizmi?</translation>
+    </message>
+    <message>
+        <source>Theme, table and behaviour return to their defaults.</source>
+        <translation>Mavzu, jadval va xatti-harakat standart qiymatlarga qaytadi.</translation>
     </message>
 </context>
 <context>
@@ -1833,6 +2011,14 @@
         <source>Close</source>
         <translation>Yopish</translation>
     </message>
+    <message>
+        <source>Table</source>
+        <translation>Jadval</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>Xatti-harakat</translation>
+    </message>
 </context>
 <context>
     <name>SharePopup</name>
@@ -1972,6 +2158,77 @@
     <message>
         <source>Query %1 ms</source>
         <translation>Soʻrov %1 ms</translation>
+    </message>
+</context>
+<context>
+    <name>TablePage</name>
+    <message>
+        <source>Time</source>
+        <translation>Vaqt</translation>
+    </message>
+    <message>
+        <source>Time format</source>
+        <translation>Vaqt formati</translation>
+    </message>
+    <message>
+        <source>In the table; the details always show the full date and milliseconds</source>
+        <translation>Jadvalda; tafsilotlarda doim toʻliq sana va millisekundlar</translation>
+    </message>
+    <message>
+        <source>15 Oct 20:38:42</source>
+        <translation>15 okt 20:38:42</translation>
+    </message>
+    <message>
+        <source>Show time in UTC</source>
+        <translation>Vaqtni UTC da koʻrsatish</translation>
+    </message>
+    <message>
+        <source>Handy when comparing with server logs; the period is still picked in local time</source>
+        <translation>Server loglari bilan solishtirish uchun qulay; davr baribir mahalliy vaqtda tanlanadi</translation>
+    </message>
+    <message>
+        <source>Columns</source>
+        <translation>Ustunlar</translation>
+    </message>
+    <message>
+        <source>Level</source>
+        <translation>Daraja</translation>
+    </message>
+    <message>
+        <source>Level column</source>
+        <translation>«Daraja» ustuni</translation>
+    </message>
+    <message>
+        <source>Service</source>
+        <translation>Servis</translation>
+    </message>
+    <message>
+        <source>Hidden anyway when the table is narrow</source>
+        <translation>Tor jadvalda baribir yashiriladi</translation>
+    </message>
+    <message>
+        <source>Service column</source>
+        <translation>«Servis» ustuni</translation>
+    </message>
+    <message>
+        <source>Columns from fields</source>
+        <translation>Maydonlardan ustunlar</translation>
+    </message>
+    <message>
+        <source>Any field of an entry as a column before the message, e.g. trace_id or context.client_id</source>
+        <translation>Yozuvning istalgan maydoni xabardan oldin ustun sifatida, masalan trace_id yoki context.client_id</translation>
+    </message>
+    <message>
+        <source>Field name</source>
+        <translation>Maydon nomi</translation>
+    </message>
+    <message>
+        <source>Field for a new column</source>
+        <translation>Yangi ustun uchun maydon</translation>
+    </message>
+    <message>
+        <source>Add column</source>
+        <translation>Ustun qoʻshish</translation>
     </message>
 </context>
 <context>
@@ -2246,7 +2503,7 @@
         <translation>Saqlanmasa, ular yoʻqoladi.</translation>
     </message>
     <message>
-        <source>Don&apos;t save</source>
+        <source>Don't save</source>
         <translation>Saqlamaslik</translation>
     </message>
     <message>

@@ -10,12 +10,12 @@ Popup {
     id: root
 
     property int section: 0
-    property bool prettyJson: true
-    property bool darkTheme: true
     property var shortcuts: []
 
+    // Pages by name, so a new page does not shift callers' numbers.
+    readonly property var pageNames: ["connections", "language", "appearance", "table", "behaviour", "shortcuts", "about"]
     function openSection(index) {
-        section = index
+        section = typeof index === "string" ? Math.max(0, pageNames.indexOf(index)) : index
         open()
     }
     // Connections with the label fields open (labels were not recognised).
@@ -36,7 +36,7 @@ Popup {
     }
     function requestClose() { leaveThen(() => root.close()) }
 
-    readonly property var sections: [qsTr("Connections"), qsTr("Language"), qsTr("Appearance"), qsTr("Keyboard shortcuts"), qsTr("Version")]
+    readonly property var sections: [qsTr("Connections"), qsTr("Language"), qsTr("Appearance"), qsTr("Table"), qsTr("Behaviour"), qsTr("Keyboard shortcuts"), qsTr("Version")]
 
     parent: Overlay.overlay
     anchors.centerIn: parent
@@ -156,12 +156,9 @@ Popup {
                 currentIndex: root.section
                 ConnectionsPage { id: connections; onDone: root.close() }
                 LanguagePage { onDone: root.close() }
-                AppearancePage {
-                    darkTheme: root.darkTheme
-                    prettyJson: root.prettyJson
-                    onDarkThemeToggled: on => root.darkTheme = on
-                    onPrettyJsonToggled: on => root.prettyJson = on
-                }
+                AppearancePage { }
+                TablePage { }
+                BehaviourPage { }
                 ShortcutsPage { shortcuts: root.shortcuts }
                 AboutPage { }
             }

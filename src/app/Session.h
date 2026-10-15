@@ -13,6 +13,7 @@
 #include "app/ErrorInfo.h"
 #include "app/LogListModel.h"
 #include "app/MapListModel.h"
+#include "app/Preferences.h"
 #include "core/data/LabelDiscovery.h"
 #include "core/features/Analysis.h"
 #include "core/features/ChainedLoader.h"
@@ -69,7 +70,8 @@ class Session : public QObject {
     Q_PROPERTY(bool loadStopped READ loadStopped NOTIFY loadingChanged)   // stopped by the user, can continue
     Q_PROPERTY(int lastQueryMs READ lastQueryMs NOTIFY loadingChanged)
     Q_PROPERTY(lv::LogListModel* logs READ logs CONSTANT)
-    Q_PROPERTY(int loadStep READ loadStep CONSTANT)   // entries per "load more"
+    Q_PROPERTY(int loadStep READ loadStep NOTIFY prefsChanged)   // entries per "load more"
+    Q_PROPERTY(lv::Preferences* prefs READ prefsObject CONSTANT)
     Q_PROPERTY(lv::ErrorInfo error READ error NOTIFY errorChanged)
     Q_PROPERTY(bool needsSetup READ needsSetup NOTIFY errorChanged)
     Q_PROPERTY(bool hasError READ hasError NOTIFY errorChanged)
@@ -250,7 +252,9 @@ public:
     bool hasMore() const { return m_loader->hasMore(); }
     bool loadStopped() const { return m_loader->wasStopped(); }
     int lastQueryMs() const { return m_lastQueryMs; }
-    int loadStep() const { return ChainedLoader::kStep; }
+    int loadStep() const;
+    Preferences& prefs() const { return *m_prefs; }
+    Preferences* prefsObject() const { return m_prefs; }
     LogListModel* logs() const { return m_logs; }
     ErrorInfo error() const { return m_error; }
     bool hasError() const { return m_error.isActive(); }
@@ -292,6 +296,7 @@ public:
     void resolveConnection(std::function<void(const Connection&)> done);
 
 signals:
+    void prefsChanged();
     void environmentChanged();
     void discoveringChanged();
     void streamsChanged();
@@ -408,6 +413,7 @@ private:
     MapListModel* m_patterns;
     MapListModel* m_saved;
     LogListModel* m_logs;
+    Preferences* m_prefs = nullptr;
     FocusSession* m_focus;
     LiveSession* m_live;
 };

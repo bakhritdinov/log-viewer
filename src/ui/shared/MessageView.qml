@@ -8,6 +8,7 @@ Rectangle {
     // Coloured rich text (e.g. Session.jsonStyled); when set it is shown instead of `text`.
     property string richText
     property bool touch: false
+    property int fontSize: touch ? Theme.fontMd : Theme.fontSm
 
     implicitHeight: edit.implicitHeight + 24
     radius: touch ? Theme.radiusLg : Theme.radiusMd
@@ -26,7 +27,7 @@ Rectangle {
         wrapMode: TextEdit.WrapAnywhere
         textFormat: root.richText !== "" ? TextEdit.RichText : TextEdit.PlainText
         font.family: Theme.mono
-        font.pixelSize: root.touch ? Theme.fontMd : Theme.fontSm
+        font.pixelSize: root.fontSize
         color: Theme.text
         selectionColor: Theme.accentStrong
         selectedTextColor: Theme.textOnAccent

@@ -11,6 +11,7 @@ LiveSession::LiveSession(Session& session, QObject* parent)
       m_logs(new LogListModel(&m_buffer.store(), this))
 {
     m_logs->setPageSize(m_buffer.capacity());   // the buffer is one page
+    m_logs->setPreferences(&session.prefs());
     connect(m_tail.get(), &LiveTail::entriesArrived, this, &LiveSession::onEntries);
     connect(m_tail.get(), &LiveTail::failed, this, [this](const RequestError& e) {
         m_error = ErrorInfo::from(e, m_session.environmentName());
@@ -27,6 +28,10 @@ LiveSession::~LiveSession() = default;
 void LiveSession::start()
 {
     stop();
+    // Interval and buffer size as set in the preferences, read at each start.
+    m_tail->setIntervalMs(m_session.prefs().liveIntervalMs());
+    m_buffer.setCapacity(m_session.prefs().liveBuffer());
+    m_logs->setPageSize(m_buffer.capacity());
     m_buffer.clear();
     m_buffer.setPaused(false);
     m_logs->reload(true);

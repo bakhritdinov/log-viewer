@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
+<?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="ru" sourcelanguage="en">
 <context>
     <name>AboutPage</name>
@@ -202,10 +201,6 @@
         <translation>Красивый JSON в деталях</translation>
     </message>
     <message>
-        <source>Format messages that are JSON</source>
-        <translation>Форматировать сообщения-JSON</translation>
-    </message>
-    <message>
         <source>Theme</source>
         <translation>Тема</translation>
     </message>
@@ -218,12 +213,195 @@
         <translation>Светлая</translation>
     </message>
     <message>
-        <source>The theme changes at once. The moon/sun button in the top bar switches the same.</source>
-        <translation>Тема меняется сразу. Кнопка луны/солнца в верхней панели переключает то же самое.</translation>
-    </message>
-    <message>
         <source>Messages</source>
         <translation>Сообщения</translation>
+    </message>
+    <message>
+        <source>As in the system</source>
+        <translation>Как в системе</translation>
+    </message>
+    <message>
+        <source>The theme changes at once. The moon/sun button in the top bar switches between dark and light.</source>
+        <translation>Тема меняется сразу. Кнопка с луной/солнцем в верхней панели переключает тёмную и светлую.</translation>
+    </message>
+    <message>
+        <source>Table</source>
+        <translation>Таблица</translation>
+    </message>
+    <message>
+        <source>Density</source>
+        <translation>Плотность</translation>
+    </message>
+    <message>
+        <source>Row height: compact fits more rows on the screen</source>
+        <translation>Высота строк: в компактном режиме на экран помещается больше</translation>
+    </message>
+    <message>
+        <source>Compact</source>
+        <translation>Компактно</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Обычно</translation>
+    </message>
+    <message>
+        <source>Comfortable</source>
+        <translation>Просторно</translation>
+    </message>
+    <message>
+        <source>Log text size</source>
+        <translation>Размер текста логов</translation>
+    </message>
+    <message>
+        <source>Rows and the message in the details; the interface keeps its size</source>
+        <translation>Строки таблицы и сообщение в деталях; интерфейс не меняется</translation>
+    </message>
+    <message>
+        <source>Long messages</source>
+        <translation>Длинные сообщения</translation>
+    </message>
+    <message>
+        <source>Lines of a message shown in a row; the rest is cut with …</source>
+        <translation>Сколько строк сообщения показывать в таблице; остальное обрезается …</translation>
+    </message>
+    <message>
+        <source>1 line</source>
+        <translation>1 строка</translation>
+    </message>
+    <message>
+        <source>2 lines</source>
+        <translation>2 строки</translation>
+    </message>
+    <message>
+        <source>3 lines</source>
+        <translation>3 строки</translation>
+    </message>
+    <message>
+        <source>Tint ERROR and WARN rows</source>
+        <translation>Подсвечивать строки ERROR и WARN</translation>
+    </message>
+    <message>
+        <source>A light red or yellow background, not only the stripe on the left</source>
+        <translation>Лёгкий красный или жёлтый фон, а не только полоска слева</translation>
+    </message>
+    <message>
+        <source>A message that is JSON is indented and coloured</source>
+        <translation>Сообщение в формате JSON показывается с отступами и цветами</translation>
+    </message>
+</context>
+<context>
+    <name>BehaviourPage</name>
+    <message>
+        <source>The last one used</source>
+        <translation>Последний использованный</translation>
+    </message>
+    <message>
+        <source>Last 15 minutes</source>
+        <translation>Последние 15 минут</translation>
+    </message>
+    <message>
+        <source>Last 1 hour</source>
+        <translation>Последний 1 час</translation>
+    </message>
+    <message>
+        <source>Last 6 hours</source>
+        <translation>Последние 6 часов</translation>
+    </message>
+    <message>
+        <source>Last 24 hours</source>
+        <translation>Последние 24 часа</translation>
+    </message>
+    <message>
+        <source>Today</source>
+        <translation>Сегодня</translation>
+    </message>
+    <message>
+        <source>Loading</source>
+        <translation>Загрузка</translation>
+    </message>
+    <message>
+        <source>Entries at a time</source>
+        <translation>Записей за раз</translation>
+    </message>
+    <message>
+        <source>A search loads this many, and “Load more” adds as many again</source>
+        <translation>Столько загружает поиск, и столько же добавляет «Загрузить ещё»</translation>
+    </message>
+    <message>
+        <source>Period at start</source>
+        <translation>Период при запуске</translation>
+    </message>
+    <message>
+        <source>What the app shows when it opens</source>
+        <translation>Что показывать при открытии приложения</translation>
+    </message>
+    <message>
+        <source>Period at start: %1</source>
+        <translation>Период при запуске: %1</translation>
+    </message>
+    <message>
+        <source>Live tail</source>
+        <translation>Live tail</translation>
+    </message>
+    <message>
+        <source>Ask for new lines every</source>
+        <translation>Запрашивать новые строки каждые</translation>
+    </message>
+    <message>
+        <source>More often is closer to real time and loads the server more</source>
+        <translation>Чаще — ближе к реальному времени, но больше нагрузка на сервер</translation>
+    </message>
+    <message>
+        <source>Live tail interval</source>
+        <translation>Интервал live tail</translation>
+    </message>
+    <message>
+        <source>1 s</source>
+        <translation>1 с</translation>
+    </message>
+    <message>
+        <source>2 s</source>
+        <translation>2 с</translation>
+    </message>
+    <message>
+        <source>5 s</source>
+        <translation>5 с</translation>
+    </message>
+    <message>
+        <source>Lines kept</source>
+        <translation>Хранить строк</translation>
+    </message>
+    <message>
+        <source>Older lines leave the live view when there are more</source>
+        <translation>Когда строк больше, старые уходят из live-просмотра</translation>
+    </message>
+    <message>
+        <source>Live tail lines kept</source>
+        <translation>Сколько строк хранит live tail</translation>
+    </message>
+    <message>
+        <source>Live tail settings apply the next time it starts.</source>
+        <translation>Настройки live tail применяются при следующем запуске.</translation>
+    </message>
+    <message>
+        <source>Default settings</source>
+        <translation>Настройки по умолчанию</translation>
+    </message>
+    <message>
+        <source>Appearance, table and behaviour back as they were; connections, saved queries and history stay</source>
+        <translation>Внешний вид, таблица и поведение вернутся к исходным; подключения, сохранённые запросы и история останутся</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation>Сбросить</translation>
+    </message>
+    <message>
+        <source>Reset the settings?</source>
+        <translation>Сбросить настройки?</translation>
+    </message>
+    <message>
+        <source>Theme, table and behaviour return to their defaults.</source>
+        <translation>Тема, таблица и поведение вернутся к значениям по умолчанию.</translation>
     </message>
 </context>
 <context>
@@ -1853,6 +2031,14 @@
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
+    <message>
+        <source>Table</source>
+        <translation>Таблица</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>Поведение</translation>
+    </message>
 </context>
 <context>
     <name>SharePopup</name>
@@ -1993,6 +2179,77 @@
     <message>
         <source>Query %1 ms</source>
         <translation>Запрос %1 мс</translation>
+    </message>
+</context>
+<context>
+    <name>TablePage</name>
+    <message>
+        <source>Time</source>
+        <translation>Время</translation>
+    </message>
+    <message>
+        <source>Time format</source>
+        <translation>Формат времени</translation>
+    </message>
+    <message>
+        <source>In the table; the details always show the full date and milliseconds</source>
+        <translation>В таблице; в деталях всегда полная дата и миллисекунды</translation>
+    </message>
+    <message>
+        <source>15 Oct 20:38:42</source>
+        <translation>15 окт 20:38:42</translation>
+    </message>
+    <message>
+        <source>Show time in UTC</source>
+        <translation>Показывать время в UTC</translation>
+    </message>
+    <message>
+        <source>Handy when comparing with server logs; the period is still picked in local time</source>
+        <translation>Удобно для сверки с серверными логами; период по-прежнему выбирается в местном времени</translation>
+    </message>
+    <message>
+        <source>Columns</source>
+        <translation>Колонки</translation>
+    </message>
+    <message>
+        <source>Level</source>
+        <translation>Уровень</translation>
+    </message>
+    <message>
+        <source>Level column</source>
+        <translation>Колонка «Уровень»</translation>
+    </message>
+    <message>
+        <source>Service</source>
+        <translation>Сервис</translation>
+    </message>
+    <message>
+        <source>Hidden anyway when the table is narrow</source>
+        <translation>В узкой таблице скрывается в любом случае</translation>
+    </message>
+    <message>
+        <source>Service column</source>
+        <translation>Колонка «Сервис»</translation>
+    </message>
+    <message>
+        <source>Columns from fields</source>
+        <translation>Колонки из полей</translation>
+    </message>
+    <message>
+        <source>Any field of an entry as a column before the message, e.g. trace_id or context.client_id</source>
+        <translation>Любое поле записи — отдельной колонкой перед сообщением, например trace_id или context.client_id</translation>
+    </message>
+    <message>
+        <source>Field name</source>
+        <translation>Имя поля</translation>
+    </message>
+    <message>
+        <source>Field for a new column</source>
+        <translation>Поле для новой колонки</translation>
+    </message>
+    <message>
+        <source>Add column</source>
+        <translation>Добавить колонку</translation>
     </message>
 </context>
 <context>
@@ -2268,7 +2525,7 @@
         <translation>Без сохранения они будут потеряны.</translation>
     </message>
     <message>
-        <source>Don&apos;t save</source>
+        <source>Don't save</source>
         <translation>Не сохранять</translation>
     </message>
     <message>

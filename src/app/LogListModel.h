@@ -7,6 +7,8 @@
 
 namespace lv {
 
+class Preferences;
+
 // Log entries of a LogStore for a list/table. Two ways to slice the visible
 // entries: pages (desktop: page / pageCount / goToPage) or a growing window
 // (mobile feed: showMore()). The store is owned elsewhere; call reload() after
@@ -39,6 +41,9 @@ public:
 
     explicit LogListModel(const LogStore* store = nullptr, QObject* parent = nullptr);
 
+    // Time texts follow these preferences (format, UTC); local HH:mm:ss.zzz without.
+    void setPreferences(const Preferences* prefs);
+
     void setStore(const LogStore* store);
     // Field holding the app/service name (the discovered app label).
     void setServiceField(const QString& field);
@@ -67,6 +72,8 @@ public:
     // The entry at a row of this model; nullptr when out of range.
     const LogEntry* entryAt(int row) const;
     Q_INVOKABLE QVariantMap rowData(int row) const;
+    // A field of the entry at `row` as shown in the table ("" when absent).
+    Q_INVOKABLE QString fieldText(int row, const QString& field) const;
 
     // Rebuilds rows from the store; `resetSlice` returns to the first page /
     // initial window (a new search), otherwise the current slice is kept.
@@ -76,6 +83,7 @@ signals:
     void slicingChanged();
 
 private:
+    const Preferences* m_prefs = nullptr;
     QString serviceOf(const LogEntry& e) const;
 
     const LogStore* m_store = nullptr;

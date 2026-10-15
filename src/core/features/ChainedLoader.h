@@ -34,6 +34,9 @@ public:
     // Soft cap step: a fresh load stops after this many entries; loadMore()
     // raises the cap by the same amount.
     static constexpr int kStep = 5000;
+    // Entries per load and per loadMore() (the user's "entries at a time").
+    void setStep(int step) { m_step = step > 0 ? step : kStep; }
+    int step() const { return m_step; }
 
     ChainedLoader(HttpClient& http, ParseExecutor& parser, LogStore& store,
                   ClassifyOptions options = {}, Clock clock = systemClock(), QObject* parent = nullptr);
@@ -61,6 +64,7 @@ signals:
     void failed(const lv::RequestError& error);
 
 private:
+    int m_step = kStep;
     void fetchNext();
     void onResponse(quint64 generation, const HttpResponse& r);
     void onParsed(quint64 generation, const ParsedLogs& parsed);

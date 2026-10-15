@@ -212,6 +212,7 @@ Rectangle {
             MessageView {
                 id: message
                 width: root.width - 28
+                fontSize: Session.prefs.logFontSize
                 text: root.prettyJson && root.entry.isJson ? root.entry.prettyMessage : root.entry.message
                 richText: root.prettyJson && root.entry.isJson ? root.styled(root.entry.prettyMessage) : ""
             }
@@ -226,6 +227,7 @@ Rectangle {
             clip: true
             MessageView {
                 width: root.width - 28
+                fontSize: Session.prefs.logFontSize
                 text: root.entry.rawJson
                 richText: root.styled(root.entry.rawJson)
             }

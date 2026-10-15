@@ -1,5 +1,7 @@
 #include "app/Session.h"
 
+#include "app/Preferences.h"
+
 #include <QCoreApplication>
 #include <QFile>
 #include <QJsonArray>
@@ -40,7 +42,16 @@ Session::Session(AppServices& services, QObject* parent)
       m_saved(new MapListModel(presenters::savedQueryRoles(), this)),
       m_logs(new LogListModel(&m_store, this))
 {
+    m_prefs = new Preferences(services.settings(), this);
+    m_logs->setPreferences(m_prefs);
+    connect(m_prefs, &Preferences::changed, this, &Session::prefsChanged);
+    connect(m_prefs, &Preferences::changed, this, &Session::selectionChanged);   // the details' time text
+    // The period to start with: the last one used, or the one set in the preferences.
     m_range = services.selection().timeRange();
+    if (const QString key = m_prefs->defaultRange(); key != u"last") {
+        const TimeRange preset = TimeRange::fromKey(key);
+        if (preset.key() == key) m_range = preset;
+    }
 
     connect(m_discovery.get(), &LabelDiscovery::finished, this, &Session::onDiscovered);
     connect(m_discovery.get(), &LabelDiscovery::failed, this, [this](const RequestError& e) {
@@ -295,6 +306,11 @@ QStringList Session::searchTerms() const
     return Query::parse(m_searchText).words();
 }
 
+int Session::loadStep() const
+{
+    return m_prefs->loadStep();
+}
+
 QStringList Session::history() const
 {
     return m_services.history().items();
@@ -356,6 +372,7 @@ void Session::runSearch(bool keepSlice)
     resolveConnection([this, keepSlice](const Connection&) {
         m_queryTimer.start();
         m_lastQueryMs = 0;
+        m_loader->setStep(m_prefs->loadStep());
         m_loader->start(currentSpec(), m_range);
         m_logs->reload(!keepSlice);
         markPatternsStale();
@@ -498,6 +515,7 @@ void Session::loadMore()
     // A time-bucket filter would hide everything older that comes next.
     if (m_activeLevel == Level::Unknown && m_store.filter().isActive()) resetLevelFilter();
     if (!hasMore()) return;
+    m_loader->setStep(m_prefs->loadStep());
     m_loader->loadMore();
 }
 
@@ -911,7 +929,10 @@ EntryDetails Session::selectedEntry() const
 EntryDetails Session::detailsOf(LogListModel* model, int row) const
 {
     const LogEntry* e = model ? model->entryAt(row) : nullptr;
-    return e ? EntryDetails::from(*e) : EntryDetails{};
+    if (!e) return {};
+    EntryDetails d = EntryDetails::from(*e);
+    d.dateTimeText = m_prefs->dateTimeText(e->timestamp);
+    return d;
 }
 
 // ── environments, saved queries, recent ─────────────────────────────────────

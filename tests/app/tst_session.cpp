@@ -91,6 +91,63 @@ class TestSession : public QObject {
     Q_OBJECT
 
 private slots:
+    void preferencesDefaultsAndLimits()
+    {
+        MemoryStore kv;
+        kv.setValue("ui.desktop/dark", false);        // written by the window before preferences existed
+        Preferences p(kv);
+        QCOMPARE(p.theme(), "light");
+        QCOMPARE(p.density(), "normal");
+        QCOMPARE(p.rowHeight(), 28);
+        QCOMPARE(p.loadStep(), 5000);
+        QVERIFY(p.prettyJson());
+
+        QSignalSpy changed(&p, &Preferences::changed);
+        p.setDensity("compact");
+        QCOMPARE(p.rowHeight(), 22);
+        p.setDensity("compact");                      // same value: no signal
+        QCOMPARE(changed.count(), 1);
+        p.setLogFontSize(40);                         // kept inside 11…15
+        QCOMPARE(p.logFontSize(), 15);
+        p.setLoadStep(777);                           // not one of the choices
+        QCOMPARE(p.loadStep(), 5000);
+        p.setTheme("purple");
+        QCOMPARE(p.theme(), "dark");
+
+        p.addColumn(" trace_id ");
+        p.addColumn("trace_id");                      // no duplicates
+        p.addColumn("context.client_id");
+        QCOMPARE(p.extraColumns(), (QStringList{ "trace_id", "context.client_id" }));
+        p.removeColumn("trace_id");
+        QCOMPARE(p.extraColumns(), QStringList{ "context.client_id" });
+
+        const QDateTime t = QDateTime::fromString("2026-10-15T10:20:30.456Z", Qt::ISODateWithMs);
+        p.setUtc(true);
+        QCOMPARE(p.timeText(t), "10:20:30.456");
+        p.setTimeFormat("s");
+        QCOMPARE(p.timeText(t), "10:20:30");
+        QCOMPARE(p.dateTimeText(t), "2026-10-15 10:20:30.456 UTC");
+
+        p.reset();
+        QCOMPARE(p.density(), "normal");
+        QVERIFY(p.extraColumns().isEmpty());
+        QCOMPARE(p.theme(), "light");                 // the older setting is still there
+    }
+
+    void preferencesReachTheSession()
+    {
+        Harness h;
+        h.kv.setValue("prefs/defaultRange", "6h");
+        h.kv.setValue("prefs/loadStep", 1000);
+        h.session = std::make_unique<Session>(*h.services);
+        QCOMPARE(h.session->timeRangeKey(), "6h");      // the period at start
+        QCOMPARE(h.session->loadStep(), 1000);
+        QSignalSpy prefs(h.session.get(), &Session::prefsChanged);
+        h.session->prefs().setLoadStep(10000);
+        QCOMPARE(h.session->loadStep(), 10000);
+        QCOMPARE(prefs.count(), 1);
+    }
+
     void notConfiguredShowsSetup()
     {
         Harness h(false);

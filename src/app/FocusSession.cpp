@@ -11,6 +11,7 @@ FocusSession::FocusSession(Session& session, QObject* parent)
       m_logs(new LogListModel(&m_store, this))
 {
     m_logs->setPageSize(ChainedLoader::kStep);   // one page: the whole window
+    m_logs->setPreferences(&session.prefs());
     connect(m_loader.get(), &ChainedLoader::loadingChanged, this, &FocusSession::loadingChanged);
     connect(m_loader.get(), &ChainedLoader::batchAdded, this, [this] {
         m_logs->reload(false);

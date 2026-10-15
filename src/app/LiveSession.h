@@ -24,7 +24,7 @@ class LiveSession : public QObject {
     Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY bufferChanged)
     Q_PROPERTY(int pending READ pending NOTIFY bufferChanged)
     Q_PROPERTY(int bufferCount READ bufferCount NOTIFY bufferChanged)
-    Q_PROPERTY(int capacity READ capacity CONSTANT)
+    Q_PROPERTY(int capacity READ capacity NOTIFY bufferChanged)
     Q_PROPERTY(double ratePerSecond READ ratePerSecond NOTIFY bufferChanged)
     Q_PROPERTY(bool failing READ isFailing NOTIFY errorChanged)
     Q_PROPERTY(lv::ErrorInfo error READ error NOTIFY errorChanged)

@@ -31,7 +31,7 @@ void ChainedLoader::start(const SearchSpec& spec, const TimeRange& range)
     m_spec = spec;
     m_window = range.resolve(m_clock());
     m_cursor = m_window.to;
-    m_cap = kStep;
+    m_cap = m_step;
     m_hasMore = false;
     m_stopped = false;
     m_store.clear();
@@ -45,7 +45,7 @@ void ChainedLoader::start(const SearchSpec& spec, const TimeRange& range)
 void ChainedLoader::loadMore()
 {
     if (m_loading || !m_hasMore) return;
-    m_cap = m_store.size() + kStep;
+    m_cap = m_store.size() + m_step;
     m_hasMore = false;
     m_stopped = false;
     fetchNext();

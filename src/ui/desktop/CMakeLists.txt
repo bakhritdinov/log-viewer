@@ -33,6 +33,9 @@ qt_add_qml_module(logviewer_ui_desktop
         ConnectionsPage.qml
         LanguagePage.qml
         AppearancePage.qml
+        TablePage.qml
+        BehaviourPage.qml
+        PrefRow.qml
         ShortcutsPage.qml
         AboutPage.qml
     IMPORTS

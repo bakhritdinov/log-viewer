@@ -15,7 +15,9 @@ ColumnLayout {
     property int anchorRow: -1          // emphasised row (focus mode)
     property string serviceTitle: qsTr("Service")
     property var highlightTerms: []
-    property bool showService: width >= 640      // narrow results: the service column gives way
+    // Narrow results: the service column gives way; the preferences can hide it too.
+    property bool showService: width >= 640 && Session.prefs.showService
+    property bool showLevel: Session.prefs.showLevel
     property real newerThanMs: Infinity          // rows after this time arrived with a refresh: green for a moment
     property alias view: list
 
@@ -24,9 +26,17 @@ ColumnLayout {
 
     spacing: 0
 
-    readonly property int timeWidth: 108
-    readonly property int levelWidth: 64
-    readonly property int serviceWidth: 120
+    // Text size, row height and time format come from the preferences; the
+    // columns are measured for them.
+    readonly property int fontSize: Session.prefs.logFontSize
+    readonly property int lines: Session.prefs.messageLines
+    readonly property var extraColumns: Session.prefs.extraColumns
+    FontMetrics { id: cellMetrics; font.family: Theme.mono; font.pixelSize: root.fontSize }
+    readonly property int timeWidth: Math.ceil(cellMetrics.advanceWidth(
+        Session.prefs.timeFormat === "s" ? "00:00:00" : Session.prefs.timeFormat === "date" ? "00 MMM. 00:00:00" : "00:00:00.000")) + 16
+    readonly property int levelWidth: Math.ceil(cellMetrics.advanceWidth("ERROR")) + 22
+    readonly property int serviceWidth: Math.round(120 * fontSize / 12)
+    readonly property int extraWidth: Math.round(140 * fontSize / 12)
 
     // Header
     Rectangle {
@@ -41,8 +51,19 @@ ColumnLayout {
             anchors.rightMargin: 16
             spacing: 0
             HeaderText { Layout.preferredWidth: root.timeWidth; text: qsTr("Time") }
-            HeaderText { Layout.preferredWidth: root.levelWidth; text: qsTr("Level") }
+            HeaderText { Layout.preferredWidth: root.levelWidth; visible: root.showLevel; text: qsTr("Level") }
             HeaderText { Layout.preferredWidth: root.serviceWidth; visible: root.showService; text: root.serviceTitle }
+            Repeater {
+                model: root.extraColumns
+                delegate: HeaderText {
+                    required property string modelData
+                    Layout.preferredWidth: root.extraWidth
+                    rightPadding: 8
+                    text: modelData
+                    elide: Text.ElideRight
+                    font.capitalization: Font.MixedCase
+                }
+            }
             HeaderText { Layout.fillWidth: true; text: qsTr("Message") }
         }
     }
@@ -82,8 +103,9 @@ ColumnLayout {
             readonly property int moreLines: firstBreak < 0 ? 0 : row.message.split("
 ").length - 1
 
+            // Taller for wrapped messages; the anchored row (focus mode) a bit taller still.
             width: ListView.view.width
-            height: anchored ? 34 : 28
+            height: Math.max(Session.prefs.rowHeight, root.lines > 1 ? messageText.implicitHeight + 10 : 0) + (anchored ? 6 : 0)
             focusPolicy: Qt.NoFocus
             hoverEnabled: true
             Accessible.role: Accessible.Row
@@ -94,7 +116,9 @@ ColumnLayout {
                 color: row.selected ? (row.hovered ? Theme.tint(Theme.accent, 0.22) : Theme.accentSoft)
                      : row.anchored ? Theme.tint(Theme.accent, 0.16)
                      : row.fresh ? Theme.successSoft
-                     : (row.hovered ? Theme.surface : "transparent")
+                     : row.hovered ? Theme.surface
+                     : Session.prefs.tintRows && (row.level === "ERROR" || row.level === "WARN") ? Theme.tint(Theme.levelColor(row.level), Theme.dark ? 0.08 : 0.11)
+                     : "transparent"
                 Behavior on color { ColorAnimation { duration: 600 } }
                 border.width: row.anchored || (row.selected && list.activeFocus) ? 1 : 0
                 border.color: Theme.focusRing
@@ -112,14 +136,15 @@ ColumnLayout {
                     Layout.leftMargin: 16
                     text: row.timeText
                     font.family: Theme.mono
-                    font.pixelSize: Theme.fontSm
+                    font.pixelSize: root.fontSize
                     color: row.anchored ? Theme.textStrong : Theme.textMuted
                 }
                 Text {
                     Layout.preferredWidth: root.levelWidth
+                    visible: root.showLevel
                     text: row.level !== "" ? row.level : "—"
                     font.family: Theme.mono
-                    font.pixelSize: Theme.fontSm
+                    font.pixelSize: root.fontSize
                     font.weight: Font.Medium
                     color: Theme.levelTextColor(row.level)
                 }
@@ -130,25 +155,41 @@ ColumnLayout {
                     text: row.service
                     elide: Text.ElideRight
                     font.family: Theme.mono
-                    font.pixelSize: Theme.fontSm
+                    font.pixelSize: root.fontSize
                     color: Theme.accentText
+                }
+                Repeater {
+                    model: root.extraColumns
+                    delegate: Text {
+                        required property string modelData
+                        Layout.preferredWidth: root.extraWidth
+                        rightPadding: 8
+                        text: root.model ? root.model.fieldText(row.index, modelData) : ""
+                        elide: Text.ElideRight
+                        font.family: Theme.mono
+                        font.pixelSize: root.fontSize
+                        color: Theme.text
+                    }
                 }
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.rightMargin: 16
                     spacing: 8
                     Text {
+                        id: messageText
+                        readonly property string shown: root.lines > 1 ? row.message : row.firstLine
                         Layout.fillWidth: true
                         textFormat: root.highlightTerms.length > 0 ? Text.StyledText : Text.PlainText
-                        text: root.highlightTerms.length > 0 ? Session.highlight(row.firstLine, root.highlightTerms, Theme.warnText) : row.firstLine
+                        text: root.highlightTerms.length > 0 ? Session.highlight(shown, root.highlightTerms, Theme.warnText) : shown
                         elide: Text.ElideRight
-                        maximumLineCount: 1
+                        wrapMode: root.lines > 1 ? Text.WrapAnywhere : Text.NoWrap
+                        maximumLineCount: root.lines
                         font.family: Theme.mono
-                        font.pixelSize: Theme.fontSm
+                        font.pixelSize: root.fontSize
                         color: row.anchored ? Theme.textStrong : Theme.text
                     }
                     Rectangle {
-                        visible: row.moreLines > 0
+                        visible: row.moreLines > 0 && root.lines === 1
                         implicitWidth: moreText.implicitWidth + 12
                         implicitHeight: 18
                         radius: 9

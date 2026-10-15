@@ -79,15 +79,18 @@ ApplicationWindow {
     Settings {
         id: prefs
         category: "ui.desktop"
-        property bool dark: true
-        property bool prettyJson: true
         property bool fieldsOpen: true
         property bool histogramOpen: true
         property real detailsWidth: 420
         property alias windowWidth: window.width
         property alias windowHeight: window.height
     }
-    Binding { target: Theme; property: "dark"; value: prefs.dark }
+    // "system" follows the OS colour scheme as it changes.
+    Binding {
+        target: Theme; property: "dark"
+        value: Session.prefs.theme === "system" ? Application.styleHints.colorScheme !== Qt.ColorScheme.Light
+                                                : Session.prefs.theme === "dark"
+    }
 
     Clipboard { id: clipboard }
 
@@ -102,7 +105,7 @@ ApplicationWindow {
     Shortcut { id: shareShortcut; sequence: "Ctrl+L"; enabled: window.mainMode; onActivated: topBar.openShare() }
     // StandardKey.Preferences has no keys on Windows; Ctrl+, is Cmd+, on macOS.
     Shortcut { id: settingsShortcut; sequence: "Ctrl+,"; onActivated: settings.openSection(0) }
-    Shortcut { sequence: "?"; onActivated: settings.openSection(3) }
+    Shortcut { sequence: "?"; onActivated: settings.openSection("shortcuts") }
     Shortcut { sequence: "["; enabled: window.mainMode; onActivated: Session.logs.goToPage(Session.logs.page - 1) }
     Shortcut { sequence: "]"; enabled: window.mainMode; onActivated: Session.logs.goToPage(Session.logs.page + 1) }
     Shortcut { sequence: "{"; enabled: window.mainMode; onActivated: Session.logs.goToPage(0) }
@@ -148,7 +151,7 @@ ApplicationWindow {
             settingsKey: settingsShortcut.nativeText
             onSettingsRequested: settings.openSection(0)
             onLabelsRequested: settings.openLabels()
-            onThemeToggled: prefs.dark = !prefs.dark
+            onThemeToggled: Session.prefs.theme = Theme.dark ? "light" : "dark"
         }
 
         LinkBanner {
@@ -224,7 +227,7 @@ ApplicationWindow {
                 Layout.preferredWidth: prefs.detailsWidth
                 visible: window.detailsOpen && window.detailsEntry.valid
                 entry: window.detailsEntry
-                prettyJson: prefs.prettyJson
+                prettyJson: Session.prefs.prettyJson
                 navigable: window.mainMode
                 onPreviousRequested: Session.selectPrevious()
                 onNextRequested: Session.selectNext()
@@ -250,10 +253,6 @@ ApplicationWindow {
 
     SettingsDialog {
         id: settings
-        darkTheme: prefs.dark
-        prettyJson: prefs.prettyJson
-        onDarkThemeChanged: prefs.dark = darkTheme
-        onPrettyJsonChanged: prefs.prettyJson = prettyJson
         shortcuts: window.shortcutList
     }
 

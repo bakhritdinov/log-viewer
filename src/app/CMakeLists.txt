@@ -19,6 +19,7 @@ qt_add_qml_module(logviewer_app
         EnvironmentEditor.cpp EnvironmentEditor.h
         Language.cpp Language.h
         UpdateService.cpp UpdateService.h
+        Preferences.cpp Preferences.h
 )
 target_include_directories(logviewer_app PUBLIC ${PROJECT_SOURCE_DIR}/src)
 # Gui: QDesktopServices (release page); Network: the update check.

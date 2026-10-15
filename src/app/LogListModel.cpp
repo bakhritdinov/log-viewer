@@ -2,7 +2,9 @@
 
 #include <algorithm>
 
+#include "app/Preferences.h"
 #include "core/features/Focus.h"
+#include "core/query/Query.h"
 
 namespace lv {
 
@@ -47,8 +49,10 @@ QVariant LogListModel::data(const QModelIndex& index, int role) const
     switch (role) {
         case Qt::DisplayRole:
         case MessageRole: return e.message;
-        case TimeTextRole: return e.timestamp.toLocalTime().toString(QStringLiteral("HH:mm:ss.zzz"));
-        case DateTimeTextRole: return e.timestamp.toLocalTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss.zzz"));
+        case TimeTextRole: return m_prefs ? m_prefs->timeText(e.timestamp)
+                                          : e.timestamp.toLocalTime().toString(QStringLiteral("HH:mm:ss.zzz"));
+        case DateTimeTextRole: return m_prefs ? m_prefs->dateTimeText(e.timestamp)
+                                              : e.timestamp.toLocalTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss.zzz"));
         case TimeMsRole: return e.timeMs();
         case LevelRole: return levelName(e.level);
         case ServiceRole: return serviceOf(e);
@@ -174,6 +178,22 @@ void LogListModel::reload(bool resetSlice)
     if (m_oldestFirst) std::reverse(m_rows.begin(), m_rows.end());
     endResetModel();
     emit slicingChanged();
+}
+
+void LogListModel::setPreferences(const Preferences* prefs)
+{
+    if (m_prefs) disconnect(m_prefs, nullptr, this, nullptr);
+    m_prefs = prefs;
+    if (!m_prefs) return;
+    connect(m_prefs, &Preferences::changed, this, [this] {
+        if (!m_rows.isEmpty()) emit dataChanged(index(0), index(int(m_rows.size()) - 1), { TimeTextRole, DateTimeTextRole });
+    });
+}
+
+QString LogListModel::fieldText(int row, const QString& field) const
+{
+    const LogEntry* e = entryAt(row);
+    return e ? formatFieldValue(e->fields.value(field)) : QString();
 }
 
 } // namespace lv

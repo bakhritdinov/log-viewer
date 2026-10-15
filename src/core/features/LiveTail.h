@@ -79,6 +79,7 @@ public:
 
     const LogStore& store() const { return m_store; }
     int capacity() const { return m_capacity; }
+    void setCapacity(int capacity) { m_capacity = capacity > 0 ? capacity : kDefaultCapacity; }
 
 private:
     LogStore m_store;
