@@ -54,6 +54,14 @@ public:
                           const QString& host = {});
 };
 
+// Exposes ErrorInfo's enums to QML as `ErrorInfo.Retry`, `ErrorInfo.Unauthorized`…
+// (a value type itself must have a lowercase name).
+namespace ErrorInfoForeign {
+Q_NAMESPACE
+QML_NAMED_ELEMENT(ErrorInfo)
+QML_FOREIGN_NAMESPACE(lv::ErrorInfo)
+}
+
 // Snippet for whoever runs the Grafana reverse proxy (CORS for the PWA).
 QString corsHintForDevOps(const QString& pwaOrigin);
 

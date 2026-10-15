@@ -16,6 +16,7 @@ qt_add_qml_module(logviewer_app
         Session.cpp Session.h
         FocusSession.cpp FocusSession.h
         LiveSession.cpp LiveSession.h
+        EnvironmentEditor.cpp EnvironmentEditor.h
 )
 target_include_directories(logviewer_app PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(logviewer_app PUBLIC logviewer_core Qt6::Qml)
