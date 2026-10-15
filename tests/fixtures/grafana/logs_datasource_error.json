@@ -1,0 +1,9 @@
+{
+  "results": {
+    "A": {
+      "status": 400,
+      "frames": [],
+      "error": "unexpected token \"AND\" at position 12; want a filter"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "results": {
+    "A": {
+      "status": 200,
+      "frames": [
+        {
+          "schema": {
+            "fields": [
+              {
+                "name": "labels",
+                "type": "other"
+              },
+              {
+                "name": "Line",
+                "type": "string"
+              }
+            ]
+          },
+          "data": {
+            "values": [
+              [
+                {
+                  "_namespace": "prod-core",
+                  "_appName": "billing-api"
+                }
+              ],
+              [
+                "no time column"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

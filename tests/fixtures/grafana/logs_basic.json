@@ -1,0 +1,59 @@
+{
+  "results": {
+    "A": {
+      "status": 200,
+      "frames": [
+        {
+          "schema": {
+            "fields": [
+              {
+                "name": "labels",
+                "type": "other"
+              },
+              {
+                "name": "Time",
+                "type": "time"
+              },
+              {
+                "name": "Line",
+                "type": "string"
+              }
+            ]
+          },
+          "data": {
+            "values": [
+              [
+                {
+                  "_namespace": "prod-core",
+                  "_appName": "billing-api",
+                  "level": "error",
+                  "pod": "billing-api-x2k4"
+                },
+                {
+                  "_namespace": "prod-core",
+                  "_appName": "billing-api",
+                  "level": "warn"
+                },
+                {
+                  "_namespace": "prod-core",
+                  "_appName": "billing-api",
+                  "severity": "INFO"
+                }
+              ],
+              [
+                1792065600000,
+                1792065598500,
+                1792065597000
+              ],
+              [
+                "payment failed: upstream timeout after 30004 ms",
+                "retrying charge (attempt 3/3)",
+                "POST /v1/charge 200 (812 ms)"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

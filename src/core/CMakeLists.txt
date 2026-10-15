@@ -1,14 +1,22 @@
 # logviewer_core — all application logic, UI-agnostic.
-# Depends on Qt Core (and Network from the data layer on); never on Qt Qml/Quick.
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core)
+# Depends on Qt Core and Network only; never on Qt Qml/Quick.
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Network)
 
 add_library(logviewer_core STATIC
     domain/Level.cpp domain/Level.h
     domain/TimeRange.cpp domain/TimeRange.h
+    domain/LogEntry.h
+    data/Http.h
+    data/QtHttpClient.cpp data/QtHttpClient.h
+    data/GrafanaApi.cpp data/GrafanaApi.h
+    data/ErrorClassifier.cpp data/ErrorClassifier.h
+    data/LabelDiscovery.cpp data/LabelDiscovery.h
+    data/ParseExecutor.cpp data/ParseExecutor.h
     query/Query.cpp query/Query.h
     query/LogsQL.cpp query/LogsQL.h
     query/Suggestions.cpp query/Suggestions.h
 )
 target_include_directories(logviewer_core PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_compile_features(logviewer_core PUBLIC cxx_std_20)
-target_link_libraries(logviewer_core PUBLIC Qt6::Core)
+target_link_libraries(logviewer_core PUBLIC Qt6::Core Qt6::Network)
+set_target_properties(logviewer_core PROPERTIES AUTOMOC ON)

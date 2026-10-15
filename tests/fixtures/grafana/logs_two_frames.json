@@ -1,0 +1,93 @@
+{
+  "results": {
+    "A": {
+      "status": 200,
+      "frames": [
+        {
+          "schema": {
+            "fields": [
+              {
+                "name": "labels",
+                "type": "other"
+              },
+              {
+                "name": "Time",
+                "type": "time"
+              },
+              {
+                "name": "Line",
+                "type": "string"
+              }
+            ]
+          },
+          "data": {
+            "values": [
+              [
+                {
+                  "_namespace": "prod-core",
+                  "_appName": "billing-api",
+                  "level": "error"
+                }
+              ],
+              [
+                1792065600000
+              ],
+              [
+                "a"
+              ]
+            ]
+          }
+        },
+        {
+          "schema": {
+            "fields": [
+              {
+                "name": "labels",
+                "type": "other"
+              },
+              {
+                "name": "ts",
+                "type": "time"
+              },
+              {
+                "name": "message",
+                "type": "string"
+              },
+              {
+                "name": "order_id",
+                "type": "number"
+              },
+              {
+                "name": "retry",
+                "type": "boolean"
+              }
+            ]
+          },
+          "data": {
+            "values": [
+              [
+                {
+                  "_namespace": "prod-core",
+                  "_appName": "billing-api",
+                  "level": "debug"
+                }
+              ],
+              [
+                1792065599500
+              ],
+              [
+                "b"
+              ],
+              [
+                48213
+              ],
+              [
+                true
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

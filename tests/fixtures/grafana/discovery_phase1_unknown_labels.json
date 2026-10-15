@@ -1,0 +1,48 @@
+{
+  "results": {
+    "A": {
+      "status": 200,
+      "frames": [
+        {
+          "schema": {
+            "fields": [
+              {
+                "name": "labels",
+                "type": "other"
+              },
+              {
+                "name": "Time",
+                "type": "time"
+              },
+              {
+                "name": "Line",
+                "type": "string"
+              }
+            ]
+          },
+          "data": {
+            "values": [
+              [
+                {
+                  "host": "h1",
+                  "container": "c"
+                },
+                {
+                  "region": "eu"
+                }
+              ],
+              [
+                1792065600000,
+                1792065600000
+              ],
+              [
+                "l",
+                "l"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

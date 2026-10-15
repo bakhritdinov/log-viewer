@@ -3,3 +3,8 @@ logviewer_add_test(tst_core_timerange  SOURCES tst_timerange.cpp   LIBS logviewe
 logviewer_add_test(tst_core_query      SOURCES tst_query.cpp       LIBS logviewer_core)
 logviewer_add_test(tst_core_golden     SOURCES tst_golden.cpp      LIBS logviewer_core)
 logviewer_add_test(tst_core_suggestions SOURCES tst_suggestions.cpp LIBS logviewer_core)
+logviewer_add_test(tst_core_grafana_api      SOURCES tst_grafana_api.cpp      LIBS logviewer_core)
+logviewer_add_test(tst_core_error_classifier SOURCES tst_error_classifier.cpp LIBS logviewer_core)
+logviewer_add_test(tst_core_label_discovery  SOURCES tst_label_discovery.cpp  LIBS logviewer_core)
+logviewer_add_test(tst_core_qt_http_client   SOURCES tst_qt_http_client.cpp   LIBS logviewer_core)
+logviewer_add_test(tst_core_parse_executor   SOURCES tst_parse_executor.cpp   LIBS logviewer_core)

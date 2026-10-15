@@ -1,0 +1,42 @@
+{
+  "results": {
+    "A": {
+      "status": 200,
+      "frames": [
+        {
+          "schema": {
+            "fields": [
+              {
+                "name": "labels",
+                "type": "other"
+              },
+              {
+                "name": "Time",
+                "type": "time"
+              },
+              {
+                "name": "Line",
+                "type": "string"
+              }
+            ]
+          },
+          "data": {
+            "values": [
+              [
+                {
+                  "_namespace": "prod-core"
+                }
+              ],
+              [
+                1792065600000
+              ],
+              [
+                "l"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

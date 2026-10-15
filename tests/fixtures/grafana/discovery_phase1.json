@@ -1,0 +1,67 @@
+{
+  "results": {
+    "A": {
+      "status": 200,
+      "frames": [
+        {
+          "schema": {
+            "fields": [
+              {
+                "name": "labels",
+                "type": "other"
+              },
+              {
+                "name": "Time",
+                "type": "time"
+              },
+              {
+                "name": "Line",
+                "type": "string"
+              }
+            ]
+          },
+          "data": {
+            "values": [
+              [
+                {
+                  "_namespace": "prod-core",
+                  "_appName": "billing-api"
+                },
+                {
+                  "_namespace": "prod-core",
+                  "_appName": "billing-gw"
+                },
+                {
+                  "_namespace": "prod-edge",
+                  "_appName": "router"
+                },
+                {
+                  "_namespace": "prod-core",
+                  "_appName": ""
+                },
+                {
+                  "_namespace": "",
+                  "_appName": "x"
+                }
+              ],
+              [
+                1792065600000,
+                1792065600000,
+                1792065600000,
+                1792065600000,
+                1792065600000
+              ],
+              [
+                "l",
+                "l",
+                "l",
+                "l",
+                "l"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

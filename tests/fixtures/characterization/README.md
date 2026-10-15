@@ -41,3 +41,10 @@ Legacy `LogModel` quirks (asserted in `tests/characterization/tst_legacy_logmode
 | 7 | `formatValue(3.7)` → `"4"` (doubles lose their fraction) | numbers keep their textual form |
 | 8 | overlapping batches keep duplicate entries | entries de-duplicated across batches |
 | 9 | an out-of-range page silently shows page 0 | page clamped to the last page |
+
+Legacy `GrafanaClient` behaviour (asserted in `tests/core/tst_grafana_api.cpp` and `tst_error_classifier.cpp`):
+
+| # | Old behaviour | New behaviour |
+|---|---|---|
+| 10 | a datasource error inside a 200 body (`results.A.error`, e.g. a LogsQL syntax error) was ignored and looked like "no logs" | classified as BadQuery / TooHeavy and shown to the user |
+| 11 | errors were pre-formatted English strings | typed `RequestError` kinds; wording lives in the UI layer |

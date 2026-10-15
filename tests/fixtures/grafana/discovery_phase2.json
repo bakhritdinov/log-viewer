@@ -1,0 +1,39 @@
+{
+  "results": {
+    "A": {
+      "status": 200,
+      "frames": [
+        {
+          "schema": {
+            "fields": [
+              {
+                "name": "Time",
+                "type": "time"
+              },
+              {
+                "name": "Line",
+                "type": "string"
+              }
+            ]
+          },
+          "data": {
+            "values": [
+              [
+                1792065600000,
+                1792065600000,
+                1792065600000,
+                1792065600000
+              ],
+              [
+                "{\"_namespace\": \"prod-core\", \"_appName\": \"billing-api\", \"count()\": \"10\"}",
+                "{\"_namespace\": \"prod-core\", \"_appName\": \"billing-worker\", \"count()\": \"3\"}",
+                "{\"_namespace\": \"prod-data\", \"_appName\": \"etl\", \"count()\": \"1\"}",
+                "not json"
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
