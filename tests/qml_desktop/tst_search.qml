@@ -385,12 +385,16 @@ TestCase {
         mouseClick(rows()[0])
         const panel = () => byName(window.contentItem, "Подробности записи")
         tryVerify(() => panel() !== null)
+        // The actions show over the value while the field is hovered.
+        const fieldRow = H.find(panel(), it => it.hasOwnProperty("columnable") && H.isShown(it))
+        mouseMove(fieldRow, 20, fieldRow.height / 2)
         const toggle = () => H.find(panel(), it => String(it.Accessible.name).startsWith("Показывать колонкой") && it.visible)
         tryVerify(() => toggle() !== null)
         const field = String(toggle().Accessible.name).replace("Показывать колонкой ", "")
         mouseClick(toggle())
         compare(Session.prefs.extraColumns, [field])
         tryVerify(() => H.find(window.contentItem, it => it.text === field && it.font && it.font.capitalization === Font.MixedCase && H.isShown(it)) !== null)   // the header
+        mouseMove(fieldRow, 20, fieldRow.height / 2)
         const remove = H.find(panel(), it => it.Accessible.name === "Убрать колонку " + field && it.visible)
         verify(remove, "the toggle says the column is there")
         mouseClick(remove)

@@ -4,7 +4,9 @@ import QtQuick.Layouts
 
 // One field of a log entry with include (+), exclude (−), show-as-column and
 // copy actions.
-// Desktop: key and value side by side; touch: stacked, 44 px buttons.
+// Desktop: key and value side by side, the value uses the full width; the
+// actions appear over its right end while the row is hovered or focused.
+// Touch: stacked, 44 px buttons always shown.
 Control {
     id: root
 
@@ -13,8 +15,9 @@ Control {
     property bool touch: false
     property bool columnable: false     // offers "show as a column" (desktop) / "in the card" (touch)
     property bool isColumn: false       // already shown that way
-    // Desktop: the actions show on the hovered row only, so values stay readable.
-    readonly property bool actionsShown: touch || hover.hovered || root.activeFocus || root.visualFocus
+    // Hover is tracked on the whole row (not its background), so moving onto
+    // an action does not hide the actions.
+    readonly property bool actionsShown: touch || rowHover.hovered || root.activeFocus || root.visualFocus
 
     signal includeRequested()
     signal excludeRequested()
@@ -23,14 +26,17 @@ Control {
 
     padding: touch ? 4 : 2
     leftPadding: touch ? 12 : 6
+    rightPadding: touch ? 4 : 6
     implicitHeight: Math.max(touch ? 52 : 30, contentItem.implicitHeight + topPadding + bottomPadding)
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("%1: %2").arg(key).arg(value)
 
+    HoverHandler { id: rowHover }
+
     background: Rectangle {
+        id: rowBackground
         radius: Theme.radiusMd
-        color: root.touch ? Theme.surface : (hover.hovered ? Theme.subtle : "transparent")
-        HoverHandler { id: hover }
+        color: root.touch ? Theme.surface : (rowHover.hovered ? Theme.subtle : "transparent")
     }
 
     contentItem: RowLayout {
@@ -44,6 +50,7 @@ Control {
                 Layout.preferredWidth: root.touch ? -1 : 112
                 Layout.fillWidth: root.touch
                 Layout.alignment: Qt.AlignTop
+                topPadding: root.touch ? 0 : 5
                 text: root.key
                 // Long names and values wrap instead of being cut off.
                 wrapMode: Text.WrapAnywhere
@@ -54,6 +61,8 @@ Control {
             Text {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
+                topPadding: root.touch ? 0 : 5
+                bottomPadding: root.touch ? 0 : 5
                 text: root.value
                 wrapMode: Text.WrapAnywhere
                 maximumLineCount: 8
@@ -63,44 +72,107 @@ Control {
                 color: Theme.textStrong
             }
         }
-        IconButton {
+        // Desktop: only the column mark keeps a place, so the value is not
+        // squeezed by actions that are hidden most of the time.
+        Item {
+            visible: !root.touch && root.columnable && root.isColumn
             Layout.alignment: Qt.AlignTop
-            opacity: root.actionsShown ? 1 : 0
-            iconName: "plus"
-            label: qsTr("Show only %1 = %2").arg(root.key).arg(root.value)
-            touch: root.touch
-            iconColor: root.touch ? Theme.accent : (hovered ? Theme.accent : Theme.textMuted)
-            onClicked: root.includeRequested()
+            implicitWidth: 28
+            implicitHeight: 28
+            Icon {
+                anchors.centerIn: parent
+                visible: !root.actionsShown
+                name: "column"
+                size: 14
+                color: Theme.accent
+            }
         }
-        IconButton {
+        // Touch: the actions in the row.
+        Loader {
+            active: root.touch
+            visible: active
             Layout.alignment: Qt.AlignTop
-            opacity: root.actionsShown ? 1 : 0
-            iconName: "minus"
-            label: qsTr("Exclude %1 = %2").arg(root.key).arg(root.value)
-            touch: root.touch
-            iconColor: hovered ? Theme.dangerText : Theme.textMuted
-            onClicked: root.excludeRequested()
+            sourceComponent: actionsComponent
         }
-        IconButton {
-            Layout.alignment: Qt.AlignTop
-            visible: root.columnable
-            // Shown while it is a column, so the row tells it is one.
-            opacity: root.actionsShown || root.isColumn ? 1 : 0
-            iconName: "column"
-            checked: root.isColumn
-            label: root.isColumn ? (root.touch ? qsTr("Remove %1 from the card").arg(root.key) : qsTr("Remove the %1 column").arg(root.key))
-                                 : (root.touch ? qsTr("Show %1 in the card").arg(root.key) : qsTr("Show %1 as a column").arg(root.key))
-            touch: root.touch
-            iconColor: root.isColumn || hovered ? Theme.accent : Theme.textMuted
-            onClicked: root.columnToggled()
+    }
+
+    // Desktop: the actions over the value's right end, on the row's colour
+    // with a short fade so the text under them does not look cut.
+    Item {
+        visible: !root.touch && root.actionsShown
+        anchors.right: parent.right
+        anchors.rightMargin: root.rightPadding
+        anchors.top: parent.top
+        anchors.topMargin: root.topPadding
+        width: desktopActions.implicitWidth + fade.width
+        height: desktopActions.implicitHeight
+        Rectangle {
+            id: fade
+            width: 16
+            height: parent.height
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0; color: "transparent" }
+                GradientStop { position: 1; color: rowBackground.color }
+            }
         }
-        IconButton {
-            Layout.alignment: Qt.AlignTop
-            visible: !root.touch                       // touch: long-press copies
-            opacity: root.actionsShown ? 1 : 0
-            iconName: "copy"
-            label: qsTr("Copy value")
-            onClicked: root.copyRequested()
+        Rectangle {
+            x: fade.width
+            width: desktopActions.implicitWidth
+            height: parent.height
+            radius: Theme.radiusMd
+            color: rowBackground.color
+        }
+        Loader {
+            id: desktopActions
+            x: fade.width
+            active: !root.touch
+            sourceComponent: actionsComponent
+        }
+    }
+
+    Component {
+        id: actionsComponent
+        Row {
+            spacing: root.touch ? 4 : 0
+            IconButton {
+                implicitWidth: root.touch ? Theme.touchHeight : 28
+                implicitHeight: implicitWidth
+                iconName: "plus"
+                label: qsTr("Show only %1 = %2").arg(root.key).arg(root.value)
+                touch: root.touch
+                iconColor: root.touch ? Theme.accent : (hovered ? Theme.accent : Theme.textMuted)
+                onClicked: root.includeRequested()
+            }
+            IconButton {
+                implicitWidth: root.touch ? Theme.touchHeight : 28
+                implicitHeight: implicitWidth
+                iconName: "minus"
+                label: qsTr("Exclude %1 = %2").arg(root.key).arg(root.value)
+                touch: root.touch
+                iconColor: hovered ? Theme.dangerText : Theme.textMuted
+                onClicked: root.excludeRequested()
+            }
+            IconButton {
+                visible: root.columnable
+                implicitWidth: root.touch ? Theme.touchHeight : 28
+                implicitHeight: implicitWidth
+                iconName: "column"
+                checked: root.isColumn
+                label: root.isColumn ? (root.touch ? qsTr("Remove %1 from the card").arg(root.key) : qsTr("Remove the %1 column").arg(root.key))
+                                     : (root.touch ? qsTr("Show %1 in the card").arg(root.key) : qsTr("Show %1 as a column").arg(root.key))
+                touch: root.touch
+                iconColor: root.isColumn || hovered ? Theme.accent : Theme.textMuted
+                onClicked: root.columnToggled()
+            }
+            IconButton {
+                visible: !root.touch                       // touch: long-press copies
+                implicitWidth: 28
+                implicitHeight: 28
+                iconName: "copy"
+                label: qsTr("Copy value")
+                onClicked: root.copyRequested()
+            }
         }
     }
 
