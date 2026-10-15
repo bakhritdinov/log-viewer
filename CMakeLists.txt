@@ -17,7 +17,7 @@ if(APPLE)
     set(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Quick Network Svg Gui Sql Concurrent)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick Network Svg Gui)
 
 # Set Qt policies for compatibility
 if(POLICY QTP0004)
@@ -33,7 +33,7 @@ else()
 endif()
 
 # --- Module static libraries -------------------------------------------------
-# Code is grouped by concern: logs (Grafana/Loki) and ecotone (DLQ from Postgres).
+# Code is grouped by concern: logs (Grafana/Loki).
 # Shared QML lives in src/common/qml and is bundled into the executable's QML
 # module below, so no separate "common" static library is needed at the C++ level.
 
@@ -44,14 +44,6 @@ add_library(LogViewerLogs STATIC
 target_include_directories(LogViewerLogs PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(LogViewerLogs PUBLIC Qt6::Core Qt6::Network)
 
-add_library(LogViewerEcotone STATIC
-    src/ecotone/EcotoneClient.cpp src/ecotone/EcotoneClient.h
-    src/ecotone/ErrorMessagesModel.cpp src/ecotone/ErrorMessagesModel.h
-    src/ecotone/EcotoneConfigManager.cpp src/ecotone/EcotoneConfigManager.h
-    src/ecotone/FifoChannels.cpp src/ecotone/FifoChannels.h
-)
-target_include_directories(LogViewerEcotone PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(LogViewerEcotone PUBLIC Qt6::Core Qt6::Sql Qt6::Concurrent)
 
 qt_add_executable(LogViewer
     MACOSX_BUNDLE
@@ -112,16 +104,6 @@ qt_add_qml_module(LogViewer
         src/common/qml/PrimaryButton.qml
         src/common/qml/SecondaryButton.qml
         src/common/qml/AppTextField.qml
-        src/common/qml/StatusPill.qml
-        # Ecotone module — DLQ viewer
-        src/ecotone/qml/EcotoneWindow.qml
-        src/ecotone/qml/EcotoneTableView.qml
-        src/ecotone/qml/EcotoneDetailsPane.qml
-        src/ecotone/qml/EcotoneSettingsDialog.qml
-        src/ecotone/qml/ReplayConfirmDialog.qml
-        src/ecotone/qml/ReplayFifoGroupDialog.qml
-        src/ecotone/qml/ReplayHistoryDialog.qml
-        src/ecotone/qml/MessageDetailsWindow.qml
     RESOURCES
         src/resources/icon.png
         src/common/qml/Theme.qml
@@ -133,7 +115,6 @@ target_link_libraries(LogViewer PRIVATE
     Qt6::Network
     Qt6::Svg
     LogViewerLogs
-    LogViewerEcotone
 )
 
 include(GNUInstallDirs)
@@ -152,12 +133,9 @@ if(NOT (UNIX AND NOT APPLE) AND Qt6_VERSION VERSION_GREATER_EQUAL "6.5.0")
     set(deploy_args
         "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/logs/qml"
         "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/common/qml"
-        "-qmldir=${CMAKE_CURRENT_SOURCE_DIR}/src/ecotone/qml"
     )
 
     if(WIN32)
-        # windeployqt auto-deploys plugins for the linked Qt modules, so it ships
-        # the sqldrivers (incl. QPSQL) on its own — it has no -extra-plugins flag.
         list(APPEND deploy_args "--no-translations" "--compiler-runtime")
     endif()
 
@@ -168,61 +146,6 @@ if(NOT (UNIX AND NOT APPLE) AND Qt6_VERSION VERSION_GREATER_EQUAL "6.5.0")
         NO_UNSUPPORTED_PLATFORM_ERROR
     )
     install(SCRIPT ${deploy_script})
-
-    if(APPLE)
-        # Ecotone opens PostgreSQL via the QPSQL driver, but macdeployqt never
-        # ships it: it has no -extra-plugins flag and its -appstore-compliant mode
-        # (set by the Qt deploy script) blacklists qsqlpsql -> "Driver not loaded".
-        # We copy the plugin in ourselves. The official Qt qsqlpsql is also linked
-        # against a libpq at a hard-coded Postgres.app path that does not exist on
-        # users' machines, so when LOGVIEWER_BUNDLE_LIBPQ points at a self-contained
-        # libpq (built from source without OpenSSL — see the macOS CI job) we drop
-        # it into Frameworks and repoint the plugin at it. No external deps remain.
-        find_program(MACDEPLOYQT_EXECUTABLE macdeployqt
-            HINTS "${QT6_INSTALL_PREFIX}/bin" "${Qt6_DIR}/../../../bin" REQUIRED)
-        find_file(QPSQL_PLUGIN_PATH libqsqlpsql.dylib
-            HINTS
-                "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_PLUGINS}/sqldrivers"
-                "${QT6_INSTALL_PREFIX}/plugins/sqldrivers"
-                "${QT6_INSTALL_PREFIX}/share/qt/plugins/sqldrivers"
-            REQUIRED)
-
-        install(CODE "
-            set(_bundle \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/LogViewer.app\")
-            set(_dst \"\${_bundle}/Contents/PlugIns/sqldrivers/libqsqlpsql.dylib\")
-            # Resolve symlinks (Homebrew ships the plugin as a symlink into Cellar)
-            # so we copy the real Mach-O, not a link that breaks inside the bundle.
-            get_filename_component(_src \"${QPSQL_PLUGIN_PATH}\" REALPATH)
-            file(MAKE_DIRECTORY \"\${_bundle}/Contents/PlugIns/sqldrivers\")
-            execute_process(COMMAND \${CMAKE_COMMAND} -E copy \"\${_src}\" \"\${_dst}\")
-
-            # Bundle our self-contained libpq and repoint the plugin at it BEFORE
-            # macdeployqt runs, so macdeployqt sees the dependency already resolved
-            # inside the bundle and never looks for Qt's hard-coded Postgres.app path.
-            set(_libpq \"${LOGVIEWER_BUNDLE_LIBPQ}\")
-            if(_libpq AND EXISTS \"\${_libpq}\")
-                file(MAKE_DIRECTORY \"\${_bundle}/Contents/Frameworks\")
-                execute_process(COMMAND \${CMAKE_COMMAND} -E copy \"\${_libpq}\" \"\${_bundle}/Contents/Frameworks/libpq.5.dylib\")
-                execute_process(COMMAND install_name_tool -id @rpath/libpq.5.dylib \"\${_bundle}/Contents/Frameworks/libpq.5.dylib\")
-                execute_process(COMMAND otool -L \"\${_dst}\" OUTPUT_VARIABLE _otool)
-                string(REGEX MATCH \"[^ \\t\\r\\n]*libpq[^ \\t\\r\\n]*\\\\.dylib\" _oldref \"\${_otool}\")
-                if(_oldref)
-                    execute_process(COMMAND install_name_tool -change \"\${_oldref}\"
-                        @loader_path/../../Frameworks/libpq.5.dylib \"\${_dst}\")
-                else()
-                    message(WARNING \"Could not find libpq reference in qsqlpsql plugin to repoint\")
-                endif()
-            else()
-                message(WARNING \"LOGVIEWER_BUNDLE_LIBPQ not set or missing; QPSQL may fail at runtime: '\${_libpq}'\")
-            endif()
-
-            # macdeployqt fixes the plugin's QtSql/QtCore references to point at the
-            # frameworks already deployed in the bundle (libpq is left untouched
-            # because it now resolves to our bundled copy).
-            execute_process(COMMAND \"${MACDEPLOYQT_EXECUTABLE}\" \"\${_bundle}\" -executable=\"\${_dst}\" -no-strip)
-            execute_process(COMMAND codesign --force --deep --sign - \"\${_bundle}\")
-        ")
-    endif()
 endif()
 
 # --- Linux Desktop Integration ---
@@ -275,7 +198,6 @@ elseif(UNIX AND NOT APPLE)
     #     GNOME/KDE Wayland without forcing XWayland.
     set(CPACK_DEBIAN_PACKAGE_DEPENDS
         "libqt6core6, libqt6gui6, libqt6qml6, libqt6quick6, libqt6quickcontrols2-6, libqt6network6, libqt6svg6, \
-libqt6sql6-psql, libqt6concurrent6, \
 qt6-qpa-plugins, qt6-wayland, \
 qml6-module-qtqml, qml6-module-qtqml-workerscript, qml6-module-qtquick, qml6-module-qtquick-controls, \
 qml6-module-qtquick-layouts, qml6-module-qtquick-templates, qml6-module-qtquick-window, \
@@ -289,7 +211,7 @@ fontconfig, libfontconfig1")
         COMMAND DESTDIR=${CMAKE_BINARY_DIR}/AppDir cmake --install ${CMAKE_BINARY_DIR} --prefix /usr
         COMMAND test -f linuxdeploy-x86_64.AppImage || (wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage && chmod +x linuxdeploy-x86_64.AppImage)
         COMMAND test -f linuxdeploy-plugin-qt-x86_64.AppImage || (wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage && chmod +x linuxdeploy-plugin-qt-x86_64.AppImage)
-        COMMAND env QMAKE=${QT_QMAKE_EXECUTABLE} EXTRA_QT_PLUGINS=svg,iconengines,sqldrivers QML_SOURCES_PATHS=${CMAKE_CURRENT_SOURCE_DIR}/src/logs/qml:${CMAKE_CURRENT_SOURCE_DIR}/src/common/qml:${CMAKE_CURRENT_SOURCE_DIR}/src/ecotone/qml ./linuxdeploy-x86_64.AppImage --appdir ${CMAKE_BINARY_DIR}/AppDir --plugin qt --output appimage --desktop-file ${CMAKE_BINARY_DIR}/log-viewer.desktop --icon-file ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/icon.png
+        COMMAND env QMAKE=${QT_QMAKE_EXECUTABLE} EXTRA_QT_PLUGINS=svg,iconengines QML_SOURCES_PATHS=${CMAKE_CURRENT_SOURCE_DIR}/src/logs/qml:${CMAKE_CURRENT_SOURCE_DIR}/src/common/qml ./linuxdeploy-x86_64.AppImage --appdir ${CMAKE_BINARY_DIR}/AppDir --plugin qt --output appimage --desktop-file ${CMAKE_BINARY_DIR}/log-viewer.desktop --icon-file ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/icon.png
         COMMAND mkdir -p ${CMAKE_SOURCE_DIR}/dist
         COMMAND mv LogViewer*.AppImage ${CMAKE_SOURCE_DIR}/dist/${CPACK_PACKAGE_NAME}-Linux.AppImage
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}

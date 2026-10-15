@@ -9,10 +9,6 @@
 #include "UpdateChecker.h"
 #include "logs/GrafanaClient.h"
 #include "logs/LogModel.h"
-#include "ecotone/EcotoneClient.h"
-#include "ecotone/ErrorMessagesModel.h"
-#include "ecotone/EcotoneConfigManager.h"
-#include "ecotone/FifoChannels.h"
 
 int main(int argc, char *argv[]) {
     qputenv("QT_QUICK_CONTROLS_STYLE", "Basic");
@@ -40,13 +36,6 @@ int main(int argc, char *argv[]) {
     GrafanaClient client;
     LogModel model;
 
-    FifoChannels fifoChannels;
-    EcotoneClient ecotoneClient;
-    ecotoneClient.setFifoChannels(&fifoChannels);
-    ErrorMessagesModel errorMessagesModel;
-    errorMessagesModel.setFifoChannels(&fifoChannels);
-    EcotoneConfigManager ecotoneConfig;
-
     // First check 3s after launch so it doesn't compete with initial Loki query;
     // then re-check every 6h while the app stays open.
     QTimer::singleShot(3000, &updateChecker, &UpdateChecker::checkForUpdates);
@@ -63,19 +52,11 @@ int main(int argc, char *argv[]) {
     QObject::connect(&client, &GrafanaClient::logsReceived, &model, &LogModel::appendEntries);
     QObject::connect(&client, &GrafanaClient::loadingChanged, &model, &LogModel::setLoading);
 
-    QObject::connect(&ecotoneClient, &EcotoneClient::errorsReceived,
-                     &errorMessagesModel, &ErrorMessagesModel::setEntries);
-
     engine.rootContext()->setContextProperty("grafanaClient", &client);
     engine.rootContext()->setContextProperty("logModel", &model);
     engine.rootContext()->setContextProperty("configManager", &config);
     engine.rootContext()->setContextProperty("updateChecker", &updateChecker);
     engine.rootContext()->setContextProperty("appVersion", APP_VERSION);
-
-    engine.rootContext()->setContextProperty("ecotoneClient", &ecotoneClient);
-    engine.rootContext()->setContextProperty("errorMessagesModel", &errorMessagesModel);
-    engine.rootContext()->setContextProperty("ecotoneConfig", &ecotoneConfig);
-    engine.rootContext()->setContextProperty("fifoChannels", &fifoChannels);
 
     // Make the compiled-in module resolvable by `import LogViewerApp`.
     // Main.qml is loaded by direct qrc URL, so the qmldir applied is the one next

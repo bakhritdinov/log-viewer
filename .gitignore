@@ -35,3 +35,6 @@ GEMINI.md
 # Claude
 .claude/
 CLAUDE.md
+
+# Local build trees (desktop / WebAssembly)
+build-*/
