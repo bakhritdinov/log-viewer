@@ -498,6 +498,22 @@
         <source>Tap a bar to see the entries of that interval; tap a level to show only it.</source>
         <translation>Нажмите на столбец, чтобы увидеть записи этого интервала; на уровень — чтобы показать только его.</translation>
     </message>
+    <message>
+        <source>No chart — the request failed</source>
+        <translation>Графика нет — запрос не выполнен</translation>
+    </message>
+    <message>
+        <source>Nothing to chart</source>
+        <translation>Нечего показать на графике</translation>
+    </message>
+    <message>
+        <source>The reason is shown in the Logs section.</source>
+        <translation>Причина — в разделе «Логи».</translation>
+    </message>
+    <message>
+        <source>No entries for “%1”.</source>
+        <translation>Нет записей за «%1».</translation>
+    </message>
 </context>
 <context>
     <name>ChoiceDialog</name>
@@ -1539,6 +1555,42 @@
         <source>Stop</source>
         <translation>Остановить</translation>
     </message>
+    <message>
+        <source>Search: %1</source>
+        <translation>Поиск: %1</translation>
+    </message>
+    <message>
+        <source>all entries</source>
+        <translation>все записи</translation>
+    </message>
+    <message>
+        <source>The link leads to the environment %1, which is not set up here</source>
+        <translation>Ссылка ведёт в окружение %1, которого здесь нет</translation>
+    </message>
+    <message>
+        <source>From a link:</source>
+        <translation>Из ссылки:</translation>
+    </message>
+    <message>
+        <source>Add the environment</source>
+        <translation>Добавить окружение</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Сохранить</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
+    <message>
+        <source>Back to mine</source>
+        <translation>К своей выборке</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>Скопировано</translation>
+    </message>
 </context>
 <context>
     <name>Main</name>
@@ -2004,6 +2056,53 @@
     </message>
 </context>
 <context>
+    <name>SaveQuerySheet</name>
+    <message>
+        <source>Query “%1” now holds the current search</source>
+        <translation>Запрос «%1» теперь хранит текущий поиск</translation>
+    </message>
+    <message>
+        <source>Query “%1” saved</source>
+        <translation>Запрос «%1» сохранён</translation>
+    </message>
+    <message>
+        <source>Rename the query</source>
+        <translation>Переименовать запрос</translation>
+    </message>
+    <message>
+        <source>Save the query</source>
+        <translation>Сохранить запрос</translation>
+    </message>
+    <message>
+        <source>all entries</source>
+        <translation>все записи</translation>
+    </message>
+    <message>
+        <source>Query name</source>
+        <translation>Имя запроса</translation>
+    </message>
+    <message>
+        <source>Query № %1 already has this name</source>
+        <translation>Это имя уже у запроса № %1</translation>
+    </message>
+    <message>
+        <source>Replaces query № %1</source>
+        <translation>Заменит запрос № %1</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>Переименовать</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Заменить</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Сохранить</translation>
+    </message>
+</context>
+<context>
     <name>SavedQueriesPopup</name>
     <message>
         <source>Saved queries</source>
@@ -2131,6 +2230,49 @@
     </message>
 </context>
 <context>
+    <name>SavedQuerySheet</name>
+    <message>
+        <source>Run</source>
+        <translation>Запустить</translation>
+    </message>
+    <message>
+        <source>Share the link</source>
+        <translation>Поделиться ссылкой</translation>
+    </message>
+    <message>
+        <source>Link copied</source>
+        <translation>Ссылка скопирована</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>Переименовать</translation>
+    </message>
+    <message>
+        <source>Replace with the current search</source>
+        <translation>Заменить текущим запросом</translation>
+    </message>
+    <message>
+        <source>Query “%1” now holds the current search</source>
+        <translation>Запрос «%1» теперь хранит текущий поиск</translation>
+    </message>
+    <message>
+        <source>Move up</source>
+        <translation>Переместить выше</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Удалить</translation>
+    </message>
+    <message>
+        <source>Query “%1” deleted</source>
+        <translation>Запрос «%1» удалён</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Вернуть</translation>
+    </message>
+</context>
+<context>
     <name>SearchBar</name>
     <message>
         <source>Save query</source>
@@ -2234,6 +2376,109 @@
     <message>
         <source>Tab complete · Enter search as typed · Esc close</source>
         <translation>Tab дополнить · Enter искать как есть · Esc закрыть</translation>
+    </message>
+</context>
+<context>
+    <name>SearchScreen</name>
+    <message>
+        <source>Search</source>
+        <translation>Поиск</translation>
+    </message>
+    <message>
+        <source>Search the logs</source>
+        <translation>Поиск по логам</translation>
+    </message>
+    <message>
+        <source>Word, key:value…</source>
+        <translation>Слово, key:value…</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Очистить</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>Close the quote</source>
+        <translation>Закрыть кавычку</translation>
+    </message>
+    <message>
+        <source>Save current</source>
+        <translation>Сохранить текущий</translation>
+    </message>
+    <message>
+        <source>Share</source>
+        <translation>Поделиться</translation>
+    </message>
+    <message>
+        <source>The link holds the environment by name, the source, the query and the period — no passwords.</source>
+        <translation>В ссылке — окружение по имени, источник, запрос и период, без паролей.</translation>
+    </message>
+    <message>
+        <source>Saved</source>
+        <translation>Сохранённые</translation>
+    </message>
+    <message>
+        <source>Level</source>
+        <translation>Уровень</translation>
+    </message>
+    <message>
+        <source>Fields</source>
+        <translation>Поля</translation>
+    </message>
+    <message>
+        <source>Values of %1 · matching “%2”</source>
+        <translation>Значения %1 · совпадают с «%2»</translation>
+    </message>
+    <message>
+        <source>Values of %1</source>
+        <translation>Значения %1</translation>
+    </message>
+    <message>
+        <source>Other fields · tap to search by a field</source>
+        <translation>Другие поля · нажмите, чтобы искать по полю</translation>
+    </message>
+    <message>
+        <source>Recent queries</source>
+        <translation>Недавние запросы</translation>
+    </message>
+    <message>
+        <source>Recent</source>
+        <translation>Недавние</translation>
+    </message>
+    <message>
+        <source>Syntax: word · %1 · %2 · %3 to exclude · parts joined with AND</source>
+        <translation>Синтаксис: слово · %1 · %2 · %3 исключить · части через AND</translation>
+    </message>
+    <message>
+        <source>Minus (exclude)</source>
+        <translation>Минус (исключить)</translation>
+    </message>
+    <message>
+        <source>Find</source>
+        <translation>Найти</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n value(s)</source>
+        <translation>
+            <numerusform>%n значение</numerusform>
+            <numerusform>%n значения</numerusform>
+            <numerusform>%n значений</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Show only %1 = %2</source>
+        <translation>Показать только %1 = %2</translation>
+    </message>
+    <message>
+        <source>Exclude %1 = %2</source>
+        <translation>Исключить %1 = %2</translation>
+    </message>
+    <message>
+        <source>Actions with “%1”</source>
+        <translation>Действия с «%1»</translation>
     </message>
 </context>
 <context>
@@ -2409,6 +2654,43 @@
     <message>
         <source>The link has no Grafana address or passwords — only the environment by name, the source, the query and the period. The recipient needs an environment named “%1”.</source>
         <translation>В ссылке нет адреса Grafana и паролей — только окружение по имени, источник, запрос и период. У получателя должно быть настроено окружение «%1».</translation>
+    </message>
+</context>
+<context>
+    <name>ShareSheet</name>
+    <message>
+        <source>Share the selection</source>
+        <translation>Поделиться выборкой</translation>
+    </message>
+    <message>
+        <source>Period in the link</source>
+        <translation>Период в ссылке</translation>
+    </message>
+    <message>
+        <source>Freeze %1 – %2
+a colleague sees exactly the same</source>
+        <translation>Зафиксировать %1 – %2
+коллега увидит то же самое</translation>
+    </message>
+    <message>
+        <source>Relative: “%1”</source>
+        <translation>Относительно: «%1»</translation>
+    </message>
+    <message>
+        <source>Highlight the entry %1</source>
+        <translation>Выделить запись %1</translation>
+    </message>
+    <message>
+        <source>No Grafana address or passwords. The recipient needs an environment named “%1”.</source>
+        <translation>Без адреса Grafana и паролей. У получателя должно быть окружение «%1».</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Копировать</translation>
+    </message>
+    <message>
+        <source>Link copied</source>
+        <translation>Ссылка скопирована</translation>
     </message>
 </context>
 <context>

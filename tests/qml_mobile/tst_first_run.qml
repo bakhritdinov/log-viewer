@@ -33,4 +33,21 @@ TestCase {
         tryCompare(window, "section", 2)
         tryVerify(() => H.visibleText(window.contentItem, "Подключения") !== null)
     }
+
+    function test_3_chartShowsTheSameGuide() {
+        window.section = 0
+        waitForRendering(window.contentItem)
+        const onLogs = H.visibleText(window.contentItem, "Подключите Grafana").mapToItem(window.contentItem, 0, 0)
+        window.section = 1
+        waitForRendering(window.contentItem)
+        const guide = H.visibleText(window.contentItem, "Подключите Grafana")
+        verify(guide)
+        // The same place on both tabs: nothing jumps when switching.
+        const onChart = guide.mapToItem(window.contentItem, 0, 0)
+        compare(Math.round(onChart.y), Math.round(onLogs.y))
+        // No step switch over an empty chart.
+        verify(!H.find(window.contentItem, it => it.Accessible && it.Accessible.name === "Шаг гистограммы" && H.isShown(it)))
+        mouseClick(H.visibleText(window.contentItem, "Открыть настройки"))
+        tryCompare(window, "section", 2)
+    }
 }

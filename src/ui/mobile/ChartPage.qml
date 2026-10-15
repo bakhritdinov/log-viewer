@@ -11,6 +11,7 @@ ColumnLayout {
     id: root
 
     signal showEntriesRequested()
+    signal settingsRequested()
 
     readonly property var steps: [
         { label: qsTr("Auto"), value: 0 },
@@ -19,11 +20,15 @@ ColumnLayout {
         { label: qsTr("1 h"), value: 3600000 },
     ]
 
+    // Nothing to draw (no connection, a failed request, an empty period): no
+    // step switch or hints over an empty chart, just why.
+    readonly property bool hasData: Session.histogram.count > 0 && Session.histogramMax > 0
+
     spacing: 0
 
     Rectangle {
         Layout.fillWidth: true
-        implicitHeight: 56
+        implicitHeight: 60                     // as the Logs bar: the guide below sits at the same place
         color: Theme.surface
         Rectangle { anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom; height: 1; color: Theme.border }
         ColumnLayout {
@@ -52,9 +57,37 @@ ColumnLayout {
         }
     }
 
+    // Nothing connected: the same guide as in Logs, at the same place.
+    SetupGuide {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        visible: Session.needsSetup
+        onSettingsRequested: root.settingsRequested()
+    }
+
+    Item {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        visible: !root.hasData && !Session.needsSetup
+        EmptyState {
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.margins: 24
+            touch: true
+            visible: !Session.loading
+            iconName: "chart"
+            title: Session.hasError ? qsTr("No chart — the request failed")
+                 : qsTr("Nothing to chart")
+            message: Session.hasError ? qsTr("The reason is shown in the Logs section.")
+                   : qsTr("No entries for “%1”.").arg(Session.timeRangeLabel)
+        }
+    }
+
     Flickable {
         Layout.fillWidth: true
         Layout.fillHeight: true
+        visible: root.hasData && !Session.needsSetup
         contentHeight: body.implicitHeight + 32
         boundsBehavior: Flickable.StopAtBounds
         clip: true

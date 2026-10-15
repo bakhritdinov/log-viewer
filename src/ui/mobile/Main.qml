@@ -46,8 +46,14 @@ ApplicationWindow {
                 onChartRequested: window.section = 1
                 onSettingsRequested: window.section = 2
                 onNotice: text => window.notify(text)
+                onSearchRequested: searchScreen.open()
+                onSaveRequested: saveSheet.openSaving()
+                onAddEnvironmentRequested: name => { missingEnvironment = ""; window.section = 2 }
             }
-            ChartPage { onShowEntriesRequested: window.section = 0 }
+            ChartPage {
+                onShowEntriesRequested: window.section = 0
+                onSettingsRequested: window.section = 2
+            }
             SettingsPage { }
         }
 
@@ -64,8 +70,33 @@ ApplicationWindow {
         }
     }
 
+    // A share link whose environment is not set up here.
+    Connections {
+        target: Session
+        function onLinkEnvironmentMissing(name) { logsPage.missingEnvironment = name }
+        function onEnvironmentChanged() { logsPage.missingEnvironment = "" }
+    }
+
+    SearchScreen {
+        id: searchScreen
+        onSaveRequested: saveSheet.openSaving()
+        onShareRequested: shareSheet.open()
+        onSavedQueryMenuRequested: id => savedSheet.openFor(id)
+    }
+    SaveQuerySheet { id: saveSheet; onNotice: (text, actionText, action) => window.notify(text, actionText, action) }
+    SavedQuerySheet {
+        id: savedSheet
+        onNotice: (text, actionText, action) => window.notify(text, actionText, action)
+        onRan: searchScreen.close()
+        onRenameRequested: id => saveSheet.openRenaming(id)
+    }
+    ShareSheet { id: shareSheet; onNotice: (text, actionText, action) => window.notify(text, actionText, action) }
+
+    // In the overlay, so it shows over the search screen and the sheets too.
     Snackbar {
         id: snackbar
+        parent: Overlay.overlay
+        z: 1000
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: nav.height + 12

@@ -494,6 +494,22 @@
         <source>Tap a bar to see the entries of that interval; tap a level to show only it.</source>
         <translation>Shu oraliq yozuvlarini koʻrish uchun ustunga, faqat shu darajani koʻrsatish uchun darajaga bosing.</translation>
     </message>
+    <message>
+        <source>No chart — the request failed</source>
+        <translation>Grafik yoʻq — soʻrov bajarilmadi</translation>
+    </message>
+    <message>
+        <source>Nothing to chart</source>
+        <translation>Grafikda koʻrsatadigan narsa yoʻq</translation>
+    </message>
+    <message>
+        <source>The reason is shown in the Logs section.</source>
+        <translation>Sababi «Loglar» boʻlimida.</translation>
+    </message>
+    <message>
+        <source>No entries for “%1”.</source>
+        <translation>«%1» uchun yozuvlar yoʻq.</translation>
+    </message>
 </context>
 <context>
     <name>ChoiceDialog</name>
@@ -1528,6 +1544,42 @@
         <source>Stop</source>
         <translation>Toʻxtatish</translation>
     </message>
+    <message>
+        <source>Search: %1</source>
+        <translation>Qidiruv: %1</translation>
+    </message>
+    <message>
+        <source>all entries</source>
+        <translation>barcha yozuvlar</translation>
+    </message>
+    <message>
+        <source>The link leads to the environment %1, which is not set up here</source>
+        <translation>Havola bu yerda sozlanmagan %1 muhitiga olib boradi</translation>
+    </message>
+    <message>
+        <source>From a link:</source>
+        <translation>Havoladan:</translation>
+    </message>
+    <message>
+        <source>Add the environment</source>
+        <translation>Muhit qoʻshish</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Saqlash</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Yopish</translation>
+    </message>
+    <message>
+        <source>Back to mine</source>
+        <translation>Oʻz tanlovimga</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>Nusxalandi</translation>
+    </message>
 </context>
 <context>
     <name>Main</name>
@@ -1986,6 +2038,53 @@
     </message>
 </context>
 <context>
+    <name>SaveQuerySheet</name>
+    <message>
+        <source>Query “%1” now holds the current search</source>
+        <translation>«%1» soʻrovi endi joriy qidiruvni saqlaydi</translation>
+    </message>
+    <message>
+        <source>Query “%1” saved</source>
+        <translation>«%1» soʻrovi saqlandi</translation>
+    </message>
+    <message>
+        <source>Rename the query</source>
+        <translation>Soʻrov nomini oʻzgartirish</translation>
+    </message>
+    <message>
+        <source>Save the query</source>
+        <translation>Soʻrovni saqlash</translation>
+    </message>
+    <message>
+        <source>all entries</source>
+        <translation>barcha yozuvlar</translation>
+    </message>
+    <message>
+        <source>Query name</source>
+        <translation>Soʻrov nomi</translation>
+    </message>
+    <message>
+        <source>Query № %1 already has this name</source>
+        <translation>Bu nom allaqachon № %1 soʻrovda</translation>
+    </message>
+    <message>
+        <source>Replaces query № %1</source>
+        <translation>№ %1 soʻrovni almashtiradi</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>Nomini oʻzgartirish</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Almashtirish</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Saqlash</translation>
+    </message>
+</context>
+<context>
     <name>SavedQueriesPopup</name>
     <message>
         <source>Saved queries</source>
@@ -2113,6 +2212,49 @@
     </message>
 </context>
 <context>
+    <name>SavedQuerySheet</name>
+    <message>
+        <source>Run</source>
+        <translation>Ishga tushirish</translation>
+    </message>
+    <message>
+        <source>Share the link</source>
+        <translation>Havolani ulashish</translation>
+    </message>
+    <message>
+        <source>Link copied</source>
+        <translation>Havola nusxalandi</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>Nomini oʻzgartirish</translation>
+    </message>
+    <message>
+        <source>Replace with the current search</source>
+        <translation>Joriy qidiruv bilan almashtirish</translation>
+    </message>
+    <message>
+        <source>Query “%1” now holds the current search</source>
+        <translation>«%1» soʻrovi endi joriy qidiruvni saqlaydi</translation>
+    </message>
+    <message>
+        <source>Move up</source>
+        <translation>Yuqoriga surish</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Oʻchirish</translation>
+    </message>
+    <message>
+        <source>Query “%1” deleted</source>
+        <translation>«%1» soʻrovi oʻchirildi</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Qaytarish</translation>
+    </message>
+</context>
+<context>
     <name>SearchBar</name>
     <message>
         <source>Save query</source>
@@ -2214,6 +2356,108 @@
     <message>
         <source>Tab complete · Enter search as typed · Esc close</source>
         <translation>Tab toʻldirish · Enter yozilganicha qidirish · Esc yopish</translation>
+    </message>
+</context>
+<context>
+    <name>SearchScreen</name>
+    <message>
+        <source>Search</source>
+        <translation>Qidiruv</translation>
+    </message>
+    <message>
+        <source>Search the logs</source>
+        <translation>Loglar boʻyicha qidiruv</translation>
+    </message>
+    <message>
+        <source>Word, key:value…</source>
+        <translation>Soʻz, key:value…</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Tozalash</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Bekor qilish</translation>
+    </message>
+    <message>
+        <source>Close the quote</source>
+        <translation>Qoʻshtirnoqni yopish</translation>
+    </message>
+    <message>
+        <source>Save current</source>
+        <translation>Joriyni saqlash</translation>
+    </message>
+    <message>
+        <source>Share</source>
+        <translation>Ulashish</translation>
+    </message>
+    <message>
+        <source>The link holds the environment by name, the source, the query and the period — no passwords.</source>
+        <translation>Havolada muhit nomi, manba, soʻrov va davr bor — parollarsiz.</translation>
+    </message>
+    <message>
+        <source>Saved</source>
+        <translation>Saqlanganlar</translation>
+    </message>
+    <message>
+        <source>Level</source>
+        <translation>Daraja</translation>
+    </message>
+    <message>
+        <source>Fields</source>
+        <translation>Maydonlar</translation>
+    </message>
+    <message>
+        <source>Values of %1 · matching “%2”</source>
+        <translation>%1 qiymatlari · «%2» ga mos</translation>
+    </message>
+    <message>
+        <source>Values of %1</source>
+        <translation>%1 qiymatlari</translation>
+    </message>
+    <message>
+        <source>Other fields · tap to search by a field</source>
+        <translation>Boshqa maydonlar · maydon boʻyicha qidirish uchun bosing</translation>
+    </message>
+    <message>
+        <source>Recent queries</source>
+        <translation>Soʻnggi soʻrovlar</translation>
+    </message>
+    <message>
+        <source>Recent</source>
+        <translation>Soʻnggilari</translation>
+    </message>
+    <message>
+        <source>Syntax: word · %1 · %2 · %3 to exclude · parts joined with AND</source>
+        <translation>Sintaksis: soʻz · %1 · %2 · %3 chiqarib tashlash · qismlar AND orqali</translation>
+    </message>
+    <message>
+        <source>Minus (exclude)</source>
+        <translation>Minus (chiqarib tashlash)</translation>
+    </message>
+    <message>
+        <source>Find</source>
+        <translation>Topish</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n value(s)</source>
+        <translation>
+            <numerusform>%n ta qiymat</numerusform>
+            <numerusform>%n ta qiymat</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Show only %1 = %2</source>
+        <translation>Faqat %1 = %2 ni koʻrsatish</translation>
+    </message>
+    <message>
+        <source>Exclude %1 = %2</source>
+        <translation>%1 = %2 ni chiqarib tashlash</translation>
+    </message>
+    <message>
+        <source>Actions with “%1”</source>
+        <translation>«%1» bilan amallar</translation>
     </message>
 </context>
 <context>
@@ -2389,6 +2633,43 @@
     <message>
         <source>The link has no Grafana address or passwords — only the environment by name, the source, the query and the period. The recipient needs an environment named “%1”.</source>
         <translation>Havolada Grafana manzili va parollar yoʻq — faqat muhit nomi, manba, soʻrov va davr. Qabul qiluvchida «%1» muhiti sozlangan boʻlishi kerak.</translation>
+    </message>
+</context>
+<context>
+    <name>ShareSheet</name>
+    <message>
+        <source>Share the selection</source>
+        <translation>Tanlovni ulashish</translation>
+    </message>
+    <message>
+        <source>Period in the link</source>
+        <translation>Havoladagi davr</translation>
+    </message>
+    <message>
+        <source>Freeze %1 – %2
+a colleague sees exactly the same</source>
+        <translation>%1 – %2 ni qayd etish
+hamkasbingiz aynan shuni koʻradi</translation>
+    </message>
+    <message>
+        <source>Relative: “%1”</source>
+        <translation>Nisbiy: «%1»</translation>
+    </message>
+    <message>
+        <source>Highlight the entry %1</source>
+        <translation>%1 yozuvini ajratib koʻrsatish</translation>
+    </message>
+    <message>
+        <source>No Grafana address or passwords. The recipient needs an environment named “%1”.</source>
+        <translation>Grafana manzili va parollarsiz. Qabul qiluvchida «%1» muhiti boʻlishi kerak.</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Nusxalash</translation>
+    </message>
+    <message>
+        <source>Link copied</source>
+        <translation>Havola nusxalandi</translation>
     </message>
 </context>
 <context>

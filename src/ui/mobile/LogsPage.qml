@@ -17,6 +17,12 @@ Item {
     signal settingsRequested()
     signal sourceRequested()
     signal notice(string text)
+    signal searchRequested()
+    signal saveRequested()
+    signal addEnvironmentRequested(string name)
+
+    // The environment of an opened link that is not set up here.
+    property string missingEnvironment
 
     function scrollToTop() {
         feed.toStart()
@@ -130,19 +136,40 @@ Item {
                     anchors.rightMargin: 12
                     anchors.topMargin: 2
                     spacing: 8
-                    SearchBox {
-                        id: searchBox
+                    // The query; tapping opens the search screen, a long press saves it.
+                    AbstractButton {
+                        id: searchRow
                         Layout.fillWidth: true
-                        touch: true
-                        placeholder: qsTr("Word, key:value…")
-                        text: Session.searchText
-                        onTextChanged: if (text !== Session.searchText) Session.searchText = text
-                        suggestions: Session.suggestions
-                        history: Session.history
-                        invalid: Session.searchError !== ""
-                        onSubmitted: Session.search()
-                        onSuggestionActivated: (index, exclude) => Session.applySuggestion(index, exclude)
-                        onHistoryActivated: text => { Session.searchText = text; Session.search() }
+                        implicitHeight: 44
+                        Accessible.role: Accessible.Button
+                        Accessible.name: qsTr("Search: %1").arg(Session.searchText !== "" ? Session.searchText : qsTr("all entries"))
+                        onClicked: root.searchRequested()
+                        onPressAndHold: if (Session.namespaceName !== "") root.saveRequested()
+                        background: Rectangle {
+                            radius: Theme.radiusLg
+                            color: searchRow.pressed ? Theme.subtle : Theme.inputBg
+                            border.width: 1
+                            border.color: Session.searchError !== "" ? Theme.danger : Theme.border
+                        }
+                        contentItem: RowLayout {
+                            spacing: 8
+                            Icon { Layout.leftMargin: 12; name: "search"; size: 18; color: Theme.textMuted }
+                            Text {
+                                Layout.fillWidth: true
+                                text: Session.searchText !== "" ? Session.searchText : qsTr("Word, key:value…")
+                                elide: Text.ElideRight
+                                font.family: Theme.mono
+                                font.pixelSize: 16
+                                color: Session.searchText !== "" ? Theme.textStrong : Theme.textDisabled
+                            }
+                            IconButton {
+                                visible: Session.searchText !== ""
+                                touch: true
+                                iconName: "close"
+                                label: qsTr("Clear the search")
+                                onClicked: Session.clearSearch()
+                            }
+                        }
                     }
                     Text {
                         Layout.fillWidth: true
@@ -154,50 +181,93 @@ Item {
                         color: Theme.dangerText
                     }
                     // Period first, then the conditions; scrolls sideways, never wraps.
-                    Flickable {
+                    // What does not fit: a fade on the right and "+N".
+                    Item {
+                        id: chipsBox
                         Layout.fillWidth: true
                         implicitHeight: 32
-                        contentWidth: chipsRow.implicitWidth
-                        flickableDirection: Flickable.HorizontalFlick
-                        boundsBehavior: Flickable.StopAtBounds
-                        clip: true
-                        Row {
-                            id: chipsRow
-                            spacing: 6
-                            AbstractButton {
-                                id: periodChip
-                                implicitHeight: 32
-                                implicitWidth: periodRow.implicitWidth + 20
-                                Accessible.name: qsTr("Period: %1").arg(Session.timeRangeLabel)
-                                background: Rectangle {
-                                    radius: 16
-                                    color: periodChip.pressed ? Theme.hover : Theme.subtle
-                                    border.width: 1
-                                    border.color: Theme.border
-                                }
-                                contentItem: Item {
-                                    Row {
-                                        id: periodRow
-                                        anchors.centerIn: parent
-                                        spacing: 6
-                                        Icon { anchors.verticalCenter: parent.verticalCenter; name: "clock"; size: 14; color: Theme.textStrong }
-                                        Text {
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            text: Session.timeRangeShortLabel
-                                            font.family: Theme.sans
-                                            font.pixelSize: Theme.fontMd
-                                            font.weight: Font.Medium
-                                            color: Theme.textStrong
+                        Flickable {
+                            id: chipsFlick
+                            anchors.fill: parent
+                            implicitHeight: 32
+                            contentWidth: chipsRow.implicitWidth
+                            flickableDirection: Flickable.HorizontalFlick
+                            boundsBehavior: Flickable.StopAtBounds
+                            clip: true
+                            Row {
+                                id: chipsRow
+                                spacing: 6
+                                AbstractButton {
+                                    id: periodChip
+                                    implicitHeight: 32
+                                    implicitWidth: periodRow.implicitWidth + 20
+                                    Accessible.name: qsTr("Period: %1").arg(Session.timeRangeLabel)
+                                    background: Rectangle {
+                                        radius: 16
+                                        color: periodChip.pressed ? Theme.hover : Theme.subtle
+                                        border.width: 1
+                                        border.color: Theme.border
+                                    }
+                                    contentItem: Item {
+                                        Row {
+                                            id: periodRow
+                                            anchors.centerIn: parent
+                                            spacing: 6
+                                            Icon { anchors.verticalCenter: parent.verticalCenter; name: "clock"; size: 14; color: Theme.textStrong }
+                                            Text {
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                text: Session.timeRangeShortLabel
+                                                font.family: Theme.sans
+                                                font.pixelSize: Theme.fontMd
+                                                font.weight: Font.Medium
+                                                color: Theme.textStrong
+                                            }
+                                            Icon { anchors.verticalCenter: parent.verticalCenter; name: "chevronDown"; size: 12; color: Theme.textMuted }
                                         }
-                                        Icon { anchors.verticalCenter: parent.verticalCenter; name: "chevronDown"; size: 12; color: Theme.textMuted }
                                     }
                                 }
+                                FilterChipBar {
+                                    id: chipBar
+                                    touch: true
+                                    model: Session.chips
+                                    onRemoveRequested: index => Session.removeChip(index)
+                                    // Tapping a chip edits the query.
+                                    TapHandler { onTapped: root.searchRequested() }
+                                }
                             }
-                            FilterChipBar {
-                                touch: true
-                                model: Session.chips
-                                onRemoveRequested: index => Session.removeChip(index)
+                        }
+                        readonly property int hiddenChips: {
+                            void chipsFlick.contentX; void chipsFlick.width; void chipsRow.implicitWidth
+                            let n = 0
+                            for (let i = 0; i < chipBar.children.length; ++i) {
+                                const c = chipBar.children[i]
+                                if (!c.hasOwnProperty("exclude")) continue
+                                if (c.mapToItem(chipsFlick, 0, 0).x + c.width > chipsFlick.width + 1) ++n
                             }
+                            return n
+                        }
+                        Rectangle {
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            width: moreLabel.implicitWidth + 40
+                            visible: chipsBox.hiddenChips > 0
+                            gradient: Gradient {
+                                orientation: Gradient.Horizontal
+                                GradientStop { position: 0; color: Theme.tint(Theme.surface, 0) }
+                                GradientStop { position: 0.45; color: Theme.surface }
+                            }
+                            Text {
+                                id: moreLabel
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "+" + chipsBox.hiddenChips
+                                font.family: Theme.sans
+                                font.pixelSize: Theme.fontMd
+                                font.weight: Font.DemiBold
+                                color: Theme.textMuted
+                            }
+                            TapHandler { onTapped: root.searchRequested() }
                         }
                     }
                 }
@@ -309,6 +379,69 @@ Item {
                 }
             }
 
+            // Opened from a share link: what it is, save it or go back. Or why it
+            // did not open (its environment is not set up here).
+            Rectangle {
+                id: linkCard
+                readonly property bool missing: root.missingEnvironment !== ""
+                readonly property color tint: missing ? Theme.warn : Theme.variable
+                Layout.fillWidth: true
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
+                Layout.topMargin: root.view === "feed" ? 0 : 12
+                Layout.bottomMargin: 8
+                visible: missing || Session.openedFromLink
+                implicitHeight: linkColumn.implicitHeight + 24
+                radius: Theme.radiusLg
+                color: Theme.tint(tint, 0.1)
+                border.width: 1
+                border.color: Theme.tint(tint, 0.45)
+                Accessible.role: missing ? Accessible.AlertMessage : Accessible.StatusBar
+                Accessible.name: linkText.text
+                ColumnLayout {
+                    id: linkColumn
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 12
+                    spacing: 10
+                    RowLayout {
+                        spacing: 10
+                        Icon { Layout.alignment: Qt.AlignTop; name: linkCard.missing ? "warning" : "link"; size: 18; color: linkCard.tint }
+                        Text {
+                            id: linkText
+                            Layout.fillWidth: true
+                            textFormat: Text.StyledText
+                            text: linkCard.missing
+                                  ? qsTr("The link leads to the environment %1, which is not set up here").arg("<b>" + root.missingEnvironment + "</b>")
+                                  : qsTr("From a link:") + "<br><b>" + [Session.environmentName, Session.app, Session.timeRangeLabel].join(" · ") + "</b>"
+                            wrapMode: Text.Wrap
+                            font.family: Theme.sans
+                            font.pixelSize: Theme.fontLg
+                            color: Theme.textStrong
+                        }
+                    }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 2
+                        columnSpacing: 8
+                        AppButton {
+                            Layout.fillWidth: true
+                            touch: true
+                            variant: "primary"
+                            text: linkCard.missing ? qsTr("Add the environment") : qsTr("Save")
+                            onClicked: linkCard.missing ? root.addEnvironmentRequested(root.missingEnvironment) : root.saveRequested()
+                        }
+                        AppButton {
+                            Layout.fillWidth: true
+                            touch: true
+                            text: linkCard.missing ? qsTr("Close") : qsTr("Back to mine")
+                            onClicked: linkCard.missing ? root.missingEnvironment = "" : Session.dismissLinkBanner()
+                        }
+                    }
+                }
+            }
+
             ErrorBanner {
                 Layout.fillWidth: true
                 Layout.leftMargin: 12
@@ -325,7 +458,7 @@ Item {
                     case ErrorInfo.NarrowRange: Session.narrowRange(); break
                     case ErrorInfo.CopyCorsHint: clipboard.copy(Session.corsHint()); root.notice(qsTr("Copied")); break
                     case ErrorInfo.CopyDetails: clipboard.copy(Session.error.detail); root.notice(qsTr("Copied")); break
-                    case ErrorInfo.EditQuery: searchBox.focusInput(); break
+                    case ErrorInfo.EditQuery: root.searchRequested(); break
                     }
                 }
             }

@@ -18,6 +18,10 @@ qt_add_qml_module(logviewer_ui_mobile
         ChartPage.qml
         SettingsPage.qml
         SetupGuide.qml
+        SearchScreen.qml
+        SaveQuerySheet.qml
+        SavedQuerySheet.qml
+        ShareSheet.qml
     IMPORTS
         LogViewer.App
         LogViewer.Ui

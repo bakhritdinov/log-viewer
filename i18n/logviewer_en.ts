@@ -172,6 +172,16 @@
     </message>
 </context>
 <context>
+    <name>SearchScreen</name>
+    <message numerus="yes">
+        <source>%n value(s)</source>
+        <translation type="unfinished">
+            <numerusform>%n value</numerusform>
+            <numerusform>%n values</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>SourcePicker</name>
     <message numerus="yes">
         <source>%1, %n app(s)</source>
