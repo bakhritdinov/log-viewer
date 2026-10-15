@@ -12,6 +12,7 @@ Control {
     property bool touch: false
     property bool fill: false          // stretch options to the full width
     property bool accent: false        // the selected option filled blue (mode tabs)
+    property bool compact: false       // small secondary switch (histogram step)
     property string accessibleName
 
     signal activated(var value)
@@ -27,13 +28,16 @@ Control {
         if (i < 0 || i >= model.length) return
         const v = valueOf(model[i])
         if (v === value) return
-        value = v
+        // The owner usually updates the bound property in onActivated; assigning
+        // first would break `value: someState` and leave the control showing a
+        // stale option once that state changes elsewhere.
         activated(v)
+        if (value !== v) value = v
     }
 
     padding: 2
     focusPolicy: Qt.StrongFocus
-    implicitHeight: (touch ? 40 : 26) + 2 * padding
+    implicitHeight: (touch ? 40 : compact ? 18 : 26) + 2 * padding
     implicitWidth: row.implicitWidth + 2 * padding
     Accessible.role: Accessible.PageTabList
     Accessible.name: accessibleName
@@ -58,7 +62,7 @@ Control {
                 readonly property bool current: control.valueOf(modelData) === control.value
 
                 width: control.fill ? row.width / control.model.length : implicitWidth
-                implicitWidth: optionText.implicitWidth + (control.touch ? 28 : 18)
+                implicitWidth: optionText.implicitWidth + (control.touch ? 28 : control.compact ? 14 : 18)
                 height: row.height
                 focusPolicy: Qt.NoFocus
                 checkable: false
@@ -75,7 +79,7 @@ Control {
                     id: optionText
                     text: control.labelOf(option.modelData)
                     font.family: Theme.sans
-                    font.pixelSize: control.touch ? Theme.fontLg : Theme.fontSm
+                    font.pixelSize: control.touch ? Theme.fontLg : control.compact ? Theme.fontXs : Theme.fontSm
                     color: option.current ? (control.accent ? Theme.textOnAccent : Theme.textStrong) : (option.hovered ? Theme.text : Theme.textMuted)
                     font.weight: control.accent ? Font.DemiBold : Font.Medium
                     horizontalAlignment: Text.AlignHCenter

@@ -140,7 +140,7 @@ FocusScope {
                     width: ListView.view.width
                     height: root.touch ? 52 : 34
                     highlighted: ListView.isCurrentItem
-                    Accessible.name: kind === "field" ? qsTr("Field %1").arg(field) : qsTr("%1 = %2").arg(field, value)
+                    Accessible.name: kind === "field" ? qsTr("Field %1").arg(field) : qsTr("%1 = %2").arg(field).arg(value)
                     onClicked: root.suggestionActivated(index, false)
 
                     background: Rectangle {
@@ -199,7 +199,7 @@ FocusScope {
             }
             Repeater {
                 id: historyRepeater
-                model: list.count === 0 ? root.history : []
+                model: list.count === 0 ? root.history.slice(0, 8) : []
                 delegate: ItemDelegate {
                     id: recent
                     // Basic's 12 px vertical padding pushes the content below the row's centre.

@@ -23,6 +23,7 @@ qt_add_qml_module(logviewer_ui
         Theme.qml
         Icons.qml
         Icon.qml
+        Flag.qml
         AppButton.qml
         IconButton.qml
         AppTextField.qml

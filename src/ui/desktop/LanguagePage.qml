@@ -58,6 +58,10 @@ ColumnLayout {
                             color: option.current ? Theme.success : "transparent"
                         }
                     }
+                    Flag {
+                        code: option.modelData.code
+                        flagWidth: 27
+                    }
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 3
@@ -119,9 +123,12 @@ ColumnLayout {
 
     Rectangle {
         Layout.fillWidth: true
+        // Inside the dialog's border; only the dialog's corner is rounded.
+        Layout.rightMargin: 1
+        Layout.bottomMargin: 1
         implicitHeight: 62
         color: Theme.bg
-        radius: Theme.radiusLg + 2
+        bottomRightRadius: Theme.radiusLg + 1
         Rectangle { anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top; height: 1; color: Theme.border }
         RowLayout {
             anchors.fill: parent

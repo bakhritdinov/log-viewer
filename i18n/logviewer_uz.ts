@@ -1632,10 +1632,6 @@
         <translation>Joriy soʻrov bilan almashtirish</translation>
     </message>
     <message>
-        <source>Query “%1” updated</source>
-        <translation>«%1» soʻrovi yangilandi</translation>
-    </message>
-    <message>
         <source>Move up</source>
         <translation>Yuqoriga koʻchirish</translation>
     </message>
@@ -1658,6 +1654,10 @@
     <message>
         <source>Last 50 searches</source>
         <translation>Oxirgi 50 ta qidiruv</translation>
+    </message>
+    <message>
+        <source>Query “%1” now holds the current search</source>
+        <translation>«%1» soʻrovi endi joriy qidiruvni saqlaydi</translation>
     </message>
 </context>
 <context>

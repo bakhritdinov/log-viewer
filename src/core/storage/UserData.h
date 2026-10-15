@@ -49,14 +49,16 @@ private:
     QList<SavedQuery> m_list;
 };
 
-// Recent search texts, most recent first, without duplicates, capped.
+// Recent search texts, most recent first, without duplicates, capped; each
+// remembers the source (app) it was run against.
 class SearchHistory {
 public:
-    static constexpr int kCapacity = 10;
+    static constexpr int kCapacity = 50;
     explicit SearchHistory(KeyValueStore& store) : m_store(store) {}
 
     QStringList items() const;
-    void add(const QString& text);   // blank and "*" are ignored
+    void add(const QString& text, const QString& source = {});   // blank and "*" are ignored
+    QString source(const QString& text) const;
     void clear();
 
 private:

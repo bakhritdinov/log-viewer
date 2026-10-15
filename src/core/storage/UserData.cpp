@@ -163,6 +163,7 @@ void SavedQueriesStore::save()
 
 namespace {
 const QString kHistoryKey = QStringLiteral("searchHistory");
+const QString kHistorySourcesKey = QStringLiteral("searchHistorySources");
 } // namespace
 
 QStringList SearchHistory::items() const
@@ -170,7 +171,7 @@ QStringList SearchHistory::items() const
     return m_store.value(kHistoryKey).toStringList();
 }
 
-void SearchHistory::add(const QString& text)
+void SearchHistory::add(const QString& text, const QString& source)
 {
     const QString t = text.trimmed();
     if (t.isEmpty() || t == u"*") return;
@@ -179,11 +180,25 @@ void SearchHistory::add(const QString& text)
     list.prepend(t);
     while (list.size() > kCapacity) list.removeLast();
     m_store.setValue(kHistoryKey, list);
+
+    QVariantMap sources;
+    const QVariantMap old = m_store.value(kHistorySourcesKey).toMap();
+    for (const QString& item : std::as_const(list))
+        if (old.contains(item)) sources.insert(item, old.value(item));
+    if (!source.isEmpty()) sources.insert(t, source);
+    else sources.remove(t);
+    m_store.setValue(kHistorySourcesKey, sources);
+}
+
+QString SearchHistory::source(const QString& text) const
+{
+    return m_store.value(kHistorySourcesKey).toMap().value(text.trimmed()).toString();
 }
 
 void SearchHistory::clear()
 {
     m_store.remove(kHistoryKey);
+    m_store.remove(kHistorySourcesKey);
 }
 
 // ── SelectionMemory ─────────────────────────────────────────────────────────

@@ -300,6 +300,11 @@ QStringList Session::history() const
     return m_services.history().items();
 }
 
+QString Session::historySource(const QString& text) const
+{
+    return m_services.history().source(text);
+}
+
 void Session::search()
 {
     // A broken query is not sent: the results stay and the field says why.
@@ -324,7 +329,7 @@ void Session::search()
         emit searchErrorChanged();
     }
     if (!message.isEmpty()) return;
-    m_services.history().add(m_searchText);
+    m_services.history().add(m_searchText, m_app);
     emit historyChanged();
     runSearch(false);
 }
@@ -939,8 +944,14 @@ void Session::refreshRecent()
 
 QString Session::suggestedQueryName() const
 {
-    if (m_searchText.trimmed().isEmpty()) return m_app;
-    return m_app.isEmpty() ? m_searchText.trimmed() : QStringLiteral("%1 · %2").arg(m_app, m_searchText.trimmed());
+    const QString base = m_searchText.trimmed().isEmpty() ? m_app
+                       : m_app.isEmpty() ? m_searchText.trimmed()
+                                         : QStringLiteral("%1 · %2").arg(m_app, m_searchText.trimmed());
+    // Not a name already taken: saving with the suggestion adds a query, it
+    // does not silently overwrite one.
+    QString name = base;
+    for (int n = 2; !savedQueryIdByName(name).isEmpty(); ++n) name = QStringLiteral("%1 (%2)").arg(base).arg(n);
+    return name;
 }
 
 void Session::saveCurrentQuery(const QString& name)

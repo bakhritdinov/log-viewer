@@ -1563,7 +1563,7 @@
     </message>
     <message>
         <source>Recent searches</source>
-        <translation>Недавние запросы</translation>
+        <translation>Недавние поиски</translation>
     </message>
     <message>
         <source>Query name</source>
@@ -1591,7 +1591,7 @@
     </message>
     <message>
         <source>No recent searches.</source>
-        <translation>Недавних запросов нет.</translation>
+        <translation>Недавних поисков нет.</translation>
     </message>
     <message>
         <source>Ctrl+1…9</source>
@@ -1650,10 +1650,6 @@
         <translation>Заменить текущим запросом</translation>
     </message>
     <message>
-        <source>Query “%1” updated</source>
-        <translation>Запрос «%1» обновлён</translation>
-    </message>
-    <message>
         <source>Move up</source>
         <translation>Переместить выше</translation>
     </message>
@@ -1676,6 +1672,10 @@
     <message>
         <source>Last 50 searches</source>
         <translation>Последние 50 поисков</translation>
+    </message>
+    <message>
+        <source>Query “%1” now holds the current search</source>
+        <translation>Запрос «%1» теперь содержит текущий поиск</translation>
     </message>
 </context>
 <context>
@@ -1757,7 +1757,7 @@
     </message>
     <message>
         <source>Recent searches</source>
-        <translation>Недавние запросы</translation>
+        <translation>Недавние поиски</translation>
     </message>
     <message numerus="yes">
         <source>%1 · %n value(s)</source>

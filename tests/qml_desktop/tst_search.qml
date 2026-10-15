@@ -121,6 +121,26 @@ TestCase {
         keyClick(Qt.Key_Escape)
     }
 
+    // Feedback: "Replace with the current query" in a saved query's menu works.
+    function test_10b_replaceSavedQuery() {
+        tryCompare(Session.savedQueries, "count", 1)
+        Session.searchText = "level:error"
+        mouseClick(byName(window.contentItem, "История и сохранённые запросы"))
+        const more = () => H.find(root(), it => String(it.Accessible.name).startsWith("Ещё действия с") && it.visible)
+        tryVerify(() => more() !== null)
+        waitForRendering(root())
+        mouseClick(more())
+        tryVerify(() => overlayText("Заменить текущим запросом") !== null)
+        waitForRendering(root())
+        mouseClick(overlayText("Заменить текущим запросом"))
+        tryVerify(() => String(Session.savedQueries.get(0).summary).indexOf("level:error") >= 0)
+        tryVerify(() => H.find(root(), it => String(it.text).indexOf("теперь содержит текущий поиск") >= 0 && H.isShown(it)) !== null)   // toast
+        mouseClick(byName(window.contentItem, "История и сохранённые запросы"))
+        tryVerify(() => H.find(root(), it => it.font && it.font.family === Theme.mono && String(it.text).indexOf("level:error") >= 0 && H.isShown(it)) !== null)
+        keyClick(Qt.Key_Escape)
+        Session.searchText = ""
+    }
+
     function test_11_contextFocus() {
         mouseClick(rows()[0])
         harness.scriptLogs(6)

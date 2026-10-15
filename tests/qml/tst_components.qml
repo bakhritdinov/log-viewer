@@ -37,6 +37,14 @@ Item {
         ListElement { text: "-app:billing"; exclude: true }
     } }
     Component { id: segmented; SegmentedControl { model: [{ label: "A", value: "a" }, { label: "B", value: "b" }, "c"]; value: "a" } }
+    Component {
+        id: boundSegmented
+        Item {
+            property string picked: "a"
+            property alias control: inner
+            SegmentedControl { id: inner; model: ["a", "b"]; value: parent.picked; onActivated: v => parent.picked = v }
+        }
+    }
     Component { id: presets; TimePresetGrid { width: 300 } }
     Component { id: legend; LevelLegend { totals: ({ ERROR: 3, WARN: 1 }) } }
     Component { id: rangeForm; AbsoluteRangeForm { width: 500 } }
@@ -127,6 +135,15 @@ Item {
             control.select(2)               // same value: no signal
             compare(spy.count, 2)
             compare(spy.signalArguments[1][0], "c")
+        }
+
+        // Picking must not break `value: state`: a later change elsewhere shows up.
+        function test_segmentedKeepsItsBinding() {
+            const owner = createTemporaryObject(boundSegmented, host)
+            owner.control.select(1)
+            compare(owner.picked, "b")
+            owner.picked = "a"
+            compare(owner.control.value, "a")
         }
 
         function test_presetsPick() {

@@ -191,7 +191,8 @@ public:
 
     // Saved queries
     // A default name for saving the current search ("app · search").
-    Q_INVOKABLE QString suggestedQueryName() const;
+    Q_INVOKABLE QString suggestedQueryName() const;   // never a name already saved
+    Q_INVOKABLE QString historySource(const QString& text) const;   // the app a recent search ran on
     Q_INVOKABLE void saveCurrentQuery(const QString& name);
     Q_INVOKABLE void runSavedQuery(const QString& id);
     Q_INVOKABLE void renameSavedQuery(const QString& id, const QString& name);

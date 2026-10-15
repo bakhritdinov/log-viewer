@@ -11,6 +11,7 @@ AbstractButton {
     property string hint
     property bool danger: false
     property bool hintDanger: false      // the hint as a red badge ("LIVE")
+    property string iconName             // a leading icon instead of the check column
 
     signal triggered()
 
@@ -45,6 +46,13 @@ AbstractButton {
         Item {
             implicitWidth: 16
             implicitHeight: 16
+            Icon {
+                anchors.centerIn: parent
+                visible: control.iconName !== ""
+                name: control.iconName
+                size: 14
+                color: !control.enabled ? Theme.textDisabled : control.danger ? Theme.dangerText : Theme.textMuted
+            }
             Icon {
                 anchors.centerIn: parent
                 visible: control.checkedMark && control.dotColor.a === 0

@@ -395,9 +395,14 @@ Popup {
         // Footer: keys and the discovered labels
         Rectangle {
             Layout.fillWidth: true
+            // Inside the popup's border, rounded only at its own corners.
+            Layout.leftMargin: 1
+            Layout.rightMargin: 1
+            Layout.bottomMargin: 1
             implicitHeight: 40
             color: Theme.bg
-            radius: Theme.radiusLg + 2
+            bottomLeftRadius: Theme.radiusLg + 1
+            bottomRightRadius: Theme.radiusLg + 1
             Rectangle { anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top; height: 1; color: Theme.border }
             RowLayout {
                 anchors.fill: parent

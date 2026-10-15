@@ -50,21 +50,25 @@ Rectangle {
         anchors.topMargin: root.expanded ? 10 : 6
         spacing: 8
 
+        // Two independent blocks: what is shown (label, levels, trend, narrowing)
+        // on the left, how it is bucketed (step, collapse) on the right.
         RowLayout {
             Layout.fillWidth: true
-            spacing: 14
+            spacing: 12
             // Wraps onto a second line when the details panel narrows the view.
             Flow {
                 Layout.fillWidth: true
                 Layout.minimumWidth: 0
-                spacing: 14
+                Layout.alignment: Qt.AlignVCenter
+                spacing: 10
                 Item {
                     implicitWidth: distributionLabel.implicitWidth
-                    implicitHeight: legend.implicitHeight   // centred on the level buttons
+                    implicitHeight: 22                      // the height of every header control
                     SectionLabel { id: distributionLabel; anchors.verticalCenter: parent.verticalCenter; text: qsTr("Distribution") }
                 }
                 LevelLegend {
                     id: legend
+                    compact: true
                     totals: Session.levelTotals
                     activeLevel: Session.activeLevel
                     onToggled: level => Session.applyLevelFilter(level)
@@ -75,7 +79,7 @@ Rectangle {
                 Item {
                     visible: !root.expanded && root.trend.length > 0
                     implicitWidth: 160
-                    implicitHeight: legend.implicitHeight
+                    implicitHeight: 22
                     Sparkline {
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width
@@ -89,26 +93,31 @@ Rectangle {
                 FilterChip {
                     visible: Session.histogramRangeOrPatternFilter
                     pill: false
-                    implicitHeight: legend.implicitHeight
+                    implicitHeight: 22
                     text: Session.histogramFilterLabel
                     onRemoveRequested: Session.clearHistogramFilter()
                 }
             }
-            SegmentedControl {
+            Row {
                 Layout.alignment: Qt.AlignTop
-                visible: root.expanded
-                accessibleName: qsTr("Histogram step")
-                model: root.steps
-                value: Session.manualBucketMs
-                onActivated: v => Session.manualBucketMs = v
-            }
-            IconButton {
-                Layout.alignment: Qt.AlignTop
-                implicitWidth: 24
-                implicitHeight: 24
-                iconName: root.expanded ? "chevronUp" : "chevronDown"
-                label: root.expanded ? qsTr("Collapse the chart") : qsTr("Expand the chart")
-                onClicked: root.expanded = !root.expanded
+                spacing: 6
+                SegmentedControl {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.expanded
+                    compact: true
+                    accessibleName: qsTr("Histogram step")
+                    model: root.steps
+                    value: Session.manualBucketMs
+                    onActivated: v => Session.manualBucketMs = v
+                }
+                IconButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    implicitWidth: 22
+                    implicitHeight: 22
+                    iconName: root.expanded ? "chevronUp" : "chevronDown"
+                    label: root.expanded ? qsTr("Collapse the chart") : qsTr("Expand the chart")
+                    onClicked: root.expanded = !root.expanded
+                }
             }
         }
 

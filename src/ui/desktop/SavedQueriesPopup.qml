@@ -39,12 +39,29 @@ Popup {
         return 0
     }
 
+    // The saved query takes the current source, search and period; its row
+    // flashes so the change is visible even when the summary barely differs.
+    property string flashedId
+    function replaceWithCurrent(id, name) {
+        Session.replaceSavedQuery(id)
+        flashedId = id
+        flashTimer.restart()
+        notify(qsTr("Query “%1” now holds the current search").arg(name))
+    }
+    Timer { id: flashTimer; interval: 1200; onTriggered: root.flashedId = "" }
+
     function save() {
         const name = nameField.text.trim()
         if (name === "" || Session.namespaceName === "") return
-        if (conflictId !== "") Session.replaceSavedQuery(conflictId)
-        else Session.saveCurrentQuery(name)
-        const number = conflictId !== "" ? conflictNumber : Session.savedQueries.count
+        if (conflictId !== "") {
+            replaceWithCurrent(conflictId, name)
+            nameField.text = ""
+            return
+        }
+        Session.saveCurrentQuery(name)
+        const number = Session.savedQueries.count
+        flashedId = Session.savedQueries.get(number - 1).id
+        flashTimer.restart()
         nameField.text = ""
         notify(number <= 9 ? qsTr("Query “%1” saved · Ctrl+%2").arg(name).arg(number) : qsTr("Query “%1” saved").arg(name))
     }
@@ -154,7 +171,9 @@ Popup {
                 onClicked: if (!query.renaming) { Session.runSavedQuery(query.id); root.close() }
                 background: Rectangle {
                     radius: Theme.radiusLg - 2
-                    color: query.renaming || query.actionsShown ? Theme.subtle : "transparent"
+                    color: root.flashedId === query.id ? Theme.successSoft
+                         : query.renaming || query.actionsShown ? Theme.subtle : "transparent"
+                    Behavior on color { ColorAnimation { duration: 250 } }
                     border.width: query.renaming || query.visualFocus ? 1 : 0
                     border.color: Theme.focusRing
                 }
@@ -246,19 +265,22 @@ Popup {
                             y: moreButton.height + 4
                             x: moreButton.width - width
                             minimumWidth: 230
-                            AppMenuItem { text: qsTr("Rename"); onTriggered: root.renamingId = query.id }
+                            AppMenuItem { iconName: "pencil"; text: qsTr("Rename"); onTriggered: root.renamingId = query.id }
                             AppMenuItem {
+                                iconName: "refresh"
                                 text: qsTr("Replace with the current query")
                                 enabled: Session.namespaceName !== ""
-                                onTriggered: { Session.replaceSavedQuery(query.id); root.notify(qsTr("Query “%1” updated").arg(query.name)) }
+                                onTriggered: root.replaceWithCurrent(query.id, query.name)
                             }
                             AppMenuItem {
+                                iconName: "chevronUp"
                                 text: qsTr("Move up")
                                 enabled: query.index > 0
                                 onTriggered: Session.moveSavedQueryUp(query.id)
                             }
                             AppMenuSeparator { }
                             AppMenuItem {
+                                iconName: "trash"
                                 text: qsTr("Delete")
                                 danger: true
                                 onTriggered: {
@@ -317,6 +339,8 @@ Popup {
                 required property string modelData
                 width: ListView.view.width
                 height: 32
+                leftPadding: 10
+                rightPadding: 10
                 Accessible.name: item.modelData
                 onClicked: { Session.searchText = item.modelData; Session.search(); root.close() }
                 background: Rectangle { radius: Theme.radiusMd; color: item.hovered ? Theme.subtle : "transparent" }
@@ -330,6 +354,17 @@ Popup {
                         font.family: Theme.mono
                         font.pixelSize: Theme.fontSm
                         color: Theme.text
+                    }
+                    // Where it was run.
+                    Text {
+                        readonly property string source: Session.historySource(item.modelData)
+                        visible: source !== ""
+                        Layout.maximumWidth: 160
+                        text: source
+                        elide: Text.ElideRight
+                        font.family: Theme.mono
+                        font.pixelSize: Theme.fontXs
+                        color: Theme.textMuted
                     }
                 }
             }
@@ -348,9 +383,14 @@ Popup {
         // Footer
         Rectangle {
             Layout.fillWidth: true
+            // Inside the popup's border, rounded only at the popup's own corners.
+            Layout.leftMargin: 1
+            Layout.rightMargin: 1
+            Layout.bottomMargin: 1
             implicitHeight: 38
             color: Theme.bg
-            radius: Theme.radiusLg + 2
+            bottomLeftRadius: Theme.radiusLg + 1
+            bottomRightRadius: Theme.radiusLg + 1
             Rectangle { anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top; height: 1; color: Theme.border }
             RowLayout {
                 anchors.fill: parent

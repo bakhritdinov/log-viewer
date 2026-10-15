@@ -395,6 +395,14 @@ private slots:
         QCOMPARE(h.session->savedQueryIdByName(" b "), b);
         QCOMPARE(h.session->savedQueryIdByName("C"), QString());
 
+        // The suggested name is never one already taken (saving would overwrite it).
+        h.session->setSearchText("first");
+        const QString suggested = h.session->suggestedQueryName();
+        h.session->saveCurrentQuery(suggested);
+        QVERIFY(h.session->suggestedQueryName() != suggested);
+        QVERIFY(h.session->suggestedQueryName().endsWith(" (2)"));
+        h.session->removeSavedQuery(h.session->savedQueryIdByName(suggested));
+
         h.session->moveSavedQueryUp(b);                       // B is now number 1
         QCOMPARE(idAt(0), b);
         h.session->moveSavedQueryUp(b);                       // already first: no-op

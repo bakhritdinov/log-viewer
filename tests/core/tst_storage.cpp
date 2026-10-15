@@ -127,9 +127,13 @@ private slots:
         h.add("");
         h.add("*");
         QCOMPARE(h.items(), (QStringList{ "a", "b" }));
-        for (int i = 0; i < 20; ++i) h.add(QString::number(i));
+        h.add("timeout", "billing-api");
+        QCOMPARE(h.source("timeout"), "billing-api");
+        QCOMPARE(h.source("a"), QString());
+        for (int i = 0; i < 60; ++i) h.add(QString::number(i));
         QCOMPARE(h.items().size(), SearchHistory::kCapacity);
-        QCOMPARE(h.items().first(), "19");
+        QCOMPARE(h.items().first(), "59");
+        QCOMPARE(h.source("timeout"), QString());   // dropped with the entry
         h.clear();
         QVERIFY(h.items().isEmpty());
     }
