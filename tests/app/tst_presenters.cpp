@@ -109,6 +109,19 @@ private slots:
         QCOMPARE(utcOffsetLabel(-(3 * 3600 + 30 * 60)), QString("UTC−3:30"));
     }
 
+    void jsonIsColoured()
+    {
+        const QString out = jsonStyled("{\n    \"a<b\": \"x & y\",\n    \"n\": -1.5e3,\n    \"ok\": true\n}", "K", "S", "N");
+        QVERIFY(out.contains("<font color=\"K\">&quot;a&lt;b&quot;</font>"));               // key, escaped
+        QVERIFY(out.contains("<font color=\"S\">&quot;x&nbsp;&amp;&nbsp;y&quot;</font>"));   // string value
+        QVERIFY(out.contains("<font color=\"N\">-1.5e3</font>"));
+        QVERIFY(out.contains("<font color=\"N\">true</font>"));
+        QVERIFY(out.contains("<br>&nbsp;&nbsp;&nbsp;&nbsp;"));                         // indentation kept
+        QVERIFY(!out.contains('\n'));
+        // An escaped quote does not end the string.
+        QVERIFY(jsonStyled("\"a\\\"b\"", "K", "S", "N").contains("<font color=\"S\">&quot;a\\&quot;b&quot;</font>"));
+    }
+
     void calendarBounds()
     {
         const QDate day(2026, 10, 3);

@@ -58,13 +58,17 @@ Popup {
             visible: !Session.timeRangeAbsolute
             SectionLabel { text: qsTr("Period in the link") }
             AppRadioButton {
-                    checked: root.fixedRange
+                // Long labels wrap inside the popup instead of widening it.
+                Layout.fillWidth: true
+                Layout.preferredWidth: 0
+                checked: root.fixedRange
                 onToggled: root.fixedRange = true
                 text: qsTr("Freeze %1 – %2 — a colleague sees exactly the same")
                       .arg(Session.absoluteFromText).arg(Session.absoluteToText)
             }
             AppRadioButton {
                 Layout.fillWidth: true
+                Layout.preferredWidth: 0
                 checked: !root.fixedRange
                 onToggled: root.fixedRange = false
                 text: qsTr("Relative: “%1” at the moment of opening").arg(Session.timeRangeLabel)
@@ -73,6 +77,7 @@ Popup {
 
         AppCheckBox {
             Layout.fillWidth: true
+            Layout.preferredWidth: 0
             visible: root.hasSelection
             checked: root.includeSelection
             onToggled: root.includeSelection = checked

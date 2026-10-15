@@ -51,8 +51,12 @@ Rectangle {
                     activeLevel: Session.activeLevel
                     onToggled: level => Session.applyLevelFilter(level)
                 }
+                // Only a time bucket or a pattern needs a chip; a level shows on the
+                // legend and is turned off there (or by double-clicking the chart).
                 FilterChip {
-                    visible: Session.histogramFilterActive
+                    visible: Session.histogramRangeOrPatternFilter
+                    pill: false
+                    implicitHeight: legend.implicitHeight
                     text: Session.histogramFilterLabel
                     onRemoveRequested: Session.clearHistogramFilter()
                 }
@@ -82,6 +86,7 @@ Rectangle {
             model: Session.histogram
             maxTotal: Session.histogramMax
             onBucketClicked: (index, level) => Session.applyBucketFilter(index, level)
+            onResetRequested: Session.clearHistogramFilter()
         }
         RowLayout {
             Layout.fillWidth: true

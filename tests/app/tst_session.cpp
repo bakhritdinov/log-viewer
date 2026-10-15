@@ -511,6 +511,30 @@ private slots:
         QCOMPARE(important, 2);
     }
 
+    // Feedback: the level filter needs no chip — picking the active level again
+    // turns it off, picking another level switches.
+    void pickingTheActiveLevelAgainClearsIt()
+    {
+        Harness h;
+        h.scriptStartup(mixedLogs());
+        h.session->start();
+        QVERIFY(h.waitIdle(3));
+        h.session->applyLevelFilter("ERROR");
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->logs()->rowCount(), 2);
+        QVERIFY(!h.session->histogramRangeOrPatternFilter());
+        h.session->applyLevelFilter("WARN");
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->activeLevel(), "WARN");
+        h.session->applyLevelFilter("WARN");
+        QVERIFY(h.settle());
+        QVERIFY(!h.session->histogramFilterActive());
+        QCOMPARE(h.session->logs()->rowCount(), 4);
+        h.session->applyBucketFilter(0);
+        QVERIFY(h.settle());
+        QVERIFY(h.session->histogramRangeOrPatternFilter());
+    }
+
     void modelsHonourTheModelContract()
     {
         Harness h;

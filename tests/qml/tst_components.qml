@@ -267,6 +267,18 @@ Item {
             verify(Icons.paths.settings !== Icons.paths.sun)
             verify(Icons.paths.settings.indexOf("M19.4 15") > 0)
         }
+        // Double click anywhere on the chart, an empty bucket included, asks to reset.
+        function test_histogramDoubleClickResets() {
+            const h = createTemporaryObject(histogram, host, { model: createTemporaryObject(sparseModel, host), maxTotal: 2 })
+            spy.target = h; spy.signalName = "resetRequested"
+            waitForRendering(h)
+            mouseDoubleClickSequence(h, h.width * 0.75, h.height / 2)   // an empty bucket
+            compare(spy.count, 1)
+            wait(Qt.styleHints.mouseDoubleClickInterval + 50)
+            mouseDoubleClickSequence(h, h.width * 0.25, h.height - 2)    // a bar
+            compare(spy.count, 2)
+        }
+
         // A bucket without WARN/ERROR is not a target: no hover, tooltip or click.
         function test_histogramIgnoresEmptyBuckets() {
             const h = createTemporaryObject(histogram, host, { model: createTemporaryObject(sparseModel, host), maxTotal: 2 })

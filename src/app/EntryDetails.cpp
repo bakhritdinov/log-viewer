@@ -31,16 +31,19 @@ EntryDetails EntryDetails::from(const LogEntry& e)
     }
     if (!d.isJson) d.prettyMessage = e.message;
 
-    // The entry as it came from Grafana, as in 2.8: { timestamp, message, fields }.
-    // A JSON message is embedded as data, not as an escaped string.
-    QJsonObject raw;
-    raw.insert(QStringLiteral("timestamp"), e.timestamp.toUTC().toString(Qt::ISODateWithMs));
-    if (d.isJson)
-        raw.insert(QStringLiteral("message"), messageDoc.isObject() ? QJsonValue(messageDoc.object()) : QJsonValue(messageDoc.array()));
-    else
-        raw.insert(QStringLiteral("message"), e.message);
-    raw.insert(QStringLiteral("fields"), QJsonObject::fromVariantMap(e.fields));
-    d.rawJson = QString::fromUtf8(QJsonDocument(raw).toJson(QJsonDocument::Indented)).trimmed();
+    // The entry as it came from Grafana, as in 2.8: { timestamp, message, fields }
+    // in that order. A JSON message is embedded as data, not as an escaped string.
+    const auto nested = [](const QJsonDocument& doc) {
+        return QString::fromUtf8(doc.toJson(QJsonDocument::Indented)).trimmed().replace(u'\n', QStringLiteral("\n    "));
+    };
+    const auto quoted = [](const QString& text) {
+        const QString array = QString::fromUtf8(QJsonDocument(QJsonArray{ text }).toJson(QJsonDocument::Compact));
+        return array.mid(1, array.size() - 2);
+    };
+    d.rawJson = QStringLiteral("{\n    \"timestamp\": %1,\n    \"message\": %2,\n    \"fields\": %3\n}")
+                    .arg(quoted(e.timestamp.toUTC().toString(Qt::ISODateWithMs)),
+                         d.isJson ? nested(messageDoc) : quoted(e.message),
+                         nested(QJsonDocument(QJsonObject::fromVariantMap(e.fields))));
 
     for (auto it = e.fields.cbegin(); it != e.fields.cend(); ++it) {   // key-sorted
         if (it.key() == u"Line" || it.key() == u"message") continue;

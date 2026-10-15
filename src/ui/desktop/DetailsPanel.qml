@@ -23,6 +23,8 @@ Rectangle {
     signal traceRequested()
     signal resizeRequested(real width)
 
+    function styled(json) { return Session.jsonStyled(json, Theme.jsonKey, Theme.jsonString, Theme.jsonNumber) }
+
     implicitWidth: 420
     color: Theme.surface
     Accessible.role: Accessible.Pane
@@ -158,6 +160,7 @@ Rectangle {
                 id: message
                 width: root.width - 28
                 text: root.prettyJson && root.entry.isJson ? root.entry.prettyMessage : root.entry.message
+                richText: root.prettyJson && root.entry.isJson ? root.styled(root.entry.prettyMessage) : ""
             }
         }
         // The whole entry as Grafana sent it, ready to copy and share.
@@ -171,6 +174,7 @@ Rectangle {
             MessageView {
                 width: root.width - 28
                 text: root.entry.rawJson
+                richText: root.styled(root.entry.rawJson)
             }
         }
 

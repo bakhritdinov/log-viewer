@@ -280,6 +280,26 @@ TestCase {
         verify(H.find(window.contentItem, it => String(it.text).indexOf("key:~regex · AND") >= 0 && H.isShown(it)) === null)
     }
 
+    // Feedback: a level filter shows on the legend only (no chip with a cross);
+    // a time-bucket chip is as tall as the level buttons.
+    function test_27_levelFilterHasNoChip() {
+        const panel = byName(window.contentItem, "Распределение по времени")
+        const chipOf = () => H.find(panel, it => it.hasOwnProperty("pill") && H.isShown(it))
+        Session.applyLevelFilter("ERROR")
+        tryCompare(Session, "analyzing", false)
+        verify(Session.histogramFilterActive)
+        compare(chipOf(), null)
+        Session.applyLevelFilter("ERROR")                 // again: off
+        tryCompare(Session, "analyzing", false)
+        verify(!Session.histogramFilterActive)
+        Session.applyBucketFilter(0, "")
+        tryCompare(Session, "analyzing", false)
+        tryVerify(() => chipOf() !== null)
+        const button = H.find(window.contentItem, it => it.hasOwnProperty("count") && it.hasOwnProperty("active") && H.isShown(it))
+        compare(chipOf().height, button.height)
+        Session.clearHistogramFilter()
+    }
+
     // Feedback: the distribution label is centred on the level buttons.
     function test_24_distributionHeaderAligned() {
         const label = H.find(window.contentItem, it => it.text === "Распределение" && H.isShown(it))
@@ -298,6 +318,16 @@ TestCase {
         const copy = H.find(field().parent, it => it.text === "Копировать" && it.hasOwnProperty("variant"))
         compare(copy.height, field().height)
         compare(copy.mapToItem(root(), 0, 0).y, field().mapToItem(root(), 0, 0).y)
+        // Nothing sticks out of the popup (long labels wrap).
+        // The popup's own item: the ancestor sitting directly in the overlay.
+        let popup = field()
+        while (popup.parent && String(popup.parent).indexOf("QQuickOverlay") !== 0) popup = popup.parent
+        verify(popup.width >= 400 && popup.width < 700, popup.width)
+        const box = popup.mapToItem(root(), 0, 0)
+        for (const it of H.findAll(popup, it => H.isShown(it) && it.width > 0 && it.text !== undefined)) {
+            const p = it.mapToItem(root(), 0, 0)
+            verify(p.x + it.width <= box.x + popup.width + 0.5, `"${it.text}" ends at ${p.x + it.width} > ${box.x + popup.width}`)
+        }
         const heading = H.find(root(), it => it.text === "Период в ссылке" && H.isShown(it))
         const radio = H.find(root(), it => it.indicator !== undefined && String(it.text).indexOf("Зафиксировать") === 0 && H.isShown(it))
         compare(globalX(radio.indicator), globalX(heading))
@@ -315,7 +345,9 @@ TestCase {
         mouseClick(raw)
         tryVerify(() => H.find(panel(), it => String(it.text).indexOf("\"timestamp\"") >= 0 && H.isShown(it)) !== null)
         verify(H.find(panel(), it => it.text === "Копировать JSON" && H.isShown(it)))
-        const json = H.find(panel(), it => String(it.text).indexOf("\"fields\"") >= 0 && H.isShown(it)).text
+        // Coloured like the rest of the app's JSON (keys in their colour).
+        verify(H.find(panel(), it => it.textFormat === TextEdit.RichText && String(it.text).indexOf(String(Theme.jsonKey)) >= 0 && H.isShown(it)))
+        const json = H.find(panel(), it => it.hasOwnProperty("richText") && it.text.indexOf("\"fields\"") >= 0 && H.isShown(it)).text
         verify(JSON.parse(json).message.indexOf("payment") === 0)
         mouseClick(H.find(panel(), it => it.Accessible.name === "Поля" && it.hasOwnProperty("current")))
 

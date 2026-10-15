@@ -8,6 +8,7 @@ Control {
     required property string text
     property bool exclude: false
     property bool touch: false
+    property bool pill: true                // false: rounded corners like the buttons next to it
 
     signal removeRequested()
 
@@ -22,7 +23,7 @@ Control {
     readonly property color _fg: exclude ? Theme.dangerText : Theme.accentText
 
     background: Rectangle {
-        radius: height / 2
+        radius: control.pill ? height / 2 : Theme.radiusMd
         color: control.exclude ? Theme.dangerSoft : Theme.accentSoft
         border.width: 1
         border.color: control.exclude ? Theme.dangerBorder : Theme.accentBorder

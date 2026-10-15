@@ -578,6 +578,13 @@ void Session::applyBucketFilter(int bucketIndex, const QString& level)
 
 void Session::applyLevelFilter(const QString& level)
 {
+    // Picking the active level again turns the filter off (no extra chip needed).
+    const LogStore::Filter& current = m_store.filter();
+    if (!m_levelServerSide && current.toMs == 0 && current.messageTemplate.isEmpty()
+        && current.level != Level::Unknown && current.level == levelFromName(level)) {
+        clearHistogramFilter();
+        return;
+    }
     m_activeLevel = levelFromName(level);
     m_levelServerSide = false;
     applyStoreFilter({ 0, 0, m_activeLevel }, level);
@@ -774,6 +781,12 @@ void Session::setPatternSort(const QString& order)
     markPatternsStale();
     refreshPatterns();
     emit patternsChanged();
+}
+
+QString Session::jsonStyled(const QString& json, const QString& keyColor, const QString& stringColor,
+                            const QString& numberColor) const
+{
+    return presenters::jsonStyled(json, keyColor, stringColor, numberColor);
 }
 
 QString Session::highlight(const QString& text, const QStringList& terms, const QString& color) const

@@ -81,6 +81,8 @@ class Session : public QObject {
     Q_PROPERTY(QStringList histogramAxis READ histogramAxis NOTIFY histogramChanged)   // 5 labels
     Q_PROPERTY(QVariantMap levelTotals READ levelTotals NOTIFY histogramChanged)
     Q_PROPERTY(bool histogramFilterActive READ histogramFilterActive NOTIFY histogramFilterChanged)
+    // A time bucket or a pattern narrows the list (a level alone shows on the legend).
+    Q_PROPERTY(bool histogramRangeOrPatternFilter READ histogramRangeOrPatternFilter NOTIFY histogramFilterChanged)
     Q_PROPERTY(QString histogramFilterLabel READ histogramFilterLabel NOTIFY histogramFilterChanged)
     Q_PROPERTY(QString activeLevel READ activeLevel NOTIFY histogramFilterChanged)
     Q_PROPERTY(bool levelServerSide READ levelServerSide NOTIFY histogramFilterChanged)
@@ -171,6 +173,9 @@ public:
     // `text` as StyledText with `terms` (usually searchTerms) emphasised in
     // `color`. Terms are a parameter so QML bindings track them.
     Q_INVOKABLE QString highlight(const QString& text, const QStringList& terms, const QString& color) const;
+    // Indented JSON as coloured rich text (see presenters::jsonStyled).
+    Q_INVOKABLE QString jsonStyled(const QString& json, const QString& keyColor, const QString& stringColor,
+                                   const QString& numberColor) const;
 
     // Selection
     Q_INVOKABLE void selectRow(int row);
@@ -244,6 +249,7 @@ public:
     QString timeZoneLabel() const;
     QVariantMap levelTotals() const { return m_levelTotals; }
     bool histogramFilterActive() const { return m_store.filter().isActive(); }
+    bool histogramRangeOrPatternFilter() const { return m_store.filter().toMs > 0 || !m_store.filter().messageTemplate.isEmpty(); }
     QString histogramFilterLabel() const { return m_histogramFilterLabel; }
     QString activeLevel() const { return levelName(m_activeLevel); }
     bool levelServerSide() const { return m_levelServerSide; }

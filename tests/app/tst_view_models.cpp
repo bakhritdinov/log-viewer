@@ -153,6 +153,9 @@ private slots:
         QCOMPARE(raw.value("message").toObject().value("msg").toString(), "payment failed");
         QCOMPARE(raw.value("fields").toObject().value("trace_id").toString(), "4f1c");
         QCOMPARE(raw.value("fields").toObject().value("Line").toString(), "dup");   // nothing dropped
+        // In 2.8's order: timestamp, message, fields.
+        QVERIFY(d.rawJson.indexOf("\"timestamp\"") < d.rawJson.indexOf("\"message\""));
+        QVERIFY(d.rawJson.indexOf("\"message\"") < d.rawJson.indexOf("\"fields\""));
 
         e.message = "{not json";
         const EntryDetails plain = EntryDetails::from(e);

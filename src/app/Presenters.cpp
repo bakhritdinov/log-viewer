@@ -252,6 +252,50 @@ QString boundOnDay(const QString& boundText, const QDate& day, bool endOfPeriod)
     return QDateTime(day, time).toString(QStringLiteral("yyyy-MM-dd HH:mm"));
 }
 
+// ── JSON colouring ──────────────────────────────────────────────────────────
+
+QString jsonStyled(const QString& json, const QString& keyColor, const QString& stringColor, const QString& numberColor)
+{
+    const auto colored = [](const QString& color, const QString& text) {
+        return QStringLiteral("<font color=\"%1\">%2</font>").arg(color, text.toHtmlEscaped().replace(u' ', QStringLiteral("&nbsp;")));
+    };
+    QString out;
+    const qsizetype n = json.size();
+    for (qsizetype i = 0; i < n;) {
+        const QChar c = json.at(i);
+        if (c == u'"') {
+            qsizetype j = i + 1;
+            while (j < n && json.at(j) != u'"') j += json.at(j) == u'\\' ? 2 : 1;
+            j = std::min(j + 1, n);
+            qsizetype k = j;
+            while (k < n && json.at(k) == u' ') ++k;
+            const bool isKey = k < n && json.at(k) == u':';
+            out += colored(isKey ? keyColor : stringColor, json.mid(i, j - i));
+            i = j;
+        } else if (c == u'-' || c.isDigit()) {
+            qsizetype j = i + 1;
+            while (j < n && (json.at(j).isDigit() || QStringView(u".eE+-").contains(json.at(j)))) ++j;
+            out += colored(numberColor, json.mid(i, j - i));
+            i = j;
+        } else if (c.isLetter()) {
+            qsizetype j = i;
+            while (j < n && json.at(j).isLetter()) ++j;
+            out += colored(numberColor, json.mid(i, j - i));   // true, false, null
+            i = j;
+        } else if (c == u'\n') {
+            out += QStringLiteral("<br>");
+            ++i;
+        } else if (c == u' ') {
+            out += QStringLiteral("&nbsp;");
+            ++i;
+        } else {
+            out += QString(c).toHtmlEscaped();
+            ++i;
+        }
+    }
+    return out;
+}
+
 // ── Highlighting ────────────────────────────────────────────────────────────
 
 QString highlightStyled(const QString& text, const QStringList& terms, const QString& color)

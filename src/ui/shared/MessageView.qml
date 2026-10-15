@@ -5,6 +5,8 @@ Rectangle {
     id: root
 
     property string text
+    // Coloured rich text (e.g. Session.jsonStyled); when set it is shown instead of `text`.
+    property string richText
     property bool touch: false
 
     implicitHeight: edit.implicitHeight + 24
@@ -17,12 +19,12 @@ Rectangle {
         id: edit
         anchors.fill: parent
         anchors.margins: 12
-        text: root.text
+        text: root.richText !== "" ? root.richText : root.text
         readOnly: true
         selectByMouse: true
         persistentSelection: true
         wrapMode: TextEdit.WrapAnywhere
-        textFormat: TextEdit.PlainText
+        textFormat: root.richText !== "" ? TextEdit.RichText : TextEdit.PlainText
         font.family: Theme.mono
         font.pixelSize: root.touch ? Theme.fontMd : Theme.fontSm
         color: Theme.text

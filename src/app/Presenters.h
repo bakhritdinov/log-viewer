@@ -84,6 +84,12 @@ QDate boundDate(const QString& boundText, const QDate& fallback);
 // 23:59 for the end of a period.
 QString boundOnDay(const QString& boundText, const QDate& day, bool endOfPeriod);
 
+// ── JSON colouring ──
+// `json` (any indented JSON text) as rich text for a read-only TextEdit: keys,
+// strings and numbers/true/false/null in their colours; indentation and line
+// breaks kept; everything HTML-escaped.
+QString jsonStyled(const QString& json, const QString& keyColor, const QString& stringColor, const QString& numberColor);
+
 // ── Highlighting ──
 // `text` as Qt StyledText with every case-insensitive occurrence of `terms`
 // wrapped in bold `color`; everything else HTML-escaped.
