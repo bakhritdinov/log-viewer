@@ -348,6 +348,10 @@ Item {
             verify(!copy().visible)
             mouseMove(row, 20, row.height / 2)
             tryVerify(() => copy().visible)
+            // The actions cover the value, not the other way round.
+            let cover = copy()
+            while (cover.parent !== row && cover.parent) cover = cover.parent
+            verify(cover.z > row.contentItem.z, "actions above the value")
             mouseMove(copy(), copy().width / 2, copy().height / 2)
             wait(50)
             verify(copy().visible)

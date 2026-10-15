@@ -99,6 +99,12 @@ Control {
     // Desktop: the actions over the value's right end, on the row's colour
     // with a short fade so the text under them does not look cut.
     Item {
+        id: overlay
+        // An opaque cover over the value (contentItem is stacked above the
+        // row's other children otherwise); keyboard focus without hover uses
+        // the panel's colour.
+        readonly property color cover: rowHover.hovered ? Theme.subtle : Theme.surface
+        z: 2
         visible: !root.touch && root.actionsShown
         anchors.right: parent.right
         anchors.rightMargin: root.rightPadding
@@ -113,7 +119,7 @@ Control {
             gradient: Gradient {
                 orientation: Gradient.Horizontal
                 GradientStop { position: 0; color: "transparent" }
-                GradientStop { position: 1; color: rowBackground.color }
+                GradientStop { position: 1; color: overlay.cover }
             }
         }
         Rectangle {
@@ -121,7 +127,7 @@ Control {
             width: desktopActions.implicitWidth
             height: parent.height
             radius: Theme.radiusMd
-            color: rowBackground.color
+            color: overlay.cover
         }
         Loader {
             id: desktopActions
