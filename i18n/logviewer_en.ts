@@ -33,6 +33,23 @@
     </message>
 </context>
 <context>
+    <name>AboutScreen</name>
+    <message numerus="yes">
+        <source>%n saved</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n recent queries</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>DetailsScreen</name>
     <message numerus="yes">
         <source>Message · %n line(s)</source>
@@ -243,6 +260,16 @@
         <translation type="unfinished">
             <numerusform>%n value</numerusform>
             <numerusform>%n values</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>SettingsPage</name>
+    <message numerus="yes">
+        <source>%1 · %n line(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
 </context>

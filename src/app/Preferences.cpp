@@ -32,7 +32,16 @@ int oneOf(int v, const QList<int>& allowed, int fallback)
     return allowed.contains(v) ? v : fallback;
 }
 
+Preferences::Defaults& currentDefaults()
+{
+    static Preferences::Defaults defaults;
+    return defaults;
+}
+
 } // namespace
+
+void Preferences::setDefaults(const Defaults& defaults) { currentDefaults() = defaults; }
+const Preferences::Defaults& Preferences::defaults() { return currentDefaults(); }
 
 Preferences::Preferences(KeyValueStore& store, QObject* parent) : QObject(parent), m_store(store) {}
 
@@ -66,10 +75,10 @@ int Preferences::rowHeight() const
     return d == u"compact" ? 22 : d == u"comfortable" ? 34 : 28;
 }
 
-int Preferences::logFontSize() const { return std::clamp(value("logFontSize", 12).toInt(), 11, 15); }
+int Preferences::logFontSize() const { return std::clamp(value("logFontSize", defaults().logFontSize).toInt(), 11, 15); }
 void Preferences::setLogFontSize(int v) { set("logFontSize", std::clamp(v, 11, 15)); }
 
-int Preferences::messageLines() const { return std::clamp(value("messageLines", 1).toInt(), 1, 3); }
+int Preferences::messageLines() const { return std::clamp(value("messageLines", defaults().messageLines).toInt(), 1, 3); }
 void Preferences::setMessageLines(int v) { set("messageLines", std::clamp(v, 1, 3)); }
 
 bool Preferences::tintRows() const { return value("tintRows", false).toBool(); }
@@ -117,17 +126,17 @@ void Preferences::removeColumn(const QString& field)
 
 // ── behaviour ───────────────────────────────────────────────────────────────
 
-int Preferences::loadStep() const { return oneOf(value("loadStep", kDefaultLoadStep).toInt(), kLoadSteps, kDefaultLoadStep); }
-void Preferences::setLoadStep(int v) { set("loadStep", oneOf(v, kLoadSteps, kDefaultLoadStep)); }
+int Preferences::loadStep() const { return oneOf(value("loadStep", defaults().loadStep).toInt(), kLoadSteps, defaults().loadStep); }
+void Preferences::setLoadStep(int v) { set("loadStep", oneOf(v, kLoadSteps, defaults().loadStep)); }
 
 QString Preferences::defaultRange() const { return value("defaultRange", "last").toString(); }
 void Preferences::setDefaultRange(const QString& v) { set("defaultRange", v.isEmpty() ? QStringLiteral("last") : v); }
 
-int Preferences::liveIntervalMs() const { return oneOf(value("liveIntervalMs", 2000).toInt(), kLiveIntervals, 2000); }
-void Preferences::setLiveIntervalMs(int v) { set("liveIntervalMs", oneOf(v, kLiveIntervals, 2000)); }
+int Preferences::liveIntervalMs() const { return oneOf(value("liveIntervalMs", defaults().liveIntervalMs).toInt(), kLiveIntervals, defaults().liveIntervalMs); }
+void Preferences::setLiveIntervalMs(int v) { set("liveIntervalMs", oneOf(v, kLiveIntervals, defaults().liveIntervalMs)); }
 
-int Preferences::liveBuffer() const { return oneOf(value("liveBuffer", 10000).toInt(), kLiveBuffers, 10000); }
-void Preferences::setLiveBuffer(int v) { set("liveBuffer", oneOf(v, kLiveBuffers, 10000)); }
+int Preferences::liveBuffer() const { return oneOf(value("liveBuffer", defaults().liveBuffer).toInt(), kLiveBuffers, defaults().liveBuffer); }
+void Preferences::setLiveBuffer(int v) { set("liveBuffer", oneOf(v, kLiveBuffers, defaults().liveBuffer)); }
 
 // ── formatting ──────────────────────────────────────────────────────────────
 

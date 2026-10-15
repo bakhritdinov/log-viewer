@@ -9,6 +9,7 @@
 
 #include "app/AppServices.h"
 #include "app/Language.h"
+#include "app/Preferences.h"
 #include "app/Session.h"
 #include "app/UpdateService.h"
 #include "core/data/QtHttpClient.h"
@@ -31,6 +32,9 @@ int main(int argc, char* argv[])
     app.setApplicationVersion(QStringLiteral(APP_VERSION));
     app.setWindowIcon(QIcon(QStringLiteral(":/logviewer/icon.png")));
 
+#ifdef LOGVIEWER_UI_PHONE
+    lv::Preferences::setDefaults(lv::Preferences::Defaults::phone());
+#endif
     lv::QSettingsStore settings;
     // Stage 8 replaces this with the OS keychain (QtKeychain).
     lv::SettingsSecretStore secrets(settings);

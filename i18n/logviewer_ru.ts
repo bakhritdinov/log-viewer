@@ -164,6 +164,73 @@
     </message>
 </context>
 <context>
+    <name>AboutScreen</name>
+    <message>
+        <source>About</source>
+        <translation>О приложении</translation>
+    </message>
+    <message>
+        <source>Web app (PWA)</source>
+        <translation>Веб-приложение (PWA)</translation>
+    </message>
+    <message>
+        <source>Phone layout on the desktop</source>
+        <translation>Мобильный вид на компьютере</translation>
+    </message>
+    <message>
+        <source>Data on this phone</source>
+        <translation>Данные на телефоне</translation>
+    </message>
+    <message>
+        <source>Saved queries</source>
+        <translation>Сохранённые запросы</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n saved</source>
+        <translation>
+            <numerusform>%n сохранён</numerusform>
+            <numerusform>%n сохранено</numerusform>
+            <numerusform>%n сохранено</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Search history</source>
+        <translation>История поиска</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n recent queries</source>
+        <translation>
+            <numerusform>%n недавний запрос</numerusform>
+            <numerusform>%n недавних запроса</numerusform>
+            <numerusform>%n недавних запросов</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Clear the search history</source>
+        <translation>Очистить историю поиска</translation>
+    </message>
+    <message>
+        <source>Environments, saved queries and history stay on this phone; nothing is sent anywhere but your Grafana.</source>
+        <translation>Окружения, сохранённые запросы и история хранятся на телефоне; данные уходят только в вашу Grafana.</translation>
+    </message>
+    <message>
+        <source>Clear the search history?</source>
+        <translation>Очистить историю поиска?</translation>
+    </message>
+    <message>
+        <source>Recent queries are removed. Saved queries stay.</source>
+        <translation>Недавние запросы удалятся. Сохранённые останутся.</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Очистить</translation>
+    </message>
+    <message>
+        <source>Search history cleared</source>
+        <translation>История поиска очищена</translation>
+    </message>
+</context>
+<context>
     <name>AbsoluteRangeForm</name>
     <message>
         <source>From</source>
@@ -317,6 +384,97 @@
     </message>
 </context>
 <context>
+    <name>AppearanceScreen</name>
+    <message>
+        <source>Appearance</source>
+        <translation>Внешний вид</translation>
+    </message>
+    <message>
+        <source>Theme</source>
+        <translation>Тема</translation>
+    </message>
+    <message>
+        <source>Dark</source>
+        <translation>Тёмная</translation>
+    </message>
+    <message>
+        <source>Light</source>
+        <translation>Светлая</translation>
+    </message>
+    <message>
+        <source>As in the system</source>
+        <translation>Как в системе</translation>
+    </message>
+    <message>
+        <source>Feed</source>
+        <translation>Лента</translation>
+    </message>
+    <message>
+        <source>Density</source>
+        <translation>Плотность</translation>
+    </message>
+    <message>
+        <source>Compact fits more entries on the screen</source>
+        <translation>Компактно — больше записей на экране</translation>
+    </message>
+    <message>
+        <source>Compact</source>
+        <translation>Компактно</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Обычно</translation>
+    </message>
+    <message>
+        <source>Roomy</source>
+        <translation>Просторно</translation>
+    </message>
+    <message>
+        <source>Log text size</source>
+        <translation>Размер текста логов</translation>
+    </message>
+    <message>
+        <source>The feed and the message in the details</source>
+        <translation>Лента и сообщение в деталях</translation>
+    </message>
+    <message>
+        <source>Long messages</source>
+        <translation>Длинные сообщения</translation>
+    </message>
+    <message>
+        <source>Lines of a message in a card</source>
+        <translation>Строк сообщения в карточке</translation>
+    </message>
+    <message>
+        <source>1 line</source>
+        <translation>1 строка</translation>
+    </message>
+    <message>
+        <source>2 lines</source>
+        <translation>2 строки</translation>
+    </message>
+    <message>
+        <source>3 lines</source>
+        <translation>3 строки</translation>
+    </message>
+    <message>
+        <source>Tint ERROR and WARN</source>
+        <translation>Подсвечивать ERROR и WARN</translation>
+    </message>
+    <message>
+        <source>A coloured card background</source>
+        <translation>Цветной фон карточки</translation>
+    </message>
+    <message>
+        <source>Pretty JSON in the details</source>
+        <translation>Красивый JSON в деталях</translation>
+    </message>
+    <message>
+        <source>Indents and colours</source>
+        <translation>Отступы и цвета</translation>
+    </message>
+</context>
+<context>
     <name>BehaviourPage</name>
     <message>
         <source>The last one used</source>
@@ -429,6 +587,121 @@
     <message>
         <source>Theme, table and behaviour return to their defaults.</source>
         <translation>Тема, таблица и поведение вернутся к значениям по умолчанию.</translation>
+    </message>
+</context>
+<context>
+    <name>BehaviourScreen</name>
+    <message>
+        <source>The last one used</source>
+        <translation>Последний использованный</translation>
+    </message>
+    <message>
+        <source>Last 15 minutes</source>
+        <translation>Последние 15 минут</translation>
+    </message>
+    <message>
+        <source>Last 1 hour</source>
+        <translation>Последний 1 час</translation>
+    </message>
+    <message>
+        <source>Last 6 hours</source>
+        <translation>Последние 6 часов</translation>
+    </message>
+    <message>
+        <source>Last 24 hours</source>
+        <translation>Последние 24 часа</translation>
+    </message>
+    <message>
+        <source>Today</source>
+        <translation>Сегодня</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>Поведение</translation>
+    </message>
+    <message>
+        <source>Loading</source>
+        <translation>Загрузка</translation>
+    </message>
+    <message>
+        <source>Entries at a time</source>
+        <translation>Записей за раз</translation>
+    </message>
+    <message>
+        <source>A search and “Load more”</source>
+        <translation>Поиск и «Загрузить ещё»</translation>
+    </message>
+    <message>
+        <source>Period at start</source>
+        <translation>Период при запуске</translation>
+    </message>
+    <message>
+        <source>Period at start: %1</source>
+        <translation>Период при запуске: %1</translation>
+    </message>
+    <message>
+        <source>Live tail</source>
+        <translation>Live</translation>
+    </message>
+    <message>
+        <source>New lines every</source>
+        <translation>Новые строки каждые</translation>
+    </message>
+    <message>
+        <source>Less often means less traffic and battery</source>
+        <translation>Реже — меньше трафика и батареи</translation>
+    </message>
+    <message>
+        <source>Live tail interval</source>
+        <translation>Интервал live</translation>
+    </message>
+    <message>
+        <source>1 s</source>
+        <translation>1 с</translation>
+    </message>
+    <message>
+        <source>2 s</source>
+        <translation>2 с</translation>
+    </message>
+    <message>
+        <source>5 s</source>
+        <translation>5 с</translation>
+    </message>
+    <message>
+        <source>Lines kept</source>
+        <translation>Хранить строк</translation>
+    </message>
+    <message>
+        <source>The oldest leave the feed</source>
+        <translation>Старые уходят из ленты</translation>
+    </message>
+    <message>
+        <source>Live tail lines kept</source>
+        <translation>Строк в live</translation>
+    </message>
+    <message>
+        <source>Applies the next time live tail starts.</source>
+        <translation>Применяется при следующем запуске live.</translation>
+    </message>
+    <message>
+        <source>Back to the default settings</source>
+        <translation>Вернуть настройки по умолчанию</translation>
+    </message>
+    <message>
+        <source>Reset the settings?</source>
+        <translation>Сбросить настройки?</translation>
+    </message>
+    <message>
+        <source>Appearance, feed and behaviour return to their defaults. Environments, saved queries and history stay.</source>
+        <translation>Внешний вид, лента и поведение вернутся к значениям по умолчанию. Окружения, сохранённые запросы и история останутся.</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation>Сбросить</translation>
+    </message>
+    <message>
+        <source>Settings reset</source>
+        <translation>Настройки сброшены</translation>
     </message>
 </context>
 <context>
@@ -929,6 +1202,177 @@
     </message>
 </context>
 <context>
+    <name>EnvironmentScreen</name>
+    <message>
+        <source>Connected to %1</source>
+        <translation>Подключено к %1</translation>
+    </message>
+    <message>
+        <source>New environment</source>
+        <translation>Новое окружение</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Название</translation>
+    </message>
+    <message>
+        <source>Label colour</source>
+        <translation>Цвет метки</translation>
+    </message>
+    <message>
+        <source>Grafana URL</source>
+        <translation>URL Grafana</translation>
+    </message>
+    <message>
+        <source>Logs datasource UID</source>
+        <translation>UID источника логов</translation>
+    </message>
+    <message>
+        <source>Grafana → Connections → Data sources → the last part of the URL</source>
+        <translation>Grafana → Connections → Data sources → последняя часть URL</translation>
+    </message>
+    <message>
+        <source>Datasource UID</source>
+        <translation>UID источника</translation>
+    </message>
+    <message>
+        <source>Authorization</source>
+        <translation>Авторизация</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>Пароль</translation>
+    </message>
+    <message>
+        <source>Token</source>
+        <translation>Токен</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Без</translation>
+    </message>
+    <message>
+        <source>User</source>
+        <translation>Логин</translation>
+    </message>
+    <message>
+        <source>API token</source>
+        <translation>API-токен</translation>
+    </message>
+    <message>
+        <source>In the browser the password is kept in the site's storage on this phone.</source>
+        <translation>В браузере пароль хранится в памяти сайта на этом телефоне.</translation>
+    </message>
+    <message>
+        <source>The password is kept in the system keychain.</source>
+        <translation>Пароль хранится в системном хранилище ключей.</translation>
+    </message>
+    <message>
+        <source>The system keychain is unavailable: the password is kept in the settings of this device.</source>
+        <translation>Системное хранилище ключей недоступно: пароль хранится в настройках устройства.</translation>
+    </message>
+    <message>
+        <source>Own labels</source>
+        <translation>Свои метки</translation>
+    </message>
+    <message>
+        <source>Found automatically when off (_namespace / _appName and similar)</source>
+        <translation>Если выключено — находятся автоматически (_namespace / _appName и похожие)</translation>
+    </message>
+    <message>
+        <source>Namespace label</source>
+        <translation>Метка namespace</translation>
+    </message>
+    <message>
+        <source>App label</source>
+        <translation>Метка приложения</translation>
+    </message>
+    <message>
+        <source>The connection works</source>
+        <translation>Подключение работает</translation>
+    </message>
+    <message>
+        <source>Testing the connection…</source>
+        <translation>Проверяем подключение…</translation>
+    </message>
+    <message>
+        <source>Server responds · %1 ms</source>
+        <translation>Сервер отвечает · %1 мс</translation>
+    </message>
+    <message>
+        <source>Connecting to the server…</source>
+        <translation>Подключаемся к серверу…</translation>
+    </message>
+    <message>
+        <source>Login and datasource accepted</source>
+        <translation>Вход выполнен, источник найден</translation>
+    </message>
+    <message>
+        <source>Finding namespaces</source>
+        <translation>Находим namespace</translation>
+    </message>
+    <message>
+        <source>Delete the environment</source>
+        <translation>Удалить окружение</translation>
+    </message>
+    <message>
+        <source>This is the only environment</source>
+        <translation>Это единственное окружение</translation>
+    </message>
+    <message>
+        <source>Test and save</source>
+        <translation>Проверить и сохранить</translation>
+    </message>
+    <message>
+        <source>Cancel the test</source>
+        <translation>Отменить проверку</translation>
+    </message>
+    <message>
+        <source>Test again</source>
+        <translation>Проверить ещё раз</translation>
+    </message>
+    <message>
+        <source>Save without the test</source>
+        <translation>Сохранить без проверки</translation>
+    </message>
+    <message>
+        <source>Delete the environment %1?</source>
+        <translation>Удалить окружение %1?</translation>
+    </message>
+    <message>
+        <source>Its address and password are removed from the phone. Saved queries stay.</source>
+        <translation>Адрес и пароль удалятся с телефона. Сохранённые запросы останутся.</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Удалить</translation>
+    </message>
+    <message>
+        <source>Environment %1 deleted</source>
+        <translation>Окружение %1 удалено</translation>
+    </message>
+    <message>
+        <source>Save the new environment?</source>
+        <translation>Сохранить новое окружение?</translation>
+    </message>
+    <message>
+        <source>Save the changes to %1?</source>
+        <translation>Сохранить изменения в %1?</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Сохранить</translation>
+    </message>
+    <message>
+        <source>Keep editing</source>
+        <translation>Продолжить редактирование</translation>
+    </message>
+    <message>
+        <source>Don't save</source>
+        <translation>Не сохранять</translation>
+    </message>
+</context>
+<context>
     <name>EnvironmentSheet</name>
     <message>
         <source>Environment</source>
@@ -1145,6 +1589,65 @@
     </message>
 </context>
 <context>
+    <name>FeedScreen</name>
+    <message>
+        <source>Feed</source>
+        <translation>Лента</translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation>Время</translation>
+    </message>
+    <message>
+        <source>Time format</source>
+        <translation>Формат времени</translation>
+    </message>
+    <message>
+        <source>15 Oct 20:38</source>
+        <translation>15 окт 20:38</translation>
+    </message>
+    <message>
+        <source>Time in UTC</source>
+        <translation>Время в UTC</translation>
+    </message>
+    <message>
+        <source>The period is still picked in local time</source>
+        <translation>Период выбирается в местном времени</translation>
+    </message>
+    <message>
+        <source>In the card</source>
+        <translation>В карточке</translation>
+    </message>
+    <message>
+        <source>Level</source>
+        <translation>Уровень</translation>
+    </message>
+    <message>
+        <source>Service</source>
+        <translation>Сервис</translation>
+    </message>
+    <message>
+        <source>Fields in the card</source>
+        <translation>Поля в карточке</translation>
+    </message>
+    <message>
+        <source>Values of fields as a line under the message, e.g. trace_id. In the details, a long press on a field offers the same.</source>
+        <translation>Значения полей — строкой под сообщением, например trace_id. В деталях записи долгое нажатие на поле предлагает то же.</translation>
+    </message>
+    <message>
+        <source>Field name</source>
+        <translation>Имя поля</translation>
+    </message>
+    <message>
+        <source>Field for the card</source>
+        <translation>Поле для карточки</translation>
+    </message>
+    <message>
+        <source>Add the field</source>
+        <translation>Добавить поле</translation>
+    </message>
+</context>
+<context>
     <name>FieldRow</name>
     <message>
         <source>%1: %2</source>
@@ -1200,6 +1703,14 @@
     <message>
         <source>Copy as %1</source>
         <translation>Копировать как %1</translation>
+    </message>
+    <message>
+        <source>Remove from the card</source>
+        <translation>Убрать из карточки</translation>
+    </message>
+    <message>
+        <source>Show in the card</source>
+        <translation>Показывать в карточке</translation>
     </message>
 </context>
 <context>
@@ -3016,10 +3527,6 @@
         <translation>Язык · Til · Language</translation>
     </message>
     <message>
-        <source>Theme</source>
-        <translation>Тема</translation>
-    </message>
-    <message>
         <source>Dark</source>
         <translation>Тёмная</translation>
     </message>
@@ -3034,6 +3541,97 @@
     <message>
         <source>About</source>
         <translation>О приложении</translation>
+    </message>
+    <message>
+        <source>compact</source>
+        <translation>компактно</translation>
+    </message>
+    <message>
+        <source>roomy</source>
+        <translation>просторно</translation>
+    </message>
+    <message>
+        <source>normal</source>
+        <translation>обычно</translation>
+    </message>
+    <message>
+        <source>No connection</source>
+        <translation>Нет связи</translation>
+    </message>
+    <message>
+        <source>Set up</source>
+        <translation>Настроено</translation>
+    </message>
+    <message>
+        <source>Add an environment</source>
+        <translation>Добавить окружение</translation>
+    </message>
+    <message>
+        <source>Auto refresh</source>
+        <translation>Автообновление</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Выкл</translation>
+    </message>
+    <message>
+        <source>5 s</source>
+        <translation>5 с</translation>
+    </message>
+    <message>
+        <source>10 s</source>
+        <translation>10 с</translation>
+    </message>
+    <message>
+        <source>30 s</source>
+        <translation>30 с</translation>
+    </message>
+    <message>
+        <source>1 min</source>
+        <translation>1 мин</translation>
+    </message>
+    <message>
+        <source>A fixed period does not change: auto refresh is off.</source>
+        <translation>Фиксированный период не меняется: автообновление выключено.</translation>
+    </message>
+    <message>
+        <source>Repeats the search; the entries on screen stay until the new ones come.</source>
+        <translation>Повторяет поиск; записи на экране остаются, пока не придут новые.</translation>
+    </message>
+    <message>
+        <source>Look and behaviour</source>
+        <translation>Вид и поведение</translation>
+    </message>
+    <message>
+        <source>Appearance</source>
+        <translation>Внешний вид</translation>
+    </message>
+    <message>
+        <source>Feed</source>
+        <translation>Лента</translation>
+    </message>
+    <message numerus="yes">
+        <source>%1 · %n line(s)</source>
+        <translation>
+            <numerusform>%1 · %n строка</numerusform>
+            <numerusform>%1 · %n строки</numerusform>
+            <numerusform>%1 · %n строк</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>Поведение</translation>
+    </message>
+    <message>
+        <source>Version and data</source>
+        <translation>Версия и данные</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsScreen</name>
+    <message>
+        <source>Settings</source>
+        <translation>Настройки</translation>
     </message>
 </context>
 <context>

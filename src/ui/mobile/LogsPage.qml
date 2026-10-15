@@ -675,6 +675,9 @@ Item {
             lines: Math.max(2, Session.prefs.messageLines)
             fresh: !Session.loading && timeMs > root.previousTopMs
             onClicked: root.entryRequested(index)
+            required property var model
+            service: Session.prefs.showService ? model.service : ""
+            fields: { void Session.logs.totalCount; return Session.prefs.extraColumns.map(f => ({ key: f, value: Session.logs.fieldText(index, f) })).filter(f => f.value !== "") }
         }
         // The end of what is loaded: more from the server, or that's all.
         footer: Column {

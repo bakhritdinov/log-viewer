@@ -31,6 +31,13 @@ qt_add_qml_module(logviewer_ui_mobile
         PatternsList.qml
         PatternSortSheet.qml
         LiveView.qml
+        SettingsScreen.qml
+        SettingRow.qml
+        AppearanceScreen.qml
+        FeedScreen.qml
+        BehaviourScreen.qml
+        EnvironmentScreen.qml
+        AboutScreen.qml
     IMPORTS
         LogViewer.App
         LogViewer.Ui

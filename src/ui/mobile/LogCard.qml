@@ -4,8 +4,9 @@ import QtQuick.Layouts
 import LogViewer.App
 import LogViewer.Ui
 
-// One entry of the feed: level stripe, time, level, how long ago, and the
-// message (search words emphasised), a few lines.
+// One entry of the feed: level stripe, time, level, service, how long ago,
+// the message (search words emphasised, a few lines) and chosen fields under
+// it. Density, tint, level and service follow the preferences.
 AbstractButton {
     id: root
 
@@ -23,6 +24,11 @@ AbstractButton {
     // of several services, so it is always shown).
     property bool anchor: false
     property string service
+    // Fields shown under the message: [{ key, value }] (empty values left out).
+    property var fields: []
+    // Vertical padding from the density.
+    readonly property int pad: Session.prefs.density === "compact" ? 6 : Session.prefs.density === "comfortable" ? 14 : 10
+    readonly property bool tinted: Session.prefs.tintRows && (level === "ERROR" || level === "WARN")
 
     // "12 s", "4 min", "2 h", "3 d" since the entry.
     readonly property string ago: {
@@ -33,14 +39,15 @@ AbstractButton {
         return qsTr("%1 d").arg(Math.floor(s / 86400))
     }
 
-    implicitHeight: content.implicitHeight + 20
+    implicitHeight: content.implicitHeight + 2 * pad
     focusPolicy: Qt.NoFocus
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("%1 %2 %3").arg(timeText).arg(level).arg(message)
 
     background: Rectangle {
         radius: Theme.radiusLg
-        color: root.pressed ? Theme.subtle : root.fresh ? Theme.successSoft : root.anchor ? Theme.accentSoft : Theme.surface
+        color: root.pressed ? Theme.subtle : root.fresh ? Theme.successSoft : root.anchor ? Theme.accentSoft
+             : root.tinted ? Theme.levelSoft(root.level) : Theme.surface
         border.width: root.anchor ? 2 : 1
         border.color: root.anchor ? Theme.accent : root.fresh ? Theme.tint(Theme.success, 0.5) : Theme.borderMuted
         Behavior on color { ColorAnimation { duration: 400 } }
@@ -54,16 +61,17 @@ AbstractButton {
         Rectangle {
             Layout.fillHeight: true
             Layout.leftMargin: 10
-            Layout.topMargin: 10
-            Layout.bottomMargin: 10
+            Layout.topMargin: root.pad
+            Layout.bottomMargin: root.pad
             implicitWidth: 3
             radius: 2
             color: root.level !== "" ? Theme.levelColor(root.level) : Theme.border
         }
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.topMargin: 10
-            Layout.bottomMargin: 10
+            Layout.preferredWidth: 0
+            Layout.topMargin: root.pad
+            Layout.bottomMargin: root.pad
             Layout.rightMargin: 12
             spacing: 4
             RowLayout {
@@ -76,25 +84,24 @@ AbstractButton {
                     color: Theme.textMuted
                 }
                 Text {
-                    visible: root.level !== ""
+                    visible: root.level !== "" && Session.prefs.showLevel
                     text: root.level
                     font.family: Theme.sans
                     font.pixelSize: Theme.fontSm
                     font.weight: Font.DemiBold
                     color: Theme.levelTextColor(root.level)
                 }
-                Item { Layout.fillWidth: true }
                 Text {
+                    Layout.fillWidth: true
                     visible: root.service !== ""
-                    Layout.maximumWidth: root.width / 3
                     text: root.service
                     elide: Text.ElideRight
                     font.family: Theme.mono
                     font.pixelSize: Theme.fontSm
                     color: Theme.accentText
                 }
+                Item { Layout.fillWidth: true; visible: root.service === "" }
                 Text {
-                    visible: root.service === ""
                     text: root.ago
                     font.family: Theme.mono
                     font.pixelSize: Theme.fontSm
@@ -112,6 +119,18 @@ AbstractButton {
                 font.family: Theme.mono
                 font.pixelSize: Session.prefs.logFontSize
                 color: Theme.textStrong
+            }
+            Text {
+                Layout.fillWidth: true
+                visible: root.fields.length > 0
+                textFormat: Text.StyledText
+                text: root.fields.map(f => "<font color=\"%1\">%2</font> %3".arg(Theme.textMuted).arg(f.key)
+                                                .arg(f.value.replace(/&/g, "&amp;").replace(/</g, "&lt;"))).join("   ")
+                elide: Text.ElideRight
+                maximumLineCount: 1
+                font.family: Theme.mono
+                font.pixelSize: Theme.fontSm
+                color: Theme.text
             }
         }
     }

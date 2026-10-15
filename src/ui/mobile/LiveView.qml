@@ -225,6 +225,9 @@ Rectangle {
                     lines: Math.max(2, Session.prefs.messageLines)
                     fresh: timeMs > root.previousTopMs
                     onClicked: { root.pause("entry"); root.entryRequested(index) }
+                    required property var model
+                    service: Session.prefs.showService ? model.service : ""
+                    fields: { void root.live.bufferCount; return Session.prefs.extraColumns.map(f => ({ key: f, value: root.live.logs.fieldText(index, f) })).filter(f => f.value !== "") }
                 }
             }
 

@@ -54,13 +54,16 @@ ApplicationWindow {
                 onLiveEntryRequested: row => details.show(Session.live.logs, row)
                 onPatternSortRequested: patternSortSheet.open()
                 onSaveRequested: saveSheet.openSaving()
-                onAddEnvironmentRequested: name => { missingEnvironment = ""; window.section = 2 }
+                onAddEnvironmentRequested: name => { missingEnvironment = ""; window.section = 2; settingsPage.openEnvironment("", name) }
             }
             ChartPage {
                 onShowEntriesRequested: window.section = 0
                 onSettingsRequested: window.section = 2
             }
-            SettingsPage { }
+            SettingsPage {
+                id: settingsPage
+                onNotice: text => window.notify(text)
+            }
         }
 
         BottomNav {
@@ -71,6 +74,7 @@ ApplicationWindow {
             settingsAlert: Session.needsSetup || (Session.hasError && Session.error.kind === ErrorInfo.Unreachable)
             onPicked: index => {
                 if (index === window.section && index === 0) logsPage.scrollToTop()   // second tap: to the top
+                if (index === window.section && index === 2) settingsPage.popToRoot()
                 window.section = index
             }
         }

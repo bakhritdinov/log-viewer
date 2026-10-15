@@ -27,6 +27,15 @@ BottomSheet {
         text: qsTr("Exclude this value"); iconName: "minus"; tint: Theme.dangerText
         onClicked: { Session.toggleFilter(root.key, root.value, true); root.close(); root.filtered() }
     }
+    // A line under the message in every card (the desktop's column).
+    ActionRow {
+        readonly property bool shown: Session.prefs.extraColumns.indexOf(root.key) >= 0
+        text: shown ? qsTr("Remove from the card") : qsTr("Show in the card"); iconName: "column"
+        onClicked: {
+            if (shown) Session.prefs.removeColumn(root.key); else Session.prefs.addColumn(root.key)
+            root.close()
+        }
+    }
     ActionRow {
         text: qsTr("Copy the value"); iconName: "copy"
         onClicked: { clipboard.copy(root.value); root.close(); root.notice(qsTr("Copied"), "", null) }

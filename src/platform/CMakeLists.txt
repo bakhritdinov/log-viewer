@@ -15,6 +15,10 @@ target_link_libraries(logviewer-next PRIVATE
 target_compile_definitions(logviewer-next PRIVATE
     LOGVIEWER_UI_MODULE="${LOGVIEWER_UI_URI}"
     LOGVIEWER_UI_PLUGIN=${LOGVIEWER_UI_PLUGIN_CLASS})
+# The phone design starts with its own preference defaults (Preferences::Defaults).
+if(LOGVIEWER_UI_URI STREQUAL "LogViewer.Mobile")
+    target_compile_definitions(logviewer-next PRIVATE LOGVIEWER_UI_PHONE)
+endif()
 set_target_properties(logviewer-next PROPERTIES
     OUTPUT_NAME "LogViewerNext"
     MACOSX_BUNDLE_GUI_IDENTIFIER com.logviewer.LogViewerNext)

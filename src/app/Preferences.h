@@ -37,6 +37,21 @@ class Preferences : public QObject {
     Q_PROPERTY(int liveBuffer READ liveBuffer WRITE setLiveBuffer NOTIFY changed)
 
 public:
+    // Where the values start (and where reset() goes back to). The phone starts
+    // with larger text and two lines on its narrow screen, and loads less and
+    // polls live tail less often for memory and mobile traffic; the allowed
+    // values are the same everywhere.
+    struct Defaults {
+        int logFontSize = 12;
+        int messageLines = 1;
+        int loadStep = 5000;
+        int liveIntervalMs = 2000;
+        int liveBuffer = 10000;
+        static Defaults phone() { return { 14, 2, 1000, 5000, 5000 }; }
+    };
+    // Set once before the first Preferences is made (main, tests).
+    static void setDefaults(const Defaults& defaults);
+    static const Defaults& defaults();
     static constexpr int kDefaultLoadStep = 5000;
 
     explicit Preferences(KeyValueStore& store, QObject* parent = nullptr);

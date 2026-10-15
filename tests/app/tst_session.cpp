@@ -134,6 +134,25 @@ private slots:
         QCOMPARE(p.theme(), "light");                 // the older setting is still there
     }
 
+    void phoneDefaults()
+    {
+        Preferences::setDefaults(Preferences::Defaults::phone());
+        MemoryStore kv;
+        Preferences p(kv);
+        QCOMPARE(p.logFontSize(), 14);
+        QCOMPARE(p.messageLines(), 2);
+        QCOMPARE(p.loadStep(), 1000);
+        QCOMPARE(p.liveIntervalMs(), 5000);
+        QCOMPARE(p.liveBuffer(), 5000);
+        p.setLoadStep(777);                           // not a choice: back to the phone's default
+        QCOMPARE(p.loadStep(), 1000);
+        p.setLoadStep(20000);
+        p.reset();
+        QCOMPARE(p.loadStep(), 1000);                 // reset goes to the phone's values
+        Preferences::setDefaults({});
+        QCOMPARE(p.loadStep(), 5000);
+    }
+
     void preferencesReachTheSession()
     {
         Harness h;

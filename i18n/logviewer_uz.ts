@@ -160,6 +160,71 @@
     </message>
 </context>
 <context>
+    <name>AboutScreen</name>
+    <message>
+        <source>About</source>
+        <translation>Ilova haqida</translation>
+    </message>
+    <message>
+        <source>Web app (PWA)</source>
+        <translation>Veb-ilova (PWA)</translation>
+    </message>
+    <message>
+        <source>Phone layout on the desktop</source>
+        <translation>Kompyuterda mobil koʻrinish</translation>
+    </message>
+    <message>
+        <source>Data on this phone</source>
+        <translation>Telefondagi maʼlumotlar</translation>
+    </message>
+    <message>
+        <source>Saved queries</source>
+        <translation>Saqlangan soʻrovlar</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n saved</source>
+        <translation>
+            <numerusform>%n ta saqlangan</numerusform>
+            <numerusform />
+        </translation>
+    </message>
+    <message>
+        <source>Search history</source>
+        <translation>Qidiruv tarixi</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n recent queries</source>
+        <translation>
+            <numerusform>%n ta soʻnggi soʻrov</numerusform>
+            <numerusform />
+        </translation>
+    </message>
+    <message>
+        <source>Clear the search history</source>
+        <translation>Qidiruv tarixini tozalash</translation>
+    </message>
+    <message>
+        <source>Environments, saved queries and history stay on this phone; nothing is sent anywhere but your Grafana.</source>
+        <translation>Muhitlar, saqlangan soʻrovlar va tarix telefonda saqlanadi; maʼlumotlar faqat sizning Grafana’ga yuboriladi.</translation>
+    </message>
+    <message>
+        <source>Clear the search history?</source>
+        <translation>Qidiruv tarixini tozalaysizmi?</translation>
+    </message>
+    <message>
+        <source>Recent queries are removed. Saved queries stay.</source>
+        <translation>Soʻnggi soʻrovlar oʻchiriladi. Saqlanganlari qoladi.</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Tozalash</translation>
+    </message>
+    <message>
+        <source>Search history cleared</source>
+        <translation>Qidiruv tarixi tozalandi</translation>
+    </message>
+</context>
+<context>
     <name>AbsoluteRangeForm</name>
     <message>
         <source>From</source>
@@ -313,6 +378,97 @@
     </message>
 </context>
 <context>
+    <name>AppearanceScreen</name>
+    <message>
+        <source>Appearance</source>
+        <translation>Koʻrinish</translation>
+    </message>
+    <message>
+        <source>Theme</source>
+        <translation>Mavzu</translation>
+    </message>
+    <message>
+        <source>Dark</source>
+        <translation>Qorongʻi</translation>
+    </message>
+    <message>
+        <source>Light</source>
+        <translation>Yorugʻ</translation>
+    </message>
+    <message>
+        <source>As in the system</source>
+        <translation>Tizimdagidek</translation>
+    </message>
+    <message>
+        <source>Feed</source>
+        <translation>Lenta</translation>
+    </message>
+    <message>
+        <source>Density</source>
+        <translation>Zichlik</translation>
+    </message>
+    <message>
+        <source>Compact fits more entries on the screen</source>
+        <translation>Ixcham — ekranda koʻproq yozuv</translation>
+    </message>
+    <message>
+        <source>Compact</source>
+        <translation>Ixcham</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Oddiy</translation>
+    </message>
+    <message>
+        <source>Roomy</source>
+        <translation>Keng</translation>
+    </message>
+    <message>
+        <source>Log text size</source>
+        <translation>Log matni oʻlchami</translation>
+    </message>
+    <message>
+        <source>The feed and the message in the details</source>
+        <translation>Lenta va tafsilotlardagi xabar</translation>
+    </message>
+    <message>
+        <source>Long messages</source>
+        <translation>Uzun xabarlar</translation>
+    </message>
+    <message>
+        <source>Lines of a message in a card</source>
+        <translation>Kartochkadagi xabar qatorlari</translation>
+    </message>
+    <message>
+        <source>1 line</source>
+        <translation>1 qator</translation>
+    </message>
+    <message>
+        <source>2 lines</source>
+        <translation>2 qator</translation>
+    </message>
+    <message>
+        <source>3 lines</source>
+        <translation>3 qator</translation>
+    </message>
+    <message>
+        <source>Tint ERROR and WARN</source>
+        <translation>ERROR va WARN ni ajratish</translation>
+    </message>
+    <message>
+        <source>A coloured card background</source>
+        <translation>Kartochkaning rangli foni</translation>
+    </message>
+    <message>
+        <source>Pretty JSON in the details</source>
+        <translation>Tafsilotlarda chiroyli JSON</translation>
+    </message>
+    <message>
+        <source>Indents and colours</source>
+        <translation>Chekinishlar va ranglar</translation>
+    </message>
+</context>
+<context>
     <name>BehaviourPage</name>
     <message>
         <source>The last one used</source>
@@ -425,6 +581,121 @@
     <message>
         <source>Theme, table and behaviour return to their defaults.</source>
         <translation>Mavzu, jadval va xatti-harakat standart qiymatlarga qaytadi.</translation>
+    </message>
+</context>
+<context>
+    <name>BehaviourScreen</name>
+    <message>
+        <source>The last one used</source>
+        <translation>Oxirgi ishlatilgan</translation>
+    </message>
+    <message>
+        <source>Last 15 minutes</source>
+        <translation>Soʻnggi 15 daqiqa</translation>
+    </message>
+    <message>
+        <source>Last 1 hour</source>
+        <translation>Soʻnggi 1 soat</translation>
+    </message>
+    <message>
+        <source>Last 6 hours</source>
+        <translation>Soʻnggi 6 soat</translation>
+    </message>
+    <message>
+        <source>Last 24 hours</source>
+        <translation>Soʻnggi 24 soat</translation>
+    </message>
+    <message>
+        <source>Today</source>
+        <translation>Bugun</translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>Xatti-harakat</translation>
+    </message>
+    <message>
+        <source>Loading</source>
+        <translation>Yuklash</translation>
+    </message>
+    <message>
+        <source>Entries at a time</source>
+        <translation>Bir martada yozuvlar</translation>
+    </message>
+    <message>
+        <source>A search and “Load more”</source>
+        <translation>Qidiruv va «Yana yuklash»</translation>
+    </message>
+    <message>
+        <source>Period at start</source>
+        <translation>Ishga tushgandagi davr</translation>
+    </message>
+    <message>
+        <source>Period at start: %1</source>
+        <translation>Ishga tushgandagi davr: %1</translation>
+    </message>
+    <message>
+        <source>Live tail</source>
+        <translation>Live</translation>
+    </message>
+    <message>
+        <source>New lines every</source>
+        <translation>Yangi qatorlar har</translation>
+    </message>
+    <message>
+        <source>Less often means less traffic and battery</source>
+        <translation>Kamroq — kamroq trafik va batareya</translation>
+    </message>
+    <message>
+        <source>Live tail interval</source>
+        <translation>Live oraligʻi</translation>
+    </message>
+    <message>
+        <source>1 s</source>
+        <translation>1 s</translation>
+    </message>
+    <message>
+        <source>2 s</source>
+        <translation>2 s</translation>
+    </message>
+    <message>
+        <source>5 s</source>
+        <translation>5 s</translation>
+    </message>
+    <message>
+        <source>Lines kept</source>
+        <translation>Saqlanadigan qatorlar</translation>
+    </message>
+    <message>
+        <source>The oldest leave the feed</source>
+        <translation>Eskilari lentadan chiqadi</translation>
+    </message>
+    <message>
+        <source>Live tail lines kept</source>
+        <translation>Live dagi qatorlar</translation>
+    </message>
+    <message>
+        <source>Applies the next time live tail starts.</source>
+        <translation>Live keyingi safar ishga tushganda qoʻllanadi.</translation>
+    </message>
+    <message>
+        <source>Back to the default settings</source>
+        <translation>Standart sozlamalarga qaytarish</translation>
+    </message>
+    <message>
+        <source>Reset the settings?</source>
+        <translation>Sozlamalarni tiklaysizmi?</translation>
+    </message>
+    <message>
+        <source>Appearance, feed and behaviour return to their defaults. Environments, saved queries and history stay.</source>
+        <translation>Koʻrinish, lenta va xatti-harakat standart qiymatlarga qaytadi. Muhitlar, saqlangan soʻrovlar va tarix qoladi.</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation>Tiklash</translation>
+    </message>
+    <message>
+        <source>Settings reset</source>
+        <translation>Sozlamalar tiklandi</translation>
     </message>
 </context>
 <context>
@@ -923,6 +1194,177 @@
     </message>
 </context>
 <context>
+    <name>EnvironmentScreen</name>
+    <message>
+        <source>Connected to %1</source>
+        <translation>%1 ga ulandi</translation>
+    </message>
+    <message>
+        <source>New environment</source>
+        <translation>Yangi muhit</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Nomi</translation>
+    </message>
+    <message>
+        <source>Label colour</source>
+        <translation>Belgi rangi</translation>
+    </message>
+    <message>
+        <source>Grafana URL</source>
+        <translation>Grafana URL</translation>
+    </message>
+    <message>
+        <source>Logs datasource UID</source>
+        <translation>Loglar manbasi UID</translation>
+    </message>
+    <message>
+        <source>Grafana → Connections → Data sources → the last part of the URL</source>
+        <translation>Grafana → Connections → Data sources → URL ning oxirgi qismi</translation>
+    </message>
+    <message>
+        <source>Datasource UID</source>
+        <translation>Manba UID</translation>
+    </message>
+    <message>
+        <source>Authorization</source>
+        <translation>Avtorizatsiya</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>Parol</translation>
+    </message>
+    <message>
+        <source>Token</source>
+        <translation>Token</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Yoʻq</translation>
+    </message>
+    <message>
+        <source>User</source>
+        <translation>Login</translation>
+    </message>
+    <message>
+        <source>API token</source>
+        <translation>API token</translation>
+    </message>
+    <message>
+        <source>In the browser the password is kept in the site's storage on this phone.</source>
+        <translation>Brauzerda parol shu telefondagi sayt xotirasida saqlanadi.</translation>
+    </message>
+    <message>
+        <source>The password is kept in the system keychain.</source>
+        <translation>Parol tizim kalitlar omborida saqlanadi.</translation>
+    </message>
+    <message>
+        <source>The system keychain is unavailable: the password is kept in the settings of this device.</source>
+        <translation>Tizim kalitlar ombori mavjud emas: parol qurilma sozlamalarida saqlanadi.</translation>
+    </message>
+    <message>
+        <source>Own labels</source>
+        <translation>Oʻz teglari</translation>
+    </message>
+    <message>
+        <source>Found automatically when off (_namespace / _appName and similar)</source>
+        <translation>Oʻchiq boʻlsa — avtomatik topiladi (_namespace / _appName va oʻxshashlari)</translation>
+    </message>
+    <message>
+        <source>Namespace label</source>
+        <translation>Namespace tegi</translation>
+    </message>
+    <message>
+        <source>App label</source>
+        <translation>Ilova tegi</translation>
+    </message>
+    <message>
+        <source>The connection works</source>
+        <translation>Ulanish ishlayapti</translation>
+    </message>
+    <message>
+        <source>Testing the connection…</source>
+        <translation>Ulanish tekshirilmoqda…</translation>
+    </message>
+    <message>
+        <source>Server responds · %1 ms</source>
+        <translation>Server javob bermoqda · %1 ms</translation>
+    </message>
+    <message>
+        <source>Connecting to the server…</source>
+        <translation>Serverga ulanmoqda…</translation>
+    </message>
+    <message>
+        <source>Login and datasource accepted</source>
+        <translation>Kirish bajarildi, manba topildi</translation>
+    </message>
+    <message>
+        <source>Finding namespaces</source>
+        <translation>Namespace’lar topilmoqda</translation>
+    </message>
+    <message>
+        <source>Delete the environment</source>
+        <translation>Muhitni oʻchirish</translation>
+    </message>
+    <message>
+        <source>This is the only environment</source>
+        <translation>Bu yagona muhit</translation>
+    </message>
+    <message>
+        <source>Test and save</source>
+        <translation>Tekshirish va saqlash</translation>
+    </message>
+    <message>
+        <source>Cancel the test</source>
+        <translation>Tekshiruvni bekor qilish</translation>
+    </message>
+    <message>
+        <source>Test again</source>
+        <translation>Qayta tekshirish</translation>
+    </message>
+    <message>
+        <source>Save without the test</source>
+        <translation>Tekshiruvsiz saqlash</translation>
+    </message>
+    <message>
+        <source>Delete the environment %1?</source>
+        <translation>%1 muhitini oʻchirasizmi?</translation>
+    </message>
+    <message>
+        <source>Its address and password are removed from the phone. Saved queries stay.</source>
+        <translation>Manzil va parol telefondan oʻchiriladi. Saqlangan soʻrovlar qoladi.</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Oʻchirish</translation>
+    </message>
+    <message>
+        <source>Environment %1 deleted</source>
+        <translation>%1 muhiti oʻchirildi</translation>
+    </message>
+    <message>
+        <source>Save the new environment?</source>
+        <translation>Yangi muhitni saqlaysizmi?</translation>
+    </message>
+    <message>
+        <source>Save the changes to %1?</source>
+        <translation>%1 dagi oʻzgarishlarni saqlaysizmi?</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Saqlash</translation>
+    </message>
+    <message>
+        <source>Keep editing</source>
+        <translation>Tahrirlashni davom ettirish</translation>
+    </message>
+    <message>
+        <source>Don't save</source>
+        <translation>Saqlamaslik</translation>
+    </message>
+</context>
+<context>
     <name>EnvironmentSheet</name>
     <message>
         <source>Environment</source>
@@ -1137,6 +1579,65 @@
     </message>
 </context>
 <context>
+    <name>FeedScreen</name>
+    <message>
+        <source>Feed</source>
+        <translation>Lenta</translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation>Vaqt</translation>
+    </message>
+    <message>
+        <source>Time format</source>
+        <translation>Vaqt formati</translation>
+    </message>
+    <message>
+        <source>15 Oct 20:38</source>
+        <translation>15 okt 20:38</translation>
+    </message>
+    <message>
+        <source>Time in UTC</source>
+        <translation>Vaqt UTC da</translation>
+    </message>
+    <message>
+        <source>The period is still picked in local time</source>
+        <translation>Davr mahalliy vaqtda tanlanadi</translation>
+    </message>
+    <message>
+        <source>In the card</source>
+        <translation>Kartochkada</translation>
+    </message>
+    <message>
+        <source>Level</source>
+        <translation>Daraja</translation>
+    </message>
+    <message>
+        <source>Service</source>
+        <translation>Servis</translation>
+    </message>
+    <message>
+        <source>Fields in the card</source>
+        <translation>Kartochkadagi maydonlar</translation>
+    </message>
+    <message>
+        <source>Values of fields as a line under the message, e.g. trace_id. In the details, a long press on a field offers the same.</source>
+        <translation>Maydon qiymatlari xabar ostida qator boʻlib, masalan trace_id. Tafsilotlarda maydonni bosib turish ham shuni taklif qiladi.</translation>
+    </message>
+    <message>
+        <source>Field name</source>
+        <translation>Maydon nomi</translation>
+    </message>
+    <message>
+        <source>Field for the card</source>
+        <translation>Kartochka uchun maydon</translation>
+    </message>
+    <message>
+        <source>Add the field</source>
+        <translation>Maydon qoʻshish</translation>
+    </message>
+</context>
+<context>
     <name>FieldRow</name>
     <message>
         <source>%1: %2</source>
@@ -1192,6 +1693,14 @@
     <message>
         <source>Copy as %1</source>
         <translation>%1 sifatida nusxalash</translation>
+    </message>
+    <message>
+        <source>Remove from the card</source>
+        <translation>Kartochkadan olib tashlash</translation>
+    </message>
+    <message>
+        <source>Show in the card</source>
+        <translation>Kartochkada koʻrsatish</translation>
     </message>
 </context>
 <context>
@@ -2987,10 +3496,6 @@
         <translation>Til · Язык · Language</translation>
     </message>
     <message>
-        <source>Theme</source>
-        <translation>Mavzu</translation>
-    </message>
-    <message>
         <source>Dark</source>
         <translation>Qorongʻi</translation>
     </message>
@@ -3005,6 +3510,96 @@
     <message>
         <source>About</source>
         <translation>Ilova haqida</translation>
+    </message>
+    <message>
+        <source>compact</source>
+        <translation>ixcham</translation>
+    </message>
+    <message>
+        <source>roomy</source>
+        <translation>keng</translation>
+    </message>
+    <message>
+        <source>normal</source>
+        <translation>oddiy</translation>
+    </message>
+    <message>
+        <source>No connection</source>
+        <translation>Aloqa yoʻq</translation>
+    </message>
+    <message>
+        <source>Set up</source>
+        <translation>Sozlangan</translation>
+    </message>
+    <message>
+        <source>Add an environment</source>
+        <translation>Muhit qoʻshish</translation>
+    </message>
+    <message>
+        <source>Auto refresh</source>
+        <translation>Avtoyangilash</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Oʻchiq</translation>
+    </message>
+    <message>
+        <source>5 s</source>
+        <translation>5 s</translation>
+    </message>
+    <message>
+        <source>10 s</source>
+        <translation>10 s</translation>
+    </message>
+    <message>
+        <source>30 s</source>
+        <translation>30 s</translation>
+    </message>
+    <message>
+        <source>1 min</source>
+        <translation>1 daq</translation>
+    </message>
+    <message>
+        <source>A fixed period does not change: auto refresh is off.</source>
+        <translation>Qayd etilgan davr oʻzgarmaydi: avtoyangilash oʻchiq.</translation>
+    </message>
+    <message>
+        <source>Repeats the search; the entries on screen stay until the new ones come.</source>
+        <translation>Qidiruvni takrorlaydi; ekrandagi yozuvlar yangilari kelguncha qoladi.</translation>
+    </message>
+    <message>
+        <source>Look and behaviour</source>
+        <translation>Koʻrinish va xatti-harakat</translation>
+    </message>
+    <message>
+        <source>Appearance</source>
+        <translation>Koʻrinish</translation>
+    </message>
+    <message>
+        <source>Feed</source>
+        <translation>Lenta</translation>
+    </message>
+    <message numerus="yes">
+        <source>%1 · %n line(s)</source>
+        <translation>
+            <numerusform>%1 · %n qator</numerusform>
+            <numerusform />
+        </translation>
+    </message>
+    <message>
+        <source>Behaviour</source>
+        <translation>Xatti-harakat</translation>
+    </message>
+    <message>
+        <source>Version and data</source>
+        <translation>Versiya va maʼlumotlar</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsScreen</name>
+    <message>
+        <source>Settings</source>
+        <translation>Sozlamalar</translation>
     </message>
 </context>
 <context>
