@@ -106,8 +106,9 @@ Item {
         anchors.fill: parent
         enabled: root.interactive
         onClicked: mouse => {
+            // childAt() is typed as a plain Item; it is one of the bar delegates.
             const bar = bars.childAt(mouse.x, 1)
-            if (bar && bar.hasEntries) root.bucketClicked(bar.index, bar.levelAt(mouse.y))
+            if (bar && bar.hasEntries) root.bucketClicked(bar.index, bar.levelAt(mouse.y)) // qmllint disable missing-property
         }
         onDoubleClicked: root.resetRequested()
     }
