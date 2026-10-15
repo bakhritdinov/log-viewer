@@ -22,6 +22,9 @@ qt_add_qml_module(logviewer_ui_mobile
         SaveQuerySheet.qml
         SavedQuerySheet.qml
         ShareSheet.qml
+        SourceSheet.qml
+        TimeSheet.qml
+        EnvironmentSheet.qml
     IMPORTS
         LogViewer.App
         LogViewer.Ui

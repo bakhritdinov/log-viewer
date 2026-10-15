@@ -813,6 +813,33 @@
     </message>
 </context>
 <context>
+    <name>EnvironmentSheet</name>
+    <message>
+        <source>Environment</source>
+        <translation>Muhit</translation>
+    </message>
+    <message>
+        <source>Not set up</source>
+        <translation>Sozlanmagan</translation>
+    </message>
+    <message>
+        <source>No connection</source>
+        <translation>Aloqa yoʻq</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>Faol</translation>
+    </message>
+    <message>
+        <source>Set up</source>
+        <translation>Sozlangan</translation>
+    </message>
+    <message>
+        <source>Manage environments</source>
+        <translation>Muhitlarni boshqarish</translation>
+    </message>
+</context>
+<context>
     <name>ErrorBanner</name>
     <message>
         <source>Hide details</source>
@@ -2755,6 +2782,77 @@ hamkasbingiz aynan shuni koʻradi</translation>
     </message>
 </context>
 <context>
+    <name>SourceSheet</name>
+    <message>
+        <source>Log source</source>
+        <translation>Loglar manbasi</translation>
+    </message>
+    <message>
+        <source>Add an environment</source>
+        <translation>Muhit qoʻshish</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Qoʻshish</translation>
+    </message>
+    <message>
+        <source>Find a namespace or an app</source>
+        <translation>Namespace yoki ilovani topish</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Tozalash</translation>
+    </message>
+    <message>
+        <source>Recent</source>
+        <translation>Soʻnggilari</translation>
+    </message>
+    <message>
+        <source>All · %1</source>
+        <translation>Barchasi · %1</translation>
+    </message>
+    <message>
+        <source>expanded</source>
+        <translation>ochiq</translation>
+    </message>
+    <message>
+        <source>collapsed</source>
+        <translation>yigʻilgan</translation>
+    </message>
+    <message>
+        <source>Found in %1 · %2</source>
+        <translation>%1 da topildi · %2</translation>
+    </message>
+    <message>
+        <source>No “%1” in %2</source>
+        <translation>%2 da «%1» yoʻq</translation>
+    </message>
+    <message>
+        <source>Check the spelling or search another environment.</source>
+        <translation>Imloni tekshiring yoki boshqa muhitda qidiring.</translation>
+    </message>
+    <message>
+        <source>Search in %1</source>
+        <translation>%1 da qidirish</translation>
+    </message>
+    <message>
+        <source>Finding namespaces in %1…</source>
+        <translation>%1 da namespace qidirilmoqda…</translation>
+    </message>
+    <message>
+        <source>Choose the labels</source>
+        <translation>Teglarni tanlash</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Qayta urinish</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Sozlamalar</translation>
+    </message>
+</context>
+<context>
     <name>StatusBar</name>
     <message>
         <source>Connecting · %1</source>
@@ -2952,6 +3050,21 @@ hamkasbingiz aynan shuni koʻradi</translation>
     <message>
         <source>Time zone: local (%1)</source>
         <translation>Vaqt mintaqasi: mahalliy (%1)</translation>
+    </message>
+</context>
+<context>
+    <name>TimeSheet</name>
+    <message>
+        <source>Period</source>
+        <translation>Davr</translation>
+    </message>
+    <message>
+        <source>Custom period</source>
+        <translation>Ixtiyoriy davr</translation>
+    </message>
+    <message>
+        <source>Local time (%1).</source>
+        <translation>Mahalliy vaqt (%1).</translation>
     </message>
 </context>
 <context>

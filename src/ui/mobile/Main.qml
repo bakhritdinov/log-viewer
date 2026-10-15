@@ -47,6 +47,9 @@ ApplicationWindow {
                 onSettingsRequested: window.section = 2
                 onNotice: text => window.notify(text)
                 onSearchRequested: searchScreen.open()
+                onSourceRequested: sourceSheet.open()
+                onEnvironmentRequested: environmentSheet.open()
+                onPeriodRequested: timeSheet.open()
                 onSaveRequested: saveSheet.openSaving()
                 onAddEnvironmentRequested: name => { missingEnvironment = ""; window.section = 2 }
             }
@@ -89,6 +92,13 @@ ApplicationWindow {
         onNotice: (text, actionText, action) => window.notify(text, actionText, action)
         onRan: searchScreen.close()
         onRenameRequested: id => saveSheet.openRenaming(id)
+    }
+    SourceSheet { id: sourceSheet; onSettingsRequested: window.section = 2 }
+    TimeSheet { id: timeSheet }
+    EnvironmentSheet {
+        id: environmentSheet
+        onSettingsRequested: window.section = 2
+        onSourceMissing: sourceSheet.open()
     }
     ShareSheet { id: shareSheet; onNotice: (text, actionText, action) => window.notify(text, actionText, action) }
 

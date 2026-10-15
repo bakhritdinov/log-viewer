@@ -12,17 +12,22 @@ Popup {
     property string title
     default property alias content: body.data
     property alias footer: footerSlot.data
+    // Above the scrolling content, not scrolled with it (a search field).
+    property alias pinned: pinnedSlot.data
+    // Almost the whole screen whatever the content (lists that change while typing).
+    property bool tall: false
 
     parent: Overlay.overlay
     x: 0
     width: parent ? parent.width : 0
-    height: Math.min(sheet.implicitHeight, (parent ? parent.height : 800) - 56)
+    height: tall ? (parent ? parent.height : 800) - 56 : Math.min(sheet.implicitHeight, (parent ? parent.height : 800) - 56)
     y: (parent ? parent.height : 0) - height + drag.offset
     padding: 0
     modal: true
     focus: true
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     Overlay.modal: Rectangle { color: Theme.overlay }
+    onAboutToShow: bodyFlick.contentY = 0
 
     enter: Transition { NumberAnimation { property: "y"; from: root.parent ? root.parent.height : 0; duration: 180; easing.type: Easing.OutCubic } }
     exit: Transition { NumberAnimation { property: "y"; to: root.parent ? root.parent.height : 0; duration: 150; easing.type: Easing.InCubic } }
@@ -85,7 +90,17 @@ Popup {
                 IconButton { touch: true; iconName: "close"; label: qsTr("Close"); onClicked: root.close() }
             }
         }
+        ColumnLayout {
+            id: pinnedSlot
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.bottomMargin: 10
+            visible: children.length > 0
+            spacing: 12
+        }
         Flickable {
+            id: bodyFlick
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.preferredHeight: body.implicitHeight

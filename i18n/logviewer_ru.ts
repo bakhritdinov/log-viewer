@@ -818,6 +818,33 @@
     </message>
 </context>
 <context>
+    <name>EnvironmentSheet</name>
+    <message>
+        <source>Environment</source>
+        <translation>Окружение</translation>
+    </message>
+    <message>
+        <source>Not set up</source>
+        <translation>Не настроено</translation>
+    </message>
+    <message>
+        <source>No connection</source>
+        <translation>Нет связи</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>Активно</translation>
+    </message>
+    <message>
+        <source>Set up</source>
+        <translation>Настроено</translation>
+    </message>
+    <message>
+        <source>Manage environments</source>
+        <translation>Управление окружениями</translation>
+    </message>
+</context>
+<context>
     <name>ErrorBanner</name>
     <message>
         <source>Hide details</source>
@@ -2777,6 +2804,77 @@ a colleague sees exactly the same</source>
     </message>
 </context>
 <context>
+    <name>SourceSheet</name>
+    <message>
+        <source>Log source</source>
+        <translation>Источник логов</translation>
+    </message>
+    <message>
+        <source>Add an environment</source>
+        <translation>Добавить окружение</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Добавить</translation>
+    </message>
+    <message>
+        <source>Find a namespace or an app</source>
+        <translation>Найти namespace или приложение</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Очистить</translation>
+    </message>
+    <message>
+        <source>Recent</source>
+        <translation>Недавние</translation>
+    </message>
+    <message>
+        <source>All · %1</source>
+        <translation>Все · %1</translation>
+    </message>
+    <message>
+        <source>expanded</source>
+        <translation>развёрнуто</translation>
+    </message>
+    <message>
+        <source>collapsed</source>
+        <translation>свёрнуто</translation>
+    </message>
+    <message>
+        <source>Found in %1 · %2</source>
+        <translation>Найдено в %1 · %2</translation>
+    </message>
+    <message>
+        <source>No “%1” in %2</source>
+        <translation>В %2 нет «%1»</translation>
+    </message>
+    <message>
+        <source>Check the spelling or search another environment.</source>
+        <translation>Проверьте написание или поищите в другом окружении.</translation>
+    </message>
+    <message>
+        <source>Search in %1</source>
+        <translation>Искать в %1</translation>
+    </message>
+    <message>
+        <source>Finding namespaces in %1…</source>
+        <translation>Ищем namespace в %1…</translation>
+    </message>
+    <message>
+        <source>Choose the labels</source>
+        <translation>Выбрать метки</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Повторить</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Настройки</translation>
+    </message>
+</context>
+<context>
     <name>StatusBar</name>
     <message>
         <source>Connecting · %1</source>
@@ -2974,6 +3072,21 @@ a colleague sees exactly the same</source>
     <message>
         <source>Time zone: local (%1)</source>
         <translation>Часовой пояс: локальный (%1)</translation>
+    </message>
+</context>
+<context>
+    <name>TimeSheet</name>
+    <message>
+        <source>Period</source>
+        <translation>Период</translation>
+    </message>
+    <message>
+        <source>Custom period</source>
+        <translation>Произвольный период</translation>
+    </message>
+    <message>
+        <source>Local time (%1).</source>
+        <translation>Локальное время (%1).</translation>
     </message>
 </context>
 <context>

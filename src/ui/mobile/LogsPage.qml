@@ -16,6 +16,8 @@ Item {
     signal chartRequested()
     signal settingsRequested()
     signal sourceRequested()
+    signal environmentRequested()
+    signal periodRequested()
     signal notice(string text)
     signal searchRequested()
     signal saveRequested()
@@ -118,6 +120,7 @@ Item {
             AppBar {
                 Layout.fillWidth: true
                 onSourceRequested: root.sourceRequested()
+                onEnvironmentRequested: root.environmentRequested()
             }
 
             // Search and the active conditions; a running line under it while loading.
@@ -202,6 +205,7 @@ Item {
                                     implicitHeight: 32
                                     implicitWidth: periodRow.implicitWidth + 20
                                     Accessible.name: qsTr("Period: %1").arg(Session.timeRangeLabel)
+                                    onClicked: root.periodRequested()
                                     background: Rectangle {
                                         radius: 16
                                         color: periodChip.pressed ? Theme.hover : Theme.subtle
