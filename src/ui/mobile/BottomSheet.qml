@@ -21,7 +21,12 @@ Popup {
     x: 0
     width: parent ? parent.width : 0
     height: tall ? (parent ? parent.height : 800) - 56 : Math.min(sheet.implicitHeight, (parent ? parent.height : 800) - 56)
-    y: (parent ? parent.height : 0) - height + drag.offset
+    // Where the sheet rests. The enter transition goes there explicitly: the
+    // exit one writes y over the binding, and with only `from` the next enter
+    // would end where the last exit did (below the screen) — the sheet stayed
+    // hidden on a second opening while its scrim showed.
+    readonly property real restY: (parent ? parent.height : 0) - height
+    y: restY + drag.offset
     padding: 0
     modal: true
     focus: true
@@ -29,7 +34,7 @@ Popup {
     Overlay.modal: Rectangle { color: Theme.overlay }
     onAboutToShow: bodyFlick.contentY = 0
 
-    enter: Transition { NumberAnimation { property: "y"; from: root.parent ? root.parent.height : 0; duration: 180; easing.type: Easing.OutCubic } }
+    enter: Transition { NumberAnimation { property: "y"; from: root.parent ? root.parent.height : 0; to: root.restY; duration: 180; easing.type: Easing.OutCubic } }
     exit: Transition { NumberAnimation { property: "y"; to: root.parent ? root.parent.height : 0; duration: 150; easing.type: Easing.InCubic } }
 
     background: Rectangle {

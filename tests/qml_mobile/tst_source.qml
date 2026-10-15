@@ -118,4 +118,18 @@ TestCase {
         tap(byName("Управление окружениями"))
         tryCompare(window, "section", 2)
     }
+
+    // A sheet opened a second time comes up again (it stayed below the screen,
+    // only its scrim showing, after the first close).
+    function test_08_sheetOpensAgain() {
+        for (const sheet of [timeSheet(), environmentSheet()]) {
+            for (let round = 0; round < 2; ++round) {
+                sheet.open()
+                tryCompare(sheet, "opened", true)
+                tryVerify(() => Math.abs(sheet.y - (sheet.parent.height - sheet.height)) < 1)
+                sheet.close()
+                tryCompare(sheet, "visible", false)
+            }
+        }
+    }
 }
