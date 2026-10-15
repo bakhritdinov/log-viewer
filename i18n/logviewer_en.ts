@@ -2,6 +2,37 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en" sourcelanguage="en">
 <context>
+    <name>AboutPage</name>
+    <message numerus="yes">
+        <source>Search history · %n search(es)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n query(ies) exported</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n query(ies) added</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>The %n recent search(es) are removed from this device. Saved queries stay.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>EnvironmentEditor</name>
     <message numerus="yes">
         <source>Found %n namespace(s) · labels %1 / %2 · %3 ms</source>
@@ -18,6 +49,13 @@
         <translation>
             <numerusform>%1, %n value</numerusform>
             <numerusform>%1, %n values</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n more value(s)…</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
 </context>
@@ -52,6 +90,16 @@
     </message>
 </context>
 <context>
+    <name>LogTable</name>
+    <message numerus="yes">
+        <source>↵ +%n line(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>PatternsView</name>
     <message numerus="yes">
         <source>%n one-off message(s) not shown.</source>
@@ -65,6 +113,13 @@
         <translation>
             <numerusform>Show %n entry</numerusform>
             <numerusform>Show %n entries</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>All %n warnings and errors occur once.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
 </context>
@@ -108,6 +163,13 @@
             <numerusform>%n values</numerusform>
         </translation>
     </message>
+    <message numerus="yes">
+        <source>%1 · %n value(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>SourcePicker</name>
@@ -116,6 +178,16 @@
         <translation>
             <numerusform>%1, %n app</numerusform>
             <numerusform>%1, %n apps</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>TopBar</name>
+    <message numerus="yes">
+        <source>PAUSED · %n new</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
 </context>

@@ -4,12 +4,164 @@
 <context>
     <name>AboutPage</name>
     <message>
-        <source>Version</source>
-        <translation>Версия</translation>
-    </message>
-    <message>
         <source>Clear search history</source>
         <translation>Очистить историю поиска</translation>
+    </message>
+    <message>
+        <source>Desktop · %1</source>
+        <translation>Десктоп · %1</translation>
+    </message>
+    <message>
+        <source>Checking for updates…</source>
+        <translation>Проверяем обновления…</translation>
+    </message>
+    <message>
+        <source>You have the latest version · checked %1</source>
+        <translation>У вас последняя версия · проверено %1</translation>
+    </message>
+    <message>
+        <source>You have the latest version</source>
+        <translation>У вас последняя версия</translation>
+    </message>
+    <message>
+        <source>Version %1 is available</source>
+        <translation>Доступна версия %1</translation>
+    </message>
+    <message>
+        <source>Downloading %1 · %2 of %3 MB</source>
+        <translation>Скачиваем %1 · %2 из %3 МБ</translation>
+    </message>
+    <message>
+        <source>Version %1 installs on restart</source>
+        <translation>Версия %1 установится при перезапуске</translation>
+    </message>
+    <message>
+        <source>Could not check: %1</source>
+        <translation>Не удалось проверить: %1</translation>
+    </message>
+    <message>
+        <source>Updates come from GitHub Releases</source>
+        <translation>Обновления приходят из GitHub Releases</translation>
+    </message>
+    <message>
+        <source>Check for updates</source>
+        <translation>Проверить обновления</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Повторить</translation>
+    </message>
+    <message>
+        <source>Check again</source>
+        <translation>Проверить снова</translation>
+    </message>
+    <message>
+        <source>Download and install</source>
+        <translation>Скачать и установить</translation>
+    </message>
+    <message>
+        <source>Open the release page</source>
+        <translation>Открыть страницу релиза</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отменить</translation>
+    </message>
+    <message>
+        <source>Restart</source>
+        <translation>Перезапустить</translation>
+    </message>
+    <message>
+        <source>Check for updates at start-up</source>
+        <translation>Проверять обновления при запуске</translation>
+    </message>
+    <message>
+        <source>Data on this device</source>
+        <translation>Данные на этом устройстве</translation>
+    </message>
+    <message>
+        <source>Saved queries · %1</source>
+        <translation>Сохранённые запросы · %1</translation>
+    </message>
+    <message>
+        <source>Export…</source>
+        <translation>Экспорт…</translation>
+    </message>
+    <message>
+        <source>Import…</source>
+        <translation>Импорт…</translation>
+    </message>
+    <message numerus="yes">
+        <source>Search history · %n search(es)</source>
+        <translation>
+            <numerusform>История поиска · %n запрос</numerusform>
+            <numerusform>История поиска · %n запроса</numerusform>
+            <numerusform>История поиска · %n запросов</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Export saved queries</source>
+        <translation>Экспорт сохранённых запросов</translation>
+    </message>
+    <message>
+        <source>JSON files (*.json)</source>
+        <translation>Файлы JSON (*.json)</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n query(ies) exported</source>
+        <translation>
+            <numerusform>Экспортирован %n запрос</numerusform>
+            <numerusform>Экспортировано %n запроса</numerusform>
+            <numerusform>Экспортировано %n запросов</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Could not write the file</source>
+        <translation>Не удалось записать файл</translation>
+    </message>
+    <message>
+        <source>Import saved queries</source>
+        <translation>Импорт сохранённых запросов</translation>
+    </message>
+    <message>
+        <source>Add the queries from the file to yours, or replace yours with them?</source>
+        <translation>Добавить запросы из файла к вашим или заменить ими ваши?</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Добавить</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Заменить</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n query(ies) added</source>
+        <translation>
+            <numerusform>Добавлен %n запрос</numerusform>
+            <numerusform>Добавлено %n запроса</numerusform>
+            <numerusform>Добавлено %n запросов</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>This is not a file of saved queries</source>
+        <translation>Это не файл сохранённых запросов</translation>
+    </message>
+    <message>
+        <source>Clear the search history?</source>
+        <translation>Очистить историю поиска?</translation>
+    </message>
+    <message numerus="yes">
+        <source>The %n recent search(es) are removed from this device. Saved queries stay.</source>
+        <translation>
+            <numerusform>%n недавний запрос будет удалён с этого устройства. Сохранённые запросы останутся.</numerusform>
+            <numerusform>%n недавних запроса будут удалены с этого устройства. Сохранённые запросы останутся.</numerusform>
+            <numerusform>%n недавних запросов будут удалены с этого устройства. Сохранённые запросы останутся.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Clear history</source>
+        <translation>Очистить историю</translation>
     </message>
 </context>
 <context>
@@ -46,16 +198,32 @@
 <context>
     <name>AppearancePage</name>
     <message>
-        <source>Dark theme</source>
-        <translation>Тёмная тема</translation>
-    </message>
-    <message>
         <source>Pretty JSON in details</source>
         <translation>Красивый JSON в деталях</translation>
     </message>
     <message>
         <source>Format messages that are JSON</source>
         <translation>Форматировать сообщения-JSON</translation>
+    </message>
+    <message>
+        <source>Theme</source>
+        <translation>Тема</translation>
+    </message>
+    <message>
+        <source>Dark</source>
+        <translation>Тёмная</translation>
+    </message>
+    <message>
+        <source>Light</source>
+        <translation>Светлая</translation>
+    </message>
+    <message>
+        <source>The theme changes at once. The moon/sun button in the top bar switches the same.</source>
+        <translation>Тема меняется сразу. Кнопка луны/солнца в верхней панели переключает то же самое.</translation>
+    </message>
+    <message>
+        <source>Messages</source>
+        <translation>Сообщения</translation>
     </message>
 </context>
 <context>
@@ -67,6 +235,13 @@
     <message>
         <source>Next month</source>
         <translation>Следующий месяц</translation>
+    </message>
+</context>
+<context>
+    <name>ChoiceDialog</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
     </message>
 </context>
 <context>
@@ -186,6 +361,70 @@
         <source>Show</source>
         <translation>Показать</translation>
     </message>
+    <message>
+        <source>New</source>
+        <translation>Новое</translation>
+    </message>
+    <message>
+        <source>The only environment cannot be deleted</source>
+        <translation>Нельзя удалить единственное окружение</translation>
+    </message>
+    <message>
+        <source>Save without the test</source>
+        <translation>Сохранить без проверки</translation>
+    </message>
+    <message>
+        <source>Save the new environment?</source>
+        <translation>Сохранить новое окружение?</translation>
+    </message>
+    <message>
+        <source>Save the changes to %1?</source>
+        <translation>Сохранить изменения в %1?</translation>
+    </message>
+    <message>
+        <source>Advanced</source>
+        <translation>Дополнительно</translation>
+    </message>
+    <message>
+        <source>Namespace label</source>
+        <translation>Метка namespace</translation>
+    </message>
+    <message>
+        <source>found automatically</source>
+        <translation>определяется автоматически</translation>
+    </message>
+    <message>
+        <source>App label</source>
+        <translation>Метка приложения</translation>
+    </message>
+    <message>
+        <source>Empty fields: the labels are found automatically (_namespace / _appName and similar). Set both when your logs use other labels, e.g. kubernetes_namespace and app.</source>
+        <translation>Пустые поля — метки определяются автоматически (_namespace / _appName и похожие). Укажите обе, если в ваших логах другие метки, например kubernetes_namespace и app.</translation>
+    </message>
+    <message>
+        <source>Find automatically</source>
+        <translation>Определить автоматически</translation>
+    </message>
+    <message>
+        <source>Server responds · %1 ms</source>
+        <translation>Сервер отвечает · %1 мс</translation>
+    </message>
+    <message>
+        <source>Connecting to the server…</source>
+        <translation>Подключаемся к серверу…</translation>
+    </message>
+    <message>
+        <source>Login and datasource accepted</source>
+        <translation>Вход и источник данных приняты</translation>
+    </message>
+    <message>
+        <source>Finding namespaces and apps</source>
+        <translation>Ищем namespace и приложения</translation>
+    </message>
+    <message>
+        <source>Cancel the test</source>
+        <translation>Отменить проверку</translation>
+    </message>
 </context>
 <context>
     <name>DetailsPanel</name>
@@ -218,10 +457,6 @@
         <translation>Трейс ±5 мин</translation>
     </message>
     <message>
-        <source>The entry has no trace id</source>
-        <translation>У записи нет trace id</translation>
-    </message>
-    <message>
         <source>Context ±1 min</source>
         <translation>Контекст ±1 мин</translation>
     </message>
@@ -240,6 +475,30 @@
     <message>
         <source>+ include · − exclude</source>
         <translation>+ включить · − исключить</translation>
+    </message>
+    <message>
+        <source>min. %1</source>
+        <translation>мин. %1</translation>
+    </message>
+    <message>
+        <source>%1 px</source>
+        <translation>%1 px</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>Скопировано</translation>
+    </message>
+    <message>
+        <source>Trace</source>
+        <translation>Трейс</translation>
+    </message>
+    <message>
+        <source>The entry has no trace_id</source>
+        <translation>У записи нет trace_id</translation>
+    </message>
+    <message>
+        <source>Context</source>
+        <translation>Контекст</translation>
     </message>
 </context>
 <context>
@@ -274,6 +533,10 @@
     <message>
         <source>Connecting…</source>
         <translation>Подключение…</translation>
+    </message>
+    <message>
+        <source>Give both labels or neither (then they are found automatically).</source>
+        <translation>Укажите обе метки или ни одной (тогда они определятся автоматически).</translation>
     </message>
 </context>
 <context>
@@ -452,6 +715,14 @@
         <source>Exclude %1</source>
         <translation>Исключить %1</translation>
     </message>
+    <message numerus="yes">
+        <source>%n more value(s)…</source>
+        <translation>
+            <numerusform>Ещё %n значение…</numerusform>
+            <numerusform>Ещё %n значения…</numerusform>
+            <numerusform>Ещё %n значений…</numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>FieldRow</name>
@@ -493,6 +764,14 @@
     <message>
         <source>Search fields</source>
         <translation>Поиск по полям</translation>
+    </message>
+    <message>
+        <source>No fields or values with “%1”.</source>
+        <translation>Нет полей и значений с «%1».</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Очистить</translation>
     </message>
 </context>
 <context>
@@ -572,6 +851,30 @@
         <source>Open as search</source>
         <translation>Открыть как поиск</translation>
     </message>
+    <message>
+        <source>No other entries with trace_id %1 within ±5 min</source>
+        <translation>Других записей с trace_id %1 за ±5 мин нет</translation>
+    </message>
+    <message>
+        <source>No entries around %1</source>
+        <translation>Вокруг %1 записей нет</translation>
+    </message>
+    <message>
+        <source>Other services may write the trace id into another field.</source>
+        <translation>Возможно, другие сервисы пишут trace id в другое поле.</translation>
+    </message>
+    <message>
+        <source>Try a wider window.</source>
+        <translation>Попробуйте окно шире.</translation>
+    </message>
+    <message>
+        <source>Show the context</source>
+        <translation>Показать контекст</translation>
+    </message>
+    <message>
+        <source>Widen to ±5 min</source>
+        <translation>Расширить до ±5 мин</translation>
+    </message>
 </context>
 <context>
     <name>HistogramPanel</name>
@@ -638,6 +941,10 @@
         <source>WARN %1</source>
         <translation>WARN %1</translation>
     </message>
+    <message>
+        <source>Click to show only this interval</source>
+        <translation>клик — показать только этот интервал</translation>
+    </message>
 </context>
 <context>
     <name>LanguagePage</name>
@@ -671,16 +978,28 @@
 <context>
     <name>LinkBanner</name>
     <message>
-        <source>Opened from a link: %1 · %2 / %3 · %4</source>
-        <translation>Открыто по ссылке: %1 · %2 / %3 · %4</translation>
-    </message>
-    <message>
         <source>Save as query</source>
         <translation>Сохранить как запрос</translation>
     </message>
     <message>
         <source>Back to my selection</source>
         <translation>Вернуться к своей выборке</translation>
+    </message>
+    <message>
+        <source>The link leads to the environment “%1”, which is not set up here. Add an environment with this name and the link opens.</source>
+        <translation>Ссылка ведёт в окружение «%1», которого здесь нет. Добавьте окружение с таким именем — ссылка откроется сама.</translation>
+    </message>
+    <message>
+        <source>From a link: &lt;b&gt;%1&lt;/b&gt; · %2 / %3 · %4</source>
+        <translation>Из ссылки: &lt;b&gt;%1&lt;/b&gt; · %2 / %3 · %4</translation>
+    </message>
+    <message>
+        <source>Add environment %1</source>
+        <translation>Добавить окружение %1</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Закрыть</translation>
     </message>
 </context>
 <context>
@@ -704,6 +1023,38 @@
     <message>
         <source>Space — pause / resume</source>
         <translation>Пробел — пауза/продолжить</translation>
+    </message>
+    <message>
+        <source>Waiting for new entries of %1</source>
+        <translation>Ждём новые записи %1</translation>
+    </message>
+    <message>
+        <source>Checking every 2 s. Entries that arrive after live tail was turned on are shown.</source>
+        <translation>Проверяем каждые 2 с. Показываются записи, пришедшие после включения live.</translation>
+    </message>
+    <message>
+        <source>Stream interrupted</source>
+        <translation>Поток прерван</translation>
+    </message>
+    <message>
+        <source>Streaming · ~%1 lines/s</source>
+        <translation>Поток идёт · ~%1 строк/с</translation>
+    </message>
+    <message>
+        <source>Paused: an entry is open</source>
+        <translation>Пауза: открыта запись</translation>
+    </message>
+    <message>
+        <source>Paused · new entries are buffered</source>
+        <translation>Пауза · новые записи копятся</translation>
+    </message>
+    <message>
+        <source>Buffer full: %1 lines, the oldest are dropped</source>
+        <translation>Буфер полон: %1 строк, старые вытесняются</translation>
+    </message>
+    <message>
+        <source>Esc — close and resume</source>
+        <translation>Esc — закрыть и продолжить</translation>
     </message>
 </context>
 <context>
@@ -731,6 +1082,14 @@
     <message>
         <source>%1 %2 %3</source>
         <translation>%1 %2 %3</translation>
+    </message>
+    <message numerus="yes">
+        <source>↵ +%n line(s)</source>
+        <translation>
+            <numerusform>↵ +%n строка</numerusform>
+            <numerusform>↵ +%n строки</numerusform>
+            <numerusform>↵ +%n строк</numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -800,10 +1159,6 @@
         <translation>Все горячие клавиши</translation>
     </message>
     <message>
-        <source>The link points to the environment “%1”, which is not set up here.</source>
-        <translation>Ссылка ведёт в окружение «%1», которое здесь не настроено.</translation>
-    </message>
-    <message>
         <source>The filter applies to the stream on the fly</source>
         <translation>Фильтр применяется к потоку на лету</translation>
     </message>
@@ -827,6 +1182,26 @@
         <source>all keys</source>
         <translation>все клавиши</translation>
     </message>
+    <message>
+        <source>General</source>
+        <translation>Общие</translation>
+    </message>
+    <message>
+        <source>Complete the suggestion</source>
+        <translation>Дописать подсказку</translation>
+    </message>
+    <message>
+        <source>Table and details</source>
+        <translation>Таблица и детали</translation>
+    </message>
+    <message>
+        <source>Stop loading</source>
+        <translation>Остановить загрузку</translation>
+    </message>
+    <message>
+        <source>Live tail</source>
+        <translation>Live tail</translation>
+    </message>
 </context>
 <context>
     <name>MessageView</name>
@@ -842,24 +1217,8 @@
         <translation>Загружено записей: %1…</translation>
     </message>
     <message>
-        <source>Showing %1–%2 of %3 loaded</source>
-        <translation>Показано %1–%2 из %3 загруженных</translation>
-    </message>
-    <message>
-        <source>%1 · the period has more</source>
-        <translation>%1 · в периоде есть ещё</translation>
-    </message>
-    <message>
         <source>Stop</source>
         <translation>Остановить</translation>
-    </message>
-    <message>
-        <source>First page (Shift+[)</source>
-        <translation>Первая страница (Shift+[)</translation>
-    </message>
-    <message>
-        <source>Newer ([)</source>
-        <translation>Новее ([)</translation>
     </message>
     <message>
         <source>Page</source>
@@ -874,16 +1233,56 @@
         <translation>из %1</translation>
     </message>
     <message>
-        <source>Older (])</source>
-        <translation>Старее (])</translation>
-    </message>
-    <message>
-        <source>Last page (Shift+])</source>
-        <translation>Последняя страница (Shift+])</translation>
-    </message>
-    <message>
         <source>Load %1 more</source>
         <translation>Загрузить ещё %1</translation>
+    </message>
+    <message>
+        <source>Requesting entries for “%1”…</source>
+        <translation>Запрашиваем записи за «%1»…</translation>
+    </message>
+    <message>
+        <source>Stopped at %1 entries · the period has more</source>
+        <translation>Остановлено на %1 записях · в периоде есть ещё</translation>
+    </message>
+    <message>
+        <source>%1–%2 / %3</source>
+        <translation>%1–%2 / %3</translation>
+    </message>
+    <message>
+        <source>Showing %1–%2 of %3 loaded · the period has more</source>
+        <translation>Показано %1–%2 из %3 загруженных · в периоде есть ещё</translation>
+    </message>
+    <message>
+        <source>Showing %1–%2 of %3 · all entries of the period</source>
+        <translation>Показано %1–%2 из %3 · это все записи за период</translation>
+    </message>
+    <message>
+        <source>Showing %1–%2 of %3</source>
+        <translation>Показано %1–%2 из %3</translation>
+    </message>
+    <message>
+        <source>First page</source>
+        <translation>Первая страница</translation>
+    </message>
+    <message>
+        <source>Newer</source>
+        <translation>Новее</translation>
+    </message>
+    <message>
+        <source>Older</source>
+        <translation>Старее</translation>
+    </message>
+    <message>
+        <source>Last page</source>
+        <translation>Последняя страница</translation>
+    </message>
+    <message>
+        <source>Continue loading</source>
+        <translation>Продолжить загрузку</translation>
+    </message>
+    <message>
+        <source>%1 more</source>
+        <translation>Ещё %1</translation>
     </message>
 </context>
 <context>
@@ -911,10 +1310,6 @@
     <message>
         <source>by first appearance</source>
         <translation>по первому появлению</translation>
-    </message>
-    <message>
-        <source>by level</source>
-        <translation>по уровню</translation>
     </message>
     <message>
         <source>Sort patterns: %1</source>
@@ -953,10 +1348,6 @@
         <source>Variable values</source>
         <translation>Значения переменных</translation>
     </message>
-    <message>
-        <source>* #%1: %2</source>
-        <translation>* №%1: %2</translation>
-    </message>
     <message numerus="yes">
         <source>Show %n entries</source>
         <translation>
@@ -968,6 +1359,58 @@
     <message>
         <source>Exclude the pattern</source>
         <translation>Исключить шаблон</translation>
+    </message>
+    <message>
+        <source>by last appearance</source>
+        <translation>по последнему появлению</translation>
+    </message>
+    <message>
+        <source>by level (ERROR first)</source>
+        <translation>по уровню (ERROR сначала)</translation>
+    </message>
+    <message>
+        <source>No repeated messages</source>
+        <translation>Повторяющихся сообщений нет</translation>
+    </message>
+    <message>
+        <source>No WARN or ERROR among the loaded entries</source>
+        <translation>В загруженных записях нет WARN и ERROR</translation>
+    </message>
+    <message numerus="yes">
+        <source>All %n warnings and errors occur once.</source>
+        <translation>
+            <numerusform>Все %n предупреждение и ошибка встречаются по одному разу.</numerusform>
+            <numerusform>Все %n предупреждения и ошибки встречаются по одному разу.</numerusform>
+            <numerusform>Все %n предупреждений и ошибок встречаются по одному разу.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Patterns are built from warnings and errors only.</source>
+        <translation>Шаблоны строятся только по предупреждениям и ошибкам.</translation>
+    </message>
+    <message>
+        <source>To the entries</source>
+        <translation>К записям</translation>
+    </message>
+    <message>
+        <source>*%1  %2</source>
+        <translation>*%1  %2</translation>
+    </message>
+    <message>
+        <source>Copy the pattern</source>
+        <translation>Копировать шаблон</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>Скопировано</translation>
+    </message>
+    <message>
+        <source>Hide one-offs</source>
+        <translation>Скрыть единичные</translation>
+    </message>
+    <message>
+        <source>Show one-offs</source>
+        <translation>Показать единичные</translation>
     </message>
 </context>
 <context>
@@ -1056,24 +1499,56 @@
         <translation>Нет записей по запросу</translation>
     </message>
     <message>
-        <source>Choose a namespace and an app.</source>
-        <translation>Выберите namespace и приложение.</translation>
-    </message>
-    <message>
-        <source>Nothing in %1 for the period “%2”.</source>
-        <translation>В %1 нет записей за период «%2».</translation>
-    </message>
-    <message>
         <source>Widen to 24 hours</source>
         <translation>Расширить до 24 часов</translation>
     </message>
     <message>
-        <source>Remove the %1 filter</source>
-        <translation>Убрать фильтр %1</translation>
-    </message>
-    <message>
         <source>Clear the search</source>
         <translation>Очистить поиск</translation>
+    </message>
+    <message>
+        <source>Choose a source</source>
+        <translation>Выберите источник</translation>
+    </message>
+    <message>
+        <source>Nothing in the picked interval</source>
+        <translation>В выбранном интервале ничего нет</translation>
+    </message>
+    <message>
+        <source>No entries for “%1”</source>
+        <translation>Нет записей за «%1»</translation>
+    </message>
+    <message>
+        <source>Pick a namespace and an app to see their logs.</source>
+        <translation>Выберите namespace и приложение, чтобы увидеть их логи.</translation>
+    </message>
+    <message>
+        <source>%1 holds no entries of this level.</source>
+        <translation>В интервале %1 нет записей этого уровня.</translation>
+    </message>
+    <message>
+        <source>For “%1” there are no entries in %2 matching %3.</source>
+        <translation>За «%1» в %2 нет строк по запросу %3.</translation>
+    </message>
+    <message>
+        <source>Nothing came from %1 during this period.</source>
+        <translation>В %1 за этот период ничего не пришло.</translation>
+    </message>
+    <message>
+        <source>Show the whole period</source>
+        <translation>Показать весь период</translation>
+    </message>
+    <message>
+        <source>Remove %1</source>
+        <translation>Убрать %1</translation>
+    </message>
+    <message>
+        <source>Turn on live tail</source>
+        <translation>Включить live</translation>
+    </message>
+    <message>
+        <source>No entries — the request failed</source>
+        <translation>Записей нет — запрос не выполнен</translation>
     </message>
 </context>
 <context>
@@ -1093,10 +1568,6 @@
     <message>
         <source>Query name</source>
         <translation>Название запроса</translation>
-    </message>
-    <message>
-        <source>Save current</source>
-        <translation>Сохранить текущий</translation>
     </message>
     <message>
         <source>%1: %2</source>
@@ -1119,10 +1590,6 @@
         <translation>Удалить</translation>
     </message>
     <message>
-        <source>No saved queries yet. Name the current search and press “Save current”.</source>
-        <translation>Сохранённых запросов пока нет. Назовите текущий поиск и нажмите «Сохранить текущий».</translation>
-    </message>
-    <message>
         <source>No recent searches.</source>
         <translation>Недавних запросов нет.</translation>
     </message>
@@ -1137,6 +1604,78 @@
     <message>
         <source>Clear history</source>
         <translation>Очистить историю</translation>
+    </message>
+    <message>
+        <source>Query “%1” saved · Ctrl+%2</source>
+        <translation>Запрос «%1» сохранён · Ctrl+%2</translation>
+    </message>
+    <message>
+        <source>Query “%1” saved</source>
+        <translation>Запрос «%1» сохранён</translation>
+    </message>
+    <message>
+        <source>Name of the current query</source>
+        <translation>Название текущего запроса</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Заменить</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Сохранить</translation>
+    </message>
+    <message>
+        <source>Query “%1” already exists (No. %2). Saving replaces it.</source>
+        <translation>Запрос «%1» уже есть (№ %2). Сохранить — заменит его.</translation>
+    </message>
+    <message>
+        <source>Save the name</source>
+        <translation>Сохранить название</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>Copy the link to “%1”</source>
+        <translation>Скопировать ссылку на «%1»</translation>
+    </message>
+    <message>
+        <source>Link copied</source>
+        <translation>Ссылка скопирована</translation>
+    </message>
+    <message>
+        <source>Replace with the current query</source>
+        <translation>Заменить текущим запросом</translation>
+    </message>
+    <message>
+        <source>Query “%1” updated</source>
+        <translation>Запрос «%1» обновлён</translation>
+    </message>
+    <message>
+        <source>Move up</source>
+        <translation>Переместить выше</translation>
+    </message>
+    <message>
+        <source>Query “%1” deleted</source>
+        <translation>Запрос «%1» удалён</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Вернуть</translation>
+    </message>
+    <message>
+        <source>No saved queries yet</source>
+        <translation>Сохранённых запросов пока нет</translation>
+    </message>
+    <message>
+        <source>Name the current search and press “Save”. The first nine run with Ctrl+1…Ctrl+9.</source>
+        <translation>Назовите текущий поиск и нажмите «Сохранить». Первые девять запускаются по Ctrl+1…Ctrl+9.</translation>
+    </message>
+    <message>
+        <source>Last 50 searches</source>
+        <translation>Последние 50 поисков</translation>
     </message>
 </context>
 <context>
@@ -1173,6 +1712,10 @@
         <source>Patterns</source>
         <translation>Шаблоны</translation>
     </message>
+    <message>
+        <source>Close the quote</source>
+        <translation>Закрыть кавычку</translation>
+    </message>
 </context>
 <context>
     <name>SearchBox</name>
@@ -1187,10 +1730,6 @@
     <message>
         <source>Clear search</source>
         <translation>Очистить поиск</translation>
-    </message>
-    <message>
-        <source>Suggestions</source>
-        <translation>Подсказки</translation>
     </message>
     <message>
         <source>Field %1</source>
@@ -1220,6 +1759,30 @@
         <source>Recent searches</source>
         <translation>Недавние запросы</translation>
     </message>
+    <message numerus="yes">
+        <source>%1 · %n value(s)</source>
+        <translation>
+            <numerusform>%1 · %n значение</numerusform>
+            <numerusform>%1 · %n значения</numerusform>
+            <numerusform>%1 · %n значений</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Fields</source>
+        <translation>Поля</translation>
+    </message>
+    <message>
+        <source>↑ ↓ choose · Enter search · Esc close</source>
+        <translation>↑ ↓ выбрать · Enter искать · Esc закрыть</translation>
+    </message>
+    <message>
+        <source>Enter show only · Shift+Enter exclude · Esc close</source>
+        <translation>Enter показать только · Shift+Enter исключить · Esc закрыть</translation>
+    </message>
+    <message>
+        <source>Tab complete · Enter search as typed · Esc close</source>
+        <translation>Tab дополнить · Enter искать как есть · Esc закрыть</translation>
+    </message>
 </context>
 <context>
     <name>Session</name>
@@ -1234,6 +1797,22 @@
     <message>
         <source>Pattern: %1</source>
         <translation>Шаблон: %1</translation>
+    </message>
+    <message>
+        <source>A quote is not closed — the search was not run</source>
+        <translation>Не закрыта кавычка — поиск не запущен</translation>
+    </message>
+    <message>
+        <source>A quote after %1: is not closed — the search was not run</source>
+        <translation>Не закрыта кавычка после %1: — поиск не запущен</translation>
+    </message>
+    <message>
+        <source>The regular expression for %1 is not valid — the search was not run</source>
+        <translation>Неверное регулярное выражение для %1 — поиск не запущен</translation>
+    </message>
+    <message>
+        <source>%1: has no value — the search was not run</source>
+        <translation>У %1: нет значения — поиск не запущен</translation>
     </message>
 </context>
 <context>
@@ -1271,8 +1850,8 @@
         <translation>Подключения к Grafana</translation>
     </message>
     <message>
-        <source>Close (Esc)</source>
-        <translation>Закрыть (Esc)</translation>
+        <source>Close</source>
+        <translation>Закрыть</translation>
     </message>
 </context>
 <context>
@@ -1367,6 +1946,34 @@
     <message>
         <source>Labels: %1 / %2 (found automatically)</source>
         <translation>Метки: %1 / %2 (найдены автоматически)</translation>
+    </message>
+    <message>
+        <source>No namespace or app “%1” in %2</source>
+        <translation>В %2 нет namespace или приложения «%1»</translation>
+    </message>
+    <message>
+        <source>Check the spelling or search in another environment.</source>
+        <translation>Проверьте написание или поищите в другом окружении.</translation>
+    </message>
+    <message>
+        <source>Search in %1</source>
+        <translation>Искать в %1</translation>
+    </message>
+    <message>
+        <source>Choose the labels</source>
+        <translation>Выбрать метки</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Повторить</translation>
+    </message>
+    <message>
+        <source>Connection settings</source>
+        <translation>Настройки подключения</translation>
+    </message>
+    <message>
+        <source>Finding namespaces and apps in %1…</source>
+        <translation>Ищем namespace и приложения в %1…</translation>
     </message>
 </context>
 <context>
@@ -1545,10 +2152,6 @@
         <translation>Обновить</translation>
     </message>
     <message>
-        <source>Refresh (F5)</source>
-        <translation>Обновить (F5)</translation>
-    </message>
-    <message>
         <source>Auto refresh: every %1</source>
         <translation>Автообновление: каждые %1</translation>
     </message>
@@ -1585,10 +2188,6 @@
         <translation>Пауза</translation>
     </message>
     <message>
-        <source>Pause / resume (Space)</source>
-        <translation>Пауза / продолжить (пробел)</translation>
-    </message>
-    <message>
         <source>Leave live</source>
         <translation>Выйти из live</translation>
     </message>
@@ -1602,12 +2201,83 @@
         <translation>Ссылка на текущую выборку</translation>
     </message>
     <message>
-        <source>Switch theme</source>
-        <translation>Переключить тему</translation>
-    </message>
-    <message>
         <source>Settings</source>
         <translation>Настройки</translation>
+    </message>
+    <message>
+        <source>Connect Grafana to start</source>
+        <translation>Подключите Grafana, чтобы начать</translation>
+    </message>
+    <message>
+        <source>%1 / %2 — change the source</source>
+        <translation>%1 / %2 — сменить источник</translation>
+    </message>
+    <message>
+        <source>%1 – %2</source>
+        <translation>%1 – %2</translation>
+    </message>
+    <message>
+        <source>Stop loading</source>
+        <translation>Остановить загрузку</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Остановить</translation>
+    </message>
+    <message>
+        <source>Every minute</source>
+        <translation>Каждую минуту</translation>
+    </message>
+    <message>
+        <source>A fixed period needs no auto refresh</source>
+        <translation>Для фиксированного периода автообновление не нужно</translation>
+    </message>
+    <message numerus="yes">
+        <source>PAUSED · %n new</source>
+        <translation>
+            <numerusform>ПАУЗА · %n новая</numerusform>
+            <numerusform>ПАУЗА · %n новых</numerusform>
+            <numerusform>ПАУЗА · %n новых</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>PAUSED</source>
+        <translation>ПАУЗА</translation>
+    </message>
+    <message>
+        <source>Pause / resume</source>
+        <translation>Пауза / продолжить</translation>
+    </message>
+    <message>
+        <source>Space</source>
+        <translation>Пробел</translation>
+    </message>
+    <message>
+        <source>Light theme</source>
+        <translation>Светлая тема</translation>
+    </message>
+    <message>
+        <source>Dark theme</source>
+        <translation>Тёмная тема</translation>
+    </message>
+</context>
+<context>
+    <name>UnsavedChangesDialog</name>
+    <message>
+        <source>Without saving they are lost.</source>
+        <translation>Без сохранения они будут потеряны.</translation>
+    </message>
+    <message>
+        <source>Don&apos;t save</source>
+        <translation>Не сохранять</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Сохранить</translation>
     </message>
 </context>
 </TS>

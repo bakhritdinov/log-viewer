@@ -4,12 +4,160 @@
 <context>
     <name>AboutPage</name>
     <message>
-        <source>Version</source>
-        <translation>Versiya</translation>
-    </message>
-    <message>
         <source>Clear search history</source>
         <translation>Qidiruv tarixini tozalash</translation>
+    </message>
+    <message>
+        <source>Desktop · %1</source>
+        <translation>Desktop · %1</translation>
+    </message>
+    <message>
+        <source>Checking for updates…</source>
+        <translation>Yangilanishlar tekshirilmoqda…</translation>
+    </message>
+    <message>
+        <source>You have the latest version · checked %1</source>
+        <translation>Sizda oxirgi versiya · %1 da tekshirildi</translation>
+    </message>
+    <message>
+        <source>You have the latest version</source>
+        <translation>Sizda oxirgi versiya</translation>
+    </message>
+    <message>
+        <source>Version %1 is available</source>
+        <translation>%1 versiyasi mavjud</translation>
+    </message>
+    <message>
+        <source>Downloading %1 · %2 of %3 MB</source>
+        <translation>%1 yuklanmoqda · %3 MB dan %2</translation>
+    </message>
+    <message>
+        <source>Version %1 installs on restart</source>
+        <translation>%1 versiyasi qayta ishga tushirishda oʻrnatiladi</translation>
+    </message>
+    <message>
+        <source>Could not check: %1</source>
+        <translation>Tekshirib boʻlmadi: %1</translation>
+    </message>
+    <message>
+        <source>Updates come from GitHub Releases</source>
+        <translation>Yangilanishlar GitHub Releases dan keladi</translation>
+    </message>
+    <message>
+        <source>Check for updates</source>
+        <translation>Yangilanishlarni tekshirish</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Qayta urinish</translation>
+    </message>
+    <message>
+        <source>Check again</source>
+        <translation>Yana tekshirish</translation>
+    </message>
+    <message>
+        <source>Download and install</source>
+        <translation>Yuklab olish va oʻrnatish</translation>
+    </message>
+    <message>
+        <source>Open the release page</source>
+        <translation>Reliz sahifasini ochish</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Bekor qilish</translation>
+    </message>
+    <message>
+        <source>Restart</source>
+        <translation>Qayta ishga tushirish</translation>
+    </message>
+    <message>
+        <source>Check for updates at start-up</source>
+        <translation>Ishga tushganda yangilanishlarni tekshirish</translation>
+    </message>
+    <message>
+        <source>Data on this device</source>
+        <translation>Ushbu qurilmadagi maʼlumotlar</translation>
+    </message>
+    <message>
+        <source>Saved queries · %1</source>
+        <translation>Saqlangan soʻrovlar · %1</translation>
+    </message>
+    <message>
+        <source>Export…</source>
+        <translation>Eksport…</translation>
+    </message>
+    <message>
+        <source>Import…</source>
+        <translation>Import…</translation>
+    </message>
+    <message numerus="yes">
+        <source>Search history · %n search(es)</source>
+        <translation>
+            <numerusform>Qidiruv tarixi · %n ta soʻrov</numerusform>
+            <numerusform>Qidiruv tarixi · %n ta soʻrov</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Export saved queries</source>
+        <translation>Saqlangan soʻrovlarni eksport qilish</translation>
+    </message>
+    <message>
+        <source>JSON files (*.json)</source>
+        <translation>JSON fayllar (*.json)</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n query(ies) exported</source>
+        <translation>
+            <numerusform>%n ta soʻrov eksport qilindi</numerusform>
+            <numerusform>%n ta soʻrov eksport qilindi</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Could not write the file</source>
+        <translation>Faylni yozib boʻlmadi</translation>
+    </message>
+    <message>
+        <source>Import saved queries</source>
+        <translation>Saqlangan soʻrovlarni import qilish</translation>
+    </message>
+    <message>
+        <source>Add the queries from the file to yours, or replace yours with them?</source>
+        <translation>Fayldagi soʻrovlarni sizniklariga qoʻshishmi yoki ular bilan almashtirishmi?</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Qoʻshish</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Almashtirish</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n query(ies) added</source>
+        <translation>
+            <numerusform>%n ta soʻrov qoʻshildi</numerusform>
+            <numerusform>%n ta soʻrov qoʻshildi</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>This is not a file of saved queries</source>
+        <translation>Bu saqlangan soʻrovlar fayli emas</translation>
+    </message>
+    <message>
+        <source>Clear the search history?</source>
+        <translation>Qidiruv tarixi tozalansinmi?</translation>
+    </message>
+    <message numerus="yes">
+        <source>The %n recent search(es) are removed from this device. Saved queries stay.</source>
+        <translation>
+            <numerusform>%n ta soʻnggi qidiruv ushbu qurilmadan oʻchiriladi. Saqlangan soʻrovlar qoladi.</numerusform>
+            <numerusform>%n ta soʻnggi qidiruv ushbu qurilmadan oʻchiriladi. Saqlangan soʻrovlar qoladi.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Clear history</source>
+        <translation>Tarixni tozalash</translation>
     </message>
 </context>
 <context>
@@ -46,16 +194,32 @@
 <context>
     <name>AppearancePage</name>
     <message>
-        <source>Dark theme</source>
-        <translation>Qorongʻi mavzu</translation>
-    </message>
-    <message>
         <source>Pretty JSON in details</source>
         <translation>Tafsilotlarda chiroyli JSON</translation>
     </message>
     <message>
         <source>Format messages that are JSON</source>
         <translation>JSON xabarlarni formatlash</translation>
+    </message>
+    <message>
+        <source>Theme</source>
+        <translation>Mavzu</translation>
+    </message>
+    <message>
+        <source>Dark</source>
+        <translation>Qorongʻi</translation>
+    </message>
+    <message>
+        <source>Light</source>
+        <translation>Yorugʻ</translation>
+    </message>
+    <message>
+        <source>The theme changes at once. The moon/sun button in the top bar switches the same.</source>
+        <translation>Mavzu darhol oʻzgaradi. Yuqori paneldagi oy/quyosh tugmasi ham xuddi shuni almashtiradi.</translation>
+    </message>
+    <message>
+        <source>Messages</source>
+        <translation>Xabarlar</translation>
     </message>
 </context>
 <context>
@@ -67,6 +231,13 @@
     <message>
         <source>Next month</source>
         <translation>Keyingi oy</translation>
+    </message>
+</context>
+<context>
+    <name>ChoiceDialog</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Bekor qilish</translation>
     </message>
 </context>
 <context>
@@ -186,6 +357,70 @@
         <source>Show</source>
         <translation>Koʻrsatish</translation>
     </message>
+    <message>
+        <source>New</source>
+        <translation>Yangi</translation>
+    </message>
+    <message>
+        <source>The only environment cannot be deleted</source>
+        <translation>Yagona muhitni oʻchirib boʻlmaydi</translation>
+    </message>
+    <message>
+        <source>Save without the test</source>
+        <translation>Tekshirmasdan saqlash</translation>
+    </message>
+    <message>
+        <source>Save the new environment?</source>
+        <translation>Yangi muhit saqlansinmi?</translation>
+    </message>
+    <message>
+        <source>Save the changes to %1?</source>
+        <translation>%1 dagi oʻzgarishlar saqlansinmi?</translation>
+    </message>
+    <message>
+        <source>Advanced</source>
+        <translation>Qoʻshimcha</translation>
+    </message>
+    <message>
+        <source>Namespace label</source>
+        <translation>Namespace belgisi</translation>
+    </message>
+    <message>
+        <source>found automatically</source>
+        <translation>avtomatik aniqlanadi</translation>
+    </message>
+    <message>
+        <source>App label</source>
+        <translation>Ilova belgisi</translation>
+    </message>
+    <message>
+        <source>Empty fields: the labels are found automatically (_namespace / _appName and similar). Set both when your logs use other labels, e.g. kubernetes_namespace and app.</source>
+        <translation>Boʻsh maydonlar — belgilar avtomatik aniqlanadi (_namespace / _appName va oʻxshashlar). Loglaringizda boshqa belgilar boʻlsa, ikkalasini ham kiriting, masalan kubernetes_namespace va app.</translation>
+    </message>
+    <message>
+        <source>Find automatically</source>
+        <translation>Avtomatik aniqlash</translation>
+    </message>
+    <message>
+        <source>Server responds · %1 ms</source>
+        <translation>Server javob bermoqda · %1 ms</translation>
+    </message>
+    <message>
+        <source>Connecting to the server…</source>
+        <translation>Serverga ulanilmoqda…</translation>
+    </message>
+    <message>
+        <source>Login and datasource accepted</source>
+        <translation>Kirish va maʼlumot manbasi qabul qilindi</translation>
+    </message>
+    <message>
+        <source>Finding namespaces and apps</source>
+        <translation>Namespace va ilovalar qidirilmoqda</translation>
+    </message>
+    <message>
+        <source>Cancel the test</source>
+        <translation>Tekshiruvni bekor qilish</translation>
+    </message>
 </context>
 <context>
     <name>DetailsPanel</name>
@@ -218,10 +453,6 @@
         <translation>Treys ±5 daq</translation>
     </message>
     <message>
-        <source>The entry has no trace id</source>
-        <translation>Yozuvda trace id yoʻq</translation>
-    </message>
-    <message>
         <source>Context ±1 min</source>
         <translation>Kontekst ±1 daq</translation>
     </message>
@@ -240,6 +471,30 @@
     <message>
         <source>+ include · − exclude</source>
         <translation>+ qoʻshish · − chiqarish</translation>
+    </message>
+    <message>
+        <source>min. %1</source>
+        <translation>min. %1</translation>
+    </message>
+    <message>
+        <source>%1 px</source>
+        <translation>%1 px</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>Nusxalandi</translation>
+    </message>
+    <message>
+        <source>Trace</source>
+        <translation>Treys</translation>
+    </message>
+    <message>
+        <source>The entry has no trace_id</source>
+        <translation>Yozuvda trace_id yoʻq</translation>
+    </message>
+    <message>
+        <source>Context</source>
+        <translation>Kontekst</translation>
     </message>
 </context>
 <context>
@@ -273,6 +528,10 @@
     <message>
         <source>Connecting…</source>
         <translation>Ulanmoqda…</translation>
+    </message>
+    <message>
+        <source>Give both labels or neither (then they are found automatically).</source>
+        <translation>Ikkala belgini ham kiriting yoki hech birini (unda ular avtomatik aniqlanadi).</translation>
     </message>
 </context>
 <context>
@@ -450,6 +709,13 @@
         <source>Exclude %1</source>
         <translation>%1 ni chiqarib tashlash</translation>
     </message>
+    <message numerus="yes">
+        <source>%n more value(s)…</source>
+        <translation>
+            <numerusform>Yana %n ta qiymat…</numerusform>
+            <numerusform>Yana %n ta qiymat…</numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>FieldRow</name>
@@ -491,6 +757,14 @@
     <message>
         <source>Search fields</source>
         <translation>Maydonlardan qidirish</translation>
+    </message>
+    <message>
+        <source>No fields or values with “%1”.</source>
+        <translation>«%1» boʻlgan maydon yoki qiymat yoʻq.</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Tozalash</translation>
     </message>
 </context>
 <context>
@@ -569,6 +843,30 @@
         <source>Open as search</source>
         <translation>Qidiruv sifatida ochish</translation>
     </message>
+    <message>
+        <source>No other entries with trace_id %1 within ±5 min</source>
+        <translation>±5 daqiqada trace_id %1 bilan boshqa yozuvlar yoʻq</translation>
+    </message>
+    <message>
+        <source>No entries around %1</source>
+        <translation>%1 atrofida yozuvlar yoʻq</translation>
+    </message>
+    <message>
+        <source>Other services may write the trace id into another field.</source>
+        <translation>Boshqa servislar trace id ni boshqa maydonga yozishi mumkin.</translation>
+    </message>
+    <message>
+        <source>Try a wider window.</source>
+        <translation>Kengroq oynani sinab koʻring.</translation>
+    </message>
+    <message>
+        <source>Show the context</source>
+        <translation>Kontekstni koʻrsatish</translation>
+    </message>
+    <message>
+        <source>Widen to ±5 min</source>
+        <translation>±5 daqiqagacha kengaytirish</translation>
+    </message>
 </context>
 <context>
     <name>HistogramPanel</name>
@@ -634,6 +932,10 @@
         <source>WARN %1</source>
         <translation>WARN %1</translation>
     </message>
+    <message>
+        <source>Click to show only this interval</source>
+        <translation>bosing — faqat shu oraliqni koʻrsatish</translation>
+    </message>
 </context>
 <context>
     <name>LanguagePage</name>
@@ -667,16 +969,28 @@
 <context>
     <name>LinkBanner</name>
     <message>
-        <source>Opened from a link: %1 · %2 / %3 · %4</source>
-        <translation>Havoladan ochildi: %1 · %2 / %3 · %4</translation>
-    </message>
-    <message>
         <source>Save as query</source>
         <translation>Soʻrov sifatida saqlash</translation>
     </message>
     <message>
         <source>Back to my selection</source>
         <translation>Oʻz tanlovimga qaytish</translation>
+    </message>
+    <message>
+        <source>The link leads to the environment “%1”, which is not set up here. Add an environment with this name and the link opens.</source>
+        <translation>Havola bu yerda sozlanmagan «%1» muhitiga olib boradi. Shu nomli muhit qoʻshing — havola oʻzi ochiladi.</translation>
+    </message>
+    <message>
+        <source>From a link: &lt;b&gt;%1&lt;/b&gt; · %2 / %3 · %4</source>
+        <translation>Havoladan: &lt;b&gt;%1&lt;/b&gt; · %2 / %3 · %4</translation>
+    </message>
+    <message>
+        <source>Add environment %1</source>
+        <translation>%1 muhitini qoʻshish</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Yopish</translation>
     </message>
 </context>
 <context>
@@ -699,6 +1013,38 @@
     <message>
         <source>Space — pause / resume</source>
         <translation>Probel — pauza / davom</translation>
+    </message>
+    <message>
+        <source>Waiting for new entries of %1</source>
+        <translation>%1 ning yangi yozuvlari kutilmoqda</translation>
+    </message>
+    <message>
+        <source>Checking every 2 s. Entries that arrive after live tail was turned on are shown.</source>
+        <translation>Har 2 s da tekshiriladi. Live yoqilgandan keyin kelgan yozuvlar koʻrsatiladi.</translation>
+    </message>
+    <message>
+        <source>Stream interrupted</source>
+        <translation>Oqim uzildi</translation>
+    </message>
+    <message>
+        <source>Streaming · ~%1 lines/s</source>
+        <translation>Oqim davom etmoqda · ~%1 qator/s</translation>
+    </message>
+    <message>
+        <source>Paused: an entry is open</source>
+        <translation>Pauza: yozuv ochiq</translation>
+    </message>
+    <message>
+        <source>Paused · new entries are buffered</source>
+        <translation>Pauza · yangi yozuvlar yigʻilmoqda</translation>
+    </message>
+    <message>
+        <source>Buffer full: %1 lines, the oldest are dropped</source>
+        <translation>Bufer toʻla: %1 qator, eskilari oʻchiriladi</translation>
+    </message>
+    <message>
+        <source>Esc — close and resume</source>
+        <translation>Esc — yopish va davom ettirish</translation>
     </message>
 </context>
 <context>
@@ -726,6 +1072,13 @@
     <message>
         <source>%1 %2 %3</source>
         <translation>%1 %2 %3</translation>
+    </message>
+    <message numerus="yes">
+        <source>↵ +%n line(s)</source>
+        <translation>
+            <numerusform>↵ +%n qator</numerusform>
+            <numerusform>↵ +%n qator</numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -795,10 +1148,6 @@
         <translation>Barcha tezkor tugmalar</translation>
     </message>
     <message>
-        <source>The link points to the environment “%1”, which is not set up here.</source>
-        <translation>Havola bu yerda sozlanmagan «%1» muhitiga olib boradi.</translation>
-    </message>
-    <message>
         <source>The filter applies to the stream on the fly</source>
         <translation>Filtr oqimga darhol qoʻllanadi</translation>
     </message>
@@ -822,6 +1171,26 @@
         <source>all keys</source>
         <translation>barcha tugmalar</translation>
     </message>
+    <message>
+        <source>General</source>
+        <translation>Umumiy</translation>
+    </message>
+    <message>
+        <source>Complete the suggestion</source>
+        <translation>Taklifni toʻldirish</translation>
+    </message>
+    <message>
+        <source>Table and details</source>
+        <translation>Jadval va tafsilotlar</translation>
+    </message>
+    <message>
+        <source>Stop loading</source>
+        <translation>Yuklashni toʻxtatish</translation>
+    </message>
+    <message>
+        <source>Live tail</source>
+        <translation>Live tail</translation>
+    </message>
 </context>
 <context>
     <name>MessageView</name>
@@ -837,24 +1206,8 @@
         <translation>Yuklangan yozuvlar: %1…</translation>
     </message>
     <message>
-        <source>Showing %1–%2 of %3 loaded</source>
-        <translation>Yuklangan %3 tadan %1–%2 koʻrsatilgan</translation>
-    </message>
-    <message>
-        <source>%1 · the period has more</source>
-        <translation>%1 · davrda yana bor</translation>
-    </message>
-    <message>
         <source>Stop</source>
         <translation>Toʻxtatish</translation>
-    </message>
-    <message>
-        <source>First page (Shift+[)</source>
-        <translation>Birinchi sahifa (Shift+[)</translation>
-    </message>
-    <message>
-        <source>Newer ([)</source>
-        <translation>Yangiroq ([)</translation>
     </message>
     <message>
         <source>Page</source>
@@ -869,16 +1222,56 @@
         <translation>/ %1</translation>
     </message>
     <message>
-        <source>Older (])</source>
-        <translation>Eskiroq (])</translation>
-    </message>
-    <message>
-        <source>Last page (Shift+])</source>
-        <translation>Oxirgi sahifa (Shift+])</translation>
-    </message>
-    <message>
         <source>Load %1 more</source>
         <translation>Yana %1 ta yuklash</translation>
+    </message>
+    <message>
+        <source>Requesting entries for “%1”…</source>
+        <translation>«%1» uchun yozuvlar soʻralmoqda…</translation>
+    </message>
+    <message>
+        <source>Stopped at %1 entries · the period has more</source>
+        <translation>%1 ta yozuvda toʻxtatildi · davrda yana bor</translation>
+    </message>
+    <message>
+        <source>%1–%2 / %3</source>
+        <translation>%1–%2 / %3</translation>
+    </message>
+    <message>
+        <source>Showing %1–%2 of %3 loaded · the period has more</source>
+        <translation>Yuklangan %3 tadan %1–%2 koʻrsatilgan · davrda yana bor</translation>
+    </message>
+    <message>
+        <source>Showing %1–%2 of %3 · all entries of the period</source>
+        <translation>%3 tadan %1–%2 koʻrsatilgan · bu davrdagi barcha yozuvlar</translation>
+    </message>
+    <message>
+        <source>Showing %1–%2 of %3</source>
+        <translation>%3 tadan %1–%2 koʻrsatilgan</translation>
+    </message>
+    <message>
+        <source>First page</source>
+        <translation>Birinchi sahifa</translation>
+    </message>
+    <message>
+        <source>Newer</source>
+        <translation>Yangiroq</translation>
+    </message>
+    <message>
+        <source>Older</source>
+        <translation>Eskiroq</translation>
+    </message>
+    <message>
+        <source>Last page</source>
+        <translation>Oxirgi sahifa</translation>
+    </message>
+    <message>
+        <source>Continue loading</source>
+        <translation>Yuklashni davom ettirish</translation>
+    </message>
+    <message>
+        <source>%1 more</source>
+        <translation>Yana %1</translation>
     </message>
 </context>
 <context>
@@ -905,10 +1298,6 @@
     <message>
         <source>by first appearance</source>
         <translation>birinchi paydo boʻlishi boʻyicha</translation>
-    </message>
-    <message>
-        <source>by level</source>
-        <translation>daraja boʻyicha</translation>
     </message>
     <message>
         <source>Sort patterns: %1</source>
@@ -947,10 +1336,6 @@
         <source>Variable values</source>
         <translation>Oʻzgaruvchilar qiymatlari</translation>
     </message>
-    <message>
-        <source>* #%1: %2</source>
-        <translation>* №%1: %2</translation>
-    </message>
     <message numerus="yes">
         <source>Show %n entries</source>
         <translation>
@@ -961,6 +1346,57 @@
     <message>
         <source>Exclude the pattern</source>
         <translation>Shablonni chiqarib tashlash</translation>
+    </message>
+    <message>
+        <source>by last appearance</source>
+        <translation>oxirgi paydo boʻlishi boʻyicha</translation>
+    </message>
+    <message>
+        <source>by level (ERROR first)</source>
+        <translation>daraja boʻyicha (avval ERROR)</translation>
+    </message>
+    <message>
+        <source>No repeated messages</source>
+        <translation>Takrorlanuvchi xabarlar yoʻq</translation>
+    </message>
+    <message>
+        <source>No WARN or ERROR among the loaded entries</source>
+        <translation>Yuklangan yozuvlarda WARN va ERROR yoʻq</translation>
+    </message>
+    <message numerus="yes">
+        <source>All %n warnings and errors occur once.</source>
+        <translation>
+            <numerusform>Barcha %n ta ogohlantirish va xato bir martadan uchraydi.</numerusform>
+            <numerusform>Barcha %n ta ogohlantirish va xato bir martadan uchraydi.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Patterns are built from warnings and errors only.</source>
+        <translation>Shablonlar faqat ogohlantirish va xatolardan tuziladi.</translation>
+    </message>
+    <message>
+        <source>To the entries</source>
+        <translation>Yozuvlarga</translation>
+    </message>
+    <message>
+        <source>*%1  %2</source>
+        <translation>*%1  %2</translation>
+    </message>
+    <message>
+        <source>Copy the pattern</source>
+        <translation>Shablonni nusxalash</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>Nusxalandi</translation>
+    </message>
+    <message>
+        <source>Hide one-offs</source>
+        <translation>Yakkalarini yashirish</translation>
+    </message>
+    <message>
+        <source>Show one-offs</source>
+        <translation>Yakkalarini koʻrsatish</translation>
     </message>
 </context>
 <context>
@@ -1045,24 +1481,56 @@
         <translation>Soʻrov boʻyicha yozuv yoʻq</translation>
     </message>
     <message>
-        <source>Choose a namespace and an app.</source>
-        <translation>Namespace va ilovani tanlang.</translation>
-    </message>
-    <message>
-        <source>Nothing in %1 for the period “%2”.</source>
-        <translation>%1 da «%2» davri uchun yozuv yoʻq.</translation>
-    </message>
-    <message>
         <source>Widen to 24 hours</source>
         <translation>24 soatgacha kengaytirish</translation>
     </message>
     <message>
-        <source>Remove the %1 filter</source>
-        <translation>%1 filtrini olib tashlash</translation>
-    </message>
-    <message>
         <source>Clear the search</source>
         <translation>Qidiruvni tozalash</translation>
+    </message>
+    <message>
+        <source>Choose a source</source>
+        <translation>Manbani tanlang</translation>
+    </message>
+    <message>
+        <source>Nothing in the picked interval</source>
+        <translation>Tanlangan oraliqda hech narsa yoʻq</translation>
+    </message>
+    <message>
+        <source>No entries for “%1”</source>
+        <translation>«%1» uchun yozuvlar yoʻq</translation>
+    </message>
+    <message>
+        <source>Pick a namespace and an app to see their logs.</source>
+        <translation>Loglarini koʻrish uchun namespace va ilovani tanlang.</translation>
+    </message>
+    <message>
+        <source>%1 holds no entries of this level.</source>
+        <translation>%1 oraligʻida bu darajadagi yozuvlar yoʻq.</translation>
+    </message>
+    <message>
+        <source>For “%1” there are no entries in %2 matching %3.</source>
+        <translation>«%1» davomida %2 da %3 soʻroviga mos qatorlar yoʻq.</translation>
+    </message>
+    <message>
+        <source>Nothing came from %1 during this period.</source>
+        <translation>Bu davrda %1 dan hech narsa kelmadi.</translation>
+    </message>
+    <message>
+        <source>Show the whole period</source>
+        <translation>Butun davrni koʻrsatish</translation>
+    </message>
+    <message>
+        <source>Remove %1</source>
+        <translation>%1 ni olib tashlash</translation>
+    </message>
+    <message>
+        <source>Turn on live tail</source>
+        <translation>Live ni yoqish</translation>
+    </message>
+    <message>
+        <source>No entries — the request failed</source>
+        <translation>Yozuvlar yoʻq — soʻrov bajarilmadi</translation>
     </message>
 </context>
 <context>
@@ -1082,10 +1550,6 @@
     <message>
         <source>Query name</source>
         <translation>Soʻrov nomi</translation>
-    </message>
-    <message>
-        <source>Save current</source>
-        <translation>Joriyni saqlash</translation>
     </message>
     <message>
         <source>%1: %2</source>
@@ -1108,10 +1572,6 @@
         <translation>Oʻchirish</translation>
     </message>
     <message>
-        <source>No saved queries yet. Name the current search and press “Save current”.</source>
-        <translation>Hozircha saqlangan soʻrovlar yoʻq. Joriy qidiruvga nom bering va «Joriyni saqlash» ni bosing.</translation>
-    </message>
-    <message>
         <source>No recent searches.</source>
         <translation>Soʻnggi qidiruvlar yoʻq.</translation>
     </message>
@@ -1126,6 +1586,78 @@
     <message>
         <source>Clear history</source>
         <translation>Tarixni tozalash</translation>
+    </message>
+    <message>
+        <source>Query “%1” saved · Ctrl+%2</source>
+        <translation>«%1» soʻrovi saqlandi · Ctrl+%2</translation>
+    </message>
+    <message>
+        <source>Query “%1” saved</source>
+        <translation>«%1» soʻrovi saqlandi</translation>
+    </message>
+    <message>
+        <source>Name of the current query</source>
+        <translation>Joriy soʻrov nomi</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Almashtirish</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Saqlash</translation>
+    </message>
+    <message>
+        <source>Query “%1” already exists (No. %2). Saving replaces it.</source>
+        <translation>«%1» soʻrovi allaqachon bor (№ %2). Saqlash uni almashtiradi.</translation>
+    </message>
+    <message>
+        <source>Save the name</source>
+        <translation>Nomni saqlash</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Bekor qilish</translation>
+    </message>
+    <message>
+        <source>Copy the link to “%1”</source>
+        <translation>«%1» havolasini nusxalash</translation>
+    </message>
+    <message>
+        <source>Link copied</source>
+        <translation>Havola nusxalandi</translation>
+    </message>
+    <message>
+        <source>Replace with the current query</source>
+        <translation>Joriy soʻrov bilan almashtirish</translation>
+    </message>
+    <message>
+        <source>Query “%1” updated</source>
+        <translation>«%1» soʻrovi yangilandi</translation>
+    </message>
+    <message>
+        <source>Move up</source>
+        <translation>Yuqoriga koʻchirish</translation>
+    </message>
+    <message>
+        <source>Query “%1” deleted</source>
+        <translation>«%1» soʻrovi oʻchirildi</translation>
+    </message>
+    <message>
+        <source>Undo</source>
+        <translation>Qaytarish</translation>
+    </message>
+    <message>
+        <source>No saved queries yet</source>
+        <translation>Saqlangan soʻrovlar hali yoʻq</translation>
+    </message>
+    <message>
+        <source>Name the current search and press “Save”. The first nine run with Ctrl+1…Ctrl+9.</source>
+        <translation>Joriy qidiruvga nom bering va «Saqlash» ni bosing. Birinchi toʻqqiztasi Ctrl+1…Ctrl+9 bilan ishga tushadi.</translation>
+    </message>
+    <message>
+        <source>Last 50 searches</source>
+        <translation>Oxirgi 50 ta qidiruv</translation>
     </message>
 </context>
 <context>
@@ -1162,6 +1694,10 @@
         <source>Patterns</source>
         <translation>Shablonlar</translation>
     </message>
+    <message>
+        <source>Close the quote</source>
+        <translation>Qoʻshtirnoqni yopish</translation>
+    </message>
 </context>
 <context>
     <name>SearchBox</name>
@@ -1176,10 +1712,6 @@
     <message>
         <source>Clear search</source>
         <translation>Qidiruvni tozalash</translation>
-    </message>
-    <message>
-        <source>Suggestions</source>
-        <translation>Takliflar</translation>
     </message>
     <message>
         <source>Field %1</source>
@@ -1208,6 +1740,29 @@
         <source>Recent searches</source>
         <translation>Soʻnggi qidiruvlar</translation>
     </message>
+    <message numerus="yes">
+        <source>%1 · %n value(s)</source>
+        <translation>
+            <numerusform>%1 · %n ta qiymat</numerusform>
+            <numerusform>%1 · %n ta qiymat</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Fields</source>
+        <translation>Maydonlar</translation>
+    </message>
+    <message>
+        <source>↑ ↓ choose · Enter search · Esc close</source>
+        <translation>↑ ↓ tanlash · Enter qidirish · Esc yopish</translation>
+    </message>
+    <message>
+        <source>Enter show only · Shift+Enter exclude · Esc close</source>
+        <translation>Enter faqat shuni · Shift+Enter chiqarib tashlash · Esc yopish</translation>
+    </message>
+    <message>
+        <source>Tab complete · Enter search as typed · Esc close</source>
+        <translation>Tab toʻldirish · Enter yozilganicha qidirish · Esc yopish</translation>
+    </message>
 </context>
 <context>
     <name>Session</name>
@@ -1222,6 +1777,22 @@
     <message>
         <source>Pattern: %1</source>
         <translation>Shablon: %1</translation>
+    </message>
+    <message>
+        <source>A quote is not closed — the search was not run</source>
+        <translation>Qoʻshtirnoq yopilmagan — qidiruv bajarilmadi</translation>
+    </message>
+    <message>
+        <source>A quote after %1: is not closed — the search was not run</source>
+        <translation>%1: dan keyingi qoʻshtirnoq yopilmagan — qidiruv bajarilmadi</translation>
+    </message>
+    <message>
+        <source>The regular expression for %1 is not valid — the search was not run</source>
+        <translation>%1 uchun muntazam ifoda notoʻgʻri — qidiruv bajarilmadi</translation>
+    </message>
+    <message>
+        <source>%1: has no value — the search was not run</source>
+        <translation>%1: qiymatsiz — qidiruv bajarilmadi</translation>
     </message>
 </context>
 <context>
@@ -1259,8 +1830,8 @@
         <translation>Grafana ulanishlari</translation>
     </message>
     <message>
-        <source>Close (Esc)</source>
-        <translation>Yopish (Esc)</translation>
+        <source>Close</source>
+        <translation>Yopish</translation>
     </message>
 </context>
 <context>
@@ -1354,6 +1925,34 @@
     <message>
         <source>Labels: %1 / %2 (found automatically)</source>
         <translation>Teglar: %1 / %2 (avtomatik topildi)</translation>
+    </message>
+    <message>
+        <source>No namespace or app “%1” in %2</source>
+        <translation>%2 da «%1» namespace yoki ilovasi yoʻq</translation>
+    </message>
+    <message>
+        <source>Check the spelling or search in another environment.</source>
+        <translation>Imloni tekshiring yoki boshqa muhitda qidiring.</translation>
+    </message>
+    <message>
+        <source>Search in %1</source>
+        <translation>%1 da qidirish</translation>
+    </message>
+    <message>
+        <source>Choose the labels</source>
+        <translation>Belgilarni tanlash</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Qayta urinish</translation>
+    </message>
+    <message>
+        <source>Connection settings</source>
+        <translation>Ulanish sozlamalari</translation>
+    </message>
+    <message>
+        <source>Finding namespaces and apps in %1…</source>
+        <translation>%1 da namespace va ilovalar qidirilmoqda…</translation>
     </message>
 </context>
 <context>
@@ -1532,10 +2131,6 @@
         <translation>Yangilash</translation>
     </message>
     <message>
-        <source>Refresh (F5)</source>
-        <translation>Yangilash (F5)</translation>
-    </message>
-    <message>
         <source>Auto refresh: every %1</source>
         <translation>Avtoyangilash: har %1</translation>
     </message>
@@ -1572,10 +2167,6 @@
         <translation>Pauza</translation>
     </message>
     <message>
-        <source>Pause / resume (Space)</source>
-        <translation>Pauza / davom (probel)</translation>
-    </message>
-    <message>
         <source>Leave live</source>
         <translation>Live dan chiqish</translation>
     </message>
@@ -1589,12 +2180,82 @@
         <translation>Joriy tanlovga havola</translation>
     </message>
     <message>
-        <source>Switch theme</source>
-        <translation>Mavzuni almashtirish</translation>
-    </message>
-    <message>
         <source>Settings</source>
         <translation>Sozlamalar</translation>
+    </message>
+    <message>
+        <source>Connect Grafana to start</source>
+        <translation>Boshlash uchun Grafana ni ulang</translation>
+    </message>
+    <message>
+        <source>%1 / %2 — change the source</source>
+        <translation>%1 / %2 — manbani almashtirish</translation>
+    </message>
+    <message>
+        <source>%1 – %2</source>
+        <translation>%1 – %2</translation>
+    </message>
+    <message>
+        <source>Stop loading</source>
+        <translation>Yuklashni toʻxtatish</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Toʻxtatish</translation>
+    </message>
+    <message>
+        <source>Every minute</source>
+        <translation>Har daqiqada</translation>
+    </message>
+    <message>
+        <source>A fixed period needs no auto refresh</source>
+        <translation>Qatʼiy davr uchun avtoyangilash kerak emas</translation>
+    </message>
+    <message numerus="yes">
+        <source>PAUSED · %n new</source>
+        <translation>
+            <numerusform>PAUZA · %n ta yangi</numerusform>
+            <numerusform>PAUZA · %n ta yangi</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>PAUSED</source>
+        <translation>PAUZA</translation>
+    </message>
+    <message>
+        <source>Pause / resume</source>
+        <translation>Pauza / davom ettirish</translation>
+    </message>
+    <message>
+        <source>Space</source>
+        <translation>Probel</translation>
+    </message>
+    <message>
+        <source>Light theme</source>
+        <translation>Yorugʻ mavzu</translation>
+    </message>
+    <message>
+        <source>Dark theme</source>
+        <translation>Qorongʻi mavzu</translation>
+    </message>
+</context>
+<context>
+    <name>UnsavedChangesDialog</name>
+    <message>
+        <source>Without saving they are lost.</source>
+        <translation>Saqlanmasa, ular yoʻqoladi.</translation>
+    </message>
+    <message>
+        <source>Don&apos;t save</source>
+        <translation>Saqlamaslik</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Bekor qilish</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Saqlash</translation>
     </message>
 </context>
 </TS>
