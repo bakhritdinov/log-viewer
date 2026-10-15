@@ -1,0 +1,86 @@
+{
+  "source": "src/logs/qml/AppContent.qml@1e4c728",
+  "generator": "tools/characterize/gen-golden.mjs",
+  "cases": [
+    {
+      "input": {
+        "timeRange": "5m",
+        "customFrom": "",
+        "customTo": ""
+      },
+      "expected": 300
+    },
+    {
+      "input": {
+        "timeRange": "15m",
+        "customFrom": "",
+        "customTo": ""
+      },
+      "expected": 900
+    },
+    {
+      "input": {
+        "timeRange": "1h",
+        "customFrom": "",
+        "customTo": ""
+      },
+      "expected": 3600
+    },
+    {
+      "input": {
+        "timeRange": "24h",
+        "customFrom": "",
+        "customTo": ""
+      },
+      "expected": 86400
+    },
+    {
+      "input": {
+        "timeRange": "7d",
+        "customFrom": "",
+        "customTo": ""
+      },
+      "expected": 604800
+    },
+    {
+      "input": {
+        "timeRange": "90s",
+        "customFrom": "",
+        "customTo": ""
+      },
+      "expected": 90
+    },
+    {
+      "input": {
+        "timeRange": "bogus",
+        "customFrom": "",
+        "customTo": ""
+      },
+      "expected": 3600
+    },
+    {
+      "input": {
+        "timeRange": "Custom",
+        "customFrom": "2026-10-15T09:00:00Z",
+        "customTo": "2026-10-15T12:00:00Z"
+      },
+      "expected": 10800
+    },
+    {
+      "input": {
+        "timeRange": "Custom",
+        "customFrom": "2026-10-15T12:00:00Z",
+        "customTo": "2026-10-15T09:00:00Z"
+      },
+      "expected": 86400
+    },
+    {
+      "input": {
+        "timeRange": "Custom",
+        "customFrom": "",
+        "customTo": "2026-10-15T12:00:00Z"
+      },
+      "expected": 86400
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "source": "src/logs/qml/AppContent.qml@1e4c728",
+  "generator": "tools/characterize/gen-golden.mjs",
+  "cases": [
+    {
+      "name": "add to empty",
+      "input": {
+        "searchText": "",
+        "key": "service",
+        "value": "billing-api"
+      },
+      "expected": "service:\"billing-api\""
+    },
+    {
+      "name": "add to star",
+      "input": {
+        "searchText": "*",
+        "key": "service",
+        "value": "billing-api"
+      },
+      "expected": "service:\"billing-api\""
+    },
+    {
+      "name": "append to words",
+      "input": {
+        "searchText": "timeout",
+        "key": "service",
+        "value": "billing-api"
+      },
+      "expected": "timeout AND service:\"billing-api\""
+    },
+    {
+      "name": "remove existing",
+      "input": {
+        "searchText": "timeout AND service:\"billing-api\"",
+        "key": "service",
+        "value": "billing-api"
+      },
+      "expected": "timeout"
+    },
+    {
+      "name": "remove only filter",
+      "input": {
+        "searchText": "service:\"billing-api\"",
+        "key": "service",
+        "value": "billing-api"
+      },
+      "expected": ""
+    },
+    {
+      "name": "remove with lowercase and",
+      "input": {
+        "searchText": "timeout and service:\"billing-api\"",
+        "key": "service",
+        "value": "billing-api"
+      },
+      "expected": "timeout"
+    },
+    {
+      "name": "unquoted existing is not matched",
+      "input": {
+        "searchText": "service:billing-api",
+        "key": "service",
+        "value": "billing-api"
+      },
+      "expected": "service:billing-api AND service:\"billing-api\""
+    },
+    {
+      "name": "number value",
+      "input": {
+        "searchText": "",
+        "key": "order_id",
+        "value": 48213
+      },
+      "expected": "order_id:\"48213\""
+    },
+    {
+      "name": "boolean value",
+      "input": {
+        "searchText": "",
+        "key": "retry",
+        "value": true
+      },
+      "expected": "retry:\"true\""
+    },
+    {
+      "name": "empty string value ignored",
+      "input": {
+        "searchText": "timeout",
+        "key": "service",
+        "value": ""
+      },
+      "expected": "timeout"
+    },
+    {
+      "name": "null value ignored",
+      "input": {
+        "searchText": "timeout",
+        "key": "service",
+        "value": null
+      },
+      "expected": "timeout"
+    },
+    {
+      "name": "empty key ignored",
+      "input": {
+        "searchText": "timeout",
+        "key": "",
+        "value": "x"
+      },
+      "expected": "timeout"
+    },
+    {
+      "name": "trims surrounding spaces",
+      "input": {
+        "searchText": "  timeout  ",
+        "key": "level",
+        "value": "error"
+      },
+      "expected": "timeout AND level:\"error\""
+    }
+  ]
+}

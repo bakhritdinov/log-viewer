@@ -1,0 +1,67 @@
+name: Tests
+
+on:
+  push:
+    branches: [master, rewrite]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  unit:
+    name: Unit tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install system dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ninja-build libgl1-mesa-dev libegl1-mesa-dev \
+          libxkbcommon-dev libfontconfig1-dev
+
+    - name: Install system dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: brew install ninja
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.2'
+        cache: true
+
+    - name: Configure
+      run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DLOGVIEWER_TESTS=ON -Wno-dev
+
+    - name: Build
+      run: cmake --build build
+
+    - name: Run tests
+      run: ctest --test-dir build --output-on-failure
+
+  golden:
+    name: Characterization fixtures are generated, not edited
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout repository (full history for git show)
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Regenerate and compare
+      run: |
+        node tools/characterize/gen-golden.mjs 1e4c728
+        git diff --exit-code -- tests/fixtures/characterization

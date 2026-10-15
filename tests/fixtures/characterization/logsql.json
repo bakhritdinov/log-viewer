@@ -1,0 +1,510 @@
+{
+  "source": "src/logs/qml/AppContent.qml@1e4c728",
+  "generator": "tools/characterize/gen-golden.mjs",
+  "cases": [
+    {
+      "name": "empty query",
+      "input": {
+        "query": "",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s"
+    },
+    {
+      "name": "star",
+      "input": {
+        "query": "*",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s"
+    },
+    {
+      "name": "whitespace only",
+      "input": {
+        "query": "   ",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s"
+    },
+    {
+      "name": "single word",
+      "input": {
+        "query": "timeout",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s ~\"(?i)timeout\""
+    },
+    {
+      "name": "two words AND",
+      "input": {
+        "query": "timeout AND retry",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s ~\"(?i)timeout\" ~\"(?i)retry\""
+    },
+    {
+      "name": "lowercase and",
+      "input": {
+        "query": "timeout and retry",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s ~\"(?i)timeout\" ~\"(?i)retry\""
+    },
+    {
+      "name": "mixed case And",
+      "input": {
+        "query": "timeout And retry",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s ~\"(?i)timeout\" ~\"(?i)retry\""
+    },
+    {
+      "name": "key value",
+      "input": {
+        "query": "service:billing-api",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s service:\"billing-api\""
+    },
+    {
+      "name": "key quoted value",
+      "input": {
+        "query": "service:\"billing-api\"",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s service:\"billing-api\""
+    },
+    {
+      "name": "key value with spaces around colon",
+      "input": {
+        "query": "service : billing-api",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s service:\"billing-api\""
+    },
+    {
+      "name": "value containing colon (url)",
+      "input": {
+        "query": "url:https://example.org:8443/path",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s url:\"https://example.org:8443/path\""
+    },
+    {
+      "name": "regex filter",
+      "input": {
+        "query": "http_status:~5..",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s http_status:~\"5..\""
+    },
+    {
+      "name": "regex filter quoted",
+      "input": {
+        "query": "http_status:~\"5..\"",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s http_status:~\"5..\""
+    },
+    {
+      "name": "regex with backslash",
+      "input": {
+        "query": "msg:~\\d+ ms",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s msg:~\"\\\\d+ ms\""
+    },
+    {
+      "name": "single tilde is not regex",
+      "input": {
+        "query": "op:~",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s op:\"~\""
+    },
+    {
+      "name": "word with double quote",
+      "input": {
+        "query": "say \"hi\"",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s ~\"(?i)say \\\"hi\\\"\""
+    },
+    {
+      "name": "word with backslash",
+      "input": {
+        "query": "C:\\path",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s C:\"\\\\path\""
+    },
+    {
+      "name": "leading and trailing spaces",
+      "input": {
+        "query": "  timeout  ",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s ~\"(?i)timeout\""
+    },
+    {
+      "name": "empty middle part",
+      "input": {
+        "query": "timeout AND  AND retry",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s ~\"(?i)timeout\" ~\"(?i)\" ~\"(?i)retry\""
+    },
+    {
+      "name": "trailing AND",
+      "input": {
+        "query": "timeout AND ",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s ~\"(?i)timeout\" ~\"(?i)\""
+    },
+    {
+      "name": "mixed words and filters",
+      "input": {
+        "query": "timeout AND level:error AND order_id:\"48213\"",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s ~\"(?i)timeout\" level:\"error\" order_id:\"48213\""
+    },
+    {
+      "name": "dash prefixed key (exclude not supported yet)",
+      "input": {
+        "query": "-level:debug",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s -level:\"debug\""
+    },
+    {
+      "name": "unicode word",
+      "input": {
+        "query": "ошибка оплаты",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s ~\"(?i)ошибка оплаты\""
+    },
+    {
+      "name": "regex special chars in word",
+      "input": {
+        "query": "a.b*c(d)",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s ~\"(?i)a.b*c(d)\""
+    },
+    {
+      "name": "AND inside word is not a separator",
+      "input": {
+        "query": "BRAND",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s ~\"(?i)BRAND\""
+    },
+    {
+      "name": "no time filter",
+      "input": {
+        "query": "timeout",
+        "timeFilter": "",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} ~\"(?i)timeout\""
+    },
+    {
+      "name": "offset time filter",
+      "input": {
+        "query": "timeout",
+        "timeFilter": "_time:3600s offset 1834s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 1834s ~\"(?i)timeout\""
+    },
+    {
+      "name": "level ERROR server side",
+      "input": {
+        "query": "timeout",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": true,
+        "activeLevel": "ERROR"
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s (level:~\"(?i)^(err|error|fatal|crit|critical|panic)$\" OR severity:~\"(?i)^(err|error|fatal|crit|critical|panic)$\" OR lvl:~\"(?i)^(err|error|fatal|crit|critical|panic)$\" OR loglevel:~\"(?i)^(err|error|fatal|crit|critical|panic)$\" OR log_level:~\"(?i)^(err|error|fatal|crit|critical|panic)$\") ~\"(?i)timeout\""
+    },
+    {
+      "name": "level WARN server side",
+      "input": {
+        "query": "",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": true,
+        "activeLevel": "WARN"
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s (level:~\"(?i)^(warn|warning)$\" OR severity:~\"(?i)^(warn|warning)$\" OR lvl:~\"(?i)^(warn|warning)$\" OR loglevel:~\"(?i)^(warn|warning)$\" OR log_level:~\"(?i)^(warn|warning)$\")"
+    },
+    {
+      "name": "level INFO server side",
+      "input": {
+        "query": "",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": true,
+        "activeLevel": "INFO"
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s (level:~\"(?i)^(info|notice|information)$\" OR severity:~\"(?i)^(info|notice|information)$\" OR lvl:~\"(?i)^(info|notice|information)$\" OR loglevel:~\"(?i)^(info|notice|information)$\" OR log_level:~\"(?i)^(info|notice|information)$\")"
+    },
+    {
+      "name": "level DEBUG server side",
+      "input": {
+        "query": "",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": true,
+        "activeLevel": "DEBUG"
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s (level:~\"(?i)^(debug|dbg)$\" OR severity:~\"(?i)^(debug|dbg)$\" OR lvl:~\"(?i)^(debug|dbg)$\" OR loglevel:~\"(?i)^(debug|dbg)$\" OR log_level:~\"(?i)^(debug|dbg)$\")"
+    },
+    {
+      "name": "level TRACE server side",
+      "input": {
+        "query": "",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": true,
+        "activeLevel": "TRACE"
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s (level:~\"(?i)^(trace)$\" OR severity:~\"(?i)^(trace)$\" OR lvl:~\"(?i)^(trace)$\" OR loglevel:~\"(?i)^(trace)$\" OR log_level:~\"(?i)^(trace)$\")"
+    },
+    {
+      "name": "unknown level ignored",
+      "input": {
+        "query": "",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": true,
+        "activeLevel": "FATAL"
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s"
+    },
+    {
+      "name": "level not server side ignored",
+      "input": {
+        "query": "",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": "ERROR"
+      },
+      "expected": "{_namespace=\"prod-core\", _appName=\"billing-api\"} _time:3600s offset 0s"
+    },
+    {
+      "name": "custom label names",
+      "input": {
+        "query": "x",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "namespace",
+        "appLabel": "app",
+        "namespace": "prod-core",
+        "app": "billing-api",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{namespace=\"prod-core\", app=\"billing-api\"} _time:3600s offset 0s ~\"(?i)x\""
+    },
+    {
+      "name": "namespace with quote",
+      "input": {
+        "query": "",
+        "timeFilter": "_time:3600s offset 0s",
+        "nsLabel": "_namespace",
+        "appLabel": "_appName",
+        "namespace": "we\"ird",
+        "app": "a",
+        "levelServerSide": false,
+        "activeLevel": ""
+      },
+      "expected": "{_namespace=\"we\"ird\", _appName=\"a\"} _time:3600s offset 0s"
+    }
+  ]
+}

@@ -117,6 +117,13 @@ target_link_libraries(LogViewer PRIVATE
     LogViewerLogs
 )
 
+# --- Tests ---
+option(LOGVIEWER_TESTS "Build the test suite (run with ctest)" OFF)
+if(LOGVIEWER_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
 include(GNUInstallDirs)
 install(TARGETS LogViewer
     BUNDLE DESTINATION .

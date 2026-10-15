@@ -1,0 +1,73 @@
+{
+  "source": "src/logs/qml/AppContent.qml@1e4c728",
+  "generator": "tools/characterize/gen-golden.mjs",
+  "cases": [
+    {
+      "input": {
+        "searchText": ""
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "searchText": "*"
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "searchText": "timeout"
+      },
+      "expected": [
+        "timeout"
+      ]
+    },
+    {
+      "input": {
+        "searchText": "timeout AND retry"
+      },
+      "expected": [
+        "timeout",
+        "retry"
+      ]
+    },
+    {
+      "input": {
+        "searchText": "timeout and level:error"
+      },
+      "expected": [
+        "timeout"
+      ]
+    },
+    {
+      "input": {
+        "searchText": "  a  AND  b  "
+      },
+      "expected": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "input": {
+        "searchText": "service:\"x\""
+      },
+      "expected": []
+    },
+    {
+      "input": {
+        "searchText": "a AND  AND b"
+      },
+      "expected": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "input": {
+        "searchText": "url:http://x"
+      },
+      "expected": []
+    }
+  ]
+}
