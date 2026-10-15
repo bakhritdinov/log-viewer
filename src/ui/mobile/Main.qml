@@ -45,6 +45,7 @@ ApplicationWindow {
                 id: logsPage
                 onChartRequested: window.section = 1
                 onSettingsRequested: window.section = 2
+                onNotice: text => window.notify(text)
             }
             ChartPage { onShowEntriesRequested: window.section = 0 }
             SettingsPage { }

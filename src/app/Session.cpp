@@ -373,7 +373,13 @@ void Session::runSearch(bool keepSlice)
         m_queryTimer.start();
         m_lastQueryMs = 0;
         m_loader->setStep(m_prefs->loadStep());
-        m_loader->start(currentSpec(), m_range);
+        // The same search again (refresh, pull to refresh, auto refresh): the
+        // shown entries stay until the new ones come.
+        const QString key = QStringList{ environmentId(), m_namespace, m_app, m_searchText,
+                                         encodeTimeRange(m_range), levelName(m_activeLevel),
+                                         m_levelServerSide ? QStringLiteral("s") : QString() }.join(QChar(0x1f));
+        m_loader->start(currentSpec(), m_range, key == m_loadedSearchKey);
+        m_loadedSearchKey = key;
         m_logs->reload(!keepSlice);
         markPatternsStale();
         refreshDerived();

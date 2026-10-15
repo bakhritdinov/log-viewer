@@ -17,6 +17,8 @@ AbstractButton {
     property var highlightTerms: []
     property real nowMs: Date.now()
     property int lines: 3
+    // Came with the last refresh: a green glow that fades.
+    property bool fresh: false
 
     // "12 s", "4 min", "2 h", "3 d" since the entry.
     readonly property string ago: {
@@ -34,9 +36,10 @@ AbstractButton {
 
     background: Rectangle {
         radius: Theme.radiusLg
-        color: root.pressed ? Theme.subtle : Theme.surface
+        color: root.pressed ? Theme.subtle : root.fresh ? Theme.successSoft : Theme.surface
         border.width: 1
-        border.color: Theme.borderMuted
+        border.color: root.fresh ? Theme.tint(Theme.success, 0.5) : Theme.borderMuted
+        Behavior on color { ColorAnimation { duration: 400 } }
         scale: root.pressed ? 0.98 : 1
         Behavior on scale { NumberAnimation { duration: 80 } }
     }
@@ -91,7 +94,7 @@ AbstractButton {
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere   // words stay whole unless one is too long
                 maximumLineCount: root.lines
                 elide: Text.ElideRight
-                lineHeight: 1.2
+                lineHeight: 1.3
                 font.family: Theme.mono
                 font.pixelSize: Session.prefs.logFontSize
                 color: Theme.textStrong

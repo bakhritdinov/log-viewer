@@ -210,6 +210,67 @@ private slots:
         QCOMPARE(f.store.size(), kBatchLimit + 5);
     }
 
+    void newSearchClearsAtOnce()
+    {
+        Fixture f;
+        f.http.script(ok(logsBody(kNowMs, 3, 10, "a")));
+        f.http.script(std::nullopt);
+        f.loader.start(spec(), TimeRange::fromKey(u"1h"));
+        QVERIFY(f.finished.wait(1000));
+        f.loader.start(spec(), TimeRange::fromKey(u"15m"));
+        QCOMPARE(f.store.size(), 0);
+    }
+
+    void refreshKeepsShownUntilFirstBatch()
+    {
+        Fixture f;
+        f.http.script(ok(logsBody(kNowMs - 1000, 3, 10, "a")));
+        f.http.script(std::nullopt);
+        f.loader.start(spec(), TimeRange::fromKey(u"1h"));
+        QVERIFY(f.finished.wait(1000));
+        f.loader.start(spec(), TimeRange::fromKey(u"1h"), true);
+        QVERIFY(f.loader.isLoading());
+        QCOMPARE(f.store.size(), 3);                          // still the shown entries
+        f.http.complete(1, ok(logsBody(kNowMs, 2, 10, "b")));
+        QVERIFY(f.finished.wait(1000));
+        QCOMPARE(f.store.size(), 2);                          // replaced, not merged
+    }
+
+    void refreshThatFailsKeepsShown()
+    {
+        Fixture f;
+        f.http.script(ok(logsBody(kNowMs - 1000, 3, 10, "a")));
+        f.http.script(status(502));
+        f.loader.start(spec(), TimeRange::fromKey(u"1h"));
+        QVERIFY(f.finished.wait(1000));
+        f.loader.start(spec(), TimeRange::fromKey(u"1h"), true);
+        QVERIFY(f.failed.wait(1000));
+        QCOMPARE(f.store.size(), 3);
+        QVERIFY(!f.loader.hasMore());
+    }
+
+    void refreshStoppedBeforeFirstBatchKeepsWhereItWas()
+    {
+        Fixture f;
+        f.http.script(ok(logsBody(kNowMs, kBatchLimit, 10, "a")));     // oldest: now - 9990 ms
+        f.http.script(std::nullopt);                                  // second batch hangs
+        f.http.script(std::nullopt);                                  // the refresh hangs
+        f.http.script(ok(logsBody(kNowMs - 9990, 5, 10, "b")));
+        QSignalSpy batches(&f.loader, &ChainedLoader::batchAdded);
+        f.loader.start(spec(), TimeRange::fromKey(u"1h"));
+        QVERIFY(batches.wait(1000));
+        f.loader.stop();                                              // stopped mid-chain
+        f.loader.start(spec(), TimeRange::fromKey(u"1h"), true);
+        f.loader.stop();                                              // ...and the refresh too
+        QCOMPARE(f.store.size(), kBatchLimit);
+        QVERIFY(f.loader.wasStopped());
+        QVERIFY(f.loader.hasMore());
+        f.loader.loadMore();                                          // from the oldest shown entry
+        QVERIFY(f.finished.wait(1000));
+        QCOMPARE(jsonBody(f.http.requests[3]).value("to").toString(), QString::number(kNowMs - 9990));
+        QCOMPARE(f.store.size(), kBatchLimit + 5);
+    }
+
     void stopWhenIdleChangesNothing()
     {
         Fixture f;

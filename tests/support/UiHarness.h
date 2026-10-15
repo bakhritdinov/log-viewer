@@ -49,22 +49,28 @@ public:
         http.script(ok(fixture("grafana/discovery_phase2.json")));
         scriptLogs(count);
     }
-    Q_INVOKABLE void scriptLogs(int count)
-    {
-        const qint64 now = QDateTime::currentMSecsSinceEpoch();
-        QList<Row> rows;
-        const char* levels[] = { "error", "warn", "info" };
-        for (int i = 0; i < count; ++i)
-            rows.append({ now - 1000 - qint64(i) * 1000,
-                          QStringLiteral("payment %1 failed: upstream timeout after %2 ms").arg(48000 + i).arg(30000 + i),
-                          QString::fromLatin1(levels[i % 3]) });
-        http.script(ok(logsBody(rows)));
-    }
+    Q_INVOKABLE void scriptLogs(int count) { http.script(ok(logsBody(rows(count)))); }
+    // An HTTP error for the next request. A request with nothing scripted stays
+    // pending (loading) until completeLast().
+    Q_INVOKABLE void scriptStatus(int code, const QString& body = {}) { http.script(status(code, body.toUtf8())); }
+    Q_INVOKABLE void completeLast(int count) { http.complete(http.calls.size() - 1, ok(logsBody(rows(count)))); }
     Q_INVOKABLE void start() { session->start(); }
     Q_INVOKABLE QString lastExpr() const
     {
         if (http.requests.isEmpty()) return {};
         return jsonBody(http.requests.last()).value("queries").toArray().first().toObject().value("expr").toString();
+    }
+
+    static QList<Row> rows(int count)
+    {
+        const qint64 now = QDateTime::currentMSecsSinceEpoch();
+        QList<Row> out;
+        const char* levels[] = { "error", "warn", "info" };
+        for (int i = 0; i < count; ++i)
+            out.append({ now - 1000 - qint64(i) * 1000,
+                         QStringLiteral("payment %1 failed: upstream timeout after %2 ms").arg(48000 + i).arg(30000 + i),
+                         QString::fromLatin1(levels[i % 3]) });
+        return out;
     }
 
     FakeHttpClient http;

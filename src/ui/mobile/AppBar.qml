@@ -95,22 +95,18 @@ Rectangle {
             }
         }
 
-        // Refresh; the green dot means auto refresh is on. Spins while loading.
+        // Refresh; the green dot means auto refresh is on. While loading it is
+        // "Stop" (a square).
         IconButton {
             id: refresh
             visible: !Session.needsSetup
             touch: true
-            iconName: "refresh"
-            label: Session.autoRefreshSeconds > 0 ? qsTr("Refresh · auto refresh every %1 s").arg(Session.autoRefreshSeconds) : qsTr("Refresh")
+            iconName: Session.loading ? "stop" : "refresh"
+            label: Session.loading ? qsTr("Stop")
+                 : Session.autoRefreshSeconds > 0 ? qsTr("Refresh · auto refresh every %1 s").arg(Session.autoRefreshSeconds) : qsTr("Refresh")
             onClicked: Session.loading ? Session.stopLoading() : Session.search()
-            RotationAnimator on rotation {
-                running: Session.loading
-                loops: Animation.Infinite
-                from: 0; to: 360; duration: 900
-                onRunningChanged: if (!running) refresh.rotation = 0
-            }
             Rectangle {
-                visible: Session.autoRefreshSeconds > 0
+                visible: Session.autoRefreshSeconds > 0 && !Session.loading
                 x: parent.width - 16; y: 9
                 width: 8; height: 8; radius: 4
                 color: Theme.success

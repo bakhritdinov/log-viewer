@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QPointer>
 #include <functional>
+#include <optional>
 
 #include "core/data/ErrorClassifier.h"
 #include "core/data/GrafanaApi.h"
@@ -42,8 +43,11 @@ public:
                   ClassifyOptions options = {}, Clock clock = systemClock(), QObject* parent = nullptr);
     ~ChainedLoader() override;
 
-    // Clears the store and loads `range` from its newest end.
-    void start(const SearchSpec& spec, const TimeRange& range);
+    // Clears the store and loads `range` from its newest end. With
+    // `keepShown` (a refresh of the same search) the store is cleared only when
+    // the first batch arrives: until then, and if the load fails or is stopped
+    // before it, the entries already loaded stay as they were.
+    void start(const SearchSpec& spec, const TimeRange& range, bool keepShown = false);
     // Continues where the last load stopped (only when hasMore()).
     void loadMore();
     // Stops the running load; what was loaded stays.
@@ -70,6 +74,7 @@ private:
     void onParsed(quint64 generation, const ParsedLogs& parsed);
     void finish(bool hasMore);
     void setLoading(bool loading);
+    void restoreShown();
 
     HttpClient& m_http;
     ParseExecutor& m_parser;
@@ -85,6 +90,16 @@ private:
     bool m_hasMore = false;
     bool m_stopped = false;
     quint64 m_generation = 0;  // bumps on start/stop; stale results are dropped
+
+    // The load a keepShown start replaces, until its first batch arrives.
+    struct Shown {
+        TimeRange::Window window;
+        QDateTime cursor;
+        int cap = kStep;
+        bool hasMore = false;
+        bool stopped = false;
+    };
+    std::optional<Shown> m_shown;
     QPointer<HttpCall> m_call;
 };
 

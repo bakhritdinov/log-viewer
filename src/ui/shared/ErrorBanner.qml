@@ -86,11 +86,22 @@ Rectangle {
                 lineHeight: 1.15
                 color: Theme.text
             }
-            AppButton {
-                visible: root.active && root.error.detail !== ""
-                variant: "link"
-                text: root.detailsOpen ? qsTr("Hide details") : qsTr("Details")
-                onClicked: root.detailsOpen = !root.detailsOpen
+            RowLayout {
+                spacing: 12
+                AppButton {
+                    visible: root.active && root.error.detail !== ""
+                    variant: "link"
+                    text: root.detailsOpen ? qsTr("Hide details") : qsTr("Details")
+                    onClicked: root.detailsOpen = !root.detailsOpen
+                }
+                // On the phone the server's answer cannot be selected easily: copy it whole.
+                AppButton {
+                    visible: root.touch && root.detailsOpen && root.error.secondaryAction !== ErrorInfo.CopyDetails
+                    variant: "link"
+                    iconName: "copy"
+                    text: qsTr("Copy")
+                    onClicked: clipboard.copy(root.error.detail)
+                }
             }
             TextEdit {
                 Layout.fillWidth: true
@@ -128,4 +139,6 @@ Rectangle {
             }
         }
     }
+
+    Clipboard { id: clipboard }
 }

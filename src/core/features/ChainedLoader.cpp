@@ -25,17 +25,21 @@ ChainedLoader::~ChainedLoader()
     }
 }
 
-void ChainedLoader::start(const SearchSpec& spec, const TimeRange& range)
+void ChainedLoader::start(const SearchSpec& spec, const TimeRange& range, bool keepShown)
 {
     stop();
+    m_shown.reset();
+    if (keepShown && m_store.size() > 0)
+        m_shown = Shown{ m_window, m_cursor, m_cap, m_hasMore, m_stopped };
     m_spec = spec;
     m_window = range.resolve(m_clock());
     m_cursor = m_window.to;
     m_cap = m_step;
     m_hasMore = false;
     m_stopped = false;
-    m_store.clear();
+    if (!m_shown) m_store.clear();
     if (!spec.connection.isConfigured()) {
+        restoreShown();
         emit failed({ RequestError::Kind::NotConfigured, 0, {} });
         return;
     }
@@ -59,6 +63,7 @@ void ChainedLoader::stop()
         m_hasMore = true;
         m_stopped = true;
     }
+    restoreShown();
     ++m_generation;
     if (m_call) {
         HttpCall* call = m_call;
@@ -92,6 +97,7 @@ void ChainedLoader::onResponse(quint64 generation, const HttpResponse& r)
     if (!r.ok()) {
         const RequestError e = classifyResponse(r, {}, m_options);
         if (e.kind == RequestError::Kind::Cancelled) return;
+        restoreShown();
         setLoading(false);
         emit failed(e);
         return;
@@ -103,12 +109,17 @@ void ChainedLoader::onParsed(quint64 generation, const ParsedLogs& parsed)
 {
     if (generation != m_generation) return;
     if (!parsed.error.isEmpty()) {
+        restoreShown();
         setLoading(false);
         emit failed(classifyResponse({ HttpResponse::Failure::None, 200, {}, {} }, parsed.error, m_options));
         return;
     }
 
     const LogEntries& batch = parsed.entries;
+    if (m_shown) {                       // a refresh: the new entries replace the shown ones
+        m_shown.reset();
+        m_store.clear();
+    }
     const int added = m_store.add(batch);
     emit batchAdded(added);
 
@@ -131,6 +142,19 @@ void ChainedLoader::finish(bool hasMore)
     m_hasMore = hasMore;
     setLoading(false);
     emit finished(hasMore);
+}
+
+// A refresh ended before its first batch: the shown entries stay, and so does
+// how far they reach ("load more" continues from there).
+void ChainedLoader::restoreShown()
+{
+    if (!m_shown) return;
+    m_window = m_shown->window;
+    m_cursor = m_shown->cursor;
+    m_cap = m_shown->cap;
+    m_hasMore = m_shown->hasMore;
+    m_stopped = m_shown->stopped;
+    m_shown.reset();
 }
 
 void ChainedLoader::setLoading(bool loading)

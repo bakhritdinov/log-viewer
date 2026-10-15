@@ -212,6 +212,10 @@
         <source>Refresh</source>
         <translation>Yangilash</translation>
     </message>
+    <message>
+        <source>Stop</source>
+        <translation>Toʻxtatish</translation>
+    </message>
 </context>
 <context>
     <name>AppearancePage</name>
@@ -801,6 +805,10 @@
     <message>
         <source>Details</source>
         <translation>Tafsilotlar</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Nusxalash</translation>
     </message>
 </context>
 <context>
@@ -1417,8 +1425,108 @@
         <translation>Yana %1 ta yuklash</translation>
     </message>
     <message>
-        <source>Loading…</source>
-        <translation>Yuklanmoqda…</translation>
+        <source>Loading logs</source>
+        <translation>Loglar yuklanmoqda</translation>
+    </message>
+    <message>
+        <source>Patterns · …</source>
+        <translation>Andozalar · …</translation>
+    </message>
+    <message>
+        <source>Showing the data of the last successful request · %1</source>
+        <translation>Oxirgi muvaffaqiyatli soʻrov maʼlumotlari · %1</translation>
+    </message>
+    <message>
+        <source>Choose a source</source>
+        <translation>Manbani tanlang</translation>
+    </message>
+    <message>
+        <source>Nothing in the picked interval</source>
+        <translation>Tanlangan oraliqda hech narsa yoʻq</translation>
+    </message>
+    <message>
+        <source>No entries match</source>
+        <translation>Soʻrov boʻyicha yozuvlar yoʻq</translation>
+    </message>
+    <message>
+        <source>No entries for “%1”</source>
+        <translation>«%1» uchun yozuvlar yoʻq</translation>
+    </message>
+    <message>
+        <source>Pick a namespace and an app to see their logs.</source>
+        <translation>Loglarni koʻrish uchun nom maydoni va ilovani tanlang.</translation>
+    </message>
+    <message>
+        <source>%1 holds no entries of this level.</source>
+        <translation>%1 oraligʻida bu darajadagi yozuvlar yoʻq.</translation>
+    </message>
+    <message>
+        <source>Over “%1” %2 has no lines where %3.</source>
+        <translation>«%1» davomida %2 da %3 boʻlgan qatorlar yoʻq.</translation>
+    </message>
+    <message>
+        <source>Nothing came from %1 during this period.</source>
+        <translation>Bu davrda %1 dan hech narsa kelmadi.</translation>
+    </message>
+    <message>
+        <source>Show the whole period</source>
+        <translation>Butun davrni koʻrsatish</translation>
+    </message>
+    <message>
+        <source>Widen to 24 hours</source>
+        <translation>24 soatgacha kengaytirish</translation>
+    </message>
+    <message>
+        <source>Remove %1</source>
+        <translation>%1 ni olib tashlash</translation>
+    </message>
+    <message>
+        <source>Clear the search</source>
+        <translation>Qidiruvni tozalash</translation>
+    </message>
+    <message>
+        <source>Turn on live tail</source>
+        <translation>Live ni yoqish</translation>
+    </message>
+    <message>
+        <source>No entries — the request failed</source>
+        <translation>Yozuvlar yoʻq — soʻrov bajarilmadi</translation>
+    </message>
+    <message>
+        <source>Showing all %1 loaded · the period has more</source>
+        <translation>Yuklangan %1 tasi koʻrsatildi · davrda yana bor</translation>
+    </message>
+    <message>
+        <source>These are all the entries of the period</source>
+        <translation>Bu davrning barcha yozuvlari</translation>
+    </message>
+    <message>
+        <source>Release to refresh</source>
+        <translation>Yangilash uchun qoʻyib yuboring</translation>
+    </message>
+    <message>
+        <source>Pull to refresh</source>
+        <translation>Yangilash uchun torting</translation>
+    </message>
+    <message>
+        <source>To the top</source>
+        <translation>Yuqoriga</translation>
+    </message>
+    <message>
+        <source>Stopped at %1</source>
+        <translation>%1 da toʻxtatildi</translation>
+    </message>
+    <message>
+        <source>Loaded %1</source>
+        <translation>Yuklandi: %1</translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation>Davom ettirish</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Toʻxtatish</translation>
     </message>
 </context>
 <context>

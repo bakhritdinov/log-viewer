@@ -216,6 +216,10 @@
         <source>Refresh</source>
         <translation>Обновить</translation>
     </message>
+    <message>
+        <source>Stop</source>
+        <translation>Остановить</translation>
+    </message>
 </context>
 <context>
     <name>AppearancePage</name>
@@ -806,6 +810,10 @@
     <message>
         <source>Details</source>
         <translation>Подробности</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Скопировать</translation>
     </message>
 </context>
 <context>
@@ -1428,8 +1436,108 @@
         <translation>Загрузить ещё %1</translation>
     </message>
     <message>
-        <source>Loading…</source>
-        <translation>Загрузка…</translation>
+        <source>Loading logs</source>
+        <translation>Загрузка логов</translation>
+    </message>
+    <message>
+        <source>Patterns · …</source>
+        <translation>Шаблоны · …</translation>
+    </message>
+    <message>
+        <source>Showing the data of the last successful request · %1</source>
+        <translation>Показаны данные последнего успешного запроса · %1</translation>
+    </message>
+    <message>
+        <source>Choose a source</source>
+        <translation>Выберите источник</translation>
+    </message>
+    <message>
+        <source>Nothing in the picked interval</source>
+        <translation>В выбранном интервале ничего нет</translation>
+    </message>
+    <message>
+        <source>No entries match</source>
+        <translation>Нет записей по запросу</translation>
+    </message>
+    <message>
+        <source>No entries for “%1”</source>
+        <translation>Нет записей за «%1»</translation>
+    </message>
+    <message>
+        <source>Pick a namespace and an app to see their logs.</source>
+        <translation>Выберите пространство имён и приложение, чтобы увидеть их логи.</translation>
+    </message>
+    <message>
+        <source>%1 holds no entries of this level.</source>
+        <translation>В интервале %1 нет записей этого уровня.</translation>
+    </message>
+    <message>
+        <source>Over “%1” %2 has no lines where %3.</source>
+        <translation>За «%1» в %2 нет строк, где %3.</translation>
+    </message>
+    <message>
+        <source>Nothing came from %1 during this period.</source>
+        <translation>За этот период от %1 ничего не пришло.</translation>
+    </message>
+    <message>
+        <source>Show the whole period</source>
+        <translation>Показать весь период</translation>
+    </message>
+    <message>
+        <source>Widen to 24 hours</source>
+        <translation>Расширить до 24 часов</translation>
+    </message>
+    <message>
+        <source>Remove %1</source>
+        <translation>Убрать %1</translation>
+    </message>
+    <message>
+        <source>Clear the search</source>
+        <translation>Очистить поиск</translation>
+    </message>
+    <message>
+        <source>Turn on live tail</source>
+        <translation>Включить Live</translation>
+    </message>
+    <message>
+        <source>No entries — the request failed</source>
+        <translation>Записей нет — запрос не выполнен</translation>
+    </message>
+    <message>
+        <source>Showing all %1 loaded · the period has more</source>
+        <translation>Показаны все %1 загруженных · в периоде есть ещё</translation>
+    </message>
+    <message>
+        <source>These are all the entries of the period</source>
+        <translation>Это все записи за период</translation>
+    </message>
+    <message>
+        <source>Release to refresh</source>
+        <translation>Отпустите, чтобы обновить</translation>
+    </message>
+    <message>
+        <source>Pull to refresh</source>
+        <translation>Потяните, чтобы обновить</translation>
+    </message>
+    <message>
+        <source>To the top</source>
+        <translation>Наверх</translation>
+    </message>
+    <message>
+        <source>Stopped at %1</source>
+        <translation>Остановлено на %1</translation>
+    </message>
+    <message>
+        <source>Loaded %1</source>
+        <translation>Загружено %1</translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Остановить</translation>
     </message>
 </context>
 <context>

@@ -399,6 +399,7 @@ private:
     QString m_shareBaseUrl;
     bool m_openedFromLink = false;
     QString m_appliedSearch;
+    QString m_loadedSearchKey;   // what the store holds: a repeat of it is a refresh
     QString m_searchError;
     SavedQuery m_removedQuery;        // for restoreSavedQuery()
     int m_removedQueryIndex = -1;

@@ -8,6 +8,7 @@ Row {
     property var values: []
     property int maxValue: 1
     property color color: Theme.accent
+    property var colors: []             // per bar, over `color`
 
     spacing: 1
     Accessible.ignored: true
@@ -19,7 +20,8 @@ Row {
             width: (root.width - root.spacing * (root.values.length - 1)) / Math.max(1, root.values.length)
             height: Math.max(1, root.height * modelData / Math.max(1, root.maxValue))
             anchors.bottom: parent ? parent.bottom : undefined
-            color: root.color
+            required property int index
+            color: root.colors[index] ?? root.color
             radius: 1
         }
     }

@@ -39,23 +39,30 @@ Button {
         shortcut: control.shortcut
     }
 
-    contentItem: Row {
-        spacing: 6
-        Icon {
-            anchors.verticalCenter: parent.verticalCenter
-            visible: control.iconName !== ""
-            name: control.iconName
-            color: control._fg
-            size: control.touch ? 16 : 14
-        }
-        Text {
-            anchors.verticalCenter: parent.verticalCenter
-            text: control.text
-            font.family: control.font.family
-            font.pixelSize: control.font.pixelSize
-            font.weight: control.font.weight
-            font.underline: control.variant === "link" && control.hovered && control.enabled
-            color: control._fg
+    // Centred when the button is wider than its label (full-width on the phone).
+    contentItem: Item {
+        implicitWidth: label.implicitWidth
+        implicitHeight: label.implicitHeight
+        Row {
+            id: label
+            anchors.centerIn: parent
+            spacing: 6
+            Icon {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: control.iconName !== ""
+                name: control.iconName
+                color: control._fg
+                size: control.touch ? 16 : 14
+            }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: control.text
+                font.family: control.font.family
+                font.pixelSize: control.font.pixelSize
+                font.weight: control.font.weight
+                font.underline: control.variant === "link" && control.hovered && control.enabled
+                color: control._fg
+            }
         }
     }
 

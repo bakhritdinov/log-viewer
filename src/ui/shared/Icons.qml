@@ -40,6 +40,7 @@ QtObject {
         "check": "M5 12l5 5L20 7",
         "pause": "M8 5v14M16 5v14",
         "play": "M7 4l13 8-13 8z",
+        "stop": "M7 7h10v10H7z",
         "more": "M5 12h.01M12 12h.01M19 12h.01",
         "arrowUp": "M12 19V5M5 12l7-7 7 7",
         "external": "M14 4h6v6M20 4l-9 9M18 14v6H4V6h6",
