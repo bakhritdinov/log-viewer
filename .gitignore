@@ -1,8 +1,6 @@
+# Local build trees (any build*/ folder: desktop, WebAssembly, per-platform)
+build*/
 # C++ and CMake
-build/
-build_macos/
-build_linux/
-build_win/
 dist/
 AppDir/
 packaging/windows/installer_packages/*/data/
@@ -36,6 +34,4 @@ GEMINI.md
 .claude/
 CLAUDE.md
 
-# Local build trees (desktop / WebAssembly)
-build-*/
 .clangd
