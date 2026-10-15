@@ -191,6 +191,29 @@
     </message>
 </context>
 <context>
+    <name>AppBar</name>
+    <message>
+        <source>Environment: %1</source>
+        <translation>Muhit: %1</translation>
+    </message>
+    <message>
+        <source>Source: %1 / %2</source>
+        <translation>Manba: %1 / %2</translation>
+    </message>
+    <message>
+        <source>Choose a source</source>
+        <translation>Manbani tanlang</translation>
+    </message>
+    <message>
+        <source>Refresh · auto refresh every %1 s</source>
+        <translation>Yangilash · har %1 s da avtoyangilash</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Yangilash</translation>
+    </message>
+</context>
+<context>
     <name>AppearancePage</name>
     <message>
         <source>Pretty JSON in details</source>
@@ -401,6 +424,32 @@
     </message>
 </context>
 <context>
+    <name>BottomNav</name>
+    <message>
+        <source>Sections</source>
+        <translation>Boʻlimlar</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation>Loglar</translation>
+    </message>
+    <message>
+        <source>Chart</source>
+        <translation>Grafik</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Sozlamalar</translation>
+    </message>
+</context>
+<context>
+    <name>BottomSheet</name>
+    <message>
+        <source>Close</source>
+        <translation>Yopish</translation>
+    </message>
+</context>
+<context>
     <name>CalendarView</name>
     <message>
         <source>Previous month</source>
@@ -409,6 +458,37 @@
     <message>
         <source>Next month</source>
         <translation>Keyingi oy</translation>
+    </message>
+</context>
+<context>
+    <name>ChartPage</name>
+    <message>
+        <source>Auto</source>
+        <translation>Avto</translation>
+    </message>
+    <message>
+        <source>1 min</source>
+        <translation>1 daq</translation>
+    </message>
+    <message>
+        <source>5 min</source>
+        <translation>5 daq</translation>
+    </message>
+    <message>
+        <source>1 h</source>
+        <translation>1 soat</translation>
+    </message>
+    <message>
+        <source>Chart</source>
+        <translation>Grafik</translation>
+    </message>
+    <message>
+        <source>Histogram step</source>
+        <translation>Gistogramma qadami</translation>
+    </message>
+    <message>
+        <source>Tap a bar to see the entries of that interval; tap a level to show only it.</source>
+        <translation>Shu oraliq yozuvlarini koʻrish uchun ustunga, faqat shu darajani koʻrsatish uchun darajaga bosing.</translation>
     </message>
 </context>
 <context>
@@ -1242,6 +1322,29 @@
     </message>
 </context>
 <context>
+    <name>LogCard</name>
+    <message>
+        <source>%1 s</source>
+        <translation>%1 s</translation>
+    </message>
+    <message>
+        <source>%1 min</source>
+        <translation>%1 daq</translation>
+    </message>
+    <message>
+        <source>%1 h</source>
+        <translation>%1 soat</translation>
+    </message>
+    <message>
+        <source>%1 d</source>
+        <translation>%1 kun</translation>
+    </message>
+    <message>
+        <source>%1 %2 %3</source>
+        <translation>%1 %2 %3</translation>
+    </message>
+</context>
+<context>
     <name>LogTable</name>
     <message>
         <source>Service</source>
@@ -1273,6 +1376,49 @@
             <numerusform>↵ +%n qator</numerusform>
             <numerusform>↵ +%n qator</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>LogsPage</name>
+    <message>
+        <source>Word, key:value…</source>
+        <translation>Soʻz, key:value…</translation>
+    </message>
+    <message>
+        <source>Period: %1</source>
+        <translation>Davr: %1</translation>
+    </message>
+    <message>
+        <source>WARN and ERROR over the period, open the chart</source>
+        <translation>Davr boʻyicha WARN va ERROR, grafikni ochish</translation>
+    </message>
+    <message>
+        <source>Results view</source>
+        <translation>Natijalar koʻrinishi</translation>
+    </message>
+    <message>
+        <source>Records · %1</source>
+        <translation>Yozuvlar · %1</translation>
+    </message>
+    <message>
+        <source>Patterns · %1</source>
+        <translation>Andozalar · %1</translation>
+    </message>
+    <message>
+        <source>Patterns</source>
+        <translation>Andozalar</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation>Loglar</translation>
+    </message>
+    <message>
+        <source>Load %1 more</source>
+        <translation>Yana %1 ta yuklash</translation>
+    </message>
+    <message>
+        <source>Loading…</source>
+        <translation>Yuklanmoqda…</translation>
     </message>
 </context>
 <context>
@@ -2038,6 +2184,64 @@
     <message>
         <source>Behaviour</source>
         <translation>Xatti-harakat</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsPage</name>
+    <message>
+        <source>Settings</source>
+        <translation>Sozlamalar</translation>
+    </message>
+    <message>
+        <source>Connections</source>
+        <translation>Ulanishlar</translation>
+    </message>
+    <message>
+        <source>Not set up</source>
+        <translation>Sozlanmagan</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>Faol</translation>
+    </message>
+    <message>
+        <source>Language · Til · Language</source>
+        <translation>Til · Язык · Language</translation>
+    </message>
+    <message>
+        <source>Theme</source>
+        <translation>Mavzu</translation>
+    </message>
+    <message>
+        <source>Dark</source>
+        <translation>Qorongʻi</translation>
+    </message>
+    <message>
+        <source>Light</source>
+        <translation>Yorugʻ</translation>
+    </message>
+    <message>
+        <source>As in the system</source>
+        <translation>Tizimdagidek</translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation>Ilova haqida</translation>
+    </message>
+</context>
+<context>
+    <name>SetupGuide</name>
+    <message>
+        <source>Connect Grafana</source>
+        <translation>Grafanani ulang</translation>
+    </message>
+    <message>
+        <source>Add the address of your Grafana and the logs data source. The connection is checked before it is saved.</source>
+        <translation>Grafana manzilingizni va loglar manbasini qoʻshing. Ulanish saqlashdan oldin tekshiriladi.</translation>
+    </message>
+    <message>
+        <source>Open settings</source>
+        <translation>Sozlamalarni ochish</translation>
     </message>
 </context>
 <context>

@@ -4,6 +4,7 @@
 #include <QGuiApplication>
 #include <QIcon>
 #include <QQmlApplicationEngine>
+#include <QQuickWindow>
 #include <QtQml/qqmlextensionplugin.h>
 
 #include "app/AppServices.h"
@@ -49,6 +50,12 @@ int main(int argc, char* argv[])
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,
                      [] { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
     engine.loadFromModule(LOGVIEWER_UI_MODULE, "Main");
+#ifdef Q_OS_WASM
+    // In the browser the window is the whole page (its size follows the tab).
+    if (!engine.rootObjects().isEmpty())
+        if (auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().constFirst()))
+            window->showFullScreen();
+#endif
 
     // The update check at start-up (throttled inside; off in Settings → Version).
     if (auto* updates = engine.singletonInstance<lv::UpdateService*>("LogViewer.App", "Updates"); updates && updates->autoCheck())

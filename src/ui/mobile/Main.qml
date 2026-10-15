@@ -1,0 +1,73 @@
+pragma ComponentBehavior: Bound
+import QtQuick
+import QtQuick.Controls.Basic
+import QtQuick.Layouts
+import LogViewer.App
+import LogViewer.Ui
+
+// Mobile design: one column, bottom navigation (Logs · Chart · Settings),
+// sheets from the bottom, a snackbar above the navigation. On desktop it runs
+// in a phone-sized window for development.
+ApplicationWindow {
+    id: window
+
+    // 0 logs, 1 chart, 2 settings.
+    property int section: 0
+
+    // A short notice above the navigation, optionally with one action ("Undo").
+    function notify(text, actionText, action) { snackbar.show(text, actionText ?? "", action ?? null) }
+
+    width: 390
+    height: 844
+    minimumWidth: 320
+    minimumHeight: 560
+    visible: true
+    title: "LogViewer"
+    color: Theme.bg
+    font.family: Theme.sans
+
+    // "system" follows the OS colour scheme as it changes.
+    Binding {
+        target: Theme; property: "dark"
+        value: Session.prefs.theme === "system" ? Application.styleHints.colorScheme !== Qt.ColorScheme.Light
+                                                : Session.prefs.theme === "dark"
+    }
+
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: 0
+
+        StackLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            currentIndex: window.section
+            LogsPage {
+                id: logsPage
+                onChartRequested: window.section = 1
+                onSettingsRequested: window.section = 2
+            }
+            ChartPage { onShowEntriesRequested: window.section = 0 }
+            SettingsPage { }
+        }
+
+        BottomNav {
+            id: nav
+            Layout.fillWidth: true
+            current: window.section
+            // "!" on Settings: nothing is connected yet, or the connection fails.
+            settingsAlert: Session.needsSetup || (Session.hasError && Session.error.kind === ErrorInfo.Unreachable)
+            onPicked: index => {
+                if (index === window.section && index === 0) logsPage.scrollToTop()   // second tap: to the top
+                window.section = index
+            }
+        }
+    }
+
+    Snackbar {
+        id: snackbar
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: nav.height + 12
+        width: parent.width - 24
+    }
+}

@@ -19,6 +19,22 @@ set_target_properties(logviewer-next PROPERTIES
     OUTPUT_NAME "LogViewerNext"
     MACOSX_BUNDLE_GUI_IDENTIFIER com.logviewer.LogViewerNext)
 
+# Static Qt (WebAssembly, iOS): Qt links in the QML modules qmlimportscanner
+# finds in this target's resources and, through their qmldir files, everything
+# they import (Controls, Layouts, Shapes…). The designs' QML lives in the UI
+# libraries, so a one-line file importing the chosen design starts the scan.
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/qml_imports/imports.qml
+     "import QtQuick
+import LogViewer.App
+import LogViewer.Ui
+import ${LOGVIEWER_UI_URI}
+Item {}
+")
+qt_add_resources(logviewer-next "logviewer_qml_imports"
+    PREFIX /logviewer
+    BASE ${CMAKE_CURRENT_BINARY_DIR}/qml_imports
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/qml_imports/imports.qml)
+
 # The file icon: Windows takes it from the resource script, macOS from the
 # bundle (sources: src/resources/icon.svg, rebuilt with tools/icons).
 if(WIN32)

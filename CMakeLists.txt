@@ -63,10 +63,15 @@ endif()
 # `cmake --build <dir> --target update_translations` runs lupdate over the new
 # code; the .ts files are compiled to .qm and embedded under :/i18n.
 find_package(Qt6 6.8 REQUIRED COMPONENTS LinguistTools)
+# Both designs are scanned whichever is built: with -no-obsolete, a design
+# left out would lose its translations.
+file(GLOB _logviewer_design_qml CONFIGURE_DEPENDS
+     ${PROJECT_SOURCE_DIR}/src/ui/desktop/*.qml ${PROJECT_SOURCE_DIR}/src/ui/mobile/*.qml)
 qt_add_translations(logviewer_app
     TS_FILES i18n/logviewer_ru.ts i18n/logviewer_uz.ts
     PLURALS_TS_FILE i18n/logviewer_en.ts
     SOURCE_TARGETS logviewer_app logviewer_ui ${LOGVIEWER_UI_TARGET}
+    SOURCES ${_logviewer_design_qml}
     RESOURCE_PREFIX /i18n
     LUPDATE_OPTIONS -no-obsolete -locations none)
 # lupdate silently skips a QML file it cannot parse and -no-obsolete then

@@ -2,7 +2,7 @@
 # one ctest per scenario file).
 find_package(Qt6 REQUIRED COMPONENTS QuickTest Quick QuickControls2)
 
-qt_add_executable(tst_ui_desktop tst_ui_desktop.cpp)
+qt_add_executable(tst_ui_desktop tst_ui_desktop.cpp ${LOGVIEWER_TESTS_DIR}/support/UiHarness.h)
 target_link_libraries(tst_ui_desktop PRIVATE Qt6::QuickTest
     logviewer_ui_desktop logviewer_ui_desktopplugin logviewer_ui logviewer_uiplugin
     logviewer_app logviewer_appplugin)

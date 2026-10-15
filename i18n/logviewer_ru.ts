@@ -195,6 +195,29 @@
     </message>
 </context>
 <context>
+    <name>AppBar</name>
+    <message>
+        <source>Environment: %1</source>
+        <translation>Окружение: %1</translation>
+    </message>
+    <message>
+        <source>Source: %1 / %2</source>
+        <translation>Источник: %1 / %2</translation>
+    </message>
+    <message>
+        <source>Choose a source</source>
+        <translation>Выберите источник</translation>
+    </message>
+    <message>
+        <source>Refresh · auto refresh every %1 s</source>
+        <translation>Обновить · автообновление каждые %1 с</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Обновить</translation>
+    </message>
+</context>
+<context>
     <name>AppearancePage</name>
     <message>
         <source>Pretty JSON in details</source>
@@ -405,6 +428,32 @@
     </message>
 </context>
 <context>
+    <name>BottomNav</name>
+    <message>
+        <source>Sections</source>
+        <translation>Разделы</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation>Логи</translation>
+    </message>
+    <message>
+        <source>Chart</source>
+        <translation>График</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Настройки</translation>
+    </message>
+</context>
+<context>
+    <name>BottomSheet</name>
+    <message>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
+</context>
+<context>
     <name>CalendarView</name>
     <message>
         <source>Previous month</source>
@@ -413,6 +462,37 @@
     <message>
         <source>Next month</source>
         <translation>Следующий месяц</translation>
+    </message>
+</context>
+<context>
+    <name>ChartPage</name>
+    <message>
+        <source>Auto</source>
+        <translation>Авто</translation>
+    </message>
+    <message>
+        <source>1 min</source>
+        <translation>1 мин</translation>
+    </message>
+    <message>
+        <source>5 min</source>
+        <translation>5 мин</translation>
+    </message>
+    <message>
+        <source>1 h</source>
+        <translation>1 ч</translation>
+    </message>
+    <message>
+        <source>Chart</source>
+        <translation>График</translation>
+    </message>
+    <message>
+        <source>Histogram step</source>
+        <translation>Шаг гистограммы</translation>
+    </message>
+    <message>
+        <source>Tap a bar to see the entries of that interval; tap a level to show only it.</source>
+        <translation>Нажмите на столбец, чтобы увидеть записи этого интервала; на уровень — чтобы показать только его.</translation>
     </message>
 </context>
 <context>
@@ -1252,6 +1332,29 @@
     </message>
 </context>
 <context>
+    <name>LogCard</name>
+    <message>
+        <source>%1 s</source>
+        <translation>%1 с</translation>
+    </message>
+    <message>
+        <source>%1 min</source>
+        <translation>%1 мин</translation>
+    </message>
+    <message>
+        <source>%1 h</source>
+        <translation>%1 ч</translation>
+    </message>
+    <message>
+        <source>%1 d</source>
+        <translation>%1 д</translation>
+    </message>
+    <message>
+        <source>%1 %2 %3</source>
+        <translation>%1 %2 %3</translation>
+    </message>
+</context>
+<context>
     <name>LogTable</name>
     <message>
         <source>Service</source>
@@ -1284,6 +1387,49 @@
             <numerusform>↵ +%n строки</numerusform>
             <numerusform>↵ +%n строк</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>LogsPage</name>
+    <message>
+        <source>Word, key:value…</source>
+        <translation>Слово, key:value…</translation>
+    </message>
+    <message>
+        <source>Period: %1</source>
+        <translation>Период: %1</translation>
+    </message>
+    <message>
+        <source>WARN and ERROR over the period, open the chart</source>
+        <translation>WARN и ERROR за период, открыть график</translation>
+    </message>
+    <message>
+        <source>Results view</source>
+        <translation>Вид результатов</translation>
+    </message>
+    <message>
+        <source>Records · %1</source>
+        <translation>Записи · %1</translation>
+    </message>
+    <message>
+        <source>Patterns · %1</source>
+        <translation>Шаблоны · %1</translation>
+    </message>
+    <message>
+        <source>Patterns</source>
+        <translation>Шаблоны</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation>Логи</translation>
+    </message>
+    <message>
+        <source>Load %1 more</source>
+        <translation>Загрузить ещё %1</translation>
+    </message>
+    <message>
+        <source>Loading…</source>
+        <translation>Загрузка…</translation>
     </message>
 </context>
 <context>
@@ -2058,6 +2204,64 @@
     <message>
         <source>Behaviour</source>
         <translation>Поведение</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsPage</name>
+    <message>
+        <source>Settings</source>
+        <translation>Настройки</translation>
+    </message>
+    <message>
+        <source>Connections</source>
+        <translation>Подключения</translation>
+    </message>
+    <message>
+        <source>Not set up</source>
+        <translation>Не настроено</translation>
+    </message>
+    <message>
+        <source>Active</source>
+        <translation>Активно</translation>
+    </message>
+    <message>
+        <source>Language · Til · Language</source>
+        <translation>Язык · Til · Language</translation>
+    </message>
+    <message>
+        <source>Theme</source>
+        <translation>Тема</translation>
+    </message>
+    <message>
+        <source>Dark</source>
+        <translation>Тёмная</translation>
+    </message>
+    <message>
+        <source>Light</source>
+        <translation>Светлая</translation>
+    </message>
+    <message>
+        <source>As in the system</source>
+        <translation>Как в системе</translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation>О приложении</translation>
+    </message>
+</context>
+<context>
+    <name>SetupGuide</name>
+    <message>
+        <source>Connect Grafana</source>
+        <translation>Подключите Grafana</translation>
+    </message>
+    <message>
+        <source>Add the address of your Grafana and the logs data source. The connection is checked before it is saved.</source>
+        <translation>Добавьте адрес вашей Grafana и источник логов. Подключение проверяется перед сохранением.</translation>
+    </message>
+    <message>
+        <source>Open settings</source>
+        <translation>Открыть настройки</translation>
     </message>
 </context>
 <context>
