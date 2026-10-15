@@ -28,8 +28,8 @@ class FocusSession : public QObject {
     Q_PROPERTY(bool canShowTrace READ canShowTrace NOTIFY changed)
     Q_PROPERTY(QString windowText READ windowText NOTIFY changed)
     Q_PROPERTY(bool loading READ isLoading NOTIFY loadingChanged)
-    Q_PROPERTY(ErrorInfo error READ error NOTIFY changed)
-    Q_PROPERTY(LogListModel* logs READ logs CONSTANT)
+    Q_PROPERTY(lv::ErrorInfo error READ error NOTIFY changed)
+    Q_PROPERTY(lv::LogListModel* logs READ logs CONSTANT)
 
 public:
     enum class Mode { None, Context, Trace };
@@ -39,8 +39,8 @@ public:
     ~FocusSession() override;
 
     // Opens around the entry at `row` of `model` (the main list or another).
-    Q_INVOKABLE void openContext(LogListModel* model, int row, int seconds = 60);
-    Q_INVOKABLE void openTrace(LogListModel* model, int row);
+    Q_INVOKABLE void openContext(lv::LogListModel* model, int row, int seconds = 60);
+    Q_INVOKABLE void openTrace(lv::LogListModel* model, int row);
     Q_INVOKABLE void showContext();   // switch modes for the same anchor
     Q_INVOKABLE void showTrace();
     void setWindowSeconds(int seconds);

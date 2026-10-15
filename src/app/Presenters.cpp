@@ -141,7 +141,7 @@ QList<QVariantMap> facetRows(const FieldValueCounts& facets, const QString& filt
 
 QByteArrayList patternRoles()
 {
-    return { "templateText", "level", "count", "share", "firstSeen", "lastSeen", "examples", "trend", "trendMax" };
+    return { "templateText", "templateParts", "level", "count", "share", "firstSeen", "lastSeen", "examples", "trend", "trendMax" };
 }
 
 QList<QVariantMap> patternRows(const QList<MessagePattern>& patterns)
@@ -158,13 +158,124 @@ QList<QVariantMap> patternRows(const QList<MessagePattern>& patterns)
             trend << c;
             trendMax = std::max(trendMax, c);
         }
-        rows << QVariantMap{ { "templateText", p.templateText }, { "level", levelName(p.level) },
+        rows << QVariantMap{ { "templateText", p.templateText }, { "templateParts", p.templateText.split(QLatin1Char('*')) },
+                             { "level", levelName(p.level) },
                              { "count", p.count }, { "share", maxCount ? double(p.count) / maxCount : 0.0 },
                              { "firstSeen", p.firstSeen.toLocalTime().toString(QStringLiteral("HH:mm:ss")) },
                              { "lastSeen", p.lastSeen.toLocalTime().toString(QStringLiteral("HH:mm:ss")) },
                              { "examples", examples }, { "trend", trend }, { "trendMax", trendMax } };
     }
     return rows;
+}
+
+void sortPatterns(QList<MessagePattern>& patterns, const QString& order)
+{
+    auto byCount = [](const MessagePattern& a, const MessagePattern& b) { return a.count > b.count; };
+    if (order == u"first") {
+        std::stable_sort(patterns.begin(), patterns.end(),
+                         [](const MessagePattern& a, const MessagePattern& b) { return a.firstSeen < b.firstSeen; });
+    } else if (order == u"level") {
+        // Level runs Unknown < Trace < … < Error: higher first, Unknown last.
+        std::stable_sort(patterns.begin(), patterns.end(), [&](const MessagePattern& a, const MessagePattern& b) {
+            if (a.level != b.level) return int(a.level) > int(b.level);
+            return byCount(a, b);
+        });
+    } else {
+        std::stable_sort(patterns.begin(), patterns.end(), byCount);
+    }
+}
+
+// ── Source picker ───────────────────────────────────────────────────────────
+
+namespace {
+
+QVariantMap splitMatch(const QString& name, const QString& query)
+{
+    const qsizetype at = query.isEmpty() ? -1 : name.indexOf(query, 0, Qt::CaseInsensitive);
+    if (at < 0) return { { "name", name }, { "pre", name }, { "hit", QString() }, { "post", QString() } };
+    return { { "name", name }, { "pre", name.left(at) }, { "hit", name.mid(at, query.size()) },
+             { "post", name.mid(at + query.size()) } };
+}
+
+} // namespace
+
+QVariantList sourceMatches(const QMap<QString, QStringList>& appsByNamespace, const QString& rawQuery)
+{
+    const QString query = rawQuery.trimmed();
+    QVariantList rows;
+    for (auto it = appsByNamespace.cbegin(); it != appsByNamespace.cend(); ++it) {
+        const bool nsMatches = it.key().contains(query, Qt::CaseInsensitive);
+        QVariantList apps;
+        for (const QString& app : it.value())
+            if (nsMatches || app.contains(query, Qt::CaseInsensitive)) apps << splitMatch(app, query);
+        if (!nsMatches && apps.isEmpty()) continue;
+        QVariantMap row = splitMatch(it.key(), nsMatches ? query : QString());
+        row.insert("appCount", int(it.value().size()));
+        row.insert("apps", apps);
+        rows << row;
+    }
+    return rows;
+}
+
+// ── Time helpers ────────────────────────────────────────────────────────────
+
+QStringList histogramAxis(const QList<QVariantMap>& rows, int count)
+{
+    QStringList out;
+    if (rows.isEmpty() || count <= 0) return out;
+    if (rows.size() < count) count = int(rows.size());
+    for (int i = 0; i < count; ++i) {
+        const qsizetype at = count == 1 ? 0 : (i * (rows.size() - 1) + (count - 1) / 2) / (count - 1);
+        out << rows.at(at).value("timeText").toString();
+    }
+    return out;
+}
+
+QString utcOffsetLabel(int offsetSeconds)
+{
+    const int minutes = std::abs(offsetSeconds) / 60;
+    QString out = QStringLiteral("UTC%1%2").arg(offsetSeconds < 0 ? QStringLiteral("\u2212") : QStringLiteral("+")).arg(minutes / 60);
+    if (minutes % 60) out += QStringLiteral(":%1").arg(minutes % 60, 2, 10, QLatin1Char('0'));
+    return out;
+}
+
+QDate boundDate(const QString& boundText, const QDate& fallback)
+{
+    const QDateTime t = TimeRange::parseBound(boundText);
+    return t.isValid() ? t.toLocalTime().date() : fallback;
+}
+
+QString boundOnDay(const QString& boundText, const QDate& day, bool endOfPeriod)
+{
+    const QDateTime t = TimeRange::parseBound(boundText);
+    const QTime time = t.isValid() ? t.toLocalTime().time() : (endOfPeriod ? QTime(23, 59) : QTime(0, 0));
+    return QDateTime(day, time).toString(QStringLiteral("yyyy-MM-dd HH:mm"));
+}
+
+// ── Highlighting ────────────────────────────────────────────────────────────
+
+QString highlightStyled(const QString& text, const QStringList& terms, const QString& color)
+{
+    // Mark the matched ranges first, then escape each piece once.
+    QList<std::pair<qsizetype, qsizetype>> ranges;
+    for (const QString& term : terms) {
+        if (term.isEmpty()) continue;
+        for (qsizetype i = text.indexOf(term, 0, Qt::CaseInsensitive); i >= 0;
+             i = text.indexOf(term, i + term.size(), Qt::CaseInsensitive))
+            ranges.append({ i, i + term.size() });
+    }
+    std::sort(ranges.begin(), ranges.end());
+    QString out;
+    qsizetype pos = 0;
+    for (auto [from, to] : ranges) {
+        if (to <= pos) continue;
+        from = std::max(from, pos);
+        out += text.mid(pos, from - pos).toHtmlEscaped();
+        out += QStringLiteral("<b><font color=\"%1\">%2</font></b>").arg(color, text.mid(from, to - from).toHtmlEscaped());
+        pos = to;
+    }
+    out += text.mid(pos).toHtmlEscaped();
+    return out;
 }
 
 // ── Environments / saved queries ────────────────────────────────────────────

@@ -99,6 +99,11 @@ int LogListModel::firstRowNumber() const
     return m_progressive ? 1 : m_page * m_pageSize + 1;
 }
 
+int LogListModel::lastRowNumber() const
+{
+    return m_rows.isEmpty() ? 0 : firstRowNumber() + int(m_rows.size()) - 1;
+}
+
 bool LogListModel::canShowMore() const
 {
     return m_progressive && m_rows.size() < totalCount();

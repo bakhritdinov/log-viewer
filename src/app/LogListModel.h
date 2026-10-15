@@ -20,6 +20,7 @@ class LogListModel : public QAbstractListModel {
     Q_PROPERTY(int page READ page NOTIFY slicingChanged)
     Q_PROPERTY(int pageCount READ pageCount NOTIFY slicingChanged)
     Q_PROPERTY(int firstRowNumber READ firstRowNumber NOTIFY slicingChanged)
+    Q_PROPERTY(int lastRowNumber READ lastRowNumber NOTIFY slicingChanged)
     Q_PROPERTY(int totalCount READ totalCount NOTIFY slicingChanged)
     Q_PROPERTY(int loadedCount READ loadedCount NOTIFY slicingChanged)
     Q_PROPERTY(bool canShowMore READ canShowMore NOTIFY slicingChanged)
@@ -53,6 +54,7 @@ public:
     int page() const { return m_page; }
     int pageCount() const;
     int firstRowNumber() const;   // 1-based number of the first row shown, 0 if none
+    int lastRowNumber() const;    // 1-based number of the last row shown, 0 if none
     int totalCount() const;       // visible (filtered) entries
     int loadedCount() const;      // all loaded entries
     bool canShowMore() const;

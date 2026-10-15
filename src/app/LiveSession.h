@@ -27,8 +27,8 @@ class LiveSession : public QObject {
     Q_PROPERTY(int capacity READ capacity CONSTANT)
     Q_PROPERTY(double ratePerSecond READ ratePerSecond NOTIFY bufferChanged)
     Q_PROPERTY(bool failing READ isFailing NOTIFY errorChanged)
-    Q_PROPERTY(ErrorInfo error READ error NOTIFY errorChanged)
-    Q_PROPERTY(LogListModel* logs READ logs CONSTANT)
+    Q_PROPERTY(lv::ErrorInfo error READ error NOTIFY errorChanged)
+    Q_PROPERTY(lv::LogListModel* logs READ logs CONSTANT)
 
 public:
     LiveSession(Session& session, QObject* parent = nullptr);

@@ -37,9 +37,27 @@ endif()
 
 # --- New core (rewrite) ------------------------------------------------------
 # Built and tested alongside the legacy app until the new UI replaces it.
+# QML modules are laid out as <build>/qml/<URI path> so qmllint and tooling find them.
+set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qml)
+
 add_subdirectory(src/core)
 add_subdirectory(src/app)
 add_subdirectory(src/ui/shared)
+
+# The design is chosen at build time: one of src/ui/<design> is compiled in.
+if(EMSCRIPTEN OR ANDROID OR IOS)
+    set(_logviewer_default_ui mobile)
+else()
+    set(_logviewer_default_ui desktop)
+endif()
+set(LOGVIEWER_UI "${_logviewer_default_ui}" CACHE STRING "UI design to build: desktop or mobile")
+set_property(CACHE LOGVIEWER_UI PROPERTY STRINGS desktop mobile)
+if(EXISTS ${PROJECT_SOURCE_DIR}/src/ui/${LOGVIEWER_UI}/CMakeLists.txt)
+    add_subdirectory(src/ui/${LOGVIEWER_UI})   # sets LOGVIEWER_UI_TARGET/_URI/_PLUGIN_CLASS
+    add_subdirectory(src/platform)
+else()
+    message(WARNING "LOGVIEWER_UI=${LOGVIEWER_UI}: design not implemented yet, the new app is not built")
+endif()
 
 # --- Translations: Russian (default), Uzbek (Latin), English (source) ---------
 # `cmake --build <dir> --target update_translations` runs lupdate over the new
@@ -48,7 +66,7 @@ find_package(Qt6 6.8 REQUIRED COMPONENTS LinguistTools)
 qt_add_translations(logviewer_app
     TS_FILES i18n/logviewer_ru.ts i18n/logviewer_uz.ts
     PLURALS_TS_FILE i18n/logviewer_en.ts
-    SOURCE_TARGETS logviewer_app logviewer_ui
+    SOURCE_TARGETS logviewer_app logviewer_ui ${LOGVIEWER_UI_TARGET}
     RESOURCE_PREFIX /i18n
     LUPDATE_OPTIONS -no-obsolete -locations none)
 

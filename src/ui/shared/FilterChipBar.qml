@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 
 // The search conditions as chips (model: text, exclude). Wraps on narrow widths.

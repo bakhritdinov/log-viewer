@@ -44,13 +44,13 @@ Session::Session(AppServices& services, QObject* parent)
     connect(m_discovery.get(), &LabelDiscovery::finished, this, &Session::onDiscovered);
     connect(m_discovery.get(), &LabelDiscovery::failed, this, [this](const RequestError& e) {
         emit discoveringChanged();
-        setError(ErrorInfo::from(e, environmentName(), m_services.environments().current().url.host()));
+        fail(e);
     });
     connect(m_loader.get(), &ChainedLoader::batchAdded, this, &Session::onBatch);
     connect(m_loader.get(), &ChainedLoader::finished, this, &Session::onLoadFinished);
     connect(m_loader.get(), &ChainedLoader::loadingChanged, this, &Session::loadingChanged);
     connect(m_loader.get(), &ChainedLoader::failed, this, [this](const RequestError& e) {
-        setError(ErrorInfo::from(e, environmentName(), m_services.environments().current().url.host()));
+        fail(e);
     });
 
     connect(&m_autoRefresh, &QTimer::timeout, this, [this] {
@@ -120,7 +120,7 @@ void Session::start()
     clearError();
     const Environment env = m_services.environments().current();
     if (!env.isConfigured()) {
-        setError(ErrorInfo::from({ RequestError::Kind::NotConfigured, 0, {} }));
+        fail({ RequestError::Kind::NotConfigured, 0, {} });
         return;
     }
     resolveConnection([this](const Connection& c) {
@@ -198,6 +198,13 @@ void Session::rememberSource()
     while (list.size() > kRecentCapacity) list.removeLast();
     m_services.settings().setValue(kRecentKey, QJsonDocument(list).toJson(QJsonDocument::Compact));
     refreshRecent();
+}
+
+QVariantList Session::sourceMatches(const QString& query) const
+{
+    QMap<QString, QStringList> apps;
+    for (const QString& ns : namespaces()) apps.insert(ns, appsOf(ns));
+    return presenters::sourceMatches(apps, query);
 }
 
 void Session::selectRecentSource(int index)
@@ -495,6 +502,31 @@ void Session::clearError()
     setError({});
 }
 
+void Session::fail(const RequestError& error)
+{
+    m_requestError = error;
+    setError(ErrorInfo::from(error, environmentName(), m_services.environments().current().url.host()));
+}
+
+void Session::retranslate()
+{
+    if (m_error.isActive()) {
+        m_error = ErrorInfo::from(m_requestError, environmentName(), m_services.environments().current().url.host());
+        emit errorChanged();
+    }
+    if (!m_rangeError.isEmpty()) {
+        m_rangeError = QCoreApplication::translate("Session", "Check the dates: both are required and the start must be before the end.");
+        emit rangeErrorChanged();
+    }
+    if (!m_store.filter().messageTemplate.isEmpty()) {
+        m_histogramFilterLabel = patternFilterLabel();
+        emit histogramFilterChanged();
+    }
+    refreshHistogram();
+    refreshSavedQueries();
+    emit timeRangeChanged();
+}
+
 // ── histogram ───────────────────────────────────────────────────────────────
 
 void Session::setManualBucketMs(qint64 ms)
@@ -503,6 +535,26 @@ void Session::setManualBucketMs(qint64 ms)
     if (m_manualBucketMs == ms) return;
     m_manualBucketMs = ms;
     refreshHistogram();
+}
+
+QStringList Session::histogramAxis() const
+{
+    return presenters::histogramAxis(m_histogram->rows(), 5);
+}
+
+QString Session::timeZoneLabel() const
+{
+    return presenters::utcOffsetLabel(QDateTime::currentDateTime().offsetFromUtc());
+}
+
+QDate Session::boundDate(const QString& boundText) const
+{
+    return presenters::boundDate(boundText, QDate::currentDate());
+}
+
+QString Session::boundOnDay(const QString& boundText, QDate day, bool endOfPeriod) const
+{
+    return presenters::boundOnDay(boundText, day, endOfPeriod);
 }
 
 void Session::refreshHistogram()
@@ -612,9 +664,25 @@ void Session::setPatternsEnabled(bool on)
 void Session::refreshPatterns()
 {
     if (!m_patternsEnabled || !m_patternsStale) return;
-    m_patterns->setRows(presenters::patternRows(extractPatterns(m_store.visible())));
+    QList<MessagePattern> patterns = extractPatterns(m_store.visible());
+    presenters::sortPatterns(patterns, m_patternSort);
+    m_patterns->setRows(presenters::patternRows(patterns));
     m_patternsStale = false;
     emit patternsChanged();
+}
+
+void Session::setPatternSort(const QString& order)
+{
+    if (m_patternSort == order) return;
+    m_patternSort = order;
+    m_patternsStale = true;
+    refreshPatterns();
+    emit patternsChanged();
+}
+
+QString Session::highlight(const QString& text, const QStringList& terms, const QString& color) const
+{
+    return presenters::highlightStyled(text, terms, color);
 }
 
 void Session::showPattern(int index, bool exclude)
@@ -625,10 +693,17 @@ void Session::showPattern(int index, bool exclude)
     f.messageTemplate = p.value("templateText").toString();
     f.excludeTemplate = exclude;
     m_store.setFilter(f);
-    m_histogramFilterLabel = (exclude ? QCoreApplication::translate("Session", "Without pattern: %1") : QCoreApplication::translate("Session", "Pattern: %1")).arg(f.messageTemplate);
+    m_histogramFilterLabel = patternFilterLabel();
     m_logs->reload(true);
     setSelectedRow(-1);
     emit histogramFilterChanged();
+}
+
+QString Session::patternFilterLabel() const
+{
+    const LogStore::Filter& f = m_store.filter();
+    return (f.excludeTemplate ? QCoreApplication::translate("Session", "Without pattern: %1")
+                              : QCoreApplication::translate("Session", "Pattern: %1")).arg(f.messageTemplate);
 }
 
 void Session::refreshChipsAndSuggestions()
@@ -697,6 +772,12 @@ void Session::refreshRecent()
                              { "app", o.value("app").toString() } };
     }
     m_recent->setRows(rows);
+}
+
+QString Session::suggestedQueryName() const
+{
+    if (m_searchText.trimmed().isEmpty()) return m_app;
+    return m_app.isEmpty() ? m_searchText.trimmed() : QStringLiteral("%1 · %2").arg(m_app, m_searchText.trimmed());
 }
 
 void Session::saveCurrentQuery(const QString& name)

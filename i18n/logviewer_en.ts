@@ -22,12 +22,42 @@
     </message>
 </context>
 <context>
+    <name>FocusView</name>
+    <message numerus="yes">
+        <source>Showing %n entries · %1 · the selected entry is highlighted</source>
+        <translation>
+            <numerusform>Showing %n entry · %1 · the selected entry is highlighted</numerusform>
+            <numerusform>Showing %n entries · %1 · the selected entry is highlighted</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>HistogramView</name>
     <message numerus="yes">
         <source>%1 · %n entries</source>
         <translation>
             <numerusform>%1 · %n entry</numerusform>
             <numerusform>%1 · %n entries</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>LiveView</name>
+    <message numerus="yes">
+        <source>%n new · resume live</source>
+        <translation>
+            <numerusform>%n new · resume live</numerusform>
+            <numerusform>%n new · resume live</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>PatternsView</name>
+    <message numerus="yes">
+        <source>Show %n entries</source>
+        <translation>
+            <numerusform>Show %n entry</numerusform>
+            <numerusform>Show %n entries</numerusform>
         </translation>
     </message>
 </context>
@@ -69,6 +99,16 @@
         <translation>
             <numerusform>%n value</numerusform>
             <numerusform>%n values</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>SourcePicker</name>
+    <message numerus="yes">
+        <source>%1, %n app(s)</source>
+        <translation>
+            <numerusform>%1, %n app</numerusform>
+            <numerusform>%1, %n apps</numerusform>
         </translation>
     </message>
 </context>

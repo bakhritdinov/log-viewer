@@ -12,8 +12,14 @@ ColumnLayout {
     property string errorText
     property bool touch: false
     property string timeZoneNote
+    property bool cancellable: false
+    // 0 — "from", 1 — "to": the field a picked calendar day goes into.
+    property int activeField: 0
+    // Extra content between the fields and the buttons (e.g. a calendar).
+    default property alias extra: extraSlot.data
 
     signal applyRequested(string from, string to)
+    signal cancelRequested()
 
     spacing: 10
 
@@ -41,6 +47,7 @@ ColumnLayout {
                 placeholderText: qsTr("YYYY-MM-DD HH:MM")
                 inputMethodHints: Qt.ImhPreferNumbers
                 Accessible.name: qsTr("Start of the period")
+                onActiveFocusChanged: if (activeFocus) root.activeField = 0
             }
         }
         ColumnLayout {
@@ -61,6 +68,7 @@ ColumnLayout {
                 placeholderText: qsTr("YYYY-MM-DD HH:MM")
                 inputMethodHints: Qt.ImhPreferNumbers
                 Accessible.name: qsTr("End of the period")
+                onActiveFocusChanged: if (activeFocus) root.activeField = 1
                 onAccepted: root.applyRequested(fromField.text, toField.text)
             }
         }
@@ -77,6 +85,12 @@ ColumnLayout {
         Accessible.role: Accessible.AlertMessage
     }
 
+    ColumnLayout {
+        id: extraSlot
+        Layout.fillWidth: true
+        visible: children.length > 0
+    }
+
     RowLayout {
         Layout.fillWidth: true
         spacing: 8
@@ -87,6 +101,12 @@ ColumnLayout {
             font.family: Theme.sans
             font.pixelSize: Theme.fontSm
             color: Theme.textMuted
+        }
+        AppButton {
+            visible: root.cancellable
+            touch: root.touch
+            text: qsTr("Cancel")
+            onClicked: root.cancelRequested()
         }
         AppButton {
             variant: "primary"

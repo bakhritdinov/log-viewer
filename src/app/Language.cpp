@@ -1,6 +1,7 @@
 #include "app/Language.h"
 
 #include <QCoreApplication>
+#include <QDate>
 #include <QLocale>
 #include <QQmlEngine>
 
@@ -16,15 +17,16 @@ const QString kSettingsKey = QStringLiteral("ui/language");
 struct Spec {
     const char* code;
     const char* nativeName;   // shown in its own language, never translated
+    const char* englishName;
     QLocale locale;
 };
 
 const QList<Spec>& specs()
 {
     static const QList<Spec> list = {
-        { "ru", "Русский", QLocale(QLocale::Russian, QLocale::Russia) },
-        { "uz", "Oʻzbekcha", QLocale(QLocale::Uzbek, QLocale::LatinScript, QLocale::Uzbekistan) },
-        { "en", "English", QLocale(QLocale::English, QLocale::UnitedStates) },
+        { "ru", "Русский", "Russian", QLocale(QLocale::Russian, QLocale::Russia) },
+        { "uz", "Oʻzbekcha", "Uzbek (Latin)", QLocale(QLocale::Uzbek, QLocale::LatinScript, QLocale::Uzbekistan) },
+        { "en", "English", "English", QLocale(QLocale::English, QLocale::UnitedStates) },
     };
     return list;
 }
@@ -60,8 +62,17 @@ QStringList Language::supportedCodes()
 QVariantList Language::languages() const
 {
     QVariantList out;
-    for (const Spec& s : specs())
-        out << QVariantMap{ { "code", QString::fromLatin1(s.code) }, { "name", QString::fromUtf8(s.nativeName) } };
+    for (const Spec& s : specs()) {
+        // A sample in that language ("Last 1 hour · 15 Oct"), whatever the current one.
+        QTranslator translator;
+        const bool loaded = translator.load(QStringLiteral(":/i18n/logviewer_%1.qm").arg(QLatin1StringView(s.code)));
+        QString period = loaded ? translator.translate("Presenters", "Last %n hour(s)", nullptr, 1) : QString();
+        if (period.isEmpty()) period = QStringLiteral("Last 1 hour");
+        period.replace(QStringLiteral("%n"), s.locale.toString(1));
+        const QString sample = QStringLiteral("%1 · %2").arg(period, s.locale.toString(QDate::currentDate(), QStringLiteral("d MMM")));
+        out << QVariantMap{ { "code", QString::fromLatin1(s.code) }, { "name", QString::fromUtf8(s.nativeName) },
+                            { "englishName", QString::fromLatin1(s.englishName) }, { "sample", sample } };
+    }
     return out;
 }
 

@@ -36,7 +36,7 @@ class EnvironmentEditor : public QObject {
     Q_PROPERTY(bool secretsSecure READ secretsSecure CONSTANT)
     Q_PROPERTY(TestState testState READ testState NOTIFY testChanged)
     Q_PROPERTY(QString testMessage READ testMessage NOTIFY testChanged)
-    Q_PROPERTY(ErrorInfo testError READ testError NOTIFY testChanged)
+    Q_PROPERTY(lv::ErrorInfo testError READ testError NOTIFY testChanged)
 
 public:
     enum class Auth { Basic, Token, None };

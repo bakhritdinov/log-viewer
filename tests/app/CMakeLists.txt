@@ -3,3 +3,4 @@ logviewer_add_test(tst_app_environment_editor SOURCES tst_environment_editor.cpp
 logviewer_add_test(tst_app_qml_module SOURCES tst_qml_module.cpp LIBS logviewer_app logviewer_appplugin)
 logviewer_add_test(tst_app_view_models SOURCES tst_view_models.cpp LIBS logviewer_app)
 logviewer_add_test(tst_app_language SOURCES tst_language.cpp LIBS logviewer_app)
+logviewer_add_test(tst_app_presenters SOURCES tst_presenters.cpp LIBS logviewer_app)

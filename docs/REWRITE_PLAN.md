@@ -70,7 +70,8 @@ tests/{characterization,core,app,qml}, tests/fixtures/
 | 3 core/features + storage | done (QtKeychain adapter moves to stage 8) |
 | 4 app view-models | done — `LogViewer.App`; core + app line coverage 93 % |
 | 5 ui/shared + i18n | done — `LogViewer.Ui` (25 components, Qt Quick tests), `Language`, ru/uz + en plurals; translations to be reviewed by native speakers |
-| 6–9 | pending |
+| 6 ui/desktop | done — `LogViewer.Desktop`, `logviewer-next` executable (`src/platform`), scenario tests over a fake Grafana, qmllint clean |
+| 7–9 | pending |
 
 ## Stages
 
@@ -89,8 +90,12 @@ Each stage ends with a green build, green tests and a commit.
    `Language` singleton, ru/uz translations, `update_translations` target.
 6. ui/desktop per mockups (incl. language picker in Settings; Session rebuilds
    its presented strings when the language changes).
-7. ui/mobile per mockups (incl. language picker) + PWA shell.
-8. Platforms and release — URL scheme, installers, PWA hosting, CI matrix,
+7. ui/mobile per mockups (incl. language picker) + PWA shell. Translations must
+   keep covering both designs: lupdate has to scan `src/ui/desktop` and
+   `src/ui/mobile` whichever design is built (otherwise `-no-obsolete` drops
+   the other design's strings).
+8. Platforms and release — switch the app's settings name from "LogViewerNext" to
+   "LogViewer" (enables the legacy migration), URL scheme, installers, PWA hosting, CI matrix,
    removal of legacy code (and of the characterization tests that target it).
 9. Stabilization — checklist run against live Grafana (DEV/PROD), 5 000-row
    performance, accessibility.

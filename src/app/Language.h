@@ -35,7 +35,8 @@ public:
     static Language* instance();
     static Language* create(QQmlEngine* engine, QJSEngine*);
 
-    // Codes in display order with their names in their own language.
+    // In display order: code, name (in its own language), englishName and a
+    // sample label in that language.
     QVariantList languages() const;
     static QStringList supportedCodes();
 

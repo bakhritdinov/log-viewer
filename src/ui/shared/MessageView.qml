@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls.Basic
 
 // Selectable message text: pretty JSON or raw.
 Rectangle {

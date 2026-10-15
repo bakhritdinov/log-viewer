@@ -32,7 +32,7 @@ class Session : public QObject {
     QML_SINGLETON
 
     // Environment
-    Q_PROPERTY(MapListModel* environments READ environments CONSTANT)
+    Q_PROPERTY(lv::MapListModel* environments READ environments CONSTANT)
     Q_PROPERTY(QString environmentId READ environmentId NOTIFY environmentChanged)
     Q_PROPERTY(QString environmentName READ environmentName NOTIFY environmentChanged)
     Q_PROPERTY(QString environmentColor READ environmentColor NOTIFY environmentChanged)
@@ -45,11 +45,11 @@ class Session : public QObject {
     Q_PROPERTY(QStringList apps READ apps NOTIFY sourceChanged)
     Q_PROPERTY(QString namespaceLabel READ namespaceLabel NOTIFY streamsChanged)
     Q_PROPERTY(QString appLabel READ appLabel NOTIFY streamsChanged)
-    Q_PROPERTY(MapListModel* recentSources READ recentSources CONSTANT)
+    Q_PROPERTY(lv::MapListModel* recentSources READ recentSources CONSTANT)
     // Search
     Q_PROPERTY(QString searchText READ searchText WRITE setSearchText NOTIFY searchTextChanged)
-    Q_PROPERTY(MapListModel* chips READ chips CONSTANT)
-    Q_PROPERTY(MapListModel* suggestions READ suggestions CONSTANT)
+    Q_PROPERTY(lv::MapListModel* chips READ chips CONSTANT)
+    Q_PROPERTY(lv::MapListModel* suggestions READ suggestions CONSTANT)
     Q_PROPERTY(QStringList searchTerms READ searchTerms NOTIFY searchTextChanged)
     Q_PROPERTY(QStringList history READ history NOTIFY historyChanged)
     // Time range
@@ -60,40 +60,45 @@ class Session : public QObject {
     Q_PROPERTY(QString absoluteFromText READ absoluteFromText NOTIFY timeRangeChanged)
     Q_PROPERTY(QString absoluteToText READ absoluteToText NOTIFY timeRangeChanged)
     Q_PROPERTY(QString rangeError READ rangeError NOTIFY rangeErrorChanged)
+    Q_PROPERTY(QString timeZoneLabel READ timeZoneLabel NOTIFY timeRangeChanged)   // "UTC+5"
     // Loading
     Q_PROPERTY(bool loading READ isLoading NOTIFY loadingChanged)
     Q_PROPERTY(bool hasMore READ hasMore NOTIFY loadingChanged)
     Q_PROPERTY(int lastQueryMs READ lastQueryMs NOTIFY loadingChanged)
-    Q_PROPERTY(LogListModel* logs READ logs CONSTANT)
-    Q_PROPERTY(ErrorInfo error READ error NOTIFY errorChanged)
+    Q_PROPERTY(lv::LogListModel* logs READ logs CONSTANT)
+    Q_PROPERTY(int loadStep READ loadStep CONSTANT)   // entries per "load more"
+    Q_PROPERTY(lv::ErrorInfo error READ error NOTIFY errorChanged)
     Q_PROPERTY(bool needsSetup READ needsSetup NOTIFY errorChanged)
+    Q_PROPERTY(bool hasError READ hasError NOTIFY errorChanged)
     Q_PROPERTY(int autoRefreshSeconds READ autoRefreshSeconds WRITE setAutoRefreshSeconds NOTIFY autoRefreshChanged)
     // Histogram
-    Q_PROPERTY(MapListModel* histogram READ histogram CONSTANT)
+    Q_PROPERTY(lv::MapListModel* histogram READ histogram CONSTANT)
     Q_PROPERTY(qint64 histogramBucketMs READ histogramBucketMs NOTIFY histogramChanged)
     Q_PROPERTY(qint64 manualBucketMs READ manualBucketMs WRITE setManualBucketMs NOTIFY histogramChanged)
     Q_PROPERTY(int histogramMax READ histogramMax NOTIFY histogramChanged)
+    Q_PROPERTY(QStringList histogramAxis READ histogramAxis NOTIFY histogramChanged)   // 5 labels
     Q_PROPERTY(QVariantMap levelTotals READ levelTotals NOTIFY histogramChanged)
     Q_PROPERTY(bool histogramFilterActive READ histogramFilterActive NOTIFY histogramFilterChanged)
     Q_PROPERTY(QString histogramFilterLabel READ histogramFilterLabel NOTIFY histogramFilterChanged)
     Q_PROPERTY(QString activeLevel READ activeLevel NOTIFY histogramFilterChanged)
     Q_PROPERTY(bool levelServerSide READ levelServerSide NOTIFY histogramFilterChanged)
     // Fields, patterns
-    Q_PROPERTY(MapListModel* facets READ facets CONSTANT)
+    Q_PROPERTY(lv::MapListModel* facets READ facets CONSTANT)
     Q_PROPERTY(QString facetFilterText READ facetFilterText WRITE setFacetFilterText NOTIFY facetsChanged)
     Q_PROPERTY(int fieldCount READ fieldCount NOTIFY facetsChanged)
-    Q_PROPERTY(MapListModel* patterns READ patterns CONSTANT)
+    Q_PROPERTY(lv::MapListModel* patterns READ patterns CONSTANT)
     Q_PROPERTY(bool patternsEnabled READ patternsEnabled WRITE setPatternsEnabled NOTIFY patternsChanged)
+    Q_PROPERTY(QString patternSort READ patternSort WRITE setPatternSort NOTIFY patternsChanged)
     // Selection
     Q_PROPERTY(int selectedRow READ selectedRow NOTIFY selectionChanged)
-    Q_PROPERTY(EntryDetails selectedEntry READ selectedEntry NOTIFY selectionChanged)
+    Q_PROPERTY(lv::EntryDetails selectedEntry READ selectedEntry NOTIFY selectionChanged)
     // Saved queries, sharing
-    Q_PROPERTY(MapListModel* savedQueries READ savedQueries CONSTANT)
+    Q_PROPERTY(lv::MapListModel* savedQueries READ savedQueries CONSTANT)
     Q_PROPERTY(QString shareBaseUrl READ shareBaseUrl WRITE setShareBaseUrl NOTIFY shareBaseUrlChanged)
     Q_PROPERTY(bool openedFromLink READ openedFromLink NOTIFY openedFromLinkChanged)
     // Sub-sessions
-    Q_PROPERTY(FocusSession* focus READ focus CONSTANT)
-    Q_PROPERTY(LiveSession* live READ live CONSTANT)
+    Q_PROPERTY(lv::FocusSession* focus READ focus CONSTANT)
+    Q_PROPERTY(lv::LiveSession* live READ live CONSTANT)
 
 public:
     explicit Session(AppServices& services, QObject* parent = nullptr);
@@ -114,6 +119,8 @@ public:
     Q_INVOKABLE void selectSource(const QString& namespaceName, const QString& app);
     Q_INVOKABLE void selectNamespace(const QString& namespaceName);   // first app of it
     Q_INVOKABLE void selectRecentSource(int index);
+    // Rows for the source picker, see presenters::sourceMatches.
+    Q_INVOKABLE QVariantList sourceMatches(const QString& query) const;
     // Environments were edited (settings): reload list, rediscover if needed.
     Q_INVOKABLE void environmentsEdited(const QString& changedId = {});
 
@@ -129,6 +136,9 @@ public:
     // Time range
     Q_INVOKABLE void setPreset(const QString& key);
     Q_INVOKABLE bool setAbsoluteRange(const QString& fromText, const QString& toText);
+    // Calendar helpers for "yyyy-MM-dd HH:mm" bounds (see presenters).
+    Q_INVOKABLE QDate boundDate(const QString& boundText) const;
+    Q_INVOKABLE QString boundOnDay(const QString& boundText, QDate day, bool endOfPeriod) const;
     void setRange(const TimeRange& range);   // C++: apply and search
 
     // Loading
@@ -150,15 +160,24 @@ public:
     void setPatternsEnabled(bool on);
     // Narrows the list to entries of the pattern (or hides them with exclude).
     Q_INVOKABLE void showPattern(int index, bool exclude = false);
+    // "count" | "first" | "level"
+    void setPatternSort(const QString& order);
+    QString patternSort() const { return m_patternSort; }
+
+    // `text` as StyledText with `terms` (usually searchTerms) emphasised in
+    // `color`. Terms are a parameter so QML bindings track them.
+    Q_INVOKABLE QString highlight(const QString& text, const QStringList& terms, const QString& color) const;
 
     // Selection
     Q_INVOKABLE void selectRow(int row);
     Q_INVOKABLE void selectNext();
     Q_INVOKABLE void selectPrevious();
     Q_INVOKABLE void clearSelection();
-    Q_INVOKABLE EntryDetails detailsOf(LogListModel* model, int row) const;
+    Q_INVOKABLE lv::EntryDetails detailsOf(lv::LogListModel* model, int row) const;
 
     // Saved queries
+    // A default name for saving the current search ("app · search").
+    Q_INVOKABLE QString suggestedQueryName() const;
     Q_INVOKABLE void saveCurrentQuery(const QString& name);
     Q_INVOKABLE void runSavedQuery(const QString& id);
     Q_INVOKABLE void renameSavedQuery(const QString& id, const QString& name);
@@ -171,6 +190,10 @@ public:
     Q_INVOKABLE bool openLink(const QString& url);
     Q_INVOKABLE void dismissLinkBanner();
     Q_INVOKABLE QString corsHint() const;
+
+    // The UI language changed: rebuilds every text Session made in C++
+    // (errors, range labels, model rows). QML bindings retranslate themselves.
+    void retranslate();
 
     // ── getters ──
     MapListModel* environments() const { return m_environments; }
@@ -201,14 +224,18 @@ public:
     bool isLoading() const { return m_loader->isLoading(); }
     bool hasMore() const { return m_loader->hasMore(); }
     int lastQueryMs() const { return m_lastQueryMs; }
+    int loadStep() const { return ChainedLoader::kStep; }
     LogListModel* logs() const { return m_logs; }
     ErrorInfo error() const { return m_error; }
+    bool hasError() const { return m_error.isActive(); }
     bool needsSetup() const { return m_error.kind == ErrorInfo::Kind::NotConfigured; }
     int autoRefreshSeconds() const { return m_autoRefreshSeconds; }
     MapListModel* histogram() const { return m_histogram; }
     qint64 histogramBucketMs() const { return m_bucketMs; }
     qint64 manualBucketMs() const { return m_manualBucketMs; }
     int histogramMax() const { return m_histogramMax; }
+    QStringList histogramAxis() const;
+    QString timeZoneLabel() const;
     QVariantMap levelTotals() const { return m_levelTotals; }
     bool histogramFilterActive() const { return m_store.filter().isActive(); }
     QString histogramFilterLabel() const { return m_histogramFilterLabel; }
@@ -260,6 +287,8 @@ private:
     void onBatch();
     void onLoadFinished();
     void setError(const ErrorInfo& error);
+    void fail(const RequestError& error);
+    QString patternFilterLabel() const;
     void clearError();
     void rememberSource();
     void refreshDerived();          // histogram, facets, patterns after the store changed
@@ -294,6 +323,7 @@ private:
     TimeRange m_range;
     QString m_rangeError;
     ErrorInfo m_error;
+    RequestError m_requestError;   // source of m_error, to rebuild its texts
     int m_lastQueryMs = 0;
     int m_autoRefreshSeconds = 0;
 
@@ -311,6 +341,7 @@ private:
     QSet<QString> m_expandedFacets;
     bool m_patternsEnabled = false;
     bool m_patternsStale = true;
+    QString m_patternSort = QStringLiteral("count");
 
     int m_selectedRow = -1;
     QString m_shareBaseUrl;

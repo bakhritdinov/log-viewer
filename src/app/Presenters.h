@@ -42,8 +42,13 @@ QList<QVariantMap> facetRows(const FieldValueCounts& facets, const QString& filt
 
 // ── Message patterns ──
 // roles: templateText, level, count, share, firstSeen, lastSeen, examples, trend, trendMax
+// roles: templateText, templateParts (literal/variable alternating, variables at odd
+//        indexes), level, count, share, firstSeen, lastSeen, examples, trend, trendMax
 QByteArrayList patternRoles();
 QList<QVariantMap> patternRows(const QList<MessagePattern>& patterns);
+// Orders patterns: "count" (most frequent first), "first" (earliest first
+// seen first) or "level" (most severe first, then by count).
+void sortPatterns(QList<MessagePattern>& patterns, const QString& order);
 
 // ── Environments ──
 // roles: id, name, color, configured, current
@@ -60,5 +65,28 @@ QList<QVariantMap> savedQueryRows(const QList<SavedQuery>& queries, const QList<
 QString timeRangeLabel(const TimeRange& range);
 // Short label for chips/mobile ("1 h", "15 min", "Today").
 QString timeRangeShortLabel(const TimeRange& range);
+
+// ── Source picker ──
+// Namespaces matching `query` (case-insensitive) by their own name or by one
+// of their apps. Each row: name, pre/hit/post (the name split around the
+// match), appCount, apps: [{ name, pre, hit, post }] — all apps when the
+// namespace itself matches, otherwise only the matching ones.
+QVariantList sourceMatches(const QMap<QString, QStringList>& appsByNamespace, const QString& query);
+
+// ── Time helpers for the period pickers ──
+// Up to `count` evenly spaced bucket labels for the histogram axis.
+QStringList histogramAxis(const QList<QVariantMap>& rows, int count);
+// "UTC+5", "UTC−3:30" for the given offset from UTC in seconds.
+QString utcOffsetLabel(int offsetSeconds);
+// The date of a "yyyy-MM-dd HH:mm" bound; invalid text gives `fallback`.
+QDate boundDate(const QString& boundText, const QDate& fallback);
+// `boundText` moved to `day`, keeping its time; invalid text gets 00:00, or
+// 23:59 for the end of a period.
+QString boundOnDay(const QString& boundText, const QDate& day, bool endOfPeriod);
+
+// ── Highlighting ──
+// `text` as Qt StyledText with every case-insensitive occurrence of `terms`
+// wrapped in bold `color`; everything else HTML-escaped.
+QString highlightStyled(const QString& text, const QStringList& terms, const QString& color);
 
 } // namespace lv::presenters

@@ -2,6 +2,17 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ru" sourcelanguage="en">
 <context>
+    <name>AboutPage</name>
+    <message>
+        <source>Version</source>
+        <translation>Версия</translation>
+    </message>
+    <message>
+        <source>Clear search history</source>
+        <translation>Очистить историю поиска</translation>
+    </message>
+</context>
+<context>
     <name>AbsoluteRangeForm</name>
     <message>
         <source>From</source>
@@ -24,8 +35,192 @@
         <translation>Конец периода</translation>
     </message>
     <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
         <source>Apply</source>
         <translation>Применить</translation>
+    </message>
+</context>
+<context>
+    <name>AppearancePage</name>
+    <message>
+        <source>Dark theme</source>
+        <translation>Тёмная тема</translation>
+    </message>
+    <message>
+        <source>Pretty JSON in details</source>
+        <translation>Красивый JSON в деталях</translation>
+    </message>
+    <message>
+        <source>Format messages that are JSON</source>
+        <translation>Форматировать сообщения-JSON</translation>
+    </message>
+</context>
+<context>
+    <name>CalendarView</name>
+    <message>
+        <source>Previous month</source>
+        <translation>Предыдущий месяц</translation>
+    </message>
+    <message>
+        <source>Next month</source>
+        <translation>Следующий месяц</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionsPage</name>
+    <message>
+        <source>Environment</source>
+        <translation>Окружение</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Название</translation>
+    </message>
+    <message>
+        <source>Label colour</source>
+        <translation>Цвет метки</translation>
+    </message>
+    <message>
+        <source>Grafana URL</source>
+        <translation>URL Grafana</translation>
+    </message>
+    <message>
+        <source>Datasource UID (Loki / VictoriaLogs)</source>
+        <translation>UID источника данных (Loki / VictoriaLogs)</translation>
+    </message>
+    <message>
+        <source>Grafana → Connections → Data sources → your source, the last part of the URL</source>
+        <translation>Grafana → Connections → Data sources → ваш источник, последняя часть URL</translation>
+    </message>
+    <message>
+        <source>Datasource UID</source>
+        <translation>UID источника данных</translation>
+    </message>
+    <message>
+        <source>Authorization</source>
+        <translation>Авторизация</translation>
+    </message>
+    <message>
+        <source>Login and password</source>
+        <translation>Логин и пароль</translation>
+    </message>
+    <message>
+        <source>API token</source>
+        <translation>API-токен</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Без авторизации</translation>
+    </message>
+    <message>
+        <source>User</source>
+        <translation>Пользователь</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>Пароль</translation>
+    </message>
+    <message>
+        <source>The connection works</source>
+        <translation>Подключение работает</translation>
+    </message>
+    <message>
+        <source>Test the connection before saving</source>
+        <translation>Проверьте подключение перед сохранением</translation>
+    </message>
+    <message>
+        <source>Test again</source>
+        <translation>Проверить ещё раз</translation>
+    </message>
+    <message>
+        <source>Test connection</source>
+        <translation>Проверить подключение</translation>
+    </message>
+    <message>
+        <source>Passwords and tokens are kept in the system keychain (Keychain / Credential Manager), not in the settings file.</source>
+        <translation>Пароль и токен хранятся в системном хранилище ключей (Keychain / Credential Manager), а не в файле настроек.</translation>
+    </message>
+    <message>
+        <source>The system keychain is unavailable: passwords and tokens are kept in the settings file of this device.</source>
+        <translation>Системное хранилище ключей недоступно: пароли и токены хранятся в файле настроек на этом устройстве.</translation>
+    </message>
+    <message>
+        <source>Delete environment</source>
+        <translation>Удалить окружение</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>Save and connect</source>
+        <translation>Сохранить и подключиться</translation>
+    </message>
+    <message>
+        <source>Delete the environment %1?</source>
+        <translation>Удалить окружение %1?</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Скрыть</translation>
+    </message>
+    <message>
+        <source>Show</source>
+        <translation>Показать</translation>
+    </message>
+</context>
+<context>
+    <name>DetailsPanel</name>
+    <message>
+        <source>Entry details</source>
+        <translation>Подробности записи</translation>
+    </message>
+    <message>
+        <source>Previous entry (↑)</source>
+        <translation>Предыдущая запись (↑)</translation>
+    </message>
+    <message>
+        <source>Next entry (↓)</source>
+        <translation>Следующая запись (↓)</translation>
+    </message>
+    <message>
+        <source>Close (Esc)</source>
+        <translation>Закрыть (Esc)</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Копировать</translation>
+    </message>
+    <message>
+        <source>Trace ±5 min</source>
+        <translation>Трейс ±5 мин</translation>
+    </message>
+    <message>
+        <source>The entry has no trace id</source>
+        <translation>У записи нет trace id</translation>
+    </message>
+    <message>
+        <source>Context ±1 min</source>
+        <translation>Контекст ±1 мин</translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation>Сообщение</translation>
+    </message>
+    <message>
+        <source>Raw JSON</source>
+        <translation>Raw JSON</translation>
+    </message>
+    <message>
+        <source>Fields · %1</source>
+        <translation>Поля · %1</translation>
+    </message>
+    <message>
+        <source>+ include · − exclude</source>
+        <translation>+ включить · − исключить</translation>
     </message>
 </context>
 <context>
@@ -259,6 +454,29 @@
     </message>
 </context>
 <context>
+    <name>FieldsPanel</name>
+    <message>
+        <source>Show fields</source>
+        <translation>Показать поля</translation>
+    </message>
+    <message>
+        <source>Fields · %1</source>
+        <translation>Поля · %1</translation>
+    </message>
+    <message>
+        <source>Hide fields</source>
+        <translation>Свернуть панель полей</translation>
+    </message>
+    <message>
+        <source>Field, value or key:value</source>
+        <translation>Поле, значение или key:value</translation>
+    </message>
+    <message>
+        <source>Search fields</source>
+        <translation>Поиск по полям</translation>
+    </message>
+</context>
+<context>
     <name>FilterChip</name>
     <message>
         <source>Excluded: %1</source>
@@ -271,6 +489,112 @@
     <message>
         <source>Remove filter %1</source>
         <translation>Убрать фильтр %1</translation>
+    </message>
+</context>
+<context>
+    <name>FocusView</name>
+    <message>
+        <source>Focus mode</source>
+        <translation>Режим фокуса</translation>
+    </message>
+    <message>
+        <source>Back to search results</source>
+        <translation>К результатам поиска</translation>
+    </message>
+    <message>
+        <source>What to show around the entry</source>
+        <translation>Что показать вокруг записи</translation>
+    </message>
+    <message>
+        <source>Context</source>
+        <translation>Контекст</translation>
+    </message>
+    <message>
+        <source>Trace %1…</source>
+        <translation>Трейс %1…</translation>
+    </message>
+    <message>
+        <source>Entries of trace %1 around %2</source>
+        <translation>Записи трейса %1 вокруг %2</translation>
+    </message>
+    <message>
+        <source>All %1 entries around %2 · search filters are lifted for now</source>
+        <translation>Все записи %1 вокруг %2 · фильтры поиска на время сняты</translation>
+    </message>
+    <message>
+        <source>Window</source>
+        <translation>Окно</translation>
+    </message>
+    <message>
+        <source>±30 s</source>
+        <translation>±30 с</translation>
+    </message>
+    <message>
+        <source>±1 min</source>
+        <translation>±1 мин</translation>
+    </message>
+    <message>
+        <source>±5 min</source>
+        <translation>±5 мин</translation>
+    </message>
+    <message>
+        <source>Loading…</source>
+        <translation>Загрузка…</translation>
+    </message>
+    <message numerus="yes">
+        <source>Showing %n entries · %1 · the selected entry is highlighted</source>
+        <translation>
+            <numerusform>Показана %n запись · %1 · выбранная запись выделена</numerusform>
+            <numerusform>Показаны %n записи · %1 · выбранная запись выделена</numerusform>
+            <numerusform>Показаны %n записей · %1 · выбранная запись выделена</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Open as search</source>
+        <translation>Открыть как поиск</translation>
+    </message>
+</context>
+<context>
+    <name>HistogramPanel</name>
+    <message>
+        <source>Auto</source>
+        <translation>Авто</translation>
+    </message>
+    <message>
+        <source>1 min</source>
+        <translation>1 мин</translation>
+    </message>
+    <message>
+        <source>5 min</source>
+        <translation>5 мин</translation>
+    </message>
+    <message>
+        <source>15 min</source>
+        <translation>15 мин</translation>
+    </message>
+    <message>
+        <source>1 h</source>
+        <translation>1 ч</translation>
+    </message>
+    <message>
+        <source>Distribution over time</source>
+        <translation>Распределение по времени</translation>
+    </message>
+    <message>
+        <source>Distribution</source>
+        <translation>Распределение</translation>
+    </message>
+    <message>
+        <source>Histogram step</source>
+        <translation>Шаг гистограммы</translation>
+    </message>
+    <message>
+        <source>Collapse the chart</source>
+        <translation>Свернуть график</translation>
+    </message>
+    <message>
+        <source>Expand the chart</source>
+        <translation>Развернуть график</translation>
     </message>
 </context>
 <context>
@@ -297,6 +621,21 @@
     </message>
 </context>
 <context>
+    <name>LanguagePage</name>
+    <message>
+        <source>The language changes at once, no restart needed. Dates, numbers and month names follow the chosen language. Logs, field names and queries are not translated.</source>
+        <translation>Язык меняется сразу, без перезапуска. Формат дат, чисел и названия месяцев следуют выбранному языку. Сами логи, имена полей и запросы не переводятся.</translation>
+    </message>
+    <message>
+        <source>Default — Russian</source>
+        <translation>По умолчанию — русский</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
+</context>
+<context>
     <name>LevelBadge</name>
     <message>
         <source>Level %1</source>
@@ -311,10 +650,301 @@
     </message>
 </context>
 <context>
+    <name>LinkBanner</name>
+    <message>
+        <source>Opened from a link: %1 · %2 / %3 · %4</source>
+        <translation>Открыто по ссылке: %1 · %2 / %3 · %4</translation>
+    </message>
+    <message>
+        <source>Save as query</source>
+        <translation>Сохранить как запрос</translation>
+    </message>
+    <message>
+        <source>Back to my selection</source>
+        <translation>Вернуться к своей выборке</translation>
+    </message>
+</context>
+<context>
+    <name>LiveView</name>
+    <message numerus="yes">
+        <source>%n new · resume live</source>
+        <translation>
+            <numerusform>%n новая · продолжить live</numerusform>
+            <numerusform>%n новых · продолжить live</numerusform>
+            <numerusform>%n новых · продолжить live</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Paused: you scrolled down</source>
+        <translation>Пауза: вы прокрутили вниз</translation>
+    </message>
+    <message>
+        <source>Buffer holds %1 of %2 lines · the oldest are dropped</source>
+        <translation>В буфере %1 из %2 строк · старые вытесняются</translation>
+    </message>
+    <message>
+        <source>Space — pause / resume</source>
+        <translation>Пробел — пауза/продолжить</translation>
+    </message>
+</context>
+<context>
+    <name>LogTable</name>
+    <message>
+        <source>Service</source>
+        <translation>Сервис</translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation>Время</translation>
+    </message>
+    <message>
+        <source>Level</source>
+        <translation>Уровень</translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation>Сообщение</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation>Логи</translation>
+    </message>
+    <message>
+        <source>%1 %2 %3</source>
+        <translation>%1 %2 %3</translation>
+    </message>
+</context>
+<context>
+    <name>Main</name>
+    <message>
+        <source>Refresh</source>
+        <translation>Обновить</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Поиск</translation>
+    </message>
+    <message>
+        <source>Choose the source</source>
+        <translation>Выбрать источник</translation>
+    </message>
+    <message>
+        <source>Choose the period</source>
+        <translation>Выбрать период</translation>
+    </message>
+    <message>
+        <source>Newer / older page</source>
+        <translation>Страница новее / старее</translation>
+    </message>
+    <message>
+        <source>First / last page</source>
+        <translation>Первая / последняя страница</translation>
+    </message>
+    <message>
+        <source>Previous / next entry</source>
+        <translation>Предыдущая / следующая запись</translation>
+    </message>
+    <message>
+        <source>Close the details or the focus</source>
+        <translation>Закрыть детали или фокус</translation>
+    </message>
+    <message>
+        <source>Save the query</source>
+        <translation>Сохранить запрос</translation>
+    </message>
+    <message>
+        <source>Ctrl+1…9</source>
+        <translation>Ctrl+1…9</translation>
+    </message>
+    <message>
+        <source>Run a saved query</source>
+        <translation>Запустить сохранённый запрос</translation>
+    </message>
+    <message>
+        <source>Share a link</source>
+        <translation>Поделиться ссылкой</translation>
+    </message>
+    <message>
+        <source>Space</source>
+        <translation>Пробел</translation>
+    </message>
+    <message>
+        <source>Pause / resume live tail</source>
+        <translation>Пауза / продолжение live</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Настройки</translation>
+    </message>
+    <message>
+        <source>All keyboard shortcuts</source>
+        <translation>Все горячие клавиши</translation>
+    </message>
+    <message>
+        <source>The link points to the environment “%1”, which is not set up here.</source>
+        <translation>Ссылка ведёт в окружение «%1», которое здесь не настроено.</translation>
+    </message>
+    <message>
+        <source>The filter applies to the stream on the fly</source>
+        <translation>Фильтр применяется к потоку на лету</translation>
+    </message>
+    <message>
+        <source>word · key:value · key:~regex · AND</source>
+        <translation>слово · key:value · key:~regex · AND</translation>
+    </message>
+    <message>
+        <source>refresh</source>
+        <translation>обновить</translation>
+    </message>
+    <message>
+        <source>search</source>
+        <translation>поиск</translation>
+    </message>
+    <message>
+        <source>source</source>
+        <translation>источник</translation>
+    </message>
+    <message>
+        <source>pages</source>
+        <translation>страницы</translation>
+    </message>
+    <message>
+        <source>all keys</source>
+        <translation>все клавиши</translation>
+    </message>
+</context>
+<context>
     <name>MessageView</name>
     <message>
         <source>Message</source>
         <translation>Сообщение</translation>
+    </message>
+</context>
+<context>
+    <name>PageFooter</name>
+    <message>
+        <source>Loaded %1 entries…</source>
+        <translation>Загружено записей: %1…</translation>
+    </message>
+    <message>
+        <source>Showing %1–%2 of %3 loaded</source>
+        <translation>Показано %1–%2 из %3 загруженных</translation>
+    </message>
+    <message>
+        <source>%1 · the period has more</source>
+        <translation>%1 · в периоде есть ещё</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Остановить</translation>
+    </message>
+    <message>
+        <source>First page (Shift+[)</source>
+        <translation>Первая страница (Shift+[)</translation>
+    </message>
+    <message>
+        <source>Newer ([)</source>
+        <translation>Новее ([)</translation>
+    </message>
+    <message>
+        <source>Page</source>
+        <translation>Стр.</translation>
+    </message>
+    <message>
+        <source>Page number</source>
+        <translation>Номер страницы</translation>
+    </message>
+    <message>
+        <source>of %1</source>
+        <translation>из %1</translation>
+    </message>
+    <message>
+        <source>Older (])</source>
+        <translation>Старее (])</translation>
+    </message>
+    <message>
+        <source>Last page (Shift+])</source>
+        <translation>Последняя страница (Shift+])</translation>
+    </message>
+    <message>
+        <source>Load %1 more</source>
+        <translation>Загрузить ещё %1</translation>
+    </message>
+</context>
+<context>
+    <name>PatternsView</name>
+    <message>
+        <source>Similar messages are grouped: numbers, ids, addresses and times become *. Based on %1 loaded entries.</source>
+        <translation>Похожие сообщения сгруппированы: числа, ID, адреса и время заменены на *. По загруженным записям: %1.</translation>
+    </message>
+    <message>
+        <source>Sort</source>
+        <translation>Сортировка</translation>
+    </message>
+    <message>
+        <source>by count</source>
+        <translation>по количеству</translation>
+    </message>
+    <message>
+        <source>by first appearance</source>
+        <translation>по первому появлению</translation>
+    </message>
+    <message>
+        <source>by level</source>
+        <translation>по уровню</translation>
+    </message>
+    <message>
+        <source>Sort patterns: %1</source>
+        <translation>Сортировка шаблонов: %1</translation>
+    </message>
+    <message>
+        <source>Count</source>
+        <translation>Кол-во</translation>
+    </message>
+    <message>
+        <source>Share</source>
+        <comment>column: share of entries</comment>
+        <translation>Доля</translation>
+    </message>
+    <message>
+        <source>Level</source>
+        <translation>Уровень</translation>
+    </message>
+    <message>
+        <source>Pattern</source>
+        <translation>Шаблон</translation>
+    </message>
+    <message>
+        <source>Trend</source>
+        <translation>Динамика</translation>
+    </message>
+    <message>
+        <source>Last</source>
+        <translation>Последнее</translation>
+    </message>
+    <message>
+        <source>%1 entries: %2</source>
+        <translation>Записей %1: %2</translation>
+    </message>
+    <message>
+        <source>Variable values</source>
+        <translation>Значения переменных</translation>
+    </message>
+    <message>
+        <source>* #%1: %2</source>
+        <translation>* №%1: %2</translation>
+    </message>
+    <message numerus="yes">
+        <source>Show %n entries</source>
+        <translation>
+            <numerusform>Показать %n запись</numerusform>
+            <numerusform>Показать %n записи</numerusform>
+            <numerusform>Показать %n записей</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Exclude the pattern</source>
+        <translation>Исключить шаблон</translation>
     </message>
 </context>
 <context>
@@ -377,6 +1007,151 @@
     </message>
 </context>
 <context>
+    <name>ResultsView</name>
+    <message>
+        <source>Loading logs</source>
+        <translation>Загрузка логов</translation>
+    </message>
+    <message>
+        <source>Connect to Grafana</source>
+        <translation>Подключите Grafana</translation>
+    </message>
+    <message>
+        <source>1. Enter the Grafana URL and the log datasource UID.
+2. Add a login with password or an API token.
+3. Press “Test connection” — namespaces and apps are found automatically.</source>
+        <translation>1. Укажите URL Grafana и UID источника логов.
+2. Добавьте логин с паролем или API-токен.
+3. Нажмите «Проверить подключение» — namespace и приложения найдутся сами.</translation>
+    </message>
+    <message>
+        <source>Open settings</source>
+        <translation>Открыть настройки</translation>
+    </message>
+    <message>
+        <source>No entries match</source>
+        <translation>Нет записей по запросу</translation>
+    </message>
+    <message>
+        <source>Choose a namespace and an app.</source>
+        <translation>Выберите namespace и приложение.</translation>
+    </message>
+    <message>
+        <source>Nothing in %1 for the period “%2”.</source>
+        <translation>В %1 нет записей за период «%2».</translation>
+    </message>
+    <message>
+        <source>Widen to 24 hours</source>
+        <translation>Расширить до 24 часов</translation>
+    </message>
+    <message>
+        <source>Remove the %1 filter</source>
+        <translation>Убрать фильтр %1</translation>
+    </message>
+    <message>
+        <source>Clear the search</source>
+        <translation>Очистить поиск</translation>
+    </message>
+</context>
+<context>
+    <name>SavedQueriesPopup</name>
+    <message>
+        <source>Saved queries</source>
+        <translation>Сохранённые запросы</translation>
+    </message>
+    <message>
+        <source>Saved</source>
+        <translation>Сохранённые</translation>
+    </message>
+    <message>
+        <source>Recent searches</source>
+        <translation>Недавние запросы</translation>
+    </message>
+    <message>
+        <source>Query name</source>
+        <translation>Название запроса</translation>
+    </message>
+    <message>
+        <source>Save current</source>
+        <translation>Сохранить текущий</translation>
+    </message>
+    <message>
+        <source>%1: %2</source>
+        <translation>%1: %2</translation>
+    </message>
+    <message>
+        <source>New name</source>
+        <translation>Новое название</translation>
+    </message>
+    <message>
+        <source>More actions with “%1”</source>
+        <translation>Ещё действия с «%1»</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>Переименовать</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Удалить</translation>
+    </message>
+    <message>
+        <source>No saved queries yet. Name the current search and press “Save current”.</source>
+        <translation>Сохранённых запросов пока нет. Назовите текущий поиск и нажмите «Сохранить текущий».</translation>
+    </message>
+    <message>
+        <source>No recent searches.</source>
+        <translation>Недавних запросов нет.</translation>
+    </message>
+    <message>
+        <source>Ctrl+1…9</source>
+        <translation>Ctrl+1…9</translation>
+    </message>
+    <message>
+        <source>run by number · stored on this device</source>
+        <translation>запуск по номеру · хранятся на этом устройстве</translation>
+    </message>
+    <message>
+        <source>Clear history</source>
+        <translation>Очистить историю</translation>
+    </message>
+</context>
+<context>
+    <name>SearchBar</name>
+    <message>
+        <source>Save query</source>
+        <translation>Сохранить запрос</translation>
+    </message>
+    <message>
+        <source>History and saved queries</source>
+        <translation>История и сохранённые запросы</translation>
+    </message>
+    <message>
+        <source>Filters</source>
+        <translation>Фильтры</translation>
+    </message>
+    <message>
+        <source>Clear all</source>
+        <translation>Сбросить всё</translation>
+    </message>
+    <message>
+        <source>Results view</source>
+        <translation>Вид результатов</translation>
+    </message>
+    <message>
+        <source>Records %1</source>
+        <translation>Записи %1</translation>
+    </message>
+    <message>
+        <source>Patterns %1</source>
+        <translation>Шаблоны %1</translation>
+    </message>
+    <message>
+        <source>Patterns</source>
+        <translation>Шаблоны</translation>
+    </message>
+</context>
+<context>
     <name>SearchBox</name>
     <message>
         <source>Search: word, key:value, key:~regex, -key:value</source>
@@ -436,6 +1211,158 @@
     <message>
         <source>Pattern: %1</source>
         <translation>Шаблон: %1</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsDialog</name>
+    <message>
+        <source>Connections</source>
+        <translation>Подключения</translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation>Язык</translation>
+    </message>
+    <message>
+        <source>Appearance</source>
+        <translation>Внешний вид</translation>
+    </message>
+    <message>
+        <source>Keyboard shortcuts</source>
+        <translation>Горячие клавиши</translation>
+    </message>
+    <message>
+        <source>Version</source>
+        <translation>Версия</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Настройки</translation>
+    </message>
+    <message>
+        <source>Interface language</source>
+        <translation>Язык интерфейса</translation>
+    </message>
+    <message>
+        <source>Grafana connections</source>
+        <translation>Подключения к Grafana</translation>
+    </message>
+    <message>
+        <source>Close (Esc)</source>
+        <translation>Закрыть (Esc)</translation>
+    </message>
+</context>
+<context>
+    <name>SharePopup</name>
+    <message>
+        <source>Link to the selection</source>
+        <translation>Ссылка на выборку</translation>
+    </message>
+    <message>
+        <source>Link</source>
+        <translation>Ссылка</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>Скопировано</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Копировать</translation>
+    </message>
+    <message>
+        <source>Period in the link</source>
+        <translation>Период в ссылке</translation>
+    </message>
+    <message>
+        <source>Freeze %1 – %2 — a colleague sees exactly the same</source>
+        <translation>Зафиксировать %1 – %2 — коллега увидит то же самое</translation>
+    </message>
+    <message>
+        <source>Relative: “%1” at the moment of opening</source>
+        <translation>Относительно: «%1» на момент открытия</translation>
+    </message>
+    <message>
+        <source>Highlight the selected entry %1</source>
+        <translation>Выделить выбранную запись %1</translation>
+    </message>
+    <message>
+        <source>The link has no Grafana address or passwords — only the environment by name, the source, the query and the period. The recipient needs an environment named “%1”.</source>
+        <translation>В ссылке нет адреса Grafana и паролей — только окружение по имени, источник, запрос и период. У получателя должно быть настроено окружение «%1».</translation>
+    </message>
+</context>
+<context>
+    <name>SourcePicker</name>
+    <message>
+        <source>Choose a log source</source>
+        <translation>Выбор источника логов</translation>
+    </message>
+    <message>
+        <source>Find a namespace or app</source>
+        <translation>Найти namespace или приложение</translation>
+    </message>
+    <message>
+        <source>Namespace or app</source>
+        <translation>Namespace или приложение</translation>
+    </message>
+    <message>
+        <source>Recent</source>
+        <translation>Недавние</translation>
+    </message>
+    <message>
+        <source>%1 / %2 in %3</source>
+        <translation>%1 / %2 в %3</translation>
+    </message>
+    <message>
+        <source>Namespace · %1</source>
+        <translation>Namespace · %1</translation>
+    </message>
+    <message numerus="yes">
+        <source>%1, %n app(s)</source>
+        <translation>
+            <numerusform>%1, %n приложение</numerusform>
+            <numerusform>%1, %n приложения</numerusform>
+            <numerusform>%1, %n приложений</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Apps in %1 · %2</source>
+        <translation>Приложения в %1 · %2</translation>
+    </message>
+    <message>
+        <source>choose</source>
+        <translation>выбрать</translation>
+    </message>
+    <message>
+        <source>apps</source>
+        <translation>приложения</translation>
+    </message>
+    <message>
+        <source>open</source>
+        <translation>открыть</translation>
+    </message>
+    <message>
+        <source>Labels: %1 / %2 (found automatically)</source>
+        <translation>Метки: %1 / %2 (найдены автоматически)</translation>
+    </message>
+</context>
+<context>
+    <name>StatusBar</name>
+    <message>
+        <source>Connecting · %1</source>
+        <translation>Подключение · %1</translation>
+    </message>
+    <message>
+        <source>Connected · %1</source>
+        <translation>Подключено · %1</translation>
+    </message>
+    <message>
+        <source>Not connected</source>
+        <translation>Нет подключения</translation>
+    </message>
+    <message>
+        <source>Query %1 ms</source>
+        <translation>Запрос %1 мс</translation>
     </message>
 </context>
 <context>
@@ -527,6 +1454,137 @@
     <message>
         <source>Yesterday</source>
         <translation>Вчера</translation>
+    </message>
+</context>
+<context>
+    <name>TimeRangePopup</name>
+    <message>
+        <source>Choose the period</source>
+        <translation>Выбрать период</translation>
+    </message>
+    <message>
+        <source>Quick</source>
+        <translation>Быстро</translation>
+    </message>
+    <message>
+        <source>Custom period</source>
+        <translation>Произвольный период</translation>
+    </message>
+    <message>
+        <source>Time zone: local (%1)</source>
+        <translation>Часовой пояс: локальный (%1)</translation>
+    </message>
+</context>
+<context>
+    <name>TopBar</name>
+    <message>
+        <source>Off</source>
+        <translation>Выкл</translation>
+    </message>
+    <message>
+        <source>5 s</source>
+        <translation>5 с</translation>
+    </message>
+    <message>
+        <source>10 s</source>
+        <translation>10 с</translation>
+    </message>
+    <message>
+        <source>30 s</source>
+        <translation>30 с</translation>
+    </message>
+    <message>
+        <source>1 min</source>
+        <translation>1 мин</translation>
+    </message>
+    <message>
+        <source>Environment: %1</source>
+        <translation>Окружение: %1</translation>
+    </message>
+    <message>
+        <source>Manage environments…</source>
+        <translation>Управление окружениями…</translation>
+    </message>
+    <message>
+        <source>Source: %1 / %2</source>
+        <translation>Источник: %1 / %2</translation>
+    </message>
+    <message>
+        <source>Choose a source</source>
+        <translation>Выберите источник</translation>
+    </message>
+    <message>
+        <source>No period needed — new entries are shown</source>
+        <translation>Период не нужен — показываются новые записи</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Обновить</translation>
+    </message>
+    <message>
+        <source>Refresh (F5)</source>
+        <translation>Обновить (F5)</translation>
+    </message>
+    <message>
+        <source>Auto refresh: every %1</source>
+        <translation>Автообновление: каждые %1</translation>
+    </message>
+    <message>
+        <source>Auto refresh: off</source>
+        <translation>Автообновление: выкл</translation>
+    </message>
+    <message>
+        <source>%1 s</source>
+        <translation>%1 с</translation>
+    </message>
+    <message>
+        <source>Auto refresh off</source>
+        <translation>Без автообновления</translation>
+    </message>
+    <message>
+        <source>Every %1</source>
+        <translation>Каждые %1</translation>
+    </message>
+    <message>
+        <source>Live tail</source>
+        <translation>Live tail (хвост)</translation>
+    </message>
+    <message>
+        <source>LIVE · ~%1 lines/s</source>
+        <translation>LIVE · ~%1 строк/с</translation>
+    </message>
+    <message>
+        <source>Resume</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Пауза</translation>
+    </message>
+    <message>
+        <source>Pause / resume (Space)</source>
+        <translation>Пауза / продолжить (пробел)</translation>
+    </message>
+    <message>
+        <source>Leave live</source>
+        <translation>Выйти из live</translation>
+    </message>
+    <message>
+        <source>Share</source>
+        <comment>button: share a link</comment>
+        <translation>Поделиться</translation>
+    </message>
+    <message>
+        <source>Link to the current selection</source>
+        <translation>Ссылка на текущую выборку</translation>
+    </message>
+    <message>
+        <source>Switch theme</source>
+        <translation>Переключить тему</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Настройки</translation>
     </message>
 </context>
 </TS>

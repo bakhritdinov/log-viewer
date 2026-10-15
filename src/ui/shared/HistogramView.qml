@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls.Basic
 
@@ -63,7 +64,7 @@ Item {
                         model: bar.segments.slice().reverse()
                         delegate: Rectangle {
                             required property var modelData
-                            width: parent.width
+                            width: bar.width
                             height: modelData.count * bar.unit
                             color: modelData.level === "" ? Theme.levelColor("DEBUG") : Theme.levelColor(modelData.level)
                         }
