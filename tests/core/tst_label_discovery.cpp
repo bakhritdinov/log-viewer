@@ -44,6 +44,33 @@ private slots:
         QCOMPARE(r.streams.value("prod-data"), QStringList{ "etl" });
     }
 
+    void chosenLabelsSkipPhase1()
+    {
+        FakeHttpClient http;
+        http.script(ok(fixture("grafana/discovery_phase2.json")));
+        LabelDiscovery d(http);
+        QSignalSpy done(&d, &LabelDiscovery::finished);
+        QSignalSpy labels(&d, &LabelDiscovery::labelsFound);
+        d.start(conn(), "_namespace", "_appName");
+        QVERIFY(done.wait(1000));
+        QCOMPARE(http.requests.size(), 1);                   // the pairs only
+        QCOMPARE(labels.count(), 1);
+        const auto r = done.first().first().value<DiscoveryResult>();
+        QCOMPARE(r.nsLabel, "_namespace");
+        QCOMPARE(r.streams.value("prod-data"), QStringList{ "etl" });
+    }
+
+    void chosenLabelsReportErrors()
+    {
+        FakeHttpClient http;
+        http.script(status(401));
+        LabelDiscovery d(http);
+        QSignalSpy failed(&d, &LabelDiscovery::failed);
+        d.start(conn(), "ns", "app");
+        QVERIFY(failed.wait(1000));
+        QCOMPARE(failed.first().first().value<RequestError>().kind, RequestError::Kind::Unauthorized);
+    }
+
     void phase2FailureFallsBackToPhase1()
     {
         FakeHttpClient http;

@@ -35,11 +35,10 @@ TimeRange decodeTimeRange(const QString& text)
 
 namespace {
 const QString kSavedKey = QStringLiteral("savedQueries/list");
-} // namespace
 
-SavedQueriesStore::SavedQueriesStore(KeyValueStore& store) : m_store(store)
+QList<SavedQuery> parseSaved(const QJsonArray& arr)
 {
-    const QJsonArray arr = QJsonDocument::fromJson(m_store.value(kSavedKey).toByteArray()).array();
+    QList<SavedQuery> list;
     for (const QJsonValue& v : arr) {
         const QJsonObject o = v.toObject();
         SavedQuery q;
@@ -51,8 +50,49 @@ SavedQueriesStore::SavedQueriesStore(KeyValueStore& store) : m_store(store)
         q.searchText = o.value("q").toString();
         q.range = decodeTimeRange(o.value("range").toString());
         q.createdAt = QDateTime::fromMSecsSinceEpoch(qint64(o.value("created").toDouble()), QTimeZone::UTC);
-        if (!q.id.isEmpty()) m_list.append(q);
+        if (!q.id.isEmpty()) list.append(q);
     }
+    return list;
+}
+
+QByteArray serializeSaved(const QList<SavedQuery>& list, QJsonDocument::JsonFormat format)
+{
+    QJsonArray arr;
+    for (const SavedQuery& q : list) {
+        arr.append(QJsonObject{ { "id", q.id }, { "name", q.name }, { "env", q.environmentId },
+                                { "ns", q.namespaceName }, { "app", q.app }, { "q", q.searchText },
+                                { "range", encodeTimeRange(q.range) },
+                                { "created", double(q.createdAt.toMSecsSinceEpoch()) } });
+    }
+    return QJsonDocument(arr).toJson(format);
+}
+} // namespace
+
+SavedQueriesStore::SavedQueriesStore(KeyValueStore& store) : m_store(store)
+{
+    m_list = parseSaved(QJsonDocument::fromJson(m_store.value(kSavedKey).toByteArray()).array());
+}
+
+QByteArray SavedQueriesStore::exportJson() const
+{
+    return serializeSaved(m_list, QJsonDocument::Indented);
+}
+
+int SavedQueriesStore::importJson(const QByteArray& json, bool replace)
+{
+    const QJsonDocument doc = QJsonDocument::fromJson(json);
+    if (!doc.isArray()) return -1;
+    const QList<SavedQuery> incoming = parseSaved(doc.array());
+    if (replace) m_list.clear();
+    int added = 0;
+    for (const SavedQuery& q : incoming) {
+        const bool known = std::any_of(m_list.cbegin(), m_list.cend(), [&](const SavedQuery& o) { return o.id == q.id; });
+        if (known) continue;
+        m_list.append(q);
+        ++added;
+    }
+    save();
+    return added;
 }
 
 SavedQuery SavedQueriesStore::add(SavedQuery query)
@@ -75,6 +115,27 @@ bool SavedQueriesStore::rename(const QString& id, const QString& name)
     return false;
 }
 
+bool SavedQueriesStore::update(const SavedQuery& query)
+{
+    for (SavedQuery& q : m_list) {
+        if (q.id != query.id) continue;
+        const QString name = q.name;
+        const QDateTime created = q.createdAt;
+        q = query;
+        q.name = name;
+        q.createdAt = created;
+        save();
+        return true;
+    }
+    return false;
+}
+
+void SavedQueriesStore::insert(int index, const SavedQuery& query)
+{
+    m_list.insert(std::clamp<qsizetype>(index, 0, m_list.size()), query);
+    save();
+}
+
 bool SavedQueriesStore::remove(const QString& id)
 {
     const qsizetype n = m_list.removeIf([&](const SavedQuery& q) { return q.id == id; });
@@ -95,14 +156,7 @@ bool SavedQueriesStore::move(const QString& id, int toIndex)
 
 void SavedQueriesStore::save()
 {
-    QJsonArray arr;
-    for (const SavedQuery& q : m_list) {
-        arr.append(QJsonObject{ { "id", q.id }, { "name", q.name }, { "env", q.environmentId },
-                                { "ns", q.namespaceName }, { "app", q.app }, { "q", q.searchText },
-                                { "range", encodeTimeRange(q.range) },
-                                { "created", double(q.createdAt.toMSecsSinceEpoch()) } });
-    }
-    m_store.setValue(kSavedKey, QJsonDocument(arr).toJson(QJsonDocument::Compact));
+    m_store.setValue(kSavedKey, serializeSaved(m_list, QJsonDocument::Compact));
 }
 
 // ── SearchHistory ───────────────────────────────────────────────────────────

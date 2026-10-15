@@ -47,6 +47,11 @@ EnvironmentEditor::EnvironmentEditor(Session& session, QObject* parent)
                 QCoreApplication::translate("EnvironmentEditor", "Found %n namespace(s) · labels %1 / %2 · %3 ms", nullptr, int(r.streams.size()))
                     .arg(r.nsLabel, r.appLabel).arg(ms));
     });
+    connect(m_discovery.get(), &LabelDiscovery::labelsFound, this, [this] {
+        m_testStep = 1;
+        m_testServerMs = int(m_testTimer.elapsed());
+        emit testChanged();
+    });
     connect(m_discovery.get(), &LabelDiscovery::failed, this, [this](const RequestError& e) {
         const ErrorInfo info = ErrorInfo::from(e, m_name, QUrl(m_url).host());
         setTest(TestState::Failed, info.title, info);
@@ -69,22 +74,30 @@ void EnvironmentEditor::load(const QString& id)
     m_uid = env->datasourceUid;
     m_user = env->user;
     m_auth = fromCore(env->auth);
+    m_nsLabel = env->nsLabel;
+    m_appLabel = env->appLabel;
     m_password.clear();
     m_token.clear();
+    m_snapshot = formSnapshot();
     setTest(TestState::Idle, {});
     emit loaded();
     emit formChanged();
 
+    // Secrets arrive later; they are part of the stored form, not an edit.
     QPointer<EnvironmentEditor> self(this);
     const QString loadedId = m_id;
     m_session->services().secrets().read(env->passwordKey(), [self, loadedId](bool, const QString& v) {
         if (!self || self->m_id != loadedId) return;
+        const bool clean = !self->isDirty();
         self->m_password = v;
+        if (clean) self->m_snapshot = self->formSnapshot();
         emit self->formChanged();
     });
     m_session->services().secrets().read(env->tokenKey(), [self, loadedId](bool, const QString& v) {
         if (!self || self->m_id != loadedId) return;
+        const bool clean = !self->isDirty();
         self->m_token = v;
+        if (clean) self->m_snapshot = self->formSnapshot();
         emit self->formChanged();
     });
 }
@@ -109,9 +122,19 @@ void EnvironmentEditor::createNew()
     m_password.clear();
     m_token.clear();
     m_auth = Auth::Basic;
+    m_nsLabel.clear();
+    m_appLabel.clear();
+    m_snapshot = formSnapshot();
     setTest(TestState::Idle, {});
     emit loaded();
     emit formChanged();
+}
+
+QString EnvironmentEditor::formSnapshot() const
+{
+    return QStringList{ m_name, m_color, m_url, m_uid, m_user, m_password, m_token, QString::number(int(m_auth)),
+                        m_nsLabel, m_appLabel }
+        .join(QChar(0x1f));
 }
 
 Environment EnvironmentEditor::toEnvironment() const
@@ -124,6 +147,8 @@ Environment EnvironmentEditor::toEnvironment() const
     e.datasourceUid = m_uid.trimmed();
     e.user = m_user.trimmed();
     e.auth = toCore(m_auth);
+    e.nsLabel = m_nsLabel.trimmed();
+    e.appLabel = m_appLabel.trimmed();
     return e;
 }
 
@@ -131,6 +156,8 @@ QString EnvironmentEditor::validationError() const
 {
     const Environment e = toEnvironment();
     if (e.name.isEmpty()) return QCoreApplication::translate("EnvironmentEditor", "Give the environment a name.");
+    if (e.nsLabel.isEmpty() != e.appLabel.isEmpty())
+        return QCoreApplication::translate("EnvironmentEditor", "Give both labels or neither (then they are found automatically).");
     for (const Environment& other : m_session->services().environments().environments()) {
         if (other.id != e.id && other.name.compare(e.name, Qt::CaseInsensitive) == 0)
             return QCoreApplication::translate("EnvironmentEditor", "An environment named %1 already exists.").arg(e.name);
@@ -169,8 +196,17 @@ void EnvironmentEditor::testConnection()
     }
     const Environment e = toEnvironment();
     m_testTimer.start();
+    m_testStep = 0;
+    m_testServerMs = 0;
     setTest(TestState::Testing, QCoreApplication::translate("EnvironmentEditor", "Connecting…"));
-    m_discovery->start(e.connection(m_password, m_token));
+    m_discovery->start(e.connection(m_password, m_token), e.nsLabel, e.appLabel);
+}
+
+void EnvironmentEditor::cancelTest()
+{
+    if (m_testState != TestState::Testing) return;
+    m_discovery->cancel();
+    setTest(TestState::Idle, {});
 }
 
 bool EnvironmentEditor::save(bool makeCurrent)
@@ -183,6 +219,7 @@ bool EnvironmentEditor::save(bool makeCurrent)
     const Environment env = services.environments().upsert(toEnvironment());
     m_id = env.id;
     m_isNew = false;
+    m_snapshot = formSnapshot();
 
     // Keep only the secret the chosen auth uses.
     auto ignore = [](bool) {};

@@ -15,6 +15,7 @@ MessagePattern pattern(const QString& text, Level level, int count, qint64 first
     p.level = level;
     p.count = count;
     p.firstSeen = QDateTime::fromMSecsSinceEpoch(firstMs);
+    p.lastSeen = QDateTime::fromMSecsSinceEpoch(firstMs + count * 10);
     return p;
 }
 }
@@ -83,6 +84,11 @@ private slots:
         QCOMPARE(p[0].templateText, "error2");
         QCOMPARE(p[1].templateText, "error");
         QCOMPARE(p[2].templateText, "info");
+        QCOMPARE(p[3].templateText, "unknown");
+        sortPatterns(p, "last");                            // most recent first
+        QCOMPARE(p[0].templateText, "error2");             // 4300
+        QCOMPARE(p[1].templateText, "info");               // 3500
+        QCOMPARE(p[2].templateText, "error");
         QCOMPARE(p[3].templateText, "unknown");
     }
 

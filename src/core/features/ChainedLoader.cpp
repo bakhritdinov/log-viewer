@@ -33,6 +33,7 @@ void ChainedLoader::start(const SearchSpec& spec, const TimeRange& range)
     m_cursor = m_window.to;
     m_cap = kStep;
     m_hasMore = false;
+    m_stopped = false;
     m_store.clear();
     if (!spec.connection.isConfigured()) {
         emit failed({ RequestError::Kind::NotConfigured, 0, {} });
@@ -46,11 +47,18 @@ void ChainedLoader::loadMore()
     if (m_loading || !m_hasMore) return;
     m_cap = m_store.size() + kStep;
     m_hasMore = false;
+    m_stopped = false;
     fetchNext();
 }
 
 void ChainedLoader::stop()
 {
+    // Stopped mid-chain: the range was not walked to its start, so "load more"
+    // continues from the cursor (the oldest loaded entry).
+    if (m_loading) {
+        m_hasMore = true;
+        m_stopped = true;
+    }
     ++m_generation;
     if (m_call) {
         HttpCall* call = m_call;

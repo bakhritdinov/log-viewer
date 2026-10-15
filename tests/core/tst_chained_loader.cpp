@@ -190,6 +190,37 @@ private slots:
         QCOMPARE(f.failed.count(), 0);
     }
 
+    void stopMidChainCanContinue()
+    {
+        Fixture f;
+        f.http.script(ok(logsBody(kNowMs, kBatchLimit, 10, "a")));     // oldest: now - 9990 ms
+        f.http.script(std::nullopt);                                  // second batch hangs
+        f.http.script(ok(logsBody(kNowMs - 9990, 5, 10, "b")));
+        QSignalSpy batches(&f.loader, &ChainedLoader::batchAdded);
+        f.loader.start(spec(), TimeRange::fromKey(u"1h"));
+        QVERIFY(batches.wait(1000));
+        f.loader.stop();
+        QVERIFY(f.loader.wasStopped());
+        QVERIFY(f.loader.hasMore());                  // the range was not walked to its start
+        f.loader.loadMore();                          // continues from the oldest loaded entry
+        QVERIFY(!f.loader.wasStopped());
+        QVERIFY(f.finished.wait(1000));
+        QCOMPARE(f.http.requests.size(), 3);
+        QCOMPARE(jsonBody(f.http.requests[2]).value("to").toString(), QString::number(kNowMs - 9990));
+        QCOMPARE(f.store.size(), kBatchLimit + 5);
+    }
+
+    void stopWhenIdleChangesNothing()
+    {
+        Fixture f;
+        f.http.script(ok(logsBody(kNowMs - 1000, 3)));
+        f.loader.start(spec(), TimeRange::fromKey(u"1h"));
+        QVERIFY(f.finished.wait(1000));
+        f.loader.stop();
+        QVERIFY(!f.loader.wasStopped());
+        QVERIFY(!f.loader.hasMore());
+    }
+
     void serverLevelGoesIntoQuery()
     {
         Fixture f;

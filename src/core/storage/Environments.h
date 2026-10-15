@@ -22,6 +22,9 @@ struct Environment {
     QString datasourceUid;
     QString user;
     Auth auth = Auth::Basic;
+    // Labels that name the namespace and the app; empty: found automatically.
+    QString nsLabel;
+    QString appLabel;
 
     QString passwordKey() const { return QStringLiteral("env/%1/password").arg(id); }
     QString tokenKey() const { return QStringLiteral("env/%1/token").arg(id); }

@@ -174,6 +174,9 @@ void sortPatterns(QList<MessagePattern>& patterns, const QString& order)
     if (order == u"first") {
         std::stable_sort(patterns.begin(), patterns.end(),
                          [](const MessagePattern& a, const MessagePattern& b) { return a.firstSeen < b.firstSeen; });
+    } else if (order == u"last") {
+        std::stable_sort(patterns.begin(), patterns.end(),
+                         [](const MessagePattern& a, const MessagePattern& b) { return a.lastSeen > b.lastSeen; });
     } else if (order == u"level") {
         // Level runs Unknown < Trace < … < Error: higher first, Unknown last.
         std::stable_sort(patterns.begin(), patterns.end(), [&](const MessagePattern& a, const MessagePattern& b) {
@@ -324,14 +327,15 @@ QString highlightStyled(const QString& text, const QStringList& terms, const QSt
 
 // ── Environments / saved queries ────────────────────────────────────────────
 
-QByteArrayList environmentRoles() { return { "id", "name", "color", "configured", "current" }; }
+QByteArrayList environmentRoles() { return { "id", "name", "color", "configured", "current", "host" }; }
 
 QList<QVariantMap> environmentRows(const QList<Environment>& envs, const QString& currentId)
 {
     QList<QVariantMap> rows;
     for (const Environment& e : envs) {
         rows << QVariantMap{ { "id", e.id }, { "name", e.name }, { "color", e.color },
-                             { "configured", e.isConfigured() }, { "current", e.id == currentId } };
+                             { "configured", e.isConfigured() }, { "current", e.id == currentId },
+                             { "host", e.url.host() } };
     }
     return rows;
 }
@@ -384,10 +388,12 @@ QString timeRangeLabel(const TimeRange& range)
         case TimeRange::Kind::Relative: break;
     }
     const qint64 s = range.relativeSeconds();
-    if (s % 86400 == 0) return QCoreApplication::translate("Presenters", "Last %n day(s)", nullptr, int(s / 86400));
-    if (s % 3600 == 0) return QCoreApplication::translate("Presenters", "Last %n hour(s)", nullptr, int(s / 3600));
-    if (s % 60 == 0) return QCoreApplication::translate("Presenters", "Last %n minute(s)", nullptr, int(s / 60));
-    return QCoreApplication::translate("Presenters", "Last %n second(s)", nullptr, int(s));
+    // Named counts: lupdate hangs on "int(s / 86400)" as the plural argument.
+    const int days = int(s / 86400), hours = int(s / 3600), minutes = int(s / 60), seconds = int(s);
+    if (s % 86400 == 0) return QCoreApplication::translate("Presenters", "Last %n day(s)", nullptr, days);
+    if (s % 3600 == 0) return QCoreApplication::translate("Presenters", "Last %n hour(s)", nullptr, hours);
+    if (s % 60 == 0) return QCoreApplication::translate("Presenters", "Last %n minute(s)", nullptr, minutes);
+    return QCoreApplication::translate("Presenters", "Last %n second(s)", nullptr, seconds);
 }
 
 QString timeRangeShortLabel(const TimeRange& range)

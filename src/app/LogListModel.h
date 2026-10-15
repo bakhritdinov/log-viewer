@@ -51,6 +51,9 @@ public:
     void setProgressive(bool on);
     int pageSize() const { return m_pageSize; }
     void setPageSize(int size);
+    // Oldest entry first (a trace reads top-down); the store keeps newest first.
+    bool isOldestFirst() const { return m_oldestFirst; }
+    void setOldestFirst(bool on);
     int page() const { return m_page; }
     int pageCount() const;
     int firstRowNumber() const;   // 1-based number of the first row shown, 0 if none
@@ -79,6 +82,7 @@ private:
     LogEntries m_rows;
     QString m_serviceField;
     bool m_progressive = false;
+    bool m_oldestFirst = false;
     int m_pageSize = 100;
     int m_page = 0;
     int m_limit = 100;

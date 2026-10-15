@@ -34,6 +34,8 @@ private slots:
             stage.url = QUrl("https://grafana.stage");
             stage.datasourceUid = "uid";
             stage.auth = Environment::Auth::Token;
+            stage.nsLabel = "kubernetes_namespace";
+            stage.appLabel = "app";
             stage = envs.upsert(stage);
             QVERIFY(!stage.id.isEmpty());
             envs.setCurrent(stage.id);
@@ -42,6 +44,9 @@ private slots:
         QCOMPARE(reloaded.environments().size(), 3);
         QCOMPARE(reloaded.current().name, "STAGE");
         QCOMPARE(reloaded.current().auth, Environment::Auth::Token);
+        QCOMPARE(reloaded.current().nsLabel, "kubernetes_namespace");
+        QCOMPARE(reloaded.current().appLabel, "app");
+        QVERIFY(reloaded.findByName("DEV")->nsLabel.isEmpty());   // automatic by default
         QVERIFY(reloaded.current().isConfigured());
         QVERIFY(reloaded.findByName("stage").has_value());
     }

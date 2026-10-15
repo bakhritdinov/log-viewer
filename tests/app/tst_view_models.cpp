@@ -165,6 +165,18 @@ private slots:
         QVERIFY(!EntryDetails().valid);
     }
 
+    void oldestFirstReversesTheRows()
+    {
+        LogStore store;
+        store.add({ entry(0), entry(1), entry(2) });      // newest first in the store
+        LogListModel model(&store);
+        model.reload(true);
+        QCOMPARE(model.entryAt(0)->message, "m0");
+        model.setOldestFirst(true);
+        QCOMPARE(model.entryAt(0)->message, "m2");
+        QCOMPARE(model.entryAt(2)->message, "m0");
+    }
+
     void traceFocusAndOpenAsSearch()
     {
         FakeHttpClient http;
@@ -197,6 +209,7 @@ private slots:
         http.script(ok(logsBody(QList<Row>{})));
         f->openTrace(&traced, 0);
         QCOMPARE(f->mode(), FocusSession::Mode::Trace);
+        QVERIFY(f->logs()->isOldestFirst());
         QCOMPARE(f->traceId(), "abc");
         QVERIFY(f->canShowTrace());
         QTRY_VERIFY_WITH_TIMEOUT(!f->isLoading() && http.requests.size() == 4, 2000);
@@ -207,6 +220,7 @@ private slots:
         http.script(ok(logsBody(QList<Row>{})));
         f->showContext();
         QCOMPARE(f->mode(), FocusSession::Mode::Context);
+        QVERIFY(!f->logs()->isOldestFirst());
         http.script(ok(logsBody(QList<Row>{})));
         f->setWindowSeconds(300);
         QCOMPARE(f->windowSeconds(), 300);

@@ -18,6 +18,32 @@ class TestQuery : public QObject {
     Q_OBJECT
 
 private slots:
+    void checkQueryFindsMistakes_data()
+    {
+        QTest::addColumn<QString>("text");
+        QTest::addColumn<int>("kind");
+        QTest::addColumn<QString>("field");
+        using K = QueryProblem::Kind;
+        QTest::newRow("fine") << "timeout AND service:\"billing-api\"" << int(K::None) << "";
+        QTest::newRow("escaped quote") << "msg:\"say \\\"hi\\\"\"" << int(K::None) << "";
+        QTest::newRow("unclosed") << "service:\"billing-api timeout" << int(K::UnclosedQuote) << "service";
+        QTest::newRow("unclosed word") << "\"half" << int(K::UnclosedQuote) << "";
+        QTest::newRow("empty value") << "timeout AND level:" << int(K::EmptyValue) << "level";
+        QTest::newRow("empty quotes") << "level:\"\"" << int(K::EmptyValue) << "level";
+        QTest::newRow("bad regex") << "msg:~\"(open\"" << int(K::BadRegex) << "msg";
+        QTest::newRow("good regex") << "msg:~\"5..\"" << int(K::None) << "";
+        QTest::newRow("star") << "*" << int(K::None) << "";
+    }
+    void checkQueryFindsMistakes()
+    {
+        QFETCH(QString, text);
+        QFETCH(int, kind);
+        QFETCH(QString, field);
+        const QueryProblem p = checkQuery(text);
+        QCOMPARE(int(p.kind), kind);
+        QCOMPARE(p.field, field);
+    }
+
     void parseTerm_data()
     {
         QTest::addColumn<QString>("part");

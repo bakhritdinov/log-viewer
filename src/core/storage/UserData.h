@@ -31,9 +31,17 @@ public:
     QList<SavedQuery> all() const { return m_list; }
     SavedQuery add(SavedQuery query);         // assigns id/createdAt when missing
     bool rename(const QString& id, const QString& name);
+    // Replaces the stored query with the same id (name, place and creation time kept).
+    bool update(const SavedQuery& query);
+    // Puts a query back at a position (undo of remove).
+    void insert(int index, const SavedQuery& query);
     bool remove(const QString& id);
-    // Moves a saved query to a new position (shortcut ⌘1…⌘9 follow the order).
+    // Moves a saved query to a new position (shortcuts Ctrl+1…9 follow the order).
     bool move(const QString& id, int toIndex);
+    // All saved queries as a JSON file's contents, and back. Import adds the
+    // ones not present yet (by id), or replaces the list; -1: not such a file.
+    QByteArray exportJson() const;
+    int importJson(const QByteArray& json, bool replace);
 
 private:
     void save();

@@ -1,6 +1,7 @@
 #include "app/Session.h"
 
 #include <QCoreApplication>
+#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -123,8 +124,8 @@ void Session::start()
         fail({ RequestError::Kind::NotConfigured, 0, {} });
         return;
     }
-    resolveConnection([this](const Connection& c) {
-        m_discovery->start(c);
+    resolveConnection([this, env](const Connection& c) {
+        m_discovery->start(c, env.nsLabel, env.appLabel);
         emit discoveringChanged();
     });
 }
@@ -280,6 +281,10 @@ void Session::setSearchText(const QString& text)
 {
     if (m_searchText == text) return;
     m_searchText = text;
+    if (!m_searchError.isEmpty()) {
+        m_searchError.clear();
+        emit searchErrorChanged();
+    }
     refreshChipsAndSuggestions();
     emit searchTextChanged();
 }
@@ -296,6 +301,28 @@ QStringList Session::history() const
 
 void Session::search()
 {
+    // A broken query is not sent: the results stay and the field says why.
+    const QueryProblem problem = checkQuery(m_searchText);
+    QString message;
+    switch (problem.kind) {
+    case QueryProblem::Kind::None: break;
+    case QueryProblem::Kind::UnclosedQuote:
+        message = problem.field.isEmpty()
+            ? QCoreApplication::translate("Session", "A quote is not closed — the search was not run")
+            : QCoreApplication::translate("Session", "A quote after %1: is not closed — the search was not run").arg(problem.field);
+        break;
+    case QueryProblem::Kind::BadRegex:
+        message = QCoreApplication::translate("Session", "The regular expression for %1 is not valid — the search was not run").arg(problem.field);
+        break;
+    case QueryProblem::Kind::EmptyValue:
+        message = QCoreApplication::translate("Session", "%1: has no value — the search was not run").arg(problem.field);
+        break;
+    }
+    if (m_searchError != message) {
+        m_searchError = message;
+        emit searchErrorChanged();
+    }
+    if (!message.isEmpty()) return;
     m_services.history().add(m_searchText);
     emit historyChanged();
     runSearch(false);
@@ -308,6 +335,10 @@ void Session::runSearch(bool keepSlice)
         return;
     }
     clearError();
+    if (m_appliedSearch != m_searchText) {
+        m_appliedSearch = m_searchText;
+        emit appliedSearchChanged();
+    }
     if (!keepSlice) setSelectedRow(-1);
     ++m_filterGeneration;   // a filter computed for the previous result is void
     setFiltering(false);
@@ -685,6 +716,7 @@ void Session::scheduleAnalysis()
     const LogEntries visible = m_store.visible();
     const quint64 patternsEpoch = m_patternsEpoch;
     const QString patternSort = m_patternSort;
+    const bool keepSingles = m_showSinglePatterns;
     m_services.parser().run(this, [=, this]() -> ParseExecutor::Apply {
         QList<HistogramBucket> buckets;
         FieldValueCounts facets;
@@ -702,8 +734,10 @@ void Session::scheduleAnalysis()
             QList<MessagePattern> patterns = extractPatterns(problems);
             // One-off messages are noise in this view: they are counted, not listed.
             const auto single = [](const MessagePattern& p) { return p.count < 2; };
-            singles = int(std::count_if(patterns.cbegin(), patterns.cend(), single));
-            patterns.removeIf(single);
+            if (!keepSingles) {
+                singles = int(std::count_if(patterns.cbegin(), patterns.cend(), single));
+                patterns.removeIf(single);
+            }
             presenters::sortPatterns(patterns, patternSort);
             patternRows = presenters::patternRows(patterns);
         }
@@ -772,6 +806,15 @@ void Session::setPatternsEnabled(bool on)
 void Session::refreshPatterns()
 {
     scheduleAnalysis();
+}
+
+void Session::setShowSinglePatterns(bool on)
+{
+    if (m_showSinglePatterns == on) return;
+    m_showSinglePatterns = on;
+    markPatternsStale();
+    refreshPatterns();
+    emit patternsChanged();
 }
 
 void Session::setPatternSort(const QString& order)
@@ -924,7 +967,86 @@ void Session::renameSavedQuery(const QString& id, const QString& name)
 
 void Session::removeSavedQuery(const QString& id)
 {
+    const QList<SavedQuery> all = m_services.savedQueries().all();
+    for (int i = 0; i < all.size(); ++i) {
+        if (all.at(i).id != id) continue;
+        m_removedQuery = all.at(i);
+        m_removedQueryIndex = i;
+        break;
+    }
     if (m_services.savedQueries().remove(id)) refreshSavedQueries();
+}
+
+void Session::restoreSavedQuery()
+{
+    if (m_removedQueryIndex < 0) return;
+    m_services.savedQueries().insert(m_removedQueryIndex, m_removedQuery);
+    m_removedQueryIndex = -1;
+    refreshSavedQueries();
+}
+
+void Session::replaceSavedQuery(const QString& id)
+{
+    SavedQuery q;
+    q.id = id;
+    q.environmentId = environmentId();
+    q.namespaceName = m_namespace;
+    q.app = m_app;
+    q.searchText = m_searchText;
+    q.range = m_range;
+    if (m_services.savedQueries().update(q)) refreshSavedQueries();
+}
+
+void Session::moveSavedQueryUp(const QString& id)
+{
+    const QList<SavedQuery> all = m_services.savedQueries().all();
+    for (int i = 1; i < all.size(); ++i) {
+        if (all.at(i).id != id) continue;
+        if (m_services.savedQueries().move(id, i - 1)) refreshSavedQueries();
+        return;
+    }
+}
+
+QString Session::savedQueryIdByName(const QString& name) const
+{
+    const QString wanted = name.trimmed();
+    for (const SavedQuery& q : m_services.savedQueries().all())
+        if (q.name.compare(wanted, Qt::CaseInsensitive) == 0) return q.id;
+    return {};
+}
+
+int Session::exportSavedQueries(const QUrl& file) const
+{
+    QFile out(file.isLocalFile() ? file.toLocalFile() : file.toString());
+    if (!out.open(QIODevice::WriteOnly | QIODevice::Truncate)) return -1;
+    if (out.write(m_services.savedQueries().exportJson()) < 0) return -1;
+    return int(m_services.savedQueries().all().size());
+}
+
+int Session::importSavedQueries(const QUrl& file, bool replace)
+{
+    QFile in(file.isLocalFile() ? file.toLocalFile() : file.toString());
+    if (!in.open(QIODevice::ReadOnly)) return -1;
+    const int added = m_services.savedQueries().importJson(in.readAll(), replace);
+    if (added >= 0) refreshSavedQueries();
+    return added;
+}
+
+QString Session::savedQueryLink(const QString& id) const
+{
+    for (const SavedQuery& q : m_services.savedQueries().all()) {
+        if (q.id != id) continue;
+        const auto env = m_services.environments().find(q.environmentId);
+        SharedView v;
+        v.environment = env ? env->name : QString();
+        v.namespaceName = q.namespaceName;
+        v.app = q.app;
+        v.searchText = q.searchText;
+        v.range = q.range;
+        const QUrl url = m_shareBaseUrl.isEmpty() ? desktopShareUrl(v) : webShareUrl(QUrl(m_shareBaseUrl), v);
+        return url.toString(QUrl::FullyEncoded);
+    }
+    return {};
 }
 
 // ── sharing ─────────────────────────────────────────────────────────────────

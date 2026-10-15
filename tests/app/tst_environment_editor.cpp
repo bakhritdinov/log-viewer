@@ -32,6 +32,26 @@ private slots:
         QVERIFY(!h.editor.canRemove());
     }
 
+    void dirtyTracksEdits()
+    {
+        Harness h;
+        QVERIFY(!h.editor.isDirty());                             // a blank new form
+        h.editor.setProperty("name", "STAGE");
+        QVERIFY(h.editor.isDirty());
+        h.editor.setProperty("name", "");
+        QVERIFY(!h.editor.isDirty());                             // back to what it was
+
+        const QString devId = h.services.environments().environments().first().id;
+        h.secrets.write(h.services.environments().environments().first().passwordKey(), "pw", [](bool) {});
+        h.editor.load(devId);
+        QTRY_COMPARE(h.editor.property("password").toString(), "pw");
+        QVERIFY(!h.editor.isDirty());                             // a loaded secret is not an edit
+        h.editor.setProperty("url", "https://other");
+        QVERIFY(h.editor.isDirty());
+        h.editor.load(devId);
+        QVERIFY(!h.editor.isDirty());
+    }
+
     void validation()
     {
         Harness h;
@@ -115,6 +135,24 @@ private slots:
         QTRY_COMPARE_WITH_TIMEOUT(h.editor.testState(), EnvironmentEditor::TestState::Failed, 2000);
         QCOMPARE(h.editor.testError().kind, ErrorInfo::Kind::Unauthorized);
         QVERIFY(h.services.environments().findByName("STAGE") == std::nullopt);   // testing does not save
+    }
+
+    void testConnectionReportsSteps()
+    {
+        Harness h;
+        h.editor.setProperty("name", "STAGE");
+        h.editor.setProperty("url", "https://grafana.stage");
+        h.editor.setProperty("datasourceUid", "uid");
+        h.http.script(ok(fixture("grafana/discovery_phase1.json")));
+        h.http.script(std::nullopt);                          // listing the namespaces hangs
+        h.editor.testConnection();
+        QCOMPARE(h.editor.testStep(), 0);
+        QTRY_COMPARE_WITH_TIMEOUT(h.editor.testStep(), 1, 2000);   // server, login and datasource are fine
+        QCOMPARE(h.editor.testState(), EnvironmentEditor::TestState::Testing);
+        QVERIFY(h.editor.testServerMs() >= 0);
+
+        h.editor.cancelTest();
+        QCOMPARE(h.editor.testState(), EnvironmentEditor::TestState::Idle);
     }
 };
 

@@ -54,6 +54,30 @@ QString FieldFilter::toText() const
          + (regex ? QStringLiteral(":~") : QStringLiteral(":")) + quote(value);
 }
 
+QueryProblem checkQuery(QStringView text)
+{
+    for (const QString& raw : splitQueryParts(text)) {
+        const QStringView part = QStringView(raw).trimmed();
+        if (part.isEmpty() || part == u"*") continue;
+        // Quotes: an unescaped " opens and closes a value.
+        bool open = false;
+        for (qsizetype i = 0; i < part.size(); ++i) {
+            if (part.at(i) == u'\\') { ++i; continue; }
+            if (part.at(i) == u'"') open = !open;
+        }
+        const QueryTerm term = Query::parseTerm(part);
+        const QString field = term.kind == QueryTerm::Kind::Filter ? term.filter.field : QString();
+        if (open) return { QueryProblem::Kind::UnclosedQuote, field };
+        if (term.kind != QueryTerm::Kind::Filter) continue;
+        const qsizetype colon = part.indexOf(u':');
+        const QStringView value = part.sliced(colon + 1).trimmed();
+        if (value.isEmpty() || value == u"~" || value == u"\"\"") return { QueryProblem::Kind::EmptyValue, field };
+        if (term.filter.regex && !QRegularExpression(term.filter.value).isValid())
+            return { QueryProblem::Kind::BadRegex, field };
+    }
+    return {};
+}
+
 QStringList splitQueryParts(QStringView text)
 {
     return text.toString().split(andSeparator());

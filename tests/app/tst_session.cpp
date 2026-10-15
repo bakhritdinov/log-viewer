@@ -1,6 +1,7 @@
 // Scenario tests of the view-model layer over a scripted fake HTTP client.
 #include <QAbstractItemModelTester>
 #include <QSignalSpy>
+#include <QTemporaryDir>
 #include <QTest>
 
 #include "app/AppServices.h"
@@ -325,6 +326,98 @@ private slots:
         QCOMPARE(h.session->savedQueries()->count(), 0);
     }
 
+    void brokenQueryIsNotSent()
+    {
+        Harness h;
+        h.scriptStartup(mixedLogs());
+        h.session->start();
+        QVERIFY(h.waitIdle(3));
+        QCOMPARE(h.session->appliedSearchText(), QString());
+        const qsizetype before = h.http.requests.size();
+
+        h.session->setSearchText("service:\"billing-api timeout");
+        h.session->search();
+        QCOMPARE(h.http.requests.size(), before);              // nothing sent
+        QVERIFY(h.session->searchError().contains("service"));
+        QVERIFY(h.session->history().isEmpty());
+
+        h.session->setSearchText("service:\"billing-api\" timeout");
+        QVERIFY(h.session->searchError().isEmpty());           // editing clears the message
+        h.http.script(ok(mixedLogs()));
+        h.session->search();
+        QVERIFY(h.waitIdle(int(before) + 1));
+        QCOMPARE(h.session->appliedSearchText(), "service:\"billing-api\" timeout");
+    }
+
+    void savedQueriesExportAndImport()
+    {
+        Harness h;
+        h.scriptStartup(mixedLogs());
+        h.session->start();
+        QVERIFY(h.waitIdle(3));
+        h.session->setSearchText("first");
+        h.session->saveCurrentQuery("A");
+        h.session->setSearchText("second");
+        h.session->saveCurrentQuery("B");
+
+        QTemporaryDir dir;
+        const QUrl file = QUrl::fromLocalFile(dir.filePath("queries.json"));
+        QCOMPARE(h.session->exportSavedQueries(file), 2);
+
+        QCOMPARE(h.session->importSavedQueries(file, false), 0);   // all known already
+        h.session->removeSavedQuery(h.session->savedQueries()->get(0).value("id").toString());
+        QCOMPARE(h.session->importSavedQueries(file, false), 1);   // the removed one is back
+        QCOMPARE(h.session->savedQueries()->count(), 2);
+        QCOMPARE(h.session->importSavedQueries(file, true), 2);    // replaced by the file
+        QCOMPARE(h.session->savedQueries()->get(0).value("name").toString(), "A");
+
+        QFile broken(dir.filePath("broken.json"));
+        QVERIFY(broken.open(QIODevice::WriteOnly));
+        broken.write("not json");
+        broken.close();
+        QCOMPARE(h.session->importSavedQueries(QUrl::fromLocalFile(broken.fileName()), false), -1);
+        QCOMPARE(h.session->importSavedQueries(QUrl::fromLocalFile(dir.filePath("missing.json")), false), -1);
+    }
+
+    void savedQueryEditing()
+    {
+        Harness h;
+        h.scriptStartup(mixedLogs());
+        h.session->start();
+        QVERIFY(h.waitIdle(3));
+        h.session->setSearchText("first");
+        h.session->saveCurrentQuery("A");
+        h.session->setSearchText("second");
+        h.session->saveCurrentQuery("B");
+        const auto idAt = [&](int i) { return h.session->savedQueries()->get(i).value("id").toString(); };
+        const QString a = idAt(0), b = idAt(1);
+
+        QCOMPARE(h.session->savedQueryIdByName(" b "), b);
+        QCOMPARE(h.session->savedQueryIdByName("C"), QString());
+
+        h.session->moveSavedQueryUp(b);                       // B is now number 1
+        QCOMPARE(idAt(0), b);
+        h.session->moveSavedQueryUp(b);                       // already first: no-op
+        QCOMPARE(idAt(0), b);
+
+        h.session->setSearchText("third");
+        h.session->replaceSavedQuery(a);                      // name and place kept, query replaced
+        QCOMPARE(idAt(1), a);
+        QCOMPARE(h.session->savedQueries()->get(1).value("name").toString(), "A");
+        QVERIFY(h.session->savedQueries()->get(1).value("summary").toString().contains("third"));
+
+        QVERIFY(h.session->savedQueryLink(a).startsWith("logviewer://"));
+        QVERIFY(h.session->savedQueryLink(a).contains("third"));
+
+        h.session->removeSavedQuery(b);
+        QCOMPARE(h.session->savedQueries()->count(), 1);
+        h.session->restoreSavedQuery();                       // back at its place
+        QCOMPARE(h.session->savedQueries()->count(), 2);
+        QCOMPARE(idAt(0), b);
+        h.session->restoreSavedQuery();                       // nothing more to restore
+        QCOMPARE(h.session->savedQueries()->count(), 2);
+    }
+
     void shareLinkOpensSameView()
     {
         Harness a;
@@ -420,6 +513,14 @@ private slots:
         QCOMPARE(h.session->patterns()->count(), 1);
         QCOMPARE(h.session->hiddenSinglePatterns(), 1);
         QCOMPARE(h.session->patterns()->get(0).value("count").toInt(), 3);
+
+        h.session->setShowSinglePatterns(true);       // the one-off is listed after the repeated one
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->patterns()->count(), 2);
+        QCOMPARE(h.session->hiddenSinglePatterns(), 0);
+        h.session->setShowSinglePatterns(false);
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->patterns()->count(), 1);
 
         h.session->showPattern(0, false);
         QVERIFY(h.session->isAnalyzing());           // computed off the UI thread

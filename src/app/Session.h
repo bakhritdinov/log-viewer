@@ -52,6 +52,8 @@ class Session : public QObject {
     Q_PROPERTY(lv::MapListModel* suggestions READ suggestions CONSTANT)
     Q_PROPERTY(QStringList searchTerms READ searchTerms NOTIFY searchTextChanged)
     Q_PROPERTY(QStringList history READ history NOTIFY historyChanged)
+    Q_PROPERTY(QString appliedSearchText READ appliedSearchText NOTIFY appliedSearchChanged)   // the text of the last search run
+    Q_PROPERTY(QString searchError READ searchError NOTIFY searchErrorChanged)   // why search() refused the text
     // Time range
     Q_PROPERTY(QString timeRangeKey READ timeRangeKey NOTIFY timeRangeChanged)
     Q_PROPERTY(QString timeRangeLabel READ timeRangeLabel NOTIFY timeRangeChanged)
@@ -64,6 +66,7 @@ class Session : public QObject {
     // Loading
     Q_PROPERTY(bool loading READ isLoading NOTIFY loadingChanged)
     Q_PROPERTY(bool hasMore READ hasMore NOTIFY loadingChanged)
+    Q_PROPERTY(bool loadStopped READ loadStopped NOTIFY loadingChanged)   // stopped by the user, can continue
     Q_PROPERTY(int lastQueryMs READ lastQueryMs NOTIFY loadingChanged)
     Q_PROPERTY(lv::LogListModel* logs READ logs CONSTANT)
     Q_PROPERTY(int loadStep READ loadStep CONSTANT)   // entries per "load more"
@@ -84,6 +87,7 @@ class Session : public QObject {
     // A time bucket or a pattern narrows the list (a level alone shows on the legend).
     Q_PROPERTY(bool histogramRangeOrPatternFilter READ histogramRangeOrPatternFilter NOTIFY histogramFilterChanged)
     Q_PROPERTY(QString histogramFilterLabel READ histogramFilterLabel NOTIFY histogramFilterChanged)
+    Q_PROPERTY(qint64 histogramFilterFromMs READ histogramFilterFromMs NOTIFY histogramFilterChanged)   // 0: no interval
     Q_PROPERTY(QString activeLevel READ activeLevel NOTIFY histogramFilterChanged)
     Q_PROPERTY(bool levelServerSide READ levelServerSide NOTIFY histogramFilterChanged)
     // Fields, patterns
@@ -95,6 +99,7 @@ class Session : public QObject {
     // Messages seen once are not listed as patterns, only counted.
     Q_PROPERTY(int hiddenSinglePatterns READ hiddenSinglePatterns NOTIFY patternsChanged)
     Q_PROPERTY(QString patternSort READ patternSort WRITE setPatternSort NOTIFY patternsChanged)
+    Q_PROPERTY(bool showSinglePatterns READ showSinglePatterns WRITE setShowSinglePatterns NOTIFY patternsChanged)   // one-off messages listed too
     // Selection
     Q_PROPERTY(int selectedRow READ selectedRow NOTIFY selectionChanged)
     Q_PROPERTY(lv::EntryDetails selectedEntry READ selectedEntry NOTIFY selectionChanged)
@@ -191,6 +196,14 @@ public:
     Q_INVOKABLE void runSavedQuery(const QString& id);
     Q_INVOKABLE void renameSavedQuery(const QString& id, const QString& name);
     Q_INVOKABLE void removeSavedQuery(const QString& id);
+    Q_INVOKABLE void restoreSavedQuery();                       // undo the last removal
+    Q_INVOKABLE void replaceSavedQuery(const QString& id);      // with the current search
+    Q_INVOKABLE void moveSavedQueryUp(const QString& id);
+    Q_INVOKABLE QString savedQueryIdByName(const QString& name) const;   // "" when none
+    Q_INVOKABLE QString savedQueryLink(const QString& id) const;
+    // Saved queries to / from a file; the number written or added, -1 on failure.
+    Q_INVOKABLE int exportSavedQueries(const QUrl& file) const;
+    Q_INVOKABLE int importSavedQueries(const QUrl& file, bool replace);
 
     // Sharing
     void setShareBaseUrl(const QString& url);
@@ -221,6 +234,8 @@ public:
     QString searchText() const { return m_searchText; }
     MapListModel* chips() const { return m_chips; }
     MapListModel* suggestions() const { return m_suggestions; }
+    QString appliedSearchText() const { return m_appliedSearch; }
+    QString searchError() const { return m_searchError; }
     QStringList searchTerms() const;
     QStringList history() const;
     QString timeRangeKey() const;
@@ -232,6 +247,7 @@ public:
     QString rangeError() const { return m_rangeError; }
     bool isLoading() const { return m_loader->isLoading(); }
     bool hasMore() const { return m_loader->hasMore(); }
+    bool loadStopped() const { return m_loader->wasStopped(); }
     int lastQueryMs() const { return m_lastQueryMs; }
     int loadStep() const { return ChainedLoader::kStep; }
     LogListModel* logs() const { return m_logs; }
@@ -251,6 +267,7 @@ public:
     bool histogramFilterActive() const { return m_store.filter().isActive(); }
     bool histogramRangeOrPatternFilter() const { return m_store.filter().toMs > 0 || !m_store.filter().messageTemplate.isEmpty(); }
     QString histogramFilterLabel() const { return m_histogramFilterLabel; }
+    qint64 histogramFilterFromMs() const { return m_store.filter().toMs > 0 ? m_store.filter().fromMs : 0; }
     QString activeLevel() const { return levelName(m_activeLevel); }
     bool levelServerSide() const { return m_levelServerSide; }
     MapListModel* facets() const { return m_facets; }
@@ -258,6 +275,8 @@ public:
     int fieldCount() const { return int(m_facetCounts.size()); }
     MapListModel* patterns() const { return m_patterns; }
     bool patternsEnabled() const { return m_patternsEnabled; }
+    bool showSinglePatterns() const { return m_showSinglePatterns; }
+    void setShowSinglePatterns(bool on);
     int selectedRow() const { return m_selectedRow; }
     EntryDetails selectedEntry() const;
     MapListModel* savedQueries() const { return m_saved; }
@@ -277,6 +296,8 @@ signals:
     void streamsChanged();
     void sourceChanged();
     void searchTextChanged();
+    void appliedSearchChanged();
+    void searchErrorChanged();
     void historyChanged();
     void timeRangeChanged();
     void rangeErrorChanged();
@@ -357,6 +378,7 @@ private:
     QString m_facetFilter;
     QSet<QString> m_expandedFacets;
     bool m_patternsEnabled = false;
+    bool m_showSinglePatterns = false;
     bool m_patternsStale = true;
     QString m_patternSort = QStringLiteral("count");
     quint64 m_patternsEpoch = 0;
@@ -370,6 +392,10 @@ private:
     int m_selectedRow = -1;
     QString m_shareBaseUrl;
     bool m_openedFromLink = false;
+    QString m_appliedSearch;
+    QString m_searchError;
+    SavedQuery m_removedQuery;        // for restoreSavedQuery()
+    int m_removedQueryIndex = -1;
     qint64 m_pendingAnchorMs = 0;
 
     MapListModel* m_environments;

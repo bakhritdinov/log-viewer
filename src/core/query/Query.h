@@ -58,6 +58,16 @@ private:
     QList<QueryTerm> m_terms;
 };
 
+// A mistake in the search text that would make the server query wrong.
+struct QueryProblem {
+    enum class Kind { None, UnclosedQuote, BadRegex, EmptyValue };
+    Kind kind = Kind::None;
+    QString field;          // the field it concerns (empty for a free-text part)
+    bool ok() const { return kind == Kind::None; }
+};
+// The first problem in the search text, or Kind::None.
+QueryProblem checkQuery(QStringView text);
+
 // Splits search text into its raw parts (on " AND ", case-insensitive), untrimmed.
 QStringList splitQueryParts(QStringView text);
 

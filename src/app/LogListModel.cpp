@@ -1,5 +1,7 @@
 #include "app/LogListModel.h"
 
+#include <algorithm>
+
 #include "core/features/Focus.h"
 
 namespace lv {
@@ -147,6 +149,13 @@ QVariantMap LogListModel::rowData(int row) const
     return out;
 }
 
+void LogListModel::setOldestFirst(bool on)
+{
+    if (m_oldestFirst == on) return;
+    m_oldestFirst = on;
+    reload(false);
+}
+
 void LogListModel::reload(bool resetSlice)
 {
     beginResetModel();
@@ -162,6 +171,7 @@ void LogListModel::reload(bool resetSlice)
         m_page = m_store->clampPage(m_page, m_pageSize);
         m_rows = m_store->page(m_page, m_pageSize);
     }
+    if (m_oldestFirst) std::reverse(m_rows.begin(), m_rows.end());
     endResetModel();
     emit slicingChanged();
 }

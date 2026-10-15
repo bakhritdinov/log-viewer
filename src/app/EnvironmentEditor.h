@@ -30,12 +30,19 @@ class EnvironmentEditor : public QObject {
     Q_PROPERTY(QString user MEMBER m_user NOTIFY formChanged)
     Q_PROPERTY(QString password MEMBER m_password NOTIFY formChanged)
     Q_PROPERTY(QString token MEMBER m_token NOTIFY formChanged)
+    Q_PROPERTY(QString nsLabel MEMBER m_nsLabel NOTIFY formChanged)     // empty: automatic
+    Q_PROPERTY(QString appLabel MEMBER m_appLabel NOTIFY formChanged)
     Q_PROPERTY(QStringList colors READ colors CONSTANT)
     Q_PROPERTY(QString validationError READ validationError NOTIFY formChanged)
     Q_PROPERTY(bool canRemove READ canRemove NOTIFY loaded)
+    Q_PROPERTY(bool dirty READ isDirty NOTIFY formChanged)   // the form differs from what is stored
     Q_PROPERTY(bool secretsSecure READ secretsSecure CONSTANT)
     Q_PROPERTY(TestState testState READ testState NOTIFY testChanged)
     Q_PROPERTY(QString testMessage READ testMessage NOTIFY testChanged)
+    // While testing: 0 waiting for the server, 1 server, login and datasource are
+    // fine and namespaces are being listed.
+    Q_PROPERTY(int testStep READ testStep NOTIFY testChanged)
+    Q_PROPERTY(int testServerMs READ testServerMs NOTIFY testChanged)
     Q_PROPERTY(lv::ErrorInfo testError READ testError NOTIFY testChanged)
 
 public:
@@ -54,6 +61,7 @@ public:
     // A blank environment with a free colour.
     Q_INVOKABLE void createNew();
     Q_INVOKABLE void testConnection();
+    Q_INVOKABLE void cancelTest();
     // Validates and stores; `makeCurrent` switches to it. Returns false on a
     // validation error (see validationError).
     Q_INVOKABLE bool save(bool makeCurrent = true);
@@ -64,9 +72,12 @@ public:
     QStringList colors() const { return environmentColors(); }
     QString validationError() const;
     bool canRemove() const;
+    bool isDirty() const { return formSnapshot() != m_snapshot; }
     bool secretsSecure() const;
     TestState testState() const { return m_testState; }
     QString testMessage() const { return m_testMessage; }
+    int testStep() const { return m_testStep; }
+    int testServerMs() const { return m_testServerMs; }
     ErrorInfo testError() const { return m_testError; }
 
 signals:
@@ -78,6 +89,10 @@ signals:
 
 private:
     Environment toEnvironment() const;
+    QString formSnapshot() const;
+    QString m_snapshot;               // the form as last loaded or saved
+    int m_testStep = 0;
+    int m_testServerMs = 0;
     void setTest(TestState state, const QString& message, const ErrorInfo& error = {});
 
     Session* m_session;
@@ -93,6 +108,8 @@ private:
     Auth m_auth = Auth::Basic;
     QString m_user;
     QString m_password;
+    QString m_nsLabel;
+    QString m_appLabel;
     QString m_token;
     TestState m_testState = TestState::Idle;
     QString m_testMessage;

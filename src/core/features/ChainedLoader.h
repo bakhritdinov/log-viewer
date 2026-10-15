@@ -47,8 +47,10 @@ public:
     void stop();
 
     bool isLoading() const { return m_loading; }
-    // The last load stopped at the cap and the range may hold more entries.
+    // The last load stopped at the cap (or was stopped) and the range may hold more entries.
     bool hasMore() const { return m_hasMore; }
+    // The last load was stopped by stop() before it finished.
+    bool wasStopped() const { return m_stopped; }
     TimeRange::Window window() const { return m_window; }
 
 signals:
@@ -77,6 +79,7 @@ private:
     int m_cap = kStep;
     bool m_loading = false;
     bool m_hasMore = false;
+    bool m_stopped = false;
     quint64 m_generation = 0;  // bumps on start/stop; stale results are dropped
     QPointer<HttpCall> m_call;
 };

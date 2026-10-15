@@ -9,6 +9,7 @@
 #include "app/AppServices.h"
 #include "app/Language.h"
 #include "app/Session.h"
+#include "app/UpdateService.h"
 #include "core/data/QtHttpClient.h"
 #include "core/storage/KeyValueStore.h"
 #include "core/storage/SecretStore.h"
@@ -48,6 +49,10 @@ int main(int argc, char* argv[])
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,
                      [] { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
     engine.loadFromModule(LOGVIEWER_UI_MODULE, "Main");
+
+    // The update check at start-up (throttled inside; off in Settings → Version).
+    if (auto* updates = engine.singletonInstance<lv::UpdateService*>("LogViewer.App", "Updates"); updates && updates->autoCheck())
+        updates->checkForUpdates();
 
     lv::runLegacyMigration(services, [&](bool) {
         session.environmentsEdited();

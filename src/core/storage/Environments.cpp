@@ -31,8 +31,11 @@ Environment::Auth authFromName(const QString& s)
 
 QJsonObject toJson(const Environment& e)
 {
-    return { { "id", e.id }, { "name", e.name }, { "color", e.color }, { "url", e.url.toString() },
-             { "uid", e.datasourceUid }, { "user", e.user }, { "auth", authName(e.auth) } };
+    QJsonObject o{ { "id", e.id }, { "name", e.name }, { "color", e.color }, { "url", e.url.toString() },
+                   { "uid", e.datasourceUid }, { "user", e.user }, { "auth", authName(e.auth) } };
+    if (!e.nsLabel.isEmpty()) o.insert("nsLabel", e.nsLabel);
+    if (!e.appLabel.isEmpty()) o.insert("appLabel", e.appLabel);
+    return o;
 }
 
 Environment fromJson(const QJsonObject& o)
@@ -45,6 +48,8 @@ Environment fromJson(const QJsonObject& o)
     e.datasourceUid = o.value("uid").toString();
     e.user = o.value("user").toString();
     e.auth = authFromName(o.value("auth").toString());
+    e.nsLabel = o.value("nsLabel").toString();
+    e.appLabel = o.value("appLabel").toString();
     return e;
 }
 

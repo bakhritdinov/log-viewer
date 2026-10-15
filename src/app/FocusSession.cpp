@@ -74,6 +74,7 @@ void FocusSession::load()
     const FocusRequest req = m_mode == Mode::Trace ? traceRequest(base, m_anchor)
                                                    : contextRequest(base, m_anchor, m_seconds);
     m_range = req.range;
+    m_logs->setOldestFirst(m_mode == Mode::Trace);   // a trace reads top-down
     m_session.resolveConnection([this, req](const Connection& c) {
         SearchSpec spec = req.spec;
         spec.connection = c;
