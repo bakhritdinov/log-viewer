@@ -920,6 +920,22 @@
         <source>Copy value</source>
         <translation>Скопировать значение</translation>
     </message>
+    <message>
+        <source>Remove %1 from the card</source>
+        <translation>Убрать %1 из карточки</translation>
+    </message>
+    <message>
+        <source>Remove the %1 column</source>
+        <translation>Убрать колонку %1</translation>
+    </message>
+    <message>
+        <source>Show %1 in the card</source>
+        <translation>Показывать в карточке %1</translation>
+    </message>
+    <message>
+        <source>Show %1 as a column</source>
+        <translation>Показывать колонкой %1</translation>
+    </message>
 </context>
 <context>
     <name>FieldsPanel</name>
@@ -2236,10 +2252,6 @@
         <translation>Колонки из полей</translation>
     </message>
     <message>
-        <source>Any field of an entry as a column before the message, e.g. trace_id or context.client_id</source>
-        <translation>Любое поле записи — отдельной колонкой перед сообщением, например trace_id или context.client_id</translation>
-    </message>
-    <message>
         <source>Field name</source>
         <translation>Имя поля</translation>
     </message>
@@ -2250,6 +2262,10 @@
     <message>
         <source>Add column</source>
         <translation>Добавить колонку</translation>
+    </message>
+    <message>
+        <source>Any field of an entry as a column before the message, e.g. trace_id or context.client_id. In the details, the column button next to a field does the same.</source>
+        <translation>Любое поле записи — отдельной колонкой перед сообщением, например trace_id или context.client_id. То же делает кнопка колонки у поля в деталях записи.</translation>
     </message>
 </context>
 <context>

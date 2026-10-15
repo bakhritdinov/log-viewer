@@ -2,7 +2,8 @@ import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
 
-// One field of a log entry with include (+), exclude (−) and copy actions.
+// One field of a log entry with include (+), exclude (−), show-as-column and
+// copy actions.
 // Desktop: key and value side by side; touch: stacked, 44 px buttons.
 Control {
     id: root
@@ -10,12 +11,15 @@ Control {
     required property string key
     required property string value
     property bool touch: false
+    property bool columnable: false     // offers "show as a column" (desktop) / "in the card" (touch)
+    property bool isColumn: false       // already shown that way
     // Desktop: the actions show on the hovered row only, so values stay readable.
     readonly property bool actionsShown: touch || hover.hovered || root.activeFocus || root.visualFocus
 
     signal includeRequested()
     signal excludeRequested()
     signal copyRequested()
+    signal columnToggled()
 
     padding: touch ? 4 : 2
     leftPadding: touch ? 12 : 6
@@ -76,6 +80,19 @@ Control {
             touch: root.touch
             iconColor: hovered ? Theme.dangerText : Theme.textMuted
             onClicked: root.excludeRequested()
+        }
+        IconButton {
+            Layout.alignment: Qt.AlignTop
+            visible: root.columnable
+            // Shown while it is a column, so the row tells it is one.
+            opacity: root.actionsShown || root.isColumn ? 1 : 0
+            iconName: "column"
+            checked: root.isColumn
+            label: root.isColumn ? (root.touch ? qsTr("Remove %1 from the card").arg(root.key) : qsTr("Remove the %1 column").arg(root.key))
+                                 : (root.touch ? qsTr("Show %1 in the card").arg(root.key) : qsTr("Show %1 as a column").arg(root.key))
+            touch: root.touch
+            iconColor: root.isColumn || hovered ? Theme.accent : Theme.textMuted
+            onClicked: root.columnToggled()
         }
         IconButton {
             Layout.alignment: Qt.AlignTop

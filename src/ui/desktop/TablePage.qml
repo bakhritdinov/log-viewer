@@ -70,7 +70,7 @@ Flickable {
         }
         PrefRow {
             title: qsTr("Columns from fields")
-            subtitle: qsTr("Any field of an entry as a column before the message, e.g. trace_id or context.client_id")
+            subtitle: qsTr("Any field of an entry as a column before the message, e.g. trace_id or context.client_id. In the details, the column button next to a field does the same.")
         }
         Flow {
             Layout.fillWidth: true

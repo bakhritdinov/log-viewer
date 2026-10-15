@@ -379,4 +379,22 @@ TestCase {
         panel().resizeRequested(420)
         keyClick(Qt.Key_Escape)
     }
+
+    // A field of the details becomes a table column and back.
+    function test_28_fieldAsColumn() {
+        mouseClick(rows()[0])
+        const panel = () => byName(window.contentItem, "Подробности записи")
+        tryVerify(() => panel() !== null)
+        const toggle = () => H.find(panel(), it => String(it.Accessible.name).startsWith("Показывать колонкой") && it.visible)
+        tryVerify(() => toggle() !== null)
+        const field = String(toggle().Accessible.name).replace("Показывать колонкой ", "")
+        mouseClick(toggle())
+        compare(Session.prefs.extraColumns, [field])
+        tryVerify(() => H.find(window.contentItem, it => it.text === field && it.font && it.font.capitalization === Font.MixedCase && H.isShown(it)) !== null)   // the header
+        const remove = H.find(panel(), it => it.Accessible.name === "Убрать колонку " + field && it.visible)
+        verify(remove, "the toggle says the column is there")
+        mouseClick(remove)
+        compare(Session.prefs.extraColumns, [])
+        keyClick(Qt.Key_Escape)
+    }
 }

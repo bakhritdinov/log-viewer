@@ -913,6 +913,22 @@
         <source>Copy value</source>
         <translation>Qiymatni nusxalash</translation>
     </message>
+    <message>
+        <source>Remove %1 from the card</source>
+        <translation>%1 ni kartochkadan olib tashlash</translation>
+    </message>
+    <message>
+        <source>Remove the %1 column</source>
+        <translation>%1 ustunini olib tashlash</translation>
+    </message>
+    <message>
+        <source>Show %1 in the card</source>
+        <translation>%1 ni kartochkada koʻrsatish</translation>
+    </message>
+    <message>
+        <source>Show %1 as a column</source>
+        <translation>%1 ni ustun sifatida koʻrsatish</translation>
+    </message>
 </context>
 <context>
     <name>FieldsPanel</name>
@@ -2215,10 +2231,6 @@
         <translation>Maydonlardan ustunlar</translation>
     </message>
     <message>
-        <source>Any field of an entry as a column before the message, e.g. trace_id or context.client_id</source>
-        <translation>Yozuvning istalgan maydoni xabardan oldin ustun sifatida, masalan trace_id yoki context.client_id</translation>
-    </message>
-    <message>
         <source>Field name</source>
         <translation>Maydon nomi</translation>
     </message>
@@ -2229,6 +2241,10 @@
     <message>
         <source>Add column</source>
         <translation>Ustun qoʻshish</translation>
+    </message>
+    <message>
+        <source>Any field of an entry as a column before the message, e.g. trace_id or context.client_id. In the details, the column button next to a field does the same.</source>
+        <translation>Yozuvning istalgan maydoni xabardan oldin ustun sifatida, masalan trace_id yoki context.client_id. Tafsilotlarda maydon yonidagi ustun tugmasi ham shuni qiladi.</translation>
     </message>
 </context>
 <context>

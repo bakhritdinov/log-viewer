@@ -265,6 +265,9 @@ Rectangle {
                 onIncludeRequested: Session.toggleFilter(field.key, field.value, false)
                 onExcludeRequested: Session.toggleFilter(field.key, field.value, true)
                 onCopyRequested: clipboard.copy(field.value)
+                columnable: true
+                isColumn: Session.prefs.extraColumns.indexOf(field.key) >= 0
+                onColumnToggled: field.isColumn ? Session.prefs.removeColumn(field.key) : Session.prefs.addColumn(field.key)
             }
         }
     }

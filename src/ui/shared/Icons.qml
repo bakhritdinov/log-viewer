@@ -43,6 +43,7 @@ QtObject {
         "arrowUp": "M12 19V5M5 12l7-7 7 7",
         "external": "M14 4h6v6M20 4l-9 9M18 14v6H4V6h6",
         "pencil": "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z",
-        "trash": "M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
+        "trash": "M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6",
+        "column": "M3 5h18v14H3zM15 5v14"
     })
 }
