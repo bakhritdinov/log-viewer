@@ -1614,6 +1614,70 @@
         <source>Esc — close and resume</source>
         <translation>Esc — закрыть и продолжить</translation>
     </message>
+    <message>
+        <source>PAUSED</source>
+        <translation>ПАУЗА</translation>
+    </message>
+    <message>
+        <source>Resume</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Пауза</translation>
+    </message>
+    <message>
+        <source>Leave live tail</source>
+        <translation>Выйти из live</translation>
+    </message>
+    <message>
+        <source>all entries</source>
+        <translation>все записи</translation>
+    </message>
+    <message>
+        <source>~%1/s</source>
+        <translation>~%1/с</translation>
+    </message>
+    <message>
+        <source>Log stream</source>
+        <translation>Поток логов</translation>
+    </message>
+    <message numerus="yes">
+        <source>While you were away: %n new · resume</source>
+        <translation>
+            <numerusform>Пока вас не было: %n новая · продолжить</numerusform>
+            <numerusform>Пока вас не было: %n новые · продолжить</numerusform>
+            <numerusform>Пока вас не было: %n новых · продолжить</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n new · resume</source>
+        <translation>
+            <numerusform>%n новая · продолжить</numerusform>
+            <numerusform>%n новые · продолжить</numerusform>
+            <numerusform>%n новых · продолжить</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Waiting for new entries</source>
+        <translation>Ждём новые записи</translation>
+    </message>
+    <message>
+        <source>Checking every %1 s. Entries that arrive after live tail was turned on are shown.</source>
+        <translation>Проверяем каждые %1 с. Показываются записи, пришедшие после включения live.</translation>
+    </message>
+    <message>
+        <source>The search conditions may hide entries.</source>
+        <translation>Условия поиска могут скрывать записи.</translation>
+    </message>
+    <message>
+        <source>Clear the search</source>
+        <translation>Убрать условия</translation>
+    </message>
+    <message>
+        <source>Streaming · buffer %1 of %2</source>
+        <translation>Поток идёт · буфер %1 из %2</translation>
+    </message>
 </context>
 <context>
     <name>LogCard</name>
@@ -1851,6 +1915,10 @@
         <source>Copied</source>
         <translation>Скопировано</translation>
     </message>
+    <message>
+        <source>Sort the patterns</source>
+        <translation>Сортировать шаблоны</translation>
+    </message>
 </context>
 <context>
     <name>Main</name>
@@ -2047,6 +2115,108 @@
     <message>
         <source>%1 more</source>
         <translation>Ещё %1</translation>
+    </message>
+</context>
+<context>
+    <name>PatternSortSheet</name>
+    <message>
+        <source>Sort the patterns</source>
+        <translation>Сортировка шаблонов</translation>
+    </message>
+    <message>
+        <source>By count</source>
+        <translation>По количеству</translation>
+    </message>
+    <message>
+        <source>By first appearance</source>
+        <translation>По первому появлению</translation>
+    </message>
+    <message>
+        <source>By last appearance</source>
+        <translation>По последнему появлению</translation>
+    </message>
+    <message>
+        <source>By level (ERROR first)</source>
+        <translation>По уровню (ERROR сначала)</translation>
+    </message>
+</context>
+<context>
+    <name>PatternsList</name>
+    <message>
+        <source>Patterns</source>
+        <translation>Шаблоны</translation>
+    </message>
+    <message>
+        <source>Similar WARN and ERROR messages, from %1 loaded entries.</source>
+        <translation>Похожие сообщения WARN и ERROR по %1 загруженным записям.</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n one-off message(s) not shown.</source>
+        <translation>
+            <numerusform>%n единичное сообщение не показано.</numerusform>
+            <numerusform>%n единичных сообщения не показаны.</numerusform>
+            <numerusform>%n единичных сообщений не показано.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Hide one-offs</source>
+        <translation>Скрыть единичные</translation>
+    </message>
+    <message>
+        <source>Show one-offs</source>
+        <translation>Показать единичные</translation>
+    </message>
+    <message>
+        <source>%1 entries: %2</source>
+        <translation>%1 записей: %2</translation>
+    </message>
+    <message numerus="yes">
+        <source>Show %n entries</source>
+        <translation>
+            <numerusform>Показать %n запись</numerusform>
+            <numerusform>Показать %n записи</numerusform>
+            <numerusform>Показать %n записей</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Копировать</translation>
+    </message>
+    <message>
+        <source>Pattern copied</source>
+        <translation>Шаблон скопирован</translation>
+    </message>
+    <message>
+        <source>Exclude</source>
+        <translation>Исключить</translation>
+    </message>
+    <message>
+        <source>Counting patterns</source>
+        <translation>Считаем шаблоны</translation>
+    </message>
+    <message>
+        <source>All messages differ</source>
+        <translation>Все сообщения разные</translation>
+    </message>
+    <message>
+        <source>No WARN or ERROR among the loaded entries</source>
+        <translation>В загруженных записях нет WARN и ERROR</translation>
+    </message>
+    <message numerus="yes">
+        <source>All %n warnings and errors occur once.</source>
+        <translation>
+            <numerusform>Все %n предупреждение и ошибка встречаются по одному разу.</numerusform>
+            <numerusform>Все %n предупреждения и ошибки встречаются по одному разу.</numerusform>
+            <numerusform>Все %n предупреждений и ошибок встречаются по одному разу.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Patterns are built from warnings and errors only.</source>
+        <translation>Шаблоны строятся только по предупреждениям и ошибкам.</translation>
+    </message>
+    <message>
+        <source>To the entries</source>
+        <translation>К записям</translation>
     </message>
 </context>
 <context>

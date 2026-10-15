@@ -115,11 +115,49 @@
             <numerusform>%n new · resume live</numerusform>
         </translation>
     </message>
+    <message numerus="yes">
+        <source>While you were away: %n new · resume</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n new · resume</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>LogTable</name>
     <message numerus="yes">
         <source>↵ +%n line(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>PatternsList</name>
+    <message numerus="yes">
+        <source>%n one-off message(s) not shown.</source>
+        <translation type="unfinished">
+            <numerusform>%n one-off message not shown.</numerusform>
+            <numerusform>%n one-off messages not shown.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Show %n entries</source>
+        <translation type="unfinished">
+            <numerusform>Show %n entry</numerusform>
+            <numerusform>Show %n entries</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>All %n warnings and errors occur once.</source>
         <translation type="unfinished">
             <numerusform></numerusform>
             <numerusform></numerusform>

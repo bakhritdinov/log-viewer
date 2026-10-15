@@ -28,6 +28,9 @@ qt_add_qml_module(logviewer_ui_mobile
         DetailsScreen.qml
         FieldSheet.qml
         FocusScreen.qml
+        PatternsList.qml
+        PatternSortSheet.qml
+        LiveView.qml
     IMPORTS
         LogViewer.App
         LogViewer.Ui

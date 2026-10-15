@@ -51,6 +51,8 @@ ApplicationWindow {
                 onEnvironmentRequested: environmentSheet.open()
                 onPeriodRequested: timeSheet.open()
                 onEntryRequested: row => details.show(Session.logs, row)
+                onLiveEntryRequested: row => details.show(Session.live.logs, row)
+                onPatternSortRequested: patternSortSheet.open()
                 onSaveRequested: saveSheet.openSaving()
                 onAddEnvironmentRequested: name => { missingEnvironment = ""; window.section = 2 }
             }
@@ -109,7 +111,9 @@ ApplicationWindow {
         onTraceRequested: (model, row) => { Session.focus.openTrace(model, row); focusScreen.open() }
         onFieldMenuRequested: (key, value) => fieldSheet.openFor(key, value)
         onFiltered: window.backToFeed()
+        onClosed: logsPage.resumeLiveAfterEntry()
     }
+    PatternSortSheet { id: patternSortSheet }
     FocusScreen {
         id: focusScreen
         onEntryRequested: row => focusDetails.show(Session.focus.logs, row)

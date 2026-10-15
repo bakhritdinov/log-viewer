@@ -1601,6 +1601,68 @@
         <source>Esc — close and resume</source>
         <translation>Esc — yopish va davom ettirish</translation>
     </message>
+    <message>
+        <source>PAUSED</source>
+        <translation>PAUZA</translation>
+    </message>
+    <message>
+        <source>Resume</source>
+        <translation>Davom ettirish</translation>
+    </message>
+    <message>
+        <source>Pause</source>
+        <translation>Pauza</translation>
+    </message>
+    <message>
+        <source>Leave live tail</source>
+        <translation>Live dan chiqish</translation>
+    </message>
+    <message>
+        <source>all entries</source>
+        <translation>barcha yozuvlar</translation>
+    </message>
+    <message>
+        <source>~%1/s</source>
+        <translation>~%1/s</translation>
+    </message>
+    <message>
+        <source>Log stream</source>
+        <translation>Loglar oqimi</translation>
+    </message>
+    <message numerus="yes">
+        <source>While you were away: %n new · resume</source>
+        <translation>
+            <numerusform>Siz yoʻqligingizda: %n ta yangi · davom ettirish</numerusform>
+            <numerusform />
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n new · resume</source>
+        <translation>
+            <numerusform>%n ta yangi · davom ettirish</numerusform>
+            <numerusform />
+        </translation>
+    </message>
+    <message>
+        <source>Waiting for new entries</source>
+        <translation>Yangi yozuvlar kutilmoqda</translation>
+    </message>
+    <message>
+        <source>Checking every %1 s. Entries that arrive after live tail was turned on are shown.</source>
+        <translation>Har %1 s da tekshiramiz. Live yoqilgandan keyin kelgan yozuvlar koʻrsatiladi.</translation>
+    </message>
+    <message>
+        <source>The search conditions may hide entries.</source>
+        <translation>Qidiruv shartlari yozuvlarni yashirishi mumkin.</translation>
+    </message>
+    <message>
+        <source>Clear the search</source>
+        <translation>Shartlarni olib tashlash</translation>
+    </message>
+    <message>
+        <source>Streaming · buffer %1 of %2</source>
+        <translation>Oqim davom etmoqda · bufer %1 / %2</translation>
+    </message>
 </context>
 <context>
     <name>LogCard</name>
@@ -1837,6 +1899,10 @@
         <source>Copied</source>
         <translation>Nusxalandi</translation>
     </message>
+    <message>
+        <source>Sort the patterns</source>
+        <translation>Andozalarni saralash</translation>
+    </message>
 </context>
 <context>
     <name>Main</name>
@@ -2033,6 +2099,105 @@
     <message>
         <source>%1 more</source>
         <translation>Yana %1</translation>
+    </message>
+</context>
+<context>
+    <name>PatternSortSheet</name>
+    <message>
+        <source>Sort the patterns</source>
+        <translation>Andozalarni saralash</translation>
+    </message>
+    <message>
+        <source>By count</source>
+        <translation>Soni boʻyicha</translation>
+    </message>
+    <message>
+        <source>By first appearance</source>
+        <translation>Birinchi paydo boʻlish boʻyicha</translation>
+    </message>
+    <message>
+        <source>By last appearance</source>
+        <translation>Oxirgi paydo boʻlish boʻyicha</translation>
+    </message>
+    <message>
+        <source>By level (ERROR first)</source>
+        <translation>Daraja boʻyicha (avval ERROR)</translation>
+    </message>
+</context>
+<context>
+    <name>PatternsList</name>
+    <message>
+        <source>Patterns</source>
+        <translation>Andozalar</translation>
+    </message>
+    <message>
+        <source>Similar WARN and ERROR messages, from %1 loaded entries.</source>
+        <translation>Yuklangan %1 ta yozuv boʻyicha oʻxshash WARN va ERROR xabarlari.</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n one-off message(s) not shown.</source>
+        <translation>
+            <numerusform>%n ta yagona xabar koʻrsatilmadi.</numerusform>
+            <numerusform>%n ta yakka xabar koʻrsatilmadi.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Hide one-offs</source>
+        <translation>Yagonalarni yashirish</translation>
+    </message>
+    <message>
+        <source>Show one-offs</source>
+        <translation>Yagonalarni koʻrsatish</translation>
+    </message>
+    <message>
+        <source>%1 entries: %2</source>
+        <translation>%1 ta yozuv: %2</translation>
+    </message>
+    <message numerus="yes">
+        <source>Show %n entries</source>
+        <translation>
+            <numerusform>%n ta yozuvni koʻrsatish</numerusform>
+            <numerusform>%n ta yozuvni koʻrsatish</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Nusxalash</translation>
+    </message>
+    <message>
+        <source>Pattern copied</source>
+        <translation>Andoza nusxalandi</translation>
+    </message>
+    <message>
+        <source>Exclude</source>
+        <translation>Chiqarib tashlash</translation>
+    </message>
+    <message>
+        <source>Counting patterns</source>
+        <translation>Andozalar hisoblanmoqda</translation>
+    </message>
+    <message>
+        <source>All messages differ</source>
+        <translation>Barcha xabarlar har xil</translation>
+    </message>
+    <message>
+        <source>No WARN or ERROR among the loaded entries</source>
+        <translation>Yuklangan yozuvlarda WARN va ERROR yoʻq</translation>
+    </message>
+    <message numerus="yes">
+        <source>All %n warnings and errors occur once.</source>
+        <translation>
+            <numerusform>Barcha %n ta ogohlantirish va xato bir martadan uchraydi.</numerusform>
+            <numerusform>Barcha %n ta ogohlantirish va xato bir martadan uchraydi.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Patterns are built from warnings and errors only.</source>
+        <translation>Andozalar faqat ogohlantirish va xatolardan tuziladi.</translation>
+    </message>
+    <message>
+        <source>To the entries</source>
+        <translation>Yozuvlarga</translation>
     </message>
 </context>
 <context>

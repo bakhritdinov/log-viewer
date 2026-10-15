@@ -39,6 +39,7 @@ QtObject {
         "download": "M12 4v12M6 10l6 6 6-6M4 20h16",
         "check": "M5 12l5 5L20 7",
         "pause": "M8 5v14M16 5v14",
+        "sort": "M7 20V4M3 8l4-4 4 4M17 4v16M13 16l4 4 4-4",
         "play": "M7 4l13 8-13 8z",
         "stop": "M7 7h10v10H7z",
         "more": "M5 12h.01M12 12h.01M19 12h.01",

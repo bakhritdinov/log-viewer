@@ -19,6 +19,11 @@ Item {
     signal environmentRequested()
     signal periodRequested()
     signal entryRequested(int row)
+    signal liveEntryRequested(int row)
+    signal patternSortRequested()
+
+    // An entry opened from live tail paused it; closing the entry resumes.
+    function resumeLiveAfterEntry() { if (liveView.pauseReason === "entry") liveView.resume() }
     signal notice(string text)
     signal searchRequested()
     signal saveRequested()
@@ -47,6 +52,8 @@ Item {
                                  : Session.loading ? (root.skeletonDue ? "skeleton" : "wait")
                                  : Session.hasError ? "failed" : "nothing"
     onViewChanged: if (view !== "feed") hideOffset = 0
+    readonly property bool patterns: Session.patternsEnabled && view === "feed"
+    onPatternsChanged: hideOffset = 0
 
     function num(n) { return n.toLocaleString(Qt.locale(), "f", 0) }
 
@@ -364,6 +371,14 @@ Item {
                     value: Session.patternsEnabled
                     onActivated: v => Session.patternsEnabled = v
                 }
+                // The order of the patterns (their tab only).
+                IconButton {
+                    visible: Session.patternsEnabled
+                    touch: true
+                    iconName: "sort"
+                    label: qsTr("Sort the patterns")
+                    onClicked: root.patternSortRequested()
+                }
                 AppButton {
                     id: liveButton
                     touch: true
@@ -613,7 +628,7 @@ Item {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: loadStrip.visible ? loadStrip.top : parent.bottom
-        visible: root.view === "feed"
+        visible: root.view === "feed" && !root.patterns
         topMargin: headerColumn.implicitHeight
         leftMargin: 12
         rightMargin: 12
@@ -697,6 +712,26 @@ Item {
         }
     }
 
+    // Patterns instead of the records.
+    PatternsList {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.topMargin: root.headerBottom
+        anchors.bottom: loadStrip.visible ? loadStrip.top : parent.bottom
+        visible: root.patterns
+        onNotice: (text, actionText, action) => root.notice(text)
+    }
+
+    // Live tail covers the section while it runs.
+    LiveView {
+        id: liveView
+        anchors.fill: parent
+        z: 5
+        visible: Session.live.running
+        onEntryRequested: row => root.liveEntryRequested(row)
+    }
+
     // Pull to refresh: an arc that closes as the feed is pulled, then spins.
     Column {
         id: pullIndicator
@@ -704,7 +739,7 @@ Item {
         y: root.headerBottom + (feed.refreshing ? 10 : Math.min(feed.pull, 96) - 46)
         z: 1
         spacing: 6
-        visible: root.view === "feed" && (feed.pull > 8 || feed.refreshing)
+        visible: root.view === "feed" && !root.patterns && (feed.pull > 8 || feed.refreshing)
         opacity: feed.refreshing ? 1 : Math.min(1, feed.pull / 48)
         Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
