@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls.Basic
 import QtQuick.Layouts
 import LogViewer.Ui
 
@@ -55,7 +54,7 @@ ColumnLayout {
                 color: Theme.textMuted
             }
         }
-        Switch {
+        AppSwitch {
             checked: option.checked
             onToggled: option.toggled(checked)
             Accessible.name: option.title

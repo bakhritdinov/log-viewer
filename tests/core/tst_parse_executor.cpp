@@ -51,6 +51,48 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(called, 1000);
     }
 
+    // Heavy work (analysis, filtering) runs on a pool thread; its result is
+    // applied on the context's (UI) thread.
+    void runWorksOffThreadAndAppliesOnContext()
+    {
+        auto exec = makeThreadedParseExecutor();
+        QObject context;
+        QThread* workedOn = nullptr;
+        QThread* appliedOn = nullptr;
+        exec->run(&context, [&]() -> ParseExecutor::Apply {
+            workedOn = QThread::currentThread();
+            return [&] { appliedOn = QThread::currentThread(); };
+        });
+        QTRY_VERIFY_WITH_TIMEOUT(appliedOn != nullptr, 2000);
+        QVERIFY(workedOn != QThread::currentThread());
+        QCOMPARE(appliedOn, QThread::currentThread());
+    }
+
+    void runDropsTheResultWhenContextIsGone()
+    {
+        auto exec = makeThreadedParseExecutor();
+        bool applied = false;
+        {
+            QObject context;
+            exec->run(&context, [&]() -> ParseExecutor::Apply {
+                QThread::msleep(50);
+                return [&] { applied = true; };
+            });
+        }
+        QTest::qWait(150);
+        QVERIFY(!applied);
+    }
+
+    void inlineRunIsDeferred()
+    {
+        auto exec = makeInlineParseExecutor();
+        QObject context;
+        bool applied = false;
+        exec->run(&context, [&]() -> ParseExecutor::Apply { return [&] { applied = true; }; });
+        QVERIFY(!applied);
+        QTRY_VERIFY_WITH_TIMEOUT(applied, 1000);
+    }
+
     void defaultExecutorWorks()
     {
         auto exec = makeDefaultParseExecutor();

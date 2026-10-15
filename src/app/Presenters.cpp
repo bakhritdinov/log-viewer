@@ -56,7 +56,7 @@ QList<QVariantMap> suggestionRows(const QList<Suggestion>& suggestions)
 
 QByteArrayList histogramRoles()
 {
-    return { "startMs", "timeText", "error", "warn", "info", "debug", "trace", "other", "total" };
+    return { "startMs", "timeText", "error", "warn", "info", "debug", "trace", "other", "total", "important" };
 }
 
 QList<QVariantMap> histogramRows(const QList<HistogramBucket>& buckets, qint64 bucketMs)
@@ -68,7 +68,7 @@ QList<QVariantMap> histogramRows(const QList<HistogramBucket>& buckets, qint64 b
         rows << QVariantMap{ { "startMs", b.startMs }, { "timeText", localTime(b.startMs, format) },
                              { "error", b.counts[0] }, { "warn", b.counts[1] }, { "info", b.counts[2] },
                              { "debug", b.counts[3] }, { "trace", b.counts[4] }, { "other", b.counts[5] },
-                             { "total", b.total() } };
+                             { "total", b.total() }, { "important", b.counts[0] + b.counts[1] } };
     }
     return rows;
 }

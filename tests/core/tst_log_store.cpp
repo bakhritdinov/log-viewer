@@ -24,6 +24,38 @@ class TestLogStore : public QObject {
     Q_OBJECT
 
 private slots:
+    void addMatchesOnlyNewEntriesAgainstAnActiveFilter()
+    {
+        LogStore s;
+        s.add({ entry(3000, "a", Level::Error), entry(1000, "b", Level::Info) });
+        s.setFilter({ 0, 0, Level::Error });
+        const quint64 before = s.revision();
+        QCOMPARE(s.add({ entry(2000, "c", Level::Error), entry(4000, "d", Level::Error), entry(500, "e", Level::Info) }), 3);
+        QVERIFY(s.revision() > before);
+        QCOMPARE(s.all().size(), 5);
+        QCOMPARE(s.visible().size(), 3);
+        // Merged newest first, in the full list and the filtered view alike.
+        QCOMPARE(s.visible().at(0).message, "d");
+        QCOMPARE(s.visible().at(1).message, "a");
+        QCOMPARE(s.visible().at(2).message, "c");
+        QCOMPARE(s.all().at(0).message, "d");
+        QCOMPARE(s.all().at(4).message, "e");
+        QCOMPARE(s.add({ entry(2000, "c", Level::Error) }), 0);   // duplicate: no change
+    }
+
+    void precomputedFilterIsApplied()
+    {
+        LogStore s;
+        s.add({ entry(3000, "a", Level::Error), entry(1000, "b", Level::Info) });
+        const LogStore::Filter f{ 0, 0, Level::Info };
+        LogEntries visible = LogStore::filterEntries(s.all(), f);
+        QCOMPARE(visible.size(), 1);
+        s.setFilter(f, visible);
+        QCOMPARE(s.visible().size(), 1);
+        QCOMPARE(s.visible().first().message, "b");
+        QVERIFY(LogStore::filterEntries(s.all(), {}).isEmpty());   // no filter: nothing to compute
+    }
+
     void addKeepsNewestFirst()
     {
         LogStore s;

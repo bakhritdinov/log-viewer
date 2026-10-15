@@ -17,12 +17,23 @@ ListView {
     boundsBehavior: Flickable.StopAtBounds
     ScrollBar.vertical: ScrollBar { }
 
-    delegate: RowLayout {
+    delegate: Item {
         id: line
         required property var modelData
-        x: 24
-        width: ListView.view.width - 48
-        height: 34
+        width: ListView.view.width
+        height: 40
+
+        Rectangle {
+            anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom
+            anchors.leftMargin: 24; anchors.rightMargin: 24
+            height: 1
+            color: Theme.borderMuted
+        }
+
+        RowLayout {
+        anchors.fill: parent
+        anchors.leftMargin: 24
+        anchors.rightMargin: 24
         spacing: 12
         Text {
             Layout.fillWidth: true
@@ -37,6 +48,7 @@ ListView {
                 model: line.modelData.keys
                 delegate: Kbd { required property string modelData; text: modelData }
             }
+        }
         }
     }
 }

@@ -144,11 +144,13 @@ Popup {
                         iconName: "more"
                         label: qsTr("More actions with “%1”").arg(query.name)
                         onClicked: moreMenu.open()
-                        Menu {
+                        AppMenu {
                             id: moreMenu
                             y: moreButton.height
-                            MenuItem { text: qsTr("Rename"); onTriggered: root.renamingId = query.id }
-                            MenuItem { text: qsTr("Delete"); onTriggered: Session.removeSavedQuery(query.id) }
+                            x: moreButton.width - width
+                            minimumWidth: 160
+                            AppMenuItem { text: qsTr("Rename"); onTriggered: root.renamingId = query.id }
+                            AppMenuItem { text: qsTr("Delete"); danger: true; onTriggered: Session.removeSavedQuery(query.id) }
                         }
                     }
                 }

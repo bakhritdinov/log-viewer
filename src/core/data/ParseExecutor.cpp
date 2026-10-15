@@ -28,6 +28,17 @@ public:
             promise->finish();
         });
     }
+
+    void run(QObject* context, std::function<Apply()> work) override
+    {
+        auto promise = std::make_shared<QPromise<Apply>>();
+        promise->future().then(context, [](const Apply& apply) { if (apply) apply(); });
+        QThreadPool::globalInstance()->start([promise, work = std::move(work)] {
+            promise->start();
+            promise->addResult(work());
+            promise->finish();
+        });
+    }
 };
 #endif
 
@@ -37,6 +48,13 @@ public:
     {
         QTimer::singleShot(0, context, [body = std::move(body), done = std::move(done)] {
             done(parseLogsResponse(body));
+        });
+    }
+
+    void run(QObject* context, std::function<Apply()> work) override
+    {
+        QTimer::singleShot(0, context, [work = std::move(work)] {
+            if (const Apply apply = work()) apply();
         });
     }
 };

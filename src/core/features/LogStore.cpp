@@ -1,8 +1,10 @@
 #include "core/features/LogStore.h"
 
+#include <algorithm>
+#include <iterator>
+
 #include <QCryptographicHash>
 #include <QtEndian>
-#include <algorithm>
 
 #include "core/features/Analysis.h"
 #include "core/query/Query.h"
@@ -33,26 +35,41 @@ bool LogStore::Filter::matches(const LogEntry& e) const
         if (t < fromMs || t >= toMs) return false;
     }
     if (level != Level::Unknown && e.level != level) return false;
-    if (!messageTemplate.isEmpty())
-        return (templateMessage(e.message).templateText == messageTemplate) != excludeTemplate;
+    if (!messageTemplate.isEmpty()) {
+        const bool problem = e.level == Level::Warn || e.level == Level::Error;
+        const bool inPattern = (!templateProblemsOnly || problem) && templateMessage(e.message).templateText == messageTemplate;
+        return inPattern != excludeTemplate;
+    }
     return true;
 }
 
 int LogStore::add(const LogEntries& entries)
 {
-    int added = 0;
+    LogEntries fresh;
     for (const LogEntry& e : entries) {
         const quint64 key = entryKey(e);
         if (m_keys.contains(key)) continue;
         m_keys.insert(key);
-        m_all.append(e);
-        ++added;
+        fresh.append(e);
     }
-    if (added == 0) return 0;
-    std::stable_sort(m_all.begin(), m_all.end(),
-                     [](const LogEntry& a, const LogEntry& b) { return a.timestamp > b.timestamp; });
-    rebuildVisible();
-    return added;
+    if (fresh.isEmpty()) return 0;
+    const auto newerFirst = [](const LogEntry& a, const LogEntry& b) { return a.timestamp > b.timestamp; };
+    std::stable_sort(fresh.begin(), fresh.end(), newerFirst);
+    // Merge instead of re-sorting / re-filtering everything: only the new
+    // entries are matched against the filter.
+    LogEntries merged;
+    merged.reserve(m_all.size() + fresh.size());
+    std::merge(m_all.cbegin(), m_all.cend(), fresh.cbegin(), fresh.cend(), std::back_inserter(merged), newerFirst);
+    m_all = std::move(merged);
+    if (m_filter.isActive()) {
+        const LogEntries matched = filterEntries(fresh, m_filter);
+        LogEntries visible;
+        visible.reserve(m_visible.size() + matched.size());
+        std::merge(m_visible.cbegin(), m_visible.cend(), matched.cbegin(), matched.cend(), std::back_inserter(visible), newerFirst);
+        m_visible = std::move(visible);
+    }
+    ++m_revision;
+    return int(fresh.size());
 }
 
 int LogStore::addCapped(const LogEntries& entries, int capacity)
@@ -62,6 +79,7 @@ int LogStore::addCapped(const LogEntries& entries, int capacity)
         for (qsizetype i = capacity; i < m_all.size(); ++i) m_keys.remove(entryKey(m_all.at(i)));
         m_all.resize(capacity);
         rebuildVisible();
+        ++m_revision;
     }
     return added;
 }
@@ -71,6 +89,7 @@ void LogStore::clear()
     m_all.clear();
     m_visible.clear();
     m_keys.clear();
+    ++m_revision;
 }
 
 void LogStore::setFilter(const Filter& filter)
@@ -79,12 +98,24 @@ void LogStore::setFilter(const Filter& filter)
     rebuildVisible();
 }
 
+void LogStore::setFilter(const Filter& filter, LogEntries visible)
+{
+    m_filter = filter;
+    m_visible = filter.isActive() ? std::move(visible) : LogEntries();
+}
+
+LogEntries LogStore::filterEntries(const LogEntries& entries, const Filter& filter)
+{
+    LogEntries out;
+    if (!filter.isActive()) return out;
+    for (const LogEntry& e : entries)
+        if (filter.matches(e)) out.append(e);
+    return out;
+}
+
 void LogStore::rebuildVisible()
 {
-    m_visible.clear();
-    if (!m_filter.isActive()) return;
-    for (const LogEntry& e : m_all)
-        if (m_filter.matches(e)) m_visible.append(e);
+    m_visible = filterEntries(m_all, m_filter);
 }
 
 int LogStore::pageCount(int pageSize) const

@@ -309,6 +309,8 @@ void Session::runSearch(bool keepSlice)
     }
     clearError();
     if (!keepSlice) setSelectedRow(-1);
+    ++m_filterGeneration;   // a filter computed for the previous result is void
+    setFiltering(false);
     // A new search drops a client-side histogram filter; a level promoted into
     // the query stays until the user clears it.
     if (m_levelServerSide) m_store.setFilter({ 0, 0, m_activeLevel });
@@ -319,7 +321,7 @@ void Session::runSearch(bool keepSlice)
         m_lastQueryMs = 0;
         m_loader->start(currentSpec(), m_range);
         m_logs->reload(!keepSlice);
-        m_patternsStale = true;
+        markPatternsStale();
         refreshDerived();
     });
 }
@@ -424,7 +426,7 @@ void Session::onBatch()
 {
     if (m_lastQueryMs == 0) m_lastQueryMs = int(m_queryTimer.elapsed());
     m_logs->reload(false);
-    m_patternsStale = true;
+    markPatternsStale();
     refreshDerived();
 }
 
@@ -519,7 +521,7 @@ void Session::retranslate()
         emit rangeErrorChanged();
     }
     if (!m_store.filter().messageTemplate.isEmpty()) {
-        m_histogramFilterLabel = patternFilterLabel();
+        m_histogramFilterLabel = patternFilterLabel(m_store.filter());
         emit histogramFilterChanged();
     }
     refreshHistogram();
@@ -559,15 +561,7 @@ QString Session::boundOnDay(const QString& boundText, QDate day, bool endOfPerio
 
 void Session::refreshHistogram()
 {
-    const qint64 span = m_loader->window().seconds() > 0 ? m_loader->window().seconds()
-                                                         : m_range.resolve(m_services.clock()()).seconds();
-    m_bucketMs = m_manualBucketMs > 0 ? m_manualBucketMs : autoBucketMs(span);
-    m_buckets = aggregateHistogram(m_store.all(), m_bucketMs);
-    m_histogramMax = 0;
-    for (const HistogramBucket& b : m_buckets) m_histogramMax = std::max(m_histogramMax, b.total());
-    m_levelTotals = presenters::levelTotals(m_buckets);
-    m_histogram->setRows(presenters::histogramRows(m_buckets, m_bucketMs));
-    emit histogramChanged();
+    scheduleAnalysis();
 }
 
 void Session::applyBucketFilter(int bucketIndex, const QString& level)
@@ -576,28 +570,52 @@ void Session::applyBucketFilter(int bucketIndex, const QString& level)
     const qint64 from = m_buckets.at(bucketIndex).startMs;
     m_activeLevel = levelFromName(level);
     m_levelServerSide = false;
-    m_store.setFilter({ from, from + m_bucketMs, m_activeLevel });
     const auto fmt = [](qint64 ms) { return QDateTime::fromMSecsSinceEpoch(ms).toLocalTime().toString(QStringLiteral("HH:mm:ss")); };
-    m_histogramFilterLabel = QStringLiteral("%1 → %2").arg(fmt(from), fmt(from + m_bucketMs));
-    if (m_activeLevel != Level::Unknown) m_histogramFilterLabel += QStringLiteral(" · ") + level;
-    m_logs->reload(true);
-    setSelectedRow(-1);
-    m_patternsStale = true;
-    refreshPatterns();
-    emit histogramFilterChanged();
+    QString label = QStringLiteral("%1 → %2").arg(fmt(from), fmt(from + m_bucketMs));
+    if (m_activeLevel != Level::Unknown) label += QStringLiteral(" · ") + level;
+    applyStoreFilter({ from, from + m_bucketMs, m_activeLevel }, label);
 }
 
 void Session::applyLevelFilter(const QString& level)
 {
     m_activeLevel = levelFromName(level);
     m_levelServerSide = false;
-    m_store.setFilter({ 0, 0, m_activeLevel });
-    m_histogramFilterLabel = level;
-    m_logs->reload(true);
-    setSelectedRow(-1);
-    m_patternsStale = true;
-    refreshPatterns();
-    emit histogramFilterChanged();
+    applyStoreFilter({ 0, 0, m_activeLevel }, level);
+}
+
+void Session::applyStoreFilter(const LogStore::Filter& filter, const QString& label)
+{
+    // Filtering (template matching especially) runs off the UI thread; the
+    // list keeps showing the previous view until the new one is ready.
+    const LogEntries all = m_store.all();
+    const quint64 revision = m_store.revision();
+    const quint64 generation = ++m_filterGeneration;
+    setFiltering(true);
+    m_services.parser().run(this, [this, all, revision, generation, filter, label]() -> ParseExecutor::Apply {
+        LogEntries visible = LogStore::filterEntries(all, filter);
+        return [this, revision, generation, filter, label, visible = std::move(visible)]() mutable {
+            if (generation != m_filterGeneration) return;            // superseded
+            if (revision != m_store.revision()) {                    // entries arrived meanwhile
+                applyStoreFilter(filter, label);
+                return;
+            }
+            m_store.setFilter(filter, std::move(visible));
+            m_histogramFilterLabel = label;
+            setFiltering(false);
+            m_logs->reload(true);
+            setSelectedRow(-1);
+            markPatternsStale();
+            scheduleAnalysis();
+            emit histogramFilterChanged();
+        };
+    });
+}
+
+void Session::setFiltering(bool on)
+{
+    if (m_filtering == on) return;
+    m_filtering = on;
+    emit analyzingChanged();
 }
 
 void Session::resetLevelFilter()
@@ -613,11 +631,13 @@ void Session::resetLevelFilter()
 void Session::clearHistogramFilter()
 {
     const bool wasServerSide = m_levelServerSide;
+    ++m_filterGeneration;   // drop a filter still being computed
+    setFiltering(false);
     resetLevelFilter();
     m_logs->reload(true);
     setSelectedRow(-1);
-    m_patternsStale = true;
-    refreshPatterns();
+    markPatternsStale();
+    scheduleAnalysis();
     // The loaded set only holds that level: going back to all levels needs a query.
     if (wasServerSide) runSearch(false);
 }
@@ -626,14 +646,95 @@ void Session::clearHistogramFilter()
 
 void Session::refreshDerived()
 {
-    refreshHistogram();
-    refreshFacets();
-    refreshPatterns();
+    scheduleAnalysis();
+}
+
+void Session::markPatternsStale()
+{
+    m_patternsStale = true;
+    ++m_patternsEpoch;
+}
+
+void Session::scheduleAnalysis()
+{
+    // One analysis at a time; changes meanwhile are picked up by one more run.
+    if (m_analysisRunning) {
+        m_analysisPending = true;
+        return;
+    }
+    const qint64 span = m_loader->window().seconds() > 0 ? m_loader->window().seconds()
+                                                         : m_range.resolve(m_services.clock()()).seconds();
+    const qint64 bucketMs = m_manualBucketMs > 0 ? m_manualBucketMs : autoBucketMs(span);
+    const quint64 revision = m_store.revision();
+    const bool wantCounts = revision != m_analyzedRevision || bucketMs != m_bucketMs || m_buckets.isEmpty() != m_store.all().isEmpty();
+    const bool wantPatterns = m_patternsEnabled && m_patternsStale;
+    if (!wantCounts && !wantPatterns) return;
+
+    m_analysisRunning = true;
+    m_analysisPending = false;
+    emit analyzingChanged();
+
+    const LogEntries all = m_store.all();
+    const LogEntries visible = m_store.visible();
+    const quint64 patternsEpoch = m_patternsEpoch;
+    const QString patternSort = m_patternSort;
+    m_services.parser().run(this, [=, this]() -> ParseExecutor::Apply {
+        QList<HistogramBucket> buckets;
+        FieldValueCounts facets;
+        if (wantCounts) {
+            buckets = aggregateHistogram(all, bucketMs);
+            facets = computeFacets(all);
+        }
+        QList<QVariantMap> patternRows;
+        int singles = 0;
+        if (wantPatterns) {
+            // Grouping is for problems: WARN and every kind of error only.
+            LogEntries problems;
+            for (const LogEntry& e : visible)
+                if (e.level == Level::Warn || e.level == Level::Error) problems.append(e);
+            QList<MessagePattern> patterns = extractPatterns(problems);
+            // One-off messages are noise in this view: they are counted, not listed.
+            const auto single = [](const MessagePattern& p) { return p.count < 2; };
+            singles = int(std::count_if(patterns.cbegin(), patterns.cend(), single));
+            patterns.removeIf(single);
+            presenters::sortPatterns(patterns, patternSort);
+            patternRows = presenters::patternRows(patterns);
+        }
+        QList<QVariantMap> histogramRows = wantCounts ? presenters::histogramRows(buckets, bucketMs) : QList<QVariantMap>();
+        return [=, this, buckets = std::move(buckets), facets = std::move(facets),
+                histogramRows = std::move(histogramRows), patternRows = std::move(patternRows)]() {
+            m_analysisRunning = false;
+            if (wantCounts) {
+                m_analyzedRevision = revision;
+                m_bucketMs = bucketMs;
+                m_buckets = buckets;
+                m_histogramMax = 0;
+                // As in 2.8: the chart shows WARN and ERROR, scaled to them.
+                for (const HistogramBucket& b : m_buckets) m_histogramMax = std::max(m_histogramMax, b.counts[0] + b.counts[1]);
+                m_levelTotals = presenters::levelTotals(m_buckets);
+                m_histogram->setRows(histogramRows);
+                emit histogramChanged();
+                m_facetCounts = facets;
+                refreshFacets();
+            }
+            if (wantPatterns && patternsEpoch == m_patternsEpoch) {
+                m_patterns->setRows(patternRows);
+                m_hiddenSinglePatterns = singles;
+                m_patternsStale = false;
+                emit patternsChanged();
+            }
+            if (m_analysisPending || (m_patternsEnabled && m_patternsStale) || m_analyzedRevision != m_store.revision()) {
+                m_analysisPending = false;
+                scheduleAnalysis();
+            }
+            if (!m_analysisRunning) emit analyzingChanged();
+        };
+    });
 }
 
 void Session::refreshFacets()
 {
-    m_facetCounts = computeFacets(m_store.all());
+    // Rows only, from the counts the background analysis produced.
     m_facets->setRows(presenters::facetRows(m_facetCounts, m_facetFilter, m_expandedFacets,
                                             Query::parse(m_searchText).filters()));
     m_suggestions->setRows(presenters::suggestionRows(suggest(m_searchText, m_facetCounts)));
@@ -663,19 +764,14 @@ void Session::setPatternsEnabled(bool on)
 
 void Session::refreshPatterns()
 {
-    if (!m_patternsEnabled || !m_patternsStale) return;
-    QList<MessagePattern> patterns = extractPatterns(m_store.visible());
-    presenters::sortPatterns(patterns, m_patternSort);
-    m_patterns->setRows(presenters::patternRows(patterns));
-    m_patternsStale = false;
-    emit patternsChanged();
+    scheduleAnalysis();
 }
 
 void Session::setPatternSort(const QString& order)
 {
     if (m_patternSort == order) return;
     m_patternSort = order;
-    m_patternsStale = true;
+    markPatternsStale();
     refreshPatterns();
     emit patternsChanged();
 }
@@ -692,16 +788,12 @@ void Session::showPattern(int index, bool exclude)
     LogStore::Filter f = m_store.filter();
     f.messageTemplate = p.value("templateText").toString();
     f.excludeTemplate = exclude;
-    m_store.setFilter(f);
-    m_histogramFilterLabel = patternFilterLabel();
-    m_logs->reload(true);
-    setSelectedRow(-1);
-    emit histogramFilterChanged();
+    f.templateProblemsOnly = true;
+    applyStoreFilter(f, patternFilterLabel(f));
 }
 
-QString Session::patternFilterLabel() const
+QString Session::patternFilterLabel(const LogStore::Filter& f) const
 {
-    const LogStore::Filter& f = m_store.filter();
     return (f.excludeTemplate ? QCoreApplication::translate("Session", "Without pattern: %1")
                               : QCoreApplication::translate("Session", "Pattern: %1")).arg(f.messageTemplate);
 }

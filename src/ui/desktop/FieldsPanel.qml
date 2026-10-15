@@ -53,11 +53,12 @@ Rectangle {
             text: Session.facetFilterText
             onTextEdited: Session.facetFilterText = text
         }
+        // Same side margins as the filter field: highlights line up with it.
         FacetList {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.leftMargin: 6
-            Layout.rightMargin: 6
+            Layout.leftMargin: 12
+            Layout.rightMargin: 12
             model: Session.facets
             onToggleExpanded: field => Session.toggleFacetExpanded(field)
             onValueActivated: (field, value, exclude) => Session.toggleFilter(field, value, exclude)

@@ -55,3 +55,10 @@ Loader (asserted in `tests/core/tst_chained_loader.cpp`; to be confirmed against
 |---|---|---|
 | 12 | `_time:<range>s offset <n>s` relative to *now*, recomputed per batch: the window drifted while loading, a past custom range intersected "last N seconds" (often empty), and each batch skipped up to 1 s of entries (`offset + 1`) | the window is fixed at start and walked back with `_time:[from, oldest]`; overlap removed by de-duplication; an all-duplicate batch stops the walk |
 | 13 | trace lookup searched `trace_id` over the current range | trace and context views search ±5 min / ±N around the entry |
+
+Levels and patterns (asserted in `tests/core/tst_golden.cpp`, `tst_level.cpp` and `tests/app/tst_session.cpp`):
+
+| # | Old behaviour | New behaviour |
+|---|---|---|
+| 14 | ERROR matched err / error / fatal / crit / critical / panic | also alert / emerg / emergency / severe (syslog, Java), client- and server-side |
+| 15 | — (no message patterns) | patterns group WARN and ERROR entries only; one-off messages are counted, not listed |

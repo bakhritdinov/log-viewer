@@ -43,13 +43,17 @@ private slots:
             { "empty middle part", selector("prod-core", "billing-api") + " ~\"(?i)timeout\" ~\"(?i)retry\"" },
             { "trailing AND", selector("prod-core", "billing-api") + " ~\"(?i)timeout\"" },
         };
+        // Intended change #14: ERROR also covers alert / emerg / emergency / severe.
+        const auto widenErrorLevel = [](QString expr) {
+            return expr.replace(QStringLiteral("|panic)$"), QStringLiteral("|panic|alert|emerg|emergency|severe)$"));
+        };
 
         QTest::addColumn<QJsonObject>("input");
         QTest::addColumn<QString>("expected");
         for (const QJsonValue& v : loadCases("logsql.json")) {
             const QJsonObject c = v.toObject();
             const QString name = c.value("name").toString();
-            const QString expected = intended.value(name, c.value("expected").toString());
+            const QString expected = intended.value(name, widenErrorLevel(c.value("expected").toString()));
             QTest::newRow(qPrintable(name)) << c.value("input").toObject() << expected;
         }
     }

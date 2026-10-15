@@ -23,8 +23,10 @@ ColumnLayout {
         Text {
             Layout.fillWidth: true
             wrapMode: Text.Wrap
-            text: qsTr("Similar messages are grouped: numbers, ids, addresses and times become *. Based on %1 loaded entries.")
+            text: qsTr("Similar WARN and ERROR messages are grouped: numbers, ids, addresses and times become *. Based on %1 loaded entries.")
                   .arg(Session.logs.totalCount.toLocaleString(Qt.locale(), "f", 0))
+                  + (Session.hiddenSinglePatterns > 0
+                     ? " " + qsTr("%n one-off message(s) not shown.", "", Session.hiddenSinglePatterns) : "")
             font.family: Theme.sans
             font.pixelSize: Theme.fontMd
             color: Theme.textMuted
@@ -55,16 +57,16 @@ ColumnLayout {
                 }
                 Icon { anchors.verticalCenter: parent.verticalCenter; name: "chevronDown"; size: 12; color: Theme.textMuted }
             }
-            Menu {
+            AppMenu {
                 id: sortMenu
                 y: sortButton.height + 4
+                x: sortButton.width - width
                 Repeater {
                     model: sortButton.options
-                    delegate: MenuItem {
+                    delegate: AppMenuItem {
                         required property var modelData
                         text: modelData.label
-                        checkable: true
-                        checked: Session.patternSort === modelData.value
+                        checkedMark: Session.patternSort === modelData.value
                         onTriggered: Session.patternSort = modelData.value
                     }
                 }

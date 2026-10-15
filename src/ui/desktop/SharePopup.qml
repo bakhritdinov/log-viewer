@@ -40,7 +40,8 @@ Popup {
                 readOnly: true
                 text: root.link
                 Accessible.name: qsTr("Link")
-                onActiveFocusChanged: if (activeFocus) selectAll()
+                // Show where the link starts (host, environment), not its tail.
+                onTextChanged: cursorPosition = 0
             }
             AppButton {
                 variant: "primary"
@@ -55,34 +56,26 @@ Popup {
             spacing: 6
             visible: !Session.timeRangeAbsolute
             SectionLabel { text: qsTr("Period in the link") }
-            RadioButton {
-                id: fixedOption
-                checked: root.fixedRange
+            AppRadioButton {
+                    checked: root.fixedRange
                 onToggled: root.fixedRange = true
                 text: qsTr("Freeze %1 – %2 — a colleague sees exactly the same")
                       .arg(Session.absoluteFromText).arg(Session.absoluteToText)
-                font.family: Theme.sans
-                font.pixelSize: Theme.fontMd
-                palette.windowText: Theme.text
             }
-            RadioButton {
+            AppRadioButton {
+                Layout.fillWidth: true
                 checked: !root.fixedRange
                 onToggled: root.fixedRange = false
                 text: qsTr("Relative: “%1” at the moment of opening").arg(Session.timeRangeLabel)
-                font.family: Theme.sans
-                font.pixelSize: Theme.fontMd
-                palette.windowText: Theme.text
             }
         }
 
-        CheckBox {
+        AppCheckBox {
+            Layout.fillWidth: true
             visible: root.hasSelection
             checked: root.includeSelection
             onToggled: root.includeSelection = checked
             text: qsTr("Highlight the selected entry %1").arg(Session.selectedEntry.dateTimeText)
-            font.family: Theme.sans
-            font.pixelSize: Theme.fontMd
-            palette.windowText: Theme.text
         }
 
         RowLayout {

@@ -54,6 +54,13 @@
 <context>
     <name>PatternsView</name>
     <message numerus="yes">
+        <source>%n one-off message(s) not shown.</source>
+        <translation>
+            <numerusform>%n one-off message not shown.</numerusform>
+            <numerusform>%n one-off messages not shown.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
         <source>Show %n entries</source>
         <translation>
             <numerusform>Show %n entry</numerusform>

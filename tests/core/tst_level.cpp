@@ -14,7 +14,7 @@ private slots:
     {
         QTest::addColumn<QString>("raw");
         QTest::addColumn<Level>("expected");
-        for (const char* s : { "err", "ERROR", "Fatal", "crit", "critical", "panic" })
+        for (const char* s : { "err", "ERROR", "Fatal", "crit", "critical", "panic", "alert", "EMERG", "emergency", "severe" })
             QTest::newRow(s) << QString::fromLatin1(s) << Level::Error;
         for (const char* s : { "warn", "WARNING" })
             QTest::newRow(s) << QString::fromLatin1(s) << Level::Warn;

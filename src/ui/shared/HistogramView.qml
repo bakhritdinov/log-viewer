@@ -41,11 +41,10 @@ Item {
                 required property int total
 
                 readonly property real unit: bars.height / Math.max(1, root.maxTotal)
+                // WARN and above, as in 2.8: WARN at the bottom, ERROR on top.
                 readonly property var segments: [
-                    { level: "ERROR", count: error },
                     { level: "WARN", count: warn },
-                    { level: "INFO", count: info },
-                    { level: "", count: debug + trace + other },
+                    { level: "ERROR", count: error },
                 ]
 
                 width: (bars.width - bars.spacing * (repeater.count - 1)) / Math.max(1, repeater.count)
@@ -60,13 +59,13 @@ Item {
                     anchors.bottom: parent.bottom
                     width: parent.width
                     Repeater {
-                        // Top-down: other, INFO, WARN, ERROR so ERROR sits at the bottom.
+                        // A Column lays out top-down: reversed so WARN sits at the bottom.
                         model: bar.segments.slice().reverse()
                         delegate: Rectangle {
                             required property var modelData
                             width: bar.width
                             height: modelData.count * bar.unit
-                            color: modelData.level === "" ? Theme.levelColor("DEBUG") : Theme.levelColor(modelData.level)
+                            color: Theme.levelColor(modelData.level)
                         }
                     }
                 }
@@ -94,7 +93,7 @@ Item {
                 }
                 ToolTip.visible: root.showTooltip && hover.hovered
                 ToolTip.delay: 150
-                ToolTip.text: qsTr("%1 · %n entries", "", bar.total).arg(bar.timeText)
+                ToolTip.text: qsTr("%1 · %n entries", "", bar.error + bar.warn).arg(bar.timeText)
                               + (bar.error > 0 ? "\n" + qsTr("ERROR %1").arg(bar.error) : "")
                               + (bar.warn > 0 ? "\n" + qsTr("WARN %1").arg(bar.warn) : "")
             }

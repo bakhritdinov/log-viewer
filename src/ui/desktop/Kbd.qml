@@ -4,8 +4,9 @@ import QtQuick
 Rectangle {
     property alias text: label.text
 
-    implicitWidth: label.implicitWidth + 10
-    implicitHeight: label.implicitHeight + 4
+    // Whole pixels: key caps in a column must share their edges exactly.
+    implicitWidth: Math.ceil(label.implicitWidth) + 10
+    implicitHeight: Math.ceil(label.implicitHeight) + 4
     radius: Theme.radiusSm
     color: "transparent"
     border.width: 1

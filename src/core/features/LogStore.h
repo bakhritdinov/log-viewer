@@ -19,6 +19,8 @@ public:
         Level level = Level::Unknown;
         QString messageTemplate;
         bool excludeTemplate = false;
+        // Patterns are built from WARN/ERROR entries: showing one keeps only those.
+        bool templateProblemsOnly = false;
 
         bool isActive() const { return toMs > 0 || level != Level::Unknown || !messageTemplate.isEmpty(); }
         bool matches(const LogEntry& e) const;
@@ -38,6 +40,13 @@ public:
     qint64 newestMs() const { return m_all.isEmpty() ? 0 : m_all.first().timeMs(); }
 
     void setFilter(const Filter& filter);
+    // Applies a filter whose result was computed elsewhere (filterEntries() on
+    // a background thread over all() at `revision`).
+    void setFilter(const Filter& filter, LogEntries visible);
+    // Entries of `entries` passing `filter`, in order. Thread-safe (pure).
+    static LogEntries filterEntries(const LogEntries& entries, const Filter& filter);
+    // Grows with every change of all(); tells whether a snapshot is still current.
+    quint64 revision() const { return m_revision; }
     void clearFilter() { setFilter({}); }
     const Filter& filter() const { return m_filter; }
     // Entries passing the filter (all of them without a filter).
@@ -55,6 +64,7 @@ private:
     LogEntries m_all;
     LogEntries m_visible;
     Filter m_filter;
+    quint64 m_revision = 0;
     QSet<quint64> m_keys;
 };
 

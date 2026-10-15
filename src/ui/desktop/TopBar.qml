@@ -84,24 +84,24 @@ Rectangle {
                 border.color: envButton.visualFocus ? Theme.focusRing : Theme.tint(Session.environmentColor, 0.6)
             }
 
-            Menu {
+            AppMenu {
                 id: envMenu
                 y: envButton.height + 4
                 Repeater {
                     model: Session.environments
-                    delegate: MenuItem {
+                    delegate: AppMenuItem {
                         required property string id
                         required property string name
                         required property string color
                         required property bool current
                         text: name
-                        checkable: true
-                        checked: current
+                        dotColor: color
+                        checkedMark: current
                         onTriggered: Session.switchEnvironment(id)
                     }
                 }
-                MenuSeparator { }
-                MenuItem { text: qsTr("Manage environments…"); onTriggered: root.settingsRequested() }
+                AppMenuSeparator { }
+                AppMenuItem { text: qsTr("Manage environments…"); onTriggered: root.settingsRequested() }
             }
         }
 
@@ -218,22 +218,23 @@ Rectangle {
                     Icon { anchors.verticalCenter: parent.verticalCenter; name: "chevronDown"; size: 12; color: Theme.textOnAccent }
                 }
 
-                Menu {
+                AppMenu {
                     id: refreshMenu
                     y: autoButton.height + 4
+                    x: autoButton.width - width
                     Repeater {
                         model: root.refreshOptions
-                        delegate: MenuItem {
+                        delegate: AppMenuItem {
                             required property var modelData
                             text: modelData.seconds === 0 ? qsTr("Auto refresh off") : qsTr("Every %1").arg(modelData.label)
-                            checkable: true
-                            checked: Session.autoRefreshSeconds === modelData.seconds
+                            checkedMark: Session.autoRefreshSeconds === modelData.seconds
                             onTriggered: Session.autoRefreshSeconds = modelData.seconds
                         }
                     }
-                    MenuSeparator { }
-                    MenuItem {
+                    AppMenuSeparator { }
+                    AppMenuItem {
                         text: qsTr("Live tail")
+                        hint: "LIVE"
                         onTriggered: Session.live.start()
                     }
                 }

@@ -35,6 +35,13 @@ qt_add_qml_module(logviewer_ui
         Sparkline.qml
         EmptyState.qml
         Clipboard.qml
+        AppMenu.qml
+        AppMenuItem.qml
+        AppMenuSeparator.qml
+        AppRadioButton.qml
+        AppCheckBox.qml
+        AppSwitch.qml
+        ConfirmDialog.qml
     RESOURCES
         fonts/IBMPlexSans.ttf
         fonts/JetBrainsMono.ttf

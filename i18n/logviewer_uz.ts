@@ -70,6 +70,17 @@
     </message>
 </context>
 <context>
+    <name>ConfirmDialog</name>
+    <message>
+        <source>Delete</source>
+        <translation>Oʻchirish</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Bekor qilish</translation>
+    </message>
+</context>
+<context>
     <name>ConnectionsPage</name>
     <message>
         <source>Environment</source>
@@ -162,6 +173,10 @@
     <message>
         <source>Delete the environment %1?</source>
         <translation>%1 muhiti oʻchirilsinmi?</translation>
+    </message>
+    <message>
+        <source>Its address and credentials are removed from this device. Saved queries of it stay.</source>
+        <translation>Uning manzili va hisob maʼlumotlari ushbu qurilmadan oʻchiriladi. Saqlangan soʻrovlar qoladi.</translation>
     </message>
     <message>
         <source>Hide</source>
@@ -869,8 +884,15 @@
 <context>
     <name>PatternsView</name>
     <message>
-        <source>Similar messages are grouped: numbers, ids, addresses and times become *. Based on %1 loaded entries.</source>
-        <translation>Oʻxshash xabarlar guruhlangan: raqamlar, ID, manzillar va vaqt * bilan almashtirilgan. Yuklangan yozuvlar: %1.</translation>
+        <source>Similar WARN and ERROR messages are grouped: numbers, ids, addresses and times become *. Based on %1 loaded entries.</source>
+        <translation>Oʻxshash WARN va ERROR xabarlari guruhlangan: raqamlar, ID, manzillar va vaqt * bilan almashtirilgan. Yuklangan yozuvlar: %1.</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n one-off message(s) not shown.</source>
+        <translation>
+            <numerusform>%n ta yakka xabar koʻrsatilmadi.</numerusform>
+            <numerusform>%n ta yakka xabar koʻrsatilmadi.</numerusform>
+        </translation>
     </message>
     <message>
         <source>Sort</source>

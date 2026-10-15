@@ -26,7 +26,7 @@ QByteArrayList suggestionRoles();
 QList<QVariantMap> suggestionRows(const QList<Suggestion>& suggestions);
 
 // ── Histogram buckets ──
-// roles: startMs, timeText, error, warn, info, debug, trace, other, total
+// roles: startMs, timeText, error, warn, info, debug, trace, other, total, important (error + warn)
 QByteArrayList histogramRoles();
 QList<QVariantMap> histogramRows(const QList<HistogramBucket>& buckets, qint64 bucketMs);
 // Totals per level over all buckets: {ERROR: n, WARN: n, INFO: n, DEBUG: n, TRACE: n, OTHER: n}

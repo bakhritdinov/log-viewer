@@ -7,15 +7,16 @@ import QtQuick.Layouts
 GridLayout {
     id: root
 
-    property var totals: ({})           // {ERROR: n, WARN: n, INFO: n, DEBUG: n}
+    property var totals: ({})           // {ERROR: n, WARN: n, …}
     property string activeLevel
     property bool touch: false
 
     signal toggled(string level)
 
-    readonly property var levels: ["ERROR", "WARN", "INFO", "DEBUG"]
+    // WARN and above, as in 2.8; a level without entries is not shown.
+    readonly property var levels: ["ERROR", "WARN"]
 
-    columns: touch ? 2 : 4
+    columns: 2
     columnSpacing: touch ? 8 : 4
     rowSpacing: 8
 
@@ -28,6 +29,7 @@ GridLayout {
             readonly property int count: root.totals[modelData] ?? 0
 
             Layout.fillWidth: root.touch
+            visible: count > 0 || active
             implicitHeight: root.touch ? Theme.touchHeight : 24
             implicitWidth: row.implicitWidth + 16
             Accessible.role: Accessible.CheckBox

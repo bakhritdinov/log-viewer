@@ -19,7 +19,9 @@ ListView {
     Accessible.role: Accessible.Tree
     Accessible.name: qsTr("Fields")
 
-    delegate: ColumnLayout {
+    // Plain Column (not a layout): rows take the list width and elide long
+    // field names instead of widening past it.
+    delegate: Column {
         id: fieldItem
         required property string field
         required property int distinct
@@ -31,7 +33,9 @@ ListView {
 
         ItemDelegate {
             id: header
-            Layout.fillWidth: true
+            width: fieldItem.width
+            leftPadding: 8
+            rightPadding: 8
             implicitHeight: root.touch ? 48 : 28
             Accessible.role: Accessible.TreeItem
             Accessible.name: qsTr("%1, %n value(s)", "", fieldItem.distinct).arg(fieldItem.field)
@@ -70,8 +74,10 @@ ListView {
             delegate: ItemDelegate {
                 id: valueItem
                 required property var modelData
-                Layout.fillWidth: true
-                Layout.leftMargin: root.touch ? 24 : 18
+                x: root.touch ? 24 : 18
+                width: fieldItem.width - x
+                leftPadding: 8
+                rightPadding: 4
                 implicitHeight: root.touch ? 44 : 26
                 Accessible.name: qsTr("%1 = %2, %3 entries").arg(fieldItem.field).arg(modelData.value).arg(modelData.count)
                 onClicked: root.valueActivated(fieldItem.field, modelData.value, false)

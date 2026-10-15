@@ -70,6 +70,17 @@
     </message>
 </context>
 <context>
+    <name>ConfirmDialog</name>
+    <message>
+        <source>Delete</source>
+        <translation>Удалить</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+</context>
+<context>
     <name>ConnectionsPage</name>
     <message>
         <source>Environment</source>
@@ -162,6 +173,10 @@
     <message>
         <source>Delete the environment %1?</source>
         <translation>Удалить окружение %1?</translation>
+    </message>
+    <message>
+        <source>Its address and credentials are removed from this device. Saved queries of it stay.</source>
+        <translation>Его адрес и учётные данные будут удалены с этого устройства. Сохранённые запросы останутся.</translation>
     </message>
     <message>
         <source>Hide</source>
@@ -874,8 +889,16 @@
 <context>
     <name>PatternsView</name>
     <message>
-        <source>Similar messages are grouped: numbers, ids, addresses and times become *. Based on %1 loaded entries.</source>
-        <translation>Похожие сообщения сгруппированы: числа, ID, адреса и время заменены на *. По загруженным записям: %1.</translation>
+        <source>Similar WARN and ERROR messages are grouped: numbers, ids, addresses and times become *. Based on %1 loaded entries.</source>
+        <translation>Похожие сообщения WARN и ERROR сгруппированы: числа, ID, адреса и время заменены на *. По загруженным записям: %1.</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n one-off message(s) not shown.</source>
+        <translation>
+            <numerusform>%n единичное сообщение не показано.</numerusform>
+            <numerusform>%n единичных сообщения не показаны.</numerusform>
+            <numerusform>%n единичных сообщений не показано.</numerusform>
+        </translation>
     </message>
     <message>
         <source>Sort</source>

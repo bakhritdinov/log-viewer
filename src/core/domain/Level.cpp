@@ -15,7 +15,7 @@ const QList<LevelSpec>& specs()
     // Must stay in sync with the server-side filter: every synonym listed here is
     // also what levelFromString() accepts, so client and server agree on buckets.
     static const QList<LevelSpec> all = {
-        { Level::Error, QLatin1StringView("ERROR"), { "err", "error", "fatal", "crit", "critical", "panic" } },
+        { Level::Error, QLatin1StringView("ERROR"), { "err", "error", "fatal", "crit", "critical", "panic", "alert", "emerg", "emergency", "severe" } },
         { Level::Warn,  QLatin1StringView("WARN"),  { "warn", "warning" } },
         { Level::Info,  QLatin1StringView("INFO"),  { "info", "notice", "information" } },
         { Level::Debug, QLatin1StringView("DEBUG"), { "debug", "dbg" } },

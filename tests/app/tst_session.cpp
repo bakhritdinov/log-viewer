@@ -30,9 +30,9 @@ struct Harness {
     std::unique_ptr<AppServices> services;
     std::unique_ptr<Session> session;
 
-    explicit Harness(bool configure = true)
+    explicit Harness(bool configure = true, std::unique_ptr<ParseExecutor> executor = makeInlineParseExecutor())
     {
-        services = std::make_unique<AppServices>(http, kv, secrets, makeInlineParseExecutor(),
+        services = std::make_unique<AppServices>(http, kv, secrets, std::move(executor),
                                                  ClassifyOptions{}, [] { return kNow; });
         if (configure) {
             Environment dev = *services->environments().find("dev");
@@ -62,8 +62,15 @@ struct Harness {
     bool waitIdle(int requests)
     {
         return QTest::qWaitFor([&] {
-            return http.requests.size() >= requests && !session->isLoading() && !session->isDiscovering();
+            return http.requests.size() >= requests && !session->isLoading() && !session->isDiscovering()
+                && !session->isAnalyzing();
         }, 2000);
+    }
+
+    // Background analysis / filtering finished.
+    bool settle()
+    {
+        return QTest::qWaitFor([&] { return !session->isAnalyzing(); }, 2000);
     }
 };
 
@@ -184,6 +191,7 @@ private slots:
         // Click the ERROR segment of the newest bucket: client-side only.
         const int newest = h.session->histogram()->count() - 1;
         h.session->applyBucketFilter(newest, "ERROR");
+        QVERIFY(h.settle());
         QVERIFY(h.session->histogramFilterActive());
         QCOMPARE(h.session->logs()->rowCount(), 1);
         QCOMPARE(h.http.requests.size(), 3);
@@ -211,6 +219,7 @@ private slots:
         h.session->start();
         QVERIFY(h.waitIdle(3));
         h.session->applyLevelFilter("WARN");
+        QVERIFY(h.settle());
         QCOMPARE(h.session->logs()->rowCount(), 1);
         QCOMPARE(h.session->activeLevel(), "WARN");
         h.session->clearHistogramFilter();
@@ -398,6 +407,110 @@ private slots:
         QVERIFY(!live->isRunning());
     }
 
+    void patternsHideOneOffsAndFilterInTheBackground()
+    {
+        Harness h;
+        h.scriptStartup(logsBody(QList<Row>{ { kNowMs - 1000, "took 5 ms", "error" }, { kNowMs - 2000, "took 7 ms", "critical" },
+                                             { kNowMs - 3000, "took 9 ms", "fatal" }, { kNowMs - 4000, "unique event", "warn" },
+                                             { kNowMs - 5000, "took 3 ms", "info" } }));
+        h.session->start();
+        QVERIFY(h.waitIdle(3));
+        h.session->setPatternsEnabled(true);
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->patterns()->count(), 1);
+        QCOMPARE(h.session->hiddenSinglePatterns(), 1);
+        QCOMPARE(h.session->patterns()->get(0).value("count").toInt(), 3);
+
+        h.session->showPattern(0, false);
+        QVERIFY(h.session->isAnalyzing());           // computed off the UI thread
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->logs()->rowCount(), 3);  // the INFO "took 3 ms" is not part of it
+        QCOMPARE(h.session->histogramFilterLabel(), "Pattern: took * ms");
+        h.session->clearHistogramFilter();
+        h.session->showPattern(0, true);
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->logs()->rowCount(), 2);   // the WARN one and the INFO one stay
+        QCOMPARE(h.http.requests.size(), 3);         // all client-side
+    }
+
+    void aNewerFilterWinsOverAPendingOne()
+    {
+        Harness h;
+        h.scriptStartup(mixedLogs());
+        h.session->start();
+        QVERIFY(h.waitIdle(3));
+        h.session->applyLevelFilter("WARN");
+        h.session->applyLevelFilter("ERROR");        // before the first one is applied
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->activeLevel(), "ERROR");
+        QCOMPARE(h.session->logs()->rowCount(), 2);
+    }
+
+    // The list is updated as soon as a batch is in; histogram and fields are
+    // computed afterwards in the background (they never hold the list back).
+    void listUpdatesBeforeBackgroundAnalysis()
+    {
+        Harness h;
+        QStringList order;
+        connect(h.session->logs(), &LogListModel::slicingChanged, [&] { if (!order.contains("list")) order << "list"; });
+        connect(h.session.get(), &Session::histogramChanged, [&] { if (!order.contains("histogram")) order << "histogram"; });
+        connect(h.session.get(), &Session::facetsChanged, [&] { if (!order.contains("fields")) order << "fields"; });
+        h.scriptStartup(mixedLogs());
+        h.session->start();
+        QVERIFY(h.waitIdle(3));
+        QCOMPARE(order.value(0), "list");
+        QVERIFY(order.contains("histogram"));
+        QVERIFY(order.contains("fields"));
+    }
+
+    // A histogram/level filter leaves the list as it is until the filtered view
+    // has been computed in the background.
+    void filterDoesNotBlockTheList()
+    {
+        Harness h;
+        h.scriptStartup(mixedLogs());
+        h.session->start();
+        QVERIFY(h.waitIdle(3));
+        h.session->applyLevelFilter("ERROR");
+        QVERIFY(h.session->isAnalyzing());
+        QCOMPARE(h.session->logs()->rowCount(), 4);   // unchanged for now
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->logs()->rowCount(), 2);
+    }
+
+    // Same, on real worker threads.
+    void threadedAnalysisAndFiltering()
+    {
+        Harness h(true, makeThreadedParseExecutor());
+        h.scriptStartup(mixedLogs());
+        h.session->start();
+        QVERIFY(h.waitIdle(3));
+        QCOMPARE(h.session->levelTotals().value("ERROR").toInt(), 2);
+        QVERIFY(h.session->fieldCount() > 0);
+        h.session->applyLevelFilter("WARN");
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->logs()->rowCount(), 1);
+        h.session->setPatternsEnabled(true);
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->patterns()->count() + h.session->hiddenSinglePatterns(), 1);
+    }
+
+    // As in 2.8: the chart is scaled to WARN + ERROR; INFO/DEBUG do not count.
+    void histogramShowsWarnAndAbove()
+    {
+        Harness h;
+        h.scriptStartup(logsBody(QList<Row>{ { kNowMs - 1000, "a", "info" }, { kNowMs - 1100, "b", "info" },
+                                             { kNowMs - 1200, "c", "info" }, { kNowMs - 1300, "d", "warn" },
+                                             { kNowMs - 1400, "e", "error" } }));
+        h.session->start();
+        QVERIFY(h.waitIdle(3));
+        QCOMPARE(h.session->histogramMax(), 2);
+        int important = 0;
+        for (int i = 0; i < h.session->histogram()->count(); ++i)
+            important += h.session->histogram()->get(i).value("important").toInt();
+        QCOMPARE(important, 2);
+    }
+
     void modelsHonourTheModelContract()
     {
         Harness h;
@@ -410,10 +523,19 @@ private slots:
         QVERIFY(h.waitIdle(3));
         h.session->setSearchText("a AND b");
         h.session->applyBucketFilter(0);
+        QVERIFY(h.settle());
         h.session->logs()->goToPage(3);
         h.session->setFacetFilterText("level:err");
         h.session->setPatternsEnabled(true);
-        QVERIFY(h.session->patterns()->count() >= 2);
+        QVERIFY(h.settle());
+        // Patterns are built over the WARN/ERROR entries of the filtered view;
+        // every message there is unique.
+        int problems = 0;
+        for (int row = 0; row < h.session->logs()->rowCount(); ++row) {
+            const QString level = h.session->logs()->data(h.session->logs()->index(row), LogListModel::LevelRole).toString();
+            problems += level == "WARN" || level == "ERROR";
+        }
+        QCOMPARE(h.session->patterns()->count() + h.session->hiddenSinglePatterns(), problems);
     }
 
     void legacyMigrationMovesSecrets()

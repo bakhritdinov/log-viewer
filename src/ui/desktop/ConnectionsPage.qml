@@ -232,11 +232,16 @@ ColumnLayout {
                         strokeWidth: 2.4
                         color: Theme.success
                     }
-                    BusyIndicator {
+                    Icon {
                         visible: editor.testState === EnvironmentEditor.Testing
-                        running: visible
-                        implicitWidth: 18
-                        implicitHeight: 18
+                        name: "refresh"
+                        size: 18
+                        color: Theme.accent
+                        RotationAnimator on rotation {
+                            running: editor.testState === EnvironmentEditor.Testing
+                            loops: Animation.Infinite
+                            from: 0; to: 360; duration: 900
+                        }
                     }
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -330,14 +335,12 @@ ColumnLayout {
         }
     }
 
-    Dialog {
+    ConfirmDialog {
         id: confirmRemove
-        parent: Overlay.overlay
-        anchors.centerIn: parent
-        modal: true
         title: qsTr("Delete the environment %1?").arg(editor.name)
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        onAccepted: editor.remove()
+        message: qsTr("Its address and credentials are removed from this device. Saved queries of it stay.")
+        confirmText: qsTr("Delete environment")
+        onConfirmed: editor.remove()
     }
 
     // A labelled form row.

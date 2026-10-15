@@ -70,6 +70,8 @@ class Session : public QObject {
     Q_PROPERTY(lv::ErrorInfo error READ error NOTIFY errorChanged)
     Q_PROPERTY(bool needsSetup READ needsSetup NOTIFY errorChanged)
     Q_PROPERTY(bool hasError READ hasError NOTIFY errorChanged)
+    // Histogram, fields, patterns or a filter are being computed in the background.
+    Q_PROPERTY(bool analyzing READ isAnalyzing NOTIFY analyzingChanged)
     Q_PROPERTY(int autoRefreshSeconds READ autoRefreshSeconds WRITE setAutoRefreshSeconds NOTIFY autoRefreshChanged)
     // Histogram
     Q_PROPERTY(lv::MapListModel* histogram READ histogram CONSTANT)
@@ -88,6 +90,8 @@ class Session : public QObject {
     Q_PROPERTY(int fieldCount READ fieldCount NOTIFY facetsChanged)
     Q_PROPERTY(lv::MapListModel* patterns READ patterns CONSTANT)
     Q_PROPERTY(bool patternsEnabled READ patternsEnabled WRITE setPatternsEnabled NOTIFY patternsChanged)
+    // Messages seen once are not listed as patterns, only counted.
+    Q_PROPERTY(int hiddenSinglePatterns READ hiddenSinglePatterns NOTIFY patternsChanged)
     Q_PROPERTY(QString patternSort READ patternSort WRITE setPatternSort NOTIFY patternsChanged)
     // Selection
     Q_PROPERTY(int selectedRow READ selectedRow NOTIFY selectionChanged)
@@ -228,6 +232,8 @@ public:
     LogListModel* logs() const { return m_logs; }
     ErrorInfo error() const { return m_error; }
     bool hasError() const { return m_error.isActive(); }
+    bool isAnalyzing() const { return m_analysisRunning || m_filtering; }
+    int hiddenSinglePatterns() const { return m_hiddenSinglePatterns; }
     bool needsSetup() const { return m_error.kind == ErrorInfo::Kind::NotConfigured; }
     int autoRefreshSeconds() const { return m_autoRefreshSeconds; }
     MapListModel* histogram() const { return m_histogram; }
@@ -275,6 +281,7 @@ signals:
     void histogramFilterChanged();
     void facetsChanged();
     void patternsChanged();
+    void analyzingChanged();
     void selectionChanged();
     void shareBaseUrlChanged();
     void openedFromLinkChanged();
@@ -288,7 +295,11 @@ private:
     void onLoadFinished();
     void setError(const ErrorInfo& error);
     void fail(const RequestError& error);
-    QString patternFilterLabel() const;
+    QString patternFilterLabel(const LogStore::Filter& filter) const;
+    void applyStoreFilter(const LogStore::Filter& filter, const QString& label);
+    void setFiltering(bool on);
+    void scheduleAnalysis();
+    void markPatternsStale();
     void clearError();
     void rememberSource();
     void refreshDerived();          // histogram, facets, patterns after the store changed
@@ -342,6 +353,13 @@ private:
     bool m_patternsEnabled = false;
     bool m_patternsStale = true;
     QString m_patternSort = QStringLiteral("count");
+    quint64 m_patternsEpoch = 0;
+    int m_hiddenSinglePatterns = 0;
+    bool m_analysisRunning = false;
+    bool m_analysisPending = false;
+    quint64 m_analyzedRevision = ~0ull;
+    bool m_filtering = false;
+    quint64 m_filterGeneration = 0;
 
     int m_selectedRow = -1;
     QString m_shareBaseUrl;
