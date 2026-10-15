@@ -26,15 +26,7 @@ ColumnLayout {
         RowLayout {
             Layout.fillWidth: true
             spacing: 14
-            Rectangle {
-                implicitWidth: 48
-                implicitHeight: 48
-                radius: 12
-                color: Theme.bg
-                border.width: 1
-                border.color: Theme.border
-                Icon { anchors.centerIn: parent; name: "logs"; size: 26; color: Theme.accent }
-            }
+            AppLogo { size: 52 }
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 2

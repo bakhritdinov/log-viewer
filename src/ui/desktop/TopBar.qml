@@ -64,7 +64,7 @@ Rectangle {
         Row {
             Layout.rightMargin: 6
             spacing: 8
-            Icon { anchors.verticalCenter: parent.verticalCenter; name: "logs"; size: 20; color: Theme.accent }
+            AppLogo { anchors.verticalCenter: parent.verticalCenter; size: 22 }
             Text {
                 anchors.verticalCenter: parent.verticalCenter
                 visible: root.showLogoText

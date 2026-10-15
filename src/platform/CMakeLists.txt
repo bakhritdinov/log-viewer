@@ -18,3 +18,14 @@ target_compile_definitions(logviewer-next PRIVATE
 set_target_properties(logviewer-next PROPERTIES
     OUTPUT_NAME "LogViewerNext"
     MACOSX_BUNDLE_GUI_IDENTIFIER com.logviewer.LogViewerNext)
+
+# The file icon: Windows takes it from the resource script, macOS from the
+# bundle (sources: src/resources/icon.svg, rebuilt with tools/icons).
+if(WIN32)
+    target_sources(logviewer-next PRIVATE ${PROJECT_SOURCE_DIR}/src/resources/resources.rc)
+elseif(APPLE)
+    set(LOGVIEWER_ICNS ${PROJECT_SOURCE_DIR}/src/resources/icon.icns)
+    set_source_files_properties(${LOGVIEWER_ICNS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    target_sources(logviewer-next PRIVATE ${LOGVIEWER_ICNS})
+    set_target_properties(logviewer-next PROPERTIES MACOSX_BUNDLE_ICON_FILE icon.icns)
+endif()

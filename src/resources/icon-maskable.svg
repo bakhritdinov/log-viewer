@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Android/PWA "maskable" icon: the background runs to the edges (the
+       system cuts its own shape), the rows sit inside the central safe zone. -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c2129"/>
+      <stop offset="1" stop-color="#0d1117"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#tile)"/>
+  <g transform="translate(256 256) scale(0.72) translate(-256 -265)">
+    <rect x="88" y="104" width="48" height="64" rx="12" fill="#f85149"/>
+    <rect x="160" y="114" width="264" height="44" rx="22" fill="#f0f6fc"/>
+    <rect x="88" y="190" width="48" height="64" rx="12" fill="#d29922"/>
+    <rect x="160" y="200" width="200" height="44" rx="22" fill="#8b949e"/>
+    <rect x="88" y="276" width="48" height="64" rx="12" fill="#58a6ff"/>
+    <rect x="160" y="286" width="236" height="44" rx="22" fill="#8b949e"/>
+    <rect x="88" y="362" width="48" height="64" rx="12" fill="#58a6ff"/>
+    <rect x="160" y="372" width="160" height="44" rx="22" fill="#8b949e"/>
+  </g>
+</svg>
