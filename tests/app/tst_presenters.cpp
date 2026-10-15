@@ -1,5 +1,6 @@
 // Pure presentation helpers added for the designs: search highlighting,
 // source picker matches, pattern ordering and the period-picker date helpers.
+#include <QDateTime>
 #include <QTest>
 
 #include "app/Presenters.h"
@@ -100,12 +101,13 @@ private slots:
 
     void histogramAxisSpreadsLabels()
     {
-        QList<QVariantMap> rows;
-        for (int i = 0; i < 9; ++i) rows << QVariantMap{ { "timeText", QString::number(i) } };
-        QCOMPARE(histogramAxis(rows, 5), QStringList({ "0", "2", "4", "6", "8" }));
-        QCOMPARE(histogramAxis(rows.mid(0, 2), 5), QStringList({ "0", "1" }));
-        QCOMPARE(histogramAxis(rows.mid(0, 1), 5), QStringList({ "0" }));
-        QVERIFY(histogramAxis({}, 5).isEmpty());
+        // Evenly spaced times over the span, not every n-th bucket.
+        const qint64 from = QDateTime(QDate(2026, 10, 15), QTime(20, 7)).toMSecsSinceEpoch();
+        QCOMPARE(histogramAxis(from, from + 4 * 3600000, 5), QStringList({ "20:07", "21:07", "22:07", "23:07", "00:07" }));
+        // A short span shows seconds.
+        QCOMPARE(histogramAxis(from, from + 300000, 5), QStringList({ "20:07:00", "20:08:15", "20:09:30", "20:10:45", "20:12:00" }));
+        QCOMPARE(histogramAxis(from, from, 5), QStringList({ "20:07:00" }));
+        QVERIFY(histogramAxis(from, from - 1, 5).isEmpty());
     }
 
     void utcOffsets()
@@ -117,15 +119,21 @@ private slots:
 
     void jsonIsColoured()
     {
-        const QString out = jsonStyled("{\n    \"a<b\": \"x & y\",\n    \"n\": -1.5e3,\n    \"ok\": true\n}", "K", "S", "N");
+        const JsonColors colors { "K", "S", "N", "B", "Z", "P" };
+        const QString out = jsonStyled("{\n    \"a<b\": \"x & y\",\n    \"n\": -1.5e3,\n    \"ok\": true,\n    \"no\": null\n}", colors);
         QVERIFY(out.contains("<font color=\"K\">&quot;a&lt;b&quot;</font>"));               // key, escaped
         QVERIFY(out.contains("<font color=\"S\">&quot;x&nbsp;&amp;&nbsp;y&quot;</font>"));   // string value
         QVERIFY(out.contains("<font color=\"N\">-1.5e3</font>"));
-        QVERIFY(out.contains("<font color=\"N\">true</font>"));
+        QVERIFY(out.contains("<font color=\"B\">true</font>"));
+        QVERIFY(out.contains("<font color=\"Z\">null</font>"));
+        QVERIFY(out.contains("<font color=\"P\">{</font>"));
+        QVERIFY(out.contains("<font color=\"P\">,</font>"));
         QVERIFY(out.contains("<br>&nbsp;&nbsp;&nbsp;&nbsp;"));                         // indentation kept
         QVERIFY(!out.contains('\n'));
         // An escaped quote does not end the string.
-        QVERIFY(jsonStyled("\"a\\\"b\"", "K", "S", "N").contains("<font color=\"S\">&quot;a\\&quot;b&quot;</font>"));
+        QVERIFY(jsonStyled("\"a\\\"b\"", colors).contains("<font color=\"S\">&quot;a\\&quot;b&quot;</font>"));
+        // No colours: plain text.
+        QCOMPARE(jsonStyled("[1]", {}), QString("[1]"));
     }
 
     void calendarBounds()

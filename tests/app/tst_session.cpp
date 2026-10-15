@@ -508,6 +508,8 @@ private slots:
                                              { kNowMs - 5000, "took 3 ms", "info" } }));
         h.session->start();
         QVERIFY(h.waitIdle(3));
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->patterns()->count(), 1);   // counted for the switch before the view is open
         h.session->setPatternsEnabled(true);
         QVERIFY(h.settle());
         QCOMPARE(h.session->patterns()->count(), 1);
@@ -527,6 +529,8 @@ private slots:
         QVERIFY(h.settle());
         QCOMPARE(h.session->logs()->rowCount(), 3);  // the INFO "took 3 ms" is not part of it
         QCOMPARE(h.session->histogramFilterLabel(), "Pattern: took * ms");
+        QCOMPARE(h.session->patterns()->count(), 1);  // the patterns do not shrink to the shown one
+        QCOMPARE(h.session->hiddenSinglePatterns(), 1);
         h.session->clearHistogramFilter();
         h.session->showPattern(0, true);
         QVERIFY(h.settle());

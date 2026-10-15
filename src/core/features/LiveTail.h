@@ -10,12 +10,14 @@ namespace lv {
 
 // Polls for entries newer than the newest one seen (`_time:>=cursor`, overlap
 // removed by the receiver's store). A full batch means a burst: poll again at
-// once. Failures back off (doubling, up to 30 s) and recover on the next success.
+// once. A network blip is retried at once and reported only if it repeats;
+// failures back off (doubling, up to 30 s) and recover on the next success.
 class LiveTail : public QObject {
     Q_OBJECT
 public:
     static constexpr int kDefaultIntervalMs = 2000;
     static constexpr int kMaxBackoffMs = 30000;
+    static constexpr int kFailuresBeforeReport = 2;   // network blips in a row before "no connection"
 
     LiveTail(HttpClient& http, ParseExecutor& parser, ClassifyOptions options = {},
              Clock clock = systemClock(), QObject* parent = nullptr);
@@ -54,6 +56,7 @@ private:
     int m_delayMs = kDefaultIntervalMs;
     bool m_running = false;
     bool m_failing = false;
+    int m_failures = 0;             // in a row
     quint64 m_generation = 0;
     QPointer<HttpCall> m_call;
 };

@@ -54,8 +54,8 @@ QList<HistogramBucket> aggregateHistogram(const LogEntries& entries, qint64 buck
 
 qint64 autoBucketMs(qint64 rangeSeconds)
 {
-    static constexpr qint64 steps[] = { 60000, 300000, 900000, 1800000, 3600000, 21600000, 86400000 };
-    if (rangeSeconds <= 0) return steps[0];
+    static constexpr qint64 steps[] = { 1000, 5000, 10000, 15000, 30000, 60000, 300000, 900000, 1800000, 3600000, 21600000, 86400000 };
+    if (rangeSeconds <= 0) return 60000;
     const double ideal = double(rangeSeconds) * 1000.0 / 60.0;
     for (qint64 s : steps)
         if (s >= ideal) return s;

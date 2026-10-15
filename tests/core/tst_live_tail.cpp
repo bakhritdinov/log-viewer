@@ -101,6 +101,24 @@ private slots:
         tail.stop();
     }
 
+    // One dropped connection is retried at once and never shown.
+    void aSingleBlipIsNotReported()
+    {
+        FakeHttpClient http;
+        auto parser = makeInlineParseExecutor();
+        LiveTail tail(http, *parser, {}, [] { return kNow; });
+        tail.setIntervalMs(5);
+        QSignalSpy failed(&tail, &LiveTail::failed);
+        http.script(failure(HttpResponse::Failure::RemoteClosed));
+        http.script(ok(logsBody({})));
+        http.script(std::nullopt);
+        tail.start(spec(), kNow);
+        QTRY_COMPARE(http.requests.size(), 3);
+        QCOMPARE(failed.count(), 0);
+        QVERIFY(!tail.isFailing());
+        tail.stop();
+    }
+
     void stopHaltsPolling()
     {
         FakeHttpClient http;

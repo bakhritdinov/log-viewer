@@ -38,7 +38,10 @@ private slots:
         QTest::addColumn<qint64>("rangeSeconds");
         QTest::addColumn<qint64>("expected");
         QTest::newRow("none") << qint64(0) << qint64(60000);
-        QTest::newRow("15m") << qint64(900) << qint64(60000);
+        QTest::newRow("1m") << qint64(60) << qint64(1000);
+        QTest::newRow("5m") << qint64(300) << qint64(5000);
+        QTest::newRow("15m") << qint64(900) << qint64(15000);
+        QTest::newRow("30m") << qint64(1800) << qint64(30000);
         QTest::newRow("1h") << qint64(3600) << qint64(60000);
         QTest::newRow("3h") << qint64(10800) << qint64(300000);
         QTest::newRow("6h") << qint64(21600) << qint64(900000);

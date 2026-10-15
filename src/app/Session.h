@@ -178,9 +178,9 @@ public:
     // `text` as StyledText with `terms` (usually searchTerms) emphasised in
     // `color`. Terms are a parameter so QML bindings track them.
     Q_INVOKABLE QString highlight(const QString& text, const QStringList& terms, const QString& color) const;
-    // Indented JSON as coloured rich text (see presenters::jsonStyled).
-    Q_INVOKABLE QString jsonStyled(const QString& json, const QString& keyColor, const QString& stringColor,
-                                   const QString& numberColor) const;
+    // Indented JSON as coloured rich text (see presenters::jsonStyled). `colors`
+    // maps key, string, number, boolean, null and punctuation to colour names.
+    Q_INVOKABLE QString jsonStyled(const QString& json, const QVariantMap& colors) const;
 
     // Selection
     Q_INVOKABLE void selectRow(int row);

@@ -1,6 +1,10 @@
 #include "core/features/LiveTail.h"
 
+#include <QLoggingCategory>
+
 namespace lv {
+
+Q_LOGGING_CATEGORY(lcLive, "lv.live")
 
 LiveTail::LiveTail(HttpClient& http, ParseExecutor& parser, ClassifyOptions options, Clock clock, QObject* parent)
     : QObject(parent), m_http(http), m_parser(parser), m_options(options), m_clock(std::move(clock))
@@ -21,6 +25,7 @@ void LiveTail::start(const SearchSpec& spec, const QDateTime& since)
     m_cursor = since;
     m_running = true;
     m_failing = false;
+    m_failures = 0;
     m_delayMs = m_intervalMs;
     poll();
 }
@@ -85,8 +90,10 @@ void LiveTail::onParsed(quint64 generation, const ParsedLogs& parsed)
         fail(classifyResponse({ HttpResponse::Failure::None, 200, {}, {} }, parsed.error, m_options));
         return;
     }
+    m_failures = 0;
     if (m_failing) {
         m_failing = false;
+        qCInfo(lcLive) << "poll recovered";
         emit recovered();
     }
     const LogEntries& batch = parsed.entries;
@@ -99,10 +106,20 @@ void LiveTail::onParsed(quint64 generation, const ParsedLogs& parsed)
 
 void LiveTail::fail(const RequestError& e)
 {
-    const bool first = !m_failing;
-    m_failing = true;
-    if (first) emit failed(e);
-    schedule(first ? m_intervalMs * 2 : std::min(m_delayMs * 2, kMaxBackoffMs));
+    qCWarning(lcLive) << "poll failed: kind" << int(e.kind) << "http" << e.httpStatus << e.detail.left(300);
+    ++m_failures;
+    // A dropped keep-alive connection or one 5xx is routine for a request every
+    // few seconds: such a failure is retried at once and reported only when
+    // the retry fails too. Credentials or the query being wrong is reported at once.
+    using K = RequestError::Kind;
+    const bool transient = e.kind == K::Unreachable || e.kind == K::TooHeavy || e.kind == K::Server
+                        || e.kind == K::RateLimited || e.kind == K::InvalidResponse;
+    if (!m_failing && (!transient || m_failures >= kFailuresBeforeReport)) {
+        m_failing = true;
+        emit failed(e);
+    }
+    schedule(m_failures == 1 && transient ? m_intervalMs
+                                          : int(std::min<qint64>(qint64(m_intervalMs) << std::clamp(m_failures - 1, 1, 12), kMaxBackoffMs)));
 }
 
 int TailBuffer::add(const LogEntries& entries)

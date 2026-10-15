@@ -234,6 +234,7 @@ void Session::switchEnvironment(const QString& id)
     m_live->stop();
     m_focus->close();
     m_store.clear();
+    markPatternsStale();
     m_streams.clear();
     m_namespace.clear();
     m_app.clear();
@@ -572,7 +573,10 @@ void Session::setManualBucketMs(qint64 ms)
 
 QStringList Session::histogramAxis() const
 {
-    return presenters::histogramAxis(m_histogram->rows(), 5);
+    const QList<QVariantMap> rows = m_histogram->rows();
+    if (rows.isEmpty()) return {};
+    return presenters::histogramAxis(rows.first().value("startMs").toLongLong(),
+                                     rows.last().value("startMs").toLongLong() + m_bucketMs, 5);
 }
 
 QString Session::timeZoneLabel() const
@@ -705,7 +709,8 @@ void Session::scheduleAnalysis()
     const qint64 bucketMs = m_manualBucketMs > 0 ? m_manualBucketMs : autoBucketMs(span);
     const quint64 revision = m_store.revision();
     const bool wantCounts = revision != m_analyzedRevision || bucketMs != m_bucketMs || m_buckets.isEmpty() != m_store.all().isEmpty();
-    const bool wantPatterns = m_patternsEnabled && m_patternsStale;
+    // Kept current even while the list is shown: the "Patterns N" switch counts them.
+    const bool wantPatterns = m_patternsStale;
     if (!wantCounts && !wantPatterns) return;
 
     m_analysisRunning = true;
@@ -714,6 +719,7 @@ void Session::scheduleAnalysis()
 
     const LogEntries all = m_store.all();
     const LogEntries visible = m_store.visible();
+    const LogStore::Filter filter = m_store.filter();
     const quint64 patternsEpoch = m_patternsEpoch;
     const QString patternSort = m_patternSort;
     const bool keepSingles = m_showSinglePatterns;
@@ -728,8 +734,17 @@ void Session::scheduleAnalysis()
         int singles = 0;
         if (wantPatterns) {
             // Grouping is for problems: WARN and every kind of error only.
+            // Showing the entries of one pattern must not shrink the patterns to it:
+            // they are built from the view without the pattern filter.
+            LogStore::Filter withoutTemplate = filter;
+            withoutTemplate.messageTemplate.clear();
+            withoutTemplate.excludeTemplate = false;
+            withoutTemplate.templateProblemsOnly = false;
+            const LogEntries source = filter.messageTemplate.isEmpty() ? visible
+                                    : withoutTemplate.isActive()       ? LogStore::filterEntries(all, withoutTemplate)
+                                                                       : all;
             LogEntries problems;
-            for (const LogEntry& e : visible)
+            for (const LogEntry& e : source)
                 if (e.level == Level::Warn || e.level == Level::Error) problems.append(e);
             QList<MessagePattern> patterns = extractPatterns(problems);
             // One-off messages are noise in this view: they are counted, not listed.
@@ -764,7 +779,7 @@ void Session::scheduleAnalysis()
                 m_patternsStale = false;
                 emit patternsChanged();
             }
-            if (m_analysisPending || (m_patternsEnabled && m_patternsStale) || m_analyzedRevision != m_store.revision()) {
+            if (m_analysisPending || m_patternsStale || m_analyzedRevision != m_store.revision()) {
                 m_analysisPending = false;
                 scheduleAnalysis();
             }
@@ -826,10 +841,10 @@ void Session::setPatternSort(const QString& order)
     emit patternsChanged();
 }
 
-QString Session::jsonStyled(const QString& json, const QString& keyColor, const QString& stringColor,
-                            const QString& numberColor) const
+QString Session::jsonStyled(const QString& json, const QVariantMap& colors) const
 {
-    return presenters::jsonStyled(json, keyColor, stringColor, numberColor);
+    const auto c = [&](const char* kind) { return colors.value(QLatin1String(kind)).toString(); };
+    return presenters::jsonStyled(json, { c("key"), c("string"), c("number"), c("boolean"), c("null"), c("punctuation") });
 }
 
 QString Session::highlight(const QString& text, const QStringList& terms, const QString& color) const

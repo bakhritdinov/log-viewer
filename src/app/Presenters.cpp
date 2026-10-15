@@ -61,7 +61,9 @@ QByteArrayList histogramRoles()
 
 QList<QVariantMap> histogramRows(const QList<HistogramBucket>& buckets, qint64 bucketMs)
 {
-    const QString format = bucketMs >= 86400000 ? QStringLiteral("dd MMM") : QStringLiteral("HH:mm");
+    const QString format = bucketMs >= 86400000 ? QStringLiteral("dd MMM")
+                         : bucketMs < 60000     ? QStringLiteral("HH:mm:ss")
+                                                : QStringLiteral("HH:mm");
     QList<QVariantMap> rows;
     rows.reserve(buckets.size());
     for (const HistogramBucket& b : buckets) {
@@ -222,15 +224,17 @@ QVariantList sourceMatches(const QMap<QString, QStringList>& appsByNamespace, co
 
 // ── Time helpers ────────────────────────────────────────────────────────────
 
-QStringList histogramAxis(const QList<QVariantMap>& rows, int count)
+QStringList histogramAxis(qint64 fromMs, qint64 toMs, int count)
 {
     QStringList out;
-    if (rows.isEmpty() || count <= 0) return out;
-    if (rows.size() < count) count = int(rows.size());
-    for (int i = 0; i < count; ++i) {
-        const qsizetype at = count == 1 ? 0 : (i * (rows.size() - 1) + (count - 1) / 2) / (count - 1);
-        out << rows.at(at).value("timeText").toString();
-    }
+    if (count <= 0 || toMs < fromMs) return out;
+    const qint64 span = toMs - fromMs;
+    const QString format = span >= 2 * 86400000LL ? QStringLiteral("dd MMM")
+                         : span <= 600000         ? QStringLiteral("HH:mm:ss")
+                                                  : QStringLiteral("HH:mm");
+    if (span == 0) count = 1;
+    for (int i = 0; i < count; ++i)
+        out << localTime(count == 1 ? fromMs : fromMs + span * i / (count - 1), format);
     return out;
 }
 
@@ -257,10 +261,11 @@ QString boundOnDay(const QString& boundText, const QDate& day, bool endOfPeriod)
 
 // ── JSON colouring ──────────────────────────────────────────────────────────
 
-QString jsonStyled(const QString& json, const QString& keyColor, const QString& stringColor, const QString& numberColor)
+QString jsonStyled(const QString& json, const JsonColors& colors)
 {
     const auto colored = [](const QString& color, const QString& text) {
-        return QStringLiteral("<font color=\"%1\">%2</font>").arg(color, text.toHtmlEscaped().replace(u' ', QStringLiteral("&nbsp;")));
+        const QString escaped = text.toHtmlEscaped().replace(u' ', QStringLiteral("&nbsp;"));
+        return color.isEmpty() ? escaped : QStringLiteral("<font color=\"%1\">%2</font>").arg(color, escaped);
     };
     QString out;
     const qsizetype n = json.size();
@@ -273,17 +278,18 @@ QString jsonStyled(const QString& json, const QString& keyColor, const QString& 
             qsizetype k = j;
             while (k < n && json.at(k) == u' ') ++k;
             const bool isKey = k < n && json.at(k) == u':';
-            out += colored(isKey ? keyColor : stringColor, json.mid(i, j - i));
+            out += colored(isKey ? colors.key : colors.string, json.mid(i, j - i));
             i = j;
         } else if (c == u'-' || c.isDigit()) {
             qsizetype j = i + 1;
             while (j < n && (json.at(j).isDigit() || QStringView(u".eE+-").contains(json.at(j)))) ++j;
-            out += colored(numberColor, json.mid(i, j - i));
+            out += colored(colors.number, json.mid(i, j - i));
             i = j;
         } else if (c.isLetter()) {
             qsizetype j = i;
             while (j < n && json.at(j).isLetter()) ++j;
-            out += colored(numberColor, json.mid(i, j - i));   // true, false, null
+            const QString word = json.mid(i, j - i);
+            out += colored(word == u"null" ? colors.null : colors.boolean, word);
             i = j;
         } else if (c == u'\n') {
             out += QStringLiteral("<br>");
@@ -291,6 +297,11 @@ QString jsonStyled(const QString& json, const QString& keyColor, const QString& 
         } else if (c == u' ') {
             out += QStringLiteral("&nbsp;");
             ++i;
+        } else if (QStringView(u"{}[],:").contains(c)) {
+            qsizetype j = i + 1;
+            while (j < n && QStringView(u"{}[],:").contains(json.at(j))) ++j;
+            out += colored(colors.punctuation, json.mid(i, j - i));
+            i = j;
         } else {
             out += QString(c).toHtmlEscaped();
             ++i;

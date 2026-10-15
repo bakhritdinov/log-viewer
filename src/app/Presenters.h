@@ -75,7 +75,7 @@ QVariantList sourceMatches(const QMap<QString, QStringList>& appsByNamespace, co
 
 // ── Time helpers for the period pickers ──
 // Up to `count` evenly spaced bucket labels for the histogram axis.
-QStringList histogramAxis(const QList<QVariantMap>& rows, int count);
+QStringList histogramAxis(qint64 fromMs, qint64 toMs, int count);
 // "UTC+5", "UTC−3:30" for the given offset from UTC in seconds.
 QString utcOffsetLabel(int offsetSeconds);
 // The date of a "yyyy-MM-dd HH:mm" bound; invalid text gives `fallback`.
@@ -86,9 +86,14 @@ QString boundOnDay(const QString& boundText, const QDate& day, bool endOfPeriod)
 
 // ── JSON colouring ──
 // `json` (any indented JSON text) as rich text for a read-only TextEdit: keys,
-// strings and numbers/true/false/null in their colours; indentation and line
-// breaks kept; everything HTML-escaped.
-QString jsonStyled(const QString& json, const QString& keyColor, const QString& stringColor, const QString& numberColor);
+// strings, numbers, true/false, null and brackets/commas each in their colour
+// (an empty colour leaves that kind plain); indentation and line breaks kept;
+// everything HTML-escaped.
+struct JsonColors
+{
+    QString key, string, number, boolean, null, punctuation;
+};
+QString jsonStyled(const QString& json, const JsonColors& colors);
 
 // ── Highlighting ──
 // `text` as Qt StyledText with every case-insensitive occurrence of `terms`
