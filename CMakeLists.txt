@@ -69,6 +69,11 @@ qt_add_translations(logviewer_app
     SOURCE_TARGETS logviewer_app logviewer_ui ${LOGVIEWER_UI_TARGET}
     RESOURCE_PREFIX /i18n
     LUPDATE_OPTIONS -no-obsolete -locations none)
+# lupdate silently skips a QML file it cannot parse and -no-obsolete then
+# drops its translations: build (and so compile every QML file) first.
+if(TARGET update_translations)
+    add_dependencies(update_translations logviewer_app logviewer_ui ${LOGVIEWER_UI_TARGET})
+endif()
 
 # --- Module static libraries -------------------------------------------------
 # Code is grouped by concern: logs (Grafana/Loki).

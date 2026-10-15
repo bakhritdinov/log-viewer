@@ -275,4 +275,56 @@ TestCase {
         compare(button.iconName, "settings")
         verify(Icons.paths.settings !== Icons.paths.sun)
     }
+    // Feedback: the search bar has no syntax hint (the placeholder has it).
+    function test_23_noSearchHint() {
+        verify(H.find(window.contentItem, it => String(it.text).indexOf("key:~regex · AND") >= 0 && H.isShown(it)) === null)
+    }
+
+    // Feedback: the distribution label is centred on the level buttons.
+    function test_24_distributionHeaderAligned() {
+        const label = H.find(window.contentItem, it => it.text === "Распределение" && H.isShown(it))
+        const chip = H.find(window.contentItem, it => it.hasOwnProperty("count") && it.hasOwnProperty("active") && H.isShown(it))
+        const mid = it => it.mapToItem(root(), 0, 0).y + it.height / 2
+        compare(Math.round(mid(label)), Math.round(mid(chip)))
+    }
+
+    // Feedback: share popup — field and button equally tall, toggles flush with the heading.
+    function test_25_shareAligned() {
+        mouseClick(rows()[0])
+        keySequence("Ctrl+L")
+        const field = () => byName(root(), "Ссылка")
+        tryVerify(() => field() !== null)
+        waitForRendering(root())
+        const copy = H.find(field().parent, it => it.text === "Копировать" && it.hasOwnProperty("variant"))
+        compare(copy.height, field().height)
+        compare(copy.mapToItem(root(), 0, 0).y, field().mapToItem(root(), 0, 0).y)
+        const heading = H.find(root(), it => it.text === "Период в ссылке" && H.isShown(it))
+        const radio = H.find(root(), it => it.indicator !== undefined && String(it.text).indexOf("Зафиксировать") === 0 && H.isShown(it))
+        compare(globalX(radio.indicator), globalX(heading))
+        keyClick(Qt.Key_Escape)
+    }
+
+    // Feedback: raw JSON of any entry (not only JSON messages), as in 2.8;
+    // long values wrap; the panel can be widened.
+    function test_26_detailsRawAndResize() {
+        mouseClick(rows()[0])
+        const panel = () => byName(window.contentItem, "Подробности записи")
+        tryVerify(() => panel() !== null)
+        const raw = H.find(panel(), it => it.Accessible.name === "Raw JSON" && it.hasOwnProperty("current"))
+        verify(raw, "the Raw JSON tab is there for a plain-text message")
+        mouseClick(raw)
+        tryVerify(() => H.find(panel(), it => String(it.text).indexOf("\"timestamp\"") >= 0 && H.isShown(it)) !== null)
+        verify(H.find(panel(), it => it.text === "Копировать JSON" && H.isShown(it)))
+        const json = H.find(panel(), it => String(it.text).indexOf("\"fields\"") >= 0 && H.isShown(it)).text
+        verify(JSON.parse(json).message.indexOf("payment") === 0)
+        mouseClick(H.find(panel(), it => it.Accessible.name === "Поля" && it.hasOwnProperty("current")))
+
+        const before = panel().width
+        panel().resizeRequested(before + 120)
+        tryCompare(panel(), "width", before + 120)
+        panel().resizeRequested(10)                       // clamped
+        tryCompare(panel(), "width", 360)
+        panel().resizeRequested(420)
+        keyClick(Qt.Key_Escape)
+    }
 }

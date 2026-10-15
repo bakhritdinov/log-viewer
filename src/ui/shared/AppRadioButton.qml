@@ -6,6 +6,9 @@ RadioButton {
     id: control
 
     spacing: 10
+    // Flush with the text above: no stock inset before the indicator.
+    leftPadding: 0
+    rightPadding: 0
     font.family: Theme.sans
     font.pixelSize: Theme.fontMd
 

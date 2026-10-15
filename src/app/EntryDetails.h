@@ -20,7 +20,7 @@ class EntryDetails {
     Q_PROPERTY(QString message MEMBER message)
     Q_PROPERTY(bool isJson MEMBER isJson)
     Q_PROPERTY(QString prettyMessage MEMBER prettyMessage)
-    Q_PROPERTY(QString rawJson MEMBER rawJson)
+    Q_PROPERTY(QString rawJson MEMBER rawJson)   // { timestamp, message, fields } as in 2.8
     Q_PROPERTY(QVariantList fields MEMBER fields)
     Q_PROPERTY(QString traceId MEMBER traceId)
 

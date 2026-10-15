@@ -44,6 +44,7 @@ Popup {
                 onTextChanged: cursorPosition = 0
             }
             AppButton {
+                implicitHeight: Theme.inputHeight      // as tall as the link field
                 variant: "primary"
                 iconName: copied.running ? "check" : "copy"
                 text: copied.running ? qsTr("Copied") : qsTr("Copy")

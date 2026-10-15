@@ -73,9 +73,11 @@ QtObject {
     readonly property color dangerSoft: dark ? Qt.rgba(0.973, 0.318, 0.286, 0.12) : Qt.rgba(0.812, 0.133, 0.18, 0.08)
     readonly property color dangerBorder: dark ? Qt.rgba(0.973, 0.318, 0.286, 0.45) : Qt.rgba(0.812, 0.133, 0.18, 0.40)
 
-    readonly property color warn: dark ? "#d29922" : "#9a6700"
+    // Warnings are yellow in both themes (the usual WARN colour); text stays dark
+    // enough to read on white.
+    readonly property color warn: dark ? "#d29922" : "#d4a72c"
     readonly property color warnText: dark ? "#e3b341" : "#7d4e00"
-    readonly property color warnSoft: dark ? Qt.rgba(0.824, 0.6, 0.133, 0.14) : Qt.rgba(0.604, 0.404, 0, 0.10)
+    readonly property color warnSoft: dark ? Qt.rgba(0.824, 0.6, 0.133, 0.14) : Qt.rgba(0.831, 0.655, 0.173, 0.16)
 
     readonly property color variable: dark ? "#d2a8ff" : "#8250df"     // pattern placeholders
     readonly property color variableSoft: dark ? Qt.rgba(0.639, 0.443, 0.969, 0.15) : Qt.rgba(0.51, 0.314, 0.875, 0.10)

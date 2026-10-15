@@ -210,6 +210,10 @@
         <translation>Nusxalash</translation>
     </message>
     <message>
+        <source>Copy JSON</source>
+        <translation>JSON ni nusxalash</translation>
+    </message>
+    <message>
         <source>Trace ±5 min</source>
         <translation>Treys ±5 daq</translation>
     </message>
@@ -222,12 +226,12 @@
         <translation>Kontekst ±1 daq</translation>
     </message>
     <message>
-        <source>Message</source>
-        <translation>Xabar</translation>
-    </message>
-    <message>
         <source>Raw JSON</source>
         <translation>Xom JSON</translation>
+    </message>
+    <message>
+        <source>Fields</source>
+        <translation>Maydonlar</translation>
     </message>
     <message>
         <source>Fields · %1</source>
@@ -797,10 +801,6 @@
     <message>
         <source>The filter applies to the stream on the fly</source>
         <translation>Filtr oqimga darhol qoʻllanadi</translation>
-    </message>
-    <message>
-        <source>word · key:value · key:~regex · AND</source>
-        <translation>soʻz · key:value · key:~regex · AND</translation>
     </message>
     <message>
         <source>refresh</source>

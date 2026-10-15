@@ -42,10 +42,11 @@ Rectangle {
                 spacing: 14
                 Item {
                     implicitWidth: distributionLabel.implicitWidth
-                    implicitHeight: 24
+                    implicitHeight: legend.implicitHeight   // centred on the level buttons
                     SectionLabel { id: distributionLabel; anchors.verticalCenter: parent.verticalCenter; text: qsTr("Distribution") }
                 }
                 LevelLegend {
+                    id: legend
                     totals: Session.levelTotals
                     activeLevel: Session.activeLevel
                     onToggled: level => Session.applyLevelFilter(level)

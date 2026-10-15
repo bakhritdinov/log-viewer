@@ -37,23 +37,28 @@ Control {
             Text {
                 Layout.preferredWidth: root.touch ? -1 : 112
                 Layout.fillWidth: root.touch
+                Layout.alignment: Qt.AlignTop
                 text: root.key
-                elide: Text.ElideRight
+                // Long names and values wrap instead of being cut off.
+                wrapMode: Text.WrapAnywhere
                 font.family: Theme.mono
                 font.pixelSize: Theme.fontSm
                 color: Theme.textMuted
             }
             Text {
                 Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
                 text: root.value
+                wrapMode: Text.WrapAnywhere
+                maximumLineCount: 8
                 elide: Text.ElideRight
-                maximumLineCount: 1
                 font.family: Theme.mono
                 font.pixelSize: root.touch ? Theme.fontLg : Theme.fontSm
                 color: Theme.textStrong
             }
         }
         IconButton {
+            Layout.alignment: Qt.AlignTop
             iconName: "plus"
             label: qsTr("Show only %1 = %2").arg(root.key).arg(root.value)
             touch: root.touch
@@ -61,6 +66,7 @@ Control {
             onClicked: root.includeRequested()
         }
         IconButton {
+            Layout.alignment: Qt.AlignTop
             iconName: "minus"
             label: qsTr("Exclude %1 = %2").arg(root.key).arg(root.value)
             touch: root.touch
@@ -68,6 +74,7 @@ Control {
             onClicked: root.excludeRequested()
         }
         IconButton {
+            Layout.alignment: Qt.AlignTop
             visible: !root.touch                       // touch: long-press copies
             iconName: "copy"
             label: qsTr("Copy value")

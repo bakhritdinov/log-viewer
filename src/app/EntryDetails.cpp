@@ -1,5 +1,6 @@
 #include "app/EntryDetails.h"
 
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -19,19 +20,26 @@ EntryDetails EntryDetails::from(const LogEntry& e)
     d.traceId = traceIdOf(e);
 
     const QString trimmed = e.message.trimmed();
+    QJsonDocument messageDoc;
     if (trimmed.startsWith(u'{') || trimmed.startsWith(u'[')) {
         QJsonParseError err;
-        const QJsonDocument doc = QJsonDocument::fromJson(trimmed.toUtf8(), &err);
-        if (err.error == QJsonParseError::NoError && !doc.isNull()) {
+        messageDoc = QJsonDocument::fromJson(trimmed.toUtf8(), &err);
+        if (err.error == QJsonParseError::NoError && !messageDoc.isNull()) {
             d.isJson = true;
-            d.prettyMessage = QString::fromUtf8(doc.toJson(QJsonDocument::Indented)).trimmed();
+            d.prettyMessage = QString::fromUtf8(messageDoc.toJson(QJsonDocument::Indented)).trimmed();
         }
     }
     if (!d.isJson) d.prettyMessage = e.message;
 
-    QJsonObject raw = QJsonObject::fromVariantMap(e.fields);
-    raw.insert(QStringLiteral("_time"), e.timestamp.toUTC().toString(Qt::ISODateWithMs));
-    raw.insert(QStringLiteral("_msg"), e.message);
+    // The entry as it came from Grafana, as in 2.8: { timestamp, message, fields }.
+    // A JSON message is embedded as data, not as an escaped string.
+    QJsonObject raw;
+    raw.insert(QStringLiteral("timestamp"), e.timestamp.toUTC().toString(Qt::ISODateWithMs));
+    if (d.isJson)
+        raw.insert(QStringLiteral("message"), messageDoc.isObject() ? QJsonValue(messageDoc.object()) : QJsonValue(messageDoc.array()));
+    else
+        raw.insert(QStringLiteral("message"), e.message);
+    raw.insert(QStringLiteral("fields"), QJsonObject::fromVariantMap(e.fields));
     d.rawJson = QString::fromUtf8(QJsonDocument(raw).toJson(QJsonDocument::Indented)).trimmed();
 
     for (auto it = e.fields.cbegin(); it != e.fields.cend(); ++it) {   // key-sorted

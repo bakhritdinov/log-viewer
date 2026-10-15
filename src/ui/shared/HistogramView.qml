@@ -78,9 +78,11 @@ Item {
                     radius: 2
                 }
 
-                HoverHandler { id: hover; enabled: root.interactive }
+                // Empty buckets (no WARN/ERROR) are not targets: no hover, tooltip or click.
+                readonly property bool hasEntries: error + warn > 0
+                HoverHandler { id: hover; enabled: root.interactive && bar.hasEntries }
                 TapHandler {
-                    enabled: root.interactive
+                    enabled: root.interactive && bar.hasEntries
                     onTapped: (point) => {
                         // Which segment was hit, counting up from the bottom.
                         let y = bar.height - point.position.y

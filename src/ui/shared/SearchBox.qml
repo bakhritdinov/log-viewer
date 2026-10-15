@@ -118,6 +118,10 @@ FocusScope {
 
                 delegate: ItemDelegate {
                     id: suggestion
+                    // Basic's 12 px vertical padding pushes the content below the row's centre.
+                    topPadding: 0
+                    bottomPadding: 0
+                    hoverEnabled: true
                     required property int index
                     required property string kind
                     required property string field
@@ -182,6 +186,10 @@ FocusScope {
                 model: list.count === 0 ? root.history : []
                 delegate: ItemDelegate {
                     id: recent
+                    // Basic's 12 px vertical padding pushes the content below the row's centre.
+                    topPadding: 0
+                    bottomPadding: 0
+                    hoverEnabled: true
                     required property string modelData
                     Layout.fillWidth: true
                     implicitHeight: root.touch ? 44 : 32

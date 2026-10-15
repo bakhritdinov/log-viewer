@@ -72,6 +72,11 @@ Item {
         ListElement { field: "level"; distinct: 3; total: 40; expanded: false; values: [] }
     } }
     Component { id: histogram; HistogramView { width: 400; height: 80; maxTotal: 4 } }
+    Component { id: sparseModel; ListModel {
+        ListElement { startMs: 0; timeText: "10:00"; error: 0; warn: 2; info: 0; debug: 0; trace: 0; other: 0; total: 2 }
+        ListElement { startMs: 60000; timeText: "10:01"; error: 0; warn: 0; info: 7; debug: 0; trace: 0; other: 0; total: 7 }
+    } }
+    Component { id: longField; FieldRow { width: 300; key: "headers.traceparent.very.long.name"; value: "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01-and-some-more-text" } }
     Component { id: histogramModel; ListModel {
         ListElement { startMs: 0; timeText: "10:00"; error: 1; warn: 3; info: 50; debug: 9; trace: 0; other: 0; total: 63 }
     } }
@@ -234,6 +239,10 @@ Item {
                 compare(r.width, list.width)
                 // Same inset on both sides of the highlight (chevron … count).
                 compare(r.contentItem.x, r.width - r.contentItem.x - r.contentItem.width)
+                // The name sits on the row's vertical centre (the highlight is not shifted).
+                const name = findAll(r, it => it.text === "level" || String(it.text).indexOf("context.") === 0)[0]
+                verify(name)
+                compare(Math.round(name.mapToItem(r, 0, 0).y + name.height / 2), Math.round(r.height / 2))
             }
         }
 
@@ -257,6 +266,59 @@ Item {
             compare(new Set(paths).size, paths.length)
             verify(Icons.paths.settings !== Icons.paths.sun)
             verify(Icons.paths.settings.indexOf("M19.4 15") > 0)
+        }
+        // A bucket without WARN/ERROR is not a target: no hover, tooltip or click.
+        function test_histogramIgnoresEmptyBuckets() {
+            const h = createTemporaryObject(histogram, host, { model: createTemporaryObject(sparseModel, host), maxTotal: 2 })
+            spy.target = h; spy.signalName = "bucketClicked"
+            waitForRendering(h)
+            const bars = findAll(h, it => it.hasOwnProperty("hasEntries"))
+            compare(bars.length, 2)
+            verify(bars[0].hasEntries)
+            verify(!bars[1].hasEntries)
+            mouseClick(bars[1], bars[1].width / 2, bars[1].height - 2)
+            compare(spy.count, 0)
+            mouseClick(bars[0], bars[0].width / 2, bars[0].height - 2)
+            compare(spy.count, 1)
+        }
+
+        // WARN is yellow in the light theme too.
+        function test_warnIsYellow() {
+            const wasDark = Theme.dark
+            Theme.dark = false
+            compare(String(Theme.levelColor("WARN")), "#d4a72c")
+            Theme.dark = true
+            compare(String(Theme.levelColor("WARN")), "#d29922")
+            Theme.dark = wasDark
+        }
+
+        // Radio and check boxes start flush with the text around them.
+        function test_togglesHaveNoLeadingInset() {
+            compare(createTemporaryObject(radio, host).indicator.x, 0)
+            compare(createTemporaryObject(check, host).indicator.x, 0)
+        }
+
+        // Level name and count share a baseline.
+        function test_legendBaseline() {
+            const l = createTemporaryObject(legend, host)
+            waitForRendering(l)
+            const chip = findAll(l, it => it.hasOwnProperty("count") && it.hasOwnProperty("active"))[0]
+            const name = findAll(chip, it => it.text === "ERROR")[0]
+            const count = findAll(chip, it => it.text === "3")[0]
+            compare(name.mapToItem(chip, 0, 0).y + name.baselineOffset, count.mapToItem(chip, 0, 0).y + count.baselineOffset)
+        }
+
+        // Long names and values wrap instead of being cut off.
+        function test_fieldRowWraps() {
+            const row = createTemporaryObject(longField, host)
+            waitForRendering(row)
+            const texts = findAll(row, it => it.wrapMode !== undefined && (it.text === row.key || it.text === row.value))
+            compare(texts.length, 2)
+            for (const t of texts) {
+                compare(t.wrapMode, Text.WrapAnywhere)
+                verify(t.lineCount > 1, t.text)
+            }
+            verify(row.height > 30)
         }
     }
 }

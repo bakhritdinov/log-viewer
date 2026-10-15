@@ -80,6 +80,10 @@ Popup {
             boundsBehavior: Flickable.StopAtBounds
             delegate: ItemDelegate {
                 id: query
+                // Basic's 12 px vertical padding pushes the content below the row's centre.
+                topPadding: 0
+                bottomPadding: 0
+                hoverEnabled: true
                 required property int index
                 required property string id
                 required property string name
@@ -179,6 +183,10 @@ Popup {
             boundsBehavior: Flickable.StopAtBounds
             delegate: ItemDelegate {
                 id: item
+                // Basic's 12 px vertical padding pushes the content below the row's centre.
+                topPadding: 0
+                bottomPadding: 0
+                hoverEnabled: true
                 required property string modelData
                 width: ListView.view.width
                 height: 32

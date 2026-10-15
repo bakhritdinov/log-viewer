@@ -1,6 +1,8 @@
 // Unit tests of the smaller view-model pieces: error presentation, the log
 // list's two slicing modes, entry details and the trace focus.
 #include <QAbstractItemModelTester>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QSignalSpy>
 #include <QTest>
 
@@ -144,13 +146,19 @@ private slots:
         QCOMPARE(d.fields.size(), 2);   // Line excluded
         QCOMPARE(d.fields.first().toMap().value("key").toString(), "order_id");
         QCOMPARE(d.fields.first().toMap().value("value").toString(), "48213");
-        QVERIFY(d.rawJson.contains("\"_msg\""));
-        QVERIFY(d.rawJson.contains("\"_time\": \"2026-10-15T12:00:00.000Z\""));
+        // Raw = the entry as received, as in 2.8: { timestamp, message, fields };
+        // a JSON message is embedded as an object.
+        const QJsonObject raw = QJsonDocument::fromJson(d.rawJson.toUtf8()).object();
+        QCOMPARE(raw.value("timestamp").toString(), "2026-10-15T12:00:00.000Z");
+        QCOMPARE(raw.value("message").toObject().value("msg").toString(), "payment failed");
+        QCOMPARE(raw.value("fields").toObject().value("trace_id").toString(), "4f1c");
+        QCOMPARE(raw.value("fields").toObject().value("Line").toString(), "dup");   // nothing dropped
 
         e.message = "{not json";
         const EntryDetails plain = EntryDetails::from(e);
         QVERIFY(!plain.isJson);
         QCOMPARE(plain.prettyMessage, "{not json");
+        QCOMPARE(QJsonDocument::fromJson(plain.rawJson.toUtf8()).object().value("message").toString(), "{not json");
         QVERIFY(!EntryDetails().valid);
     }
 

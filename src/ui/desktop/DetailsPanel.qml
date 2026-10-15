@@ -14,23 +14,42 @@ Rectangle {
     property bool prettyJson: true
     property bool navigable: true
     property bool canOpenFocus: true
-    property int tab: 0                 // 0 message, 1 raw JSON
+    property int tab: 0                 // 0 message + fields, 1 raw JSON (the entry as received)
 
     signal previousRequested()
     signal nextRequested()
     signal closeRequested()
     signal contextRequested()
     signal traceRequested()
+    signal resizeRequested(real width)
 
     implicitWidth: 420
     color: Theme.surface
     Accessible.role: Accessible.Pane
     Accessible.name: qsTr("Entry details")
-    onEntryChanged: if (!entry.isJson) tab = 0
 
     Clipboard { id: clipboard }
 
     Rectangle { anchors.top: parent.top; anchors.bottom: parent.bottom; anchors.left: parent.left; width: 1; color: Theme.border }
+
+    // Drag the left edge to make room for long values.
+    MouseArea {
+        id: resizer
+        property real startX
+        property real startWidth
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.leftMargin: -3
+        width: 6
+        z: 2
+        cursorShape: Qt.SizeHorCursor
+        onPressed: mouse => { startX = mapToItem(null, mouse.x, 0).x; startWidth = root.width }
+        onPositionChanged: mouse => {
+            if (!pressed) return
+            root.resizeRequested(startWidth + startX - mapToItem(null, mouse.x, 0).x)
+        }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -65,7 +84,7 @@ Rectangle {
             AppButton {
                 implicitHeight: 28
                 iconName: "copy"
-                text: qsTr("Copy")
+                text: root.tab === 1 ? qsTr("Copy JSON") : qsTr("Copy")
                 onClicked: clipboard.copy(root.tab === 1 ? root.entry.rawJson : root.entry.message)
             }
             AppButton {
@@ -92,10 +111,9 @@ Rectangle {
             Layout.leftMargin: 14
             Layout.topMargin: 8
             spacing: 2
-            visible: root.entry.isJson
             Accessible.role: Accessible.PageTabList
             Repeater {
-                model: [qsTr("Message"), qsTr("Raw JSON")]
+                model: [qsTr("Fields"), qsTr("Raw JSON")]
                 delegate: AbstractButton {
                     id: tabButton
                     required property int index
@@ -130,6 +148,7 @@ Rectangle {
         }
 
         ScrollView {
+            visible: root.tab === 0
             Layout.fillWidth: true
             Layout.preferredHeight: Math.min(message.implicitHeight, root.height * 0.4)
             Layout.margins: 14
@@ -138,12 +157,25 @@ Rectangle {
             MessageView {
                 id: message
                 width: root.width - 28
-                text: root.tab === 1 ? root.entry.rawJson
-                    : root.prettyJson && root.entry.isJson ? root.entry.prettyMessage : root.entry.message
+                text: root.prettyJson && root.entry.isJson ? root.entry.prettyMessage : root.entry.message
+            }
+        }
+        // The whole entry as Grafana sent it, ready to copy and share.
+        ScrollView {
+            visible: root.tab === 1
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.margins: 14
+            Layout.topMargin: 8
+            clip: true
+            MessageView {
+                width: root.width - 28
+                text: root.entry.rawJson
             }
         }
 
         RowLayout {
+            visible: root.tab === 0
             Layout.fillWidth: true
             Layout.leftMargin: 14
             Layout.rightMargin: 14
@@ -157,6 +189,7 @@ Rectangle {
             }
         }
         ListView {
+            visible: root.tab === 0
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.margins: 8

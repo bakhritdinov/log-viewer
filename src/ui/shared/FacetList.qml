@@ -33,6 +33,10 @@ ListView {
 
         ItemDelegate {
             id: header
+            // Basic's 12 px vertical padding pushes the content below the row's centre.
+            topPadding: 0
+            bottomPadding: 0
+            hoverEnabled: true
             width: fieldItem.width
             leftPadding: 8
             rightPadding: 8
@@ -73,6 +77,10 @@ ListView {
             model: fieldItem.expanded ? fieldItem.values : []
             delegate: ItemDelegate {
                 id: valueItem
+                // Basic's 12 px vertical padding pushes the content below the row's centre.
+                topPadding: 0
+                bottomPadding: 0
+                hoverEnabled: true
                 required property var modelData
                 x: root.touch ? 24 : 18
                 width: fieldItem.width - x

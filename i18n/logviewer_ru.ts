@@ -210,6 +210,10 @@
         <translation>Копировать</translation>
     </message>
     <message>
+        <source>Copy JSON</source>
+        <translation>Копировать JSON</translation>
+    </message>
+    <message>
         <source>Trace ±5 min</source>
         <translation>Трейс ±5 мин</translation>
     </message>
@@ -222,12 +226,12 @@
         <translation>Контекст ±1 мин</translation>
     </message>
     <message>
-        <source>Message</source>
-        <translation>Сообщение</translation>
-    </message>
-    <message>
         <source>Raw JSON</source>
         <translation>Raw JSON</translation>
+    </message>
+    <message>
+        <source>Fields</source>
+        <translation>Поля</translation>
     </message>
     <message>
         <source>Fields · %1</source>
@@ -802,10 +806,6 @@
     <message>
         <source>The filter applies to the stream on the fly</source>
         <translation>Фильтр применяется к потоку на лету</translation>
-    </message>
-    <message>
-        <source>word · key:value · key:~regex · AND</source>
-        <translation>слово · key:value · key:~regex · AND</translation>
     </message>
     <message>
         <source>refresh</source>

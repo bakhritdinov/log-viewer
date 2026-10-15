@@ -103,6 +103,10 @@ Popup {
                 model: Session.recentSources
                 delegate: ItemDelegate {
                     id: recent
+                    // Basic's 12 px vertical padding pushes the content below the row's centre.
+                    topPadding: 0
+                    bottomPadding: 0
+                    hoverEnabled: true
                     required property int index
                     required property string environmentName
                     required property string environmentColor
@@ -167,6 +171,10 @@ Popup {
                     boundsBehavior: Flickable.StopAtBounds
                     delegate: ItemDelegate {
                         id: ns
+                        // Basic's 12 px vertical padding pushes the content below the row's centre.
+                        topPadding: 0
+                        bottomPadding: 0
+                        hoverEnabled: true
                         required property int index
                         required property var modelData
                         readonly property bool current: ns.index === root.nsIndex
@@ -218,6 +226,10 @@ Popup {
                     Keys.onEnterPressed: root.openSource(root.currentNs.name, root.currentNs.apps[currentIndex].name)
                     delegate: ItemDelegate {
                         id: appItem
+                        // Basic's 12 px vertical padding pushes the content below the row's centre.
+                        topPadding: 0
+                        bottomPadding: 0
+                        hoverEnabled: true
                         required property int index
                         required property var modelData
                         readonly property bool selected: root.currentNs !== null && root.currentNs.name === Session.namespaceName

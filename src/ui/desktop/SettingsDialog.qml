@@ -64,6 +64,10 @@ Popup {
                     model: root.sections
                     delegate: ItemDelegate {
                         id: nav
+                        // Basic's 12 px vertical padding pushes the content below the row's centre.
+                        topPadding: 0
+                        bottomPadding: 0
+                        hoverEnabled: true
                         required property int index
                         required property string modelData
                         readonly property bool current: root.section === nav.index

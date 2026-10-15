@@ -54,6 +54,8 @@ GridLayout {
                 }
                 Text {
                     Layout.fillWidth: root.touch
+                    // Name and count share a baseline although their fonts differ.
+                    Layout.alignment: Qt.AlignBaseline
                     text: chip.modelData
                     font.family: Theme.sans
                     font.pixelSize: Theme.fontSm
@@ -61,6 +63,7 @@ GridLayout {
                     color: Theme.textStrong
                 }
                 Text {
+                    Layout.alignment: Qt.AlignBaseline
                     text: chip.count.toLocaleString(Qt.locale(), "f", 0)
                     font.family: Theme.mono
                     font.pixelSize: Theme.fontXs

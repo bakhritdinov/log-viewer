@@ -71,6 +71,7 @@ ApplicationWindow {
         property bool prettyJson: true
         property bool fieldsOpen: true
         property bool histogramOpen: true
+        property real detailsWidth: 420
         property alias windowWidth: window.width
         property alias windowHeight: window.height
     }
@@ -138,8 +139,8 @@ ApplicationWindow {
             visible: !window.focusMode && !Session.needsSetup
             showViewSwitch: window.mainMode
             findShortcut: findShortcut.nativeText
-            hint: window.liveMode ? qsTr("The filter applies to the stream on the fly")
-                                  : qsTr("word · key:value · key:~regex · AND")
+            // The placeholder already explains the syntax; live mode says what the filter does.
+            hint: window.liveMode ? qsTr("The filter applies to the stream on the fly") : ""
         }
 
         RowLayout {
@@ -186,7 +187,7 @@ ApplicationWindow {
 
             DetailsPanel {
                 Layout.fillHeight: true
-                Layout.preferredWidth: 420
+                Layout.preferredWidth: prefs.detailsWidth
                 visible: window.detailsOpen && window.detailsEntry.valid
                 entry: window.detailsEntry
                 prettyJson: prefs.prettyJson
@@ -196,6 +197,7 @@ ApplicationWindow {
                 onCloseRequested: window.closeDetails()
                 onContextRequested: Session.focus.openContext(window.detailsModel, window.detailsRow, 60)
                 onTraceRequested: Session.focus.openTrace(window.detailsModel, window.detailsRow)
+                onResizeRequested: w => prefs.detailsWidth = Math.round(Math.max(360, Math.min(window.width * 0.6, w)))
             }
         }
 
