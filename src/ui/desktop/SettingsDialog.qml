@@ -61,8 +61,13 @@ Popup {
         Rectangle {
             Layout.preferredWidth: 220
             Layout.fillHeight: true
+            // Inside the dialog's border, rounded only where the dialog is.
+            Layout.leftMargin: 1
+            Layout.topMargin: 1
+            Layout.bottomMargin: 1
             color: Theme.bg
-            radius: Theme.radiusLg + 2
+            topLeftRadius: Theme.radiusLg + 1
+            bottomLeftRadius: Theme.radiusLg + 1
             Rectangle { anchors.top: parent.top; anchors.bottom: parent.bottom; anchors.right: parent.right; width: 1; color: Theme.border }
             ColumnLayout {
                 anchors.fill: parent

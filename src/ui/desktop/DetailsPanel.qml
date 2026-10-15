@@ -27,7 +27,7 @@ Rectangle {
     property real maxWidth: 10000
     readonly property bool narrow: width < 400        // shorter button labels
 
-    function styled(json) { return Session.jsonStyled(json, Theme.jsonKey, Theme.jsonString, Theme.jsonNumber) }
+    function styled(json) { return Session.jsonStyled(json, Theme.jsonColors) }
 
     implicitWidth: 420
     color: Theme.surface

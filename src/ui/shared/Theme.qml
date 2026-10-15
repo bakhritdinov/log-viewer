@@ -94,9 +94,17 @@ QtObject {
     readonly property color highlight: dark ? Qt.rgba(0.824, 0.6, 0.133, 0.35) : Qt.rgba(1, 0.827, 0.239, 0.55)
 
     // JSON syntax colours for message views.
-    readonly property color jsonKey: dark ? "#7ee787" : "#116329"
-    readonly property color jsonString: dark ? "#a5d6ff" : "#0a3069"
+    readonly property color jsonKey: dark ? "#e3b341" : "#9a6700"
+    readonly property color jsonString: dark ? "#7ee787" : "#116329"
     readonly property color jsonNumber: dark ? "#79c0ff" : "#0550ae"
+    readonly property color jsonBoolean: dark ? "#ff7b72" : "#cf222e"
+    readonly property color jsonNull: dark ? "#d2a8ff" : "#8250df"
+    readonly property color jsonPunctuation: dark ? "#8b949e" : "#6e7781"
+    // The same as names, for Session.jsonStyled.
+    readonly property var jsonColors: ({
+        key: String(jsonKey), string: String(jsonString), number: String(jsonNumber),
+        boolean: String(jsonBoolean), null: String(jsonNull), punctuation: String(jsonPunctuation)
+    })
 
     // ── Log levels ──
     function levelColor(level) {          // stripes, bars, dots

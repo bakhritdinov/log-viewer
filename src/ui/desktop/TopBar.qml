@@ -254,9 +254,10 @@ Rectangle {
 
         Item { Layout.fillWidth: true }
 
-        // Refresh + auto-refresh (split button). While loading, the left part stops.
+        // Refresh, then the auto-refresh menu beside it. While loading, the first one stops.
         Row {
             visible: root.searchMode
+            spacing: 6
             AppButton {
                 id: refreshButton
                 visible: !root.loading
@@ -384,7 +385,6 @@ Rectangle {
             color: "transparent"
             border.width: 1
             border.color: paused ? Theme.warn : Theme.danger
-            clip: true
 
             Row {
                 id: liveRow
@@ -394,6 +394,9 @@ Rectangle {
                 Rectangle {
                     height: parent.height
                     width: liveState.implicitWidth + 24
+                    // The end segments follow the group's rounded border.
+                    topLeftRadius: liveGroup.radius - 1
+                    bottomLeftRadius: liveGroup.radius - 1
                     color: liveGroup.paused ? Theme.warnSoft : Theme.dangerSoft
                     Row {
                         id: liveState
@@ -451,7 +454,11 @@ Rectangle {
                     iconName: "close"
                     label: qsTr("Leave live")
                     onClicked: Session.live.stop()
-                    background: Rectangle { color: leaveLive.hovered ? Theme.hover : Theme.subtle }
+                    background: Rectangle {
+                        topRightRadius: liveGroup.radius - 1
+                        bottomRightRadius: liveGroup.radius - 1
+                        color: leaveLive.hovered ? Theme.hover : Theme.subtle
+                    }
                 }
             }
         }

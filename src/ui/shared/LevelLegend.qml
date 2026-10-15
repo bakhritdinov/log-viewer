@@ -60,13 +60,13 @@ GridLayout {
                     font.family: Theme.sans
                     font.pixelSize: Theme.fontSm
                     font.weight: Font.Medium
-                    color: Theme.textStrong
+                    color: chip.active ? Theme.textStrong : Theme.text
                 }
                 Text {
                     Layout.alignment: Qt.AlignBaseline
                     text: chip.count.toLocaleString(Qt.locale(), "f", 0)
                     font.family: Theme.mono
-                    font.pixelSize: Theme.fontXs
+                    font.pixelSize: Theme.fontSm
                     color: Theme.textMuted
                 }
             }

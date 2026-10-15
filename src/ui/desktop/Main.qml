@@ -46,7 +46,7 @@ ApplicationWindow {
 
     readonly property var shortcutList: [
         { header: qsTr("General") },
-        { keys: [refreshShortcut.nativeText], text: qsTr("Refresh") },
+        { keys: [refreshShortcut.nativeText, refreshShortcutAlt.nativeText].filter(k => k !== ""), text: qsTr("Refresh") },
         { keys: [sourceShortcut.nativeText], text: qsTr("Choose the source") },
         { keys: [timeShortcut.nativeText], text: qsTr("Choose the period") },
         { keys: [shareShortcut.nativeText], text: qsTr("Share a link") },
@@ -92,13 +92,16 @@ ApplicationWindow {
     Clipboard { id: clipboard }
 
     // ── Shortcuts ──
-    Shortcut { id: refreshShortcut; sequences: [StandardKey.Refresh, "Ctrl+R"]; enabled: window.mainMode; onActivated: Session.search() }
+    // One sequence per Shortcut: nativeText only describes `sequence`, not `sequences`.
+    Shortcut { id: refreshShortcut; sequence: StandardKey.Refresh; enabled: window.mainMode; onActivated: Session.search() }
+    Shortcut { id: refreshShortcutAlt; sequence: "Ctrl+R"; enabled: window.mainMode; onActivated: Session.search() }
     Shortcut { id: findShortcut; sequence: "Ctrl+F"; enabled: !window.focusMode; onActivated: searchBar.focusSearch() }
     Shortcut { id: sourceShortcut; sequence: "Ctrl+K"; onActivated: topBar.openSourcePicker() }
     Shortcut { id: timeShortcut; sequence: "Ctrl+T"; enabled: window.mainMode; onActivated: topBar.openTimePicker() }
     Shortcut { id: saveShortcut; sequence: "Ctrl+S"; enabled: window.mainMode; onActivated: searchBar.openSaving() }
     Shortcut { id: shareShortcut; sequence: "Ctrl+L"; enabled: window.mainMode; onActivated: topBar.openShare() }
-    Shortcut { id: settingsShortcut; sequences: [StandardKey.Preferences, "Ctrl+,"]; onActivated: settings.openSection(0) }
+    // StandardKey.Preferences has no keys on Windows; Ctrl+, is Cmd+, on macOS.
+    Shortcut { id: settingsShortcut; sequence: "Ctrl+,"; onActivated: settings.openSection(0) }
     Shortcut { sequence: "?"; onActivated: settings.openSection(3) }
     Shortcut { sequence: "["; enabled: window.mainMode; onActivated: Session.logs.goToPage(Session.logs.page - 1) }
     Shortcut { sequence: "]"; enabled: window.mainMode; onActivated: Session.logs.goToPage(Session.logs.page + 1) }

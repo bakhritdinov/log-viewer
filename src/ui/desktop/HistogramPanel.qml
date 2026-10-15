@@ -145,16 +145,21 @@ Rectangle {
             onBucketClicked: (index, level) => Session.applyBucketFilter(index, level)
             onResetRequested: Session.clearHistogramFilter()
         }
-        RowLayout {
+        // Evenly spaced times; each label sits at its point of the time line
+        // (the first and last flush with the edges).
+        Item {
+            id: axis
             Layout.fillWidth: true
+            implicitHeight: Math.ceil(axisMetrics.height)
             visible: root.expanded && !root.skeleton
+            FontMetrics { id: axisMetrics; font.family: Theme.mono; font.pixelSize: Theme.fontXs }
             Repeater {
                 model: Session.histogramAxis
                 delegate: Text {
                     required property int index
                     required property string modelData
-                    Layout.fillWidth: true
-                    horizontalAlignment: index === 0 ? Text.AlignLeft : (index === Session.histogramAxis.length - 1 ? Text.AlignRight : Text.AlignHCenter)
+                    readonly property int last: Session.histogramAxis.length - 1
+                    x: last <= 0 ? 0 : Math.max(0, Math.min(axis.width - implicitWidth, axis.width * index / last - implicitWidth / 2))
                     text: modelData
                     font.family: Theme.mono
                     font.pixelSize: Theme.fontXs
