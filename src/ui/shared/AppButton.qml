@@ -2,7 +2,8 @@ import QtQuick
 import QtQuick.Controls.Basic
 
 // Text button with an optional leading icon.
-// variant: "secondary" (default), "primary", "ghost", "danger", "link".
+// variant: "secondary" (default), "primary", "ghost", "danger" (outlined),
+// "dangerSolid" (confirmation dialogs only), "link".
 // touch: 44 px tall for mobile; otherwise 32 px.
 Button {
     id: control
@@ -10,26 +11,33 @@ Button {
     property string variant: "secondary"
     property string iconName
     property bool touch: false
+    property string tooltip                // shown on hover
+    property string shortcut               // shown in the tooltip
 
     readonly property color _fg: {
-        if (!enabled) return Theme.textMuted
+        if (!enabled) return Theme.textDisabled
         switch (variant) {
-        case "primary": return Theme.textOnAccent
+        case "primary":
+        case "dangerSolid": return Theme.textOnAccent
         case "danger": return Theme.dangerText
-        case "link": return Theme.accent
+        case "link": return control.down ? Theme.focusRing : Theme.accent
         }
-        return Theme.text
+        return control.hovered || control.down ? Theme.textStrong : Theme.text
     }
 
     implicitHeight: touch ? Theme.touchHeight : Theme.controlHeight
     implicitWidth: Math.max(implicitHeight, contentItem.implicitWidth + leftPadding + rightPadding)
     leftPadding: variant === "link" ? 4 : (touch ? 16 : 12)
     rightPadding: leftPadding
-    font.family: Theme.sans
-    font.pixelSize: touch ? Theme.fontLg : Theme.fontMd
-    font.weight: variant === "primary" ? Font.DemiBold : Font.Medium
+    font.weight: variant === "primary" || variant === "dangerSolid" ? Font.DemiBold : Font.Medium
     focusPolicy: Qt.StrongFocus
     Accessible.name: text
+
+    AppToolTip {
+        visible: control.hovered && control.tooltip !== ""
+        text: control.tooltip
+        shortcut: control.shortcut
+    }
 
     contentItem: Row {
         spacing: 6
@@ -43,31 +51,40 @@ Button {
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: control.text
-            font: control.font
+            font.family: control.font.family
+            font.pixelSize: control.font.pixelSize
+            font.weight: control.font.weight
+            font.underline: control.variant === "link" && control.hovered && control.enabled
             color: control._fg
-            elide: Text.ElideRight
         }
     }
 
     background: Rectangle {
         radius: control.touch ? Theme.radiusLg : Theme.radiusMd
         color: {
+            if (!control.enabled)
+                return control.variant === "ghost" || control.variant === "link" || control.variant === "danger"
+                     ? "transparent" : Theme.surface
             switch (control.variant) {
             case "primary":
-                return !control.enabled ? Theme.subtle
-                     : control.down ? Theme.successBorder : Theme.successStrong
+                return control.down ? Theme.successPressed : (control.hovered ? Theme.successBorder : Theme.successStrong)
+            case "dangerSolid":
+                return control.down ? Qt.darker(Theme.dangerStrong, 1.2) : (control.hovered ? Theme.danger : Theme.dangerStrong)
             case "ghost":
+                return control.down ? Theme.hover : (control.hovered ? Theme.subtle : "transparent")
             case "link":
-                return control.down || control.hovered ? Theme.subtle : "transparent"
+                return "transparent"
             case "danger":
-                return control.down ? Theme.dangerSoft : (control.hovered ? Theme.subtle : "transparent")
+                return control.down ? Theme.tint(Theme.danger, 0.2) : (control.hovered ? Theme.dangerSoft : "transparent")
             }
-            return control.down ? Theme.hover : (control.hovered ? Theme.hover : Theme.subtle)
+            return control.down ? Theme.subtle : (control.hovered ? Theme.hover : Theme.subtle)
         }
-        border.width: control.variant === "ghost" || control.variant === "link" ? 0 : 1
+        border.width: control.variant === "ghost" || control.variant === "link" ? (control.visualFocus ? 2 : 0) : (control.visualFocus ? 2 : 1)
         border.color: control.visualFocus ? Theme.focusRing
+                    : !control.enabled ? Theme.borderMuted
                     : control.variant === "primary" ? Theme.successBorder
-                    : control.variant === "danger" ? Theme.dangerBorder
-                    : Theme.border
+                    : control.variant === "dangerSolid" ? Theme.danger
+                    : control.variant === "danger" ? (control.hovered ? Theme.tint(Theme.danger, 0.7) : Theme.dangerBorder)
+                    : (control.hovered || control.down ? Theme.hoverBorder : Theme.border)
     }
 }

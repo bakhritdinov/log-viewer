@@ -18,6 +18,23 @@ Popup {
         section = index
         open()
     }
+    // Connections with the label fields open (labels were not recognised).
+    function openLabels() {
+        openSection(0)
+        Qt.callLater(() => connections.showLabels())
+    }
+    // Connections with a new environment, its name filled in (from a share link).
+    function openNewEnvironment(name) {
+        openSection(0)
+        Qt.callLater(() => connections.createNamed(name))
+    }
+
+    // Leaving the connections page asks about unsaved changes first.
+    function leaveThen(then) {
+        if (section === 0) connections.confirmLeave(then)
+        else then()
+    }
+    function requestClose() { leaveThen(() => root.close()) }
 
     readonly property var sections: [qsTr("Connections"), qsTr("Language"), qsTr("Appearance"), qsTr("Keyboard shortcuts"), qsTr("Version")]
 
@@ -28,13 +45,15 @@ Popup {
     padding: 0
     modal: true
     focus: true
-    closePolicy: Popup.CloseOnEscape
+    closePolicy: Popup.NoAutoClose           // Esc goes through requestClose()
 
     Overlay.modal: Rectangle { color: Theme.overlay }
     background: Surface { elevated: true; radius: Theme.radiusLg + 2 }
 
     contentItem: RowLayout {
         spacing: 0
+        focus: true
+        Keys.onEscapePressed: root.requestClose()
         Accessible.role: Accessible.Dialog
         Accessible.name: qsTr("Settings")
 
@@ -75,7 +94,7 @@ Popup {
                         implicitHeight: 34
                         Accessible.name: nav.modelData
                         Accessible.selected: nav.current
-                        onClicked: root.section = nav.index
+                        onClicked: if (!nav.current) root.leaveThen(() => root.section = nav.index)
                         background: Rectangle {
                             radius: Theme.radiusMd
                             color: nav.current ? Theme.accentSoft : (nav.hovered ? Theme.subtle : "transparent")
@@ -122,7 +141,7 @@ Popup {
                     color: Theme.textMuted
                 }
                 Item { Layout.fillWidth: true }
-                IconButton { iconName: "close"; label: qsTr("Close (Esc)"); onClicked: root.close() }
+                IconButton { iconName: "close"; label: qsTr("Close"); shortcut: "Esc"; onClicked: root.requestClose() }
             }
             Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.border }
 
@@ -130,7 +149,7 @@ Popup {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 currentIndex: root.section
-                ConnectionsPage { onDone: root.close() }
+                ConnectionsPage { id: connections; onDone: root.close() }
                 LanguagePage { onDone: root.close() }
                 AppearancePage {
                     darkTheme: root.darkTheme

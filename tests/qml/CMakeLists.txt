@@ -1,6 +1,6 @@
 # Qt Quick tests of the LogViewer.Ui components (tst_*.qml in this directory),
 # run once per UI language.
-find_package(Qt6 REQUIRED COMPONENTS QuickTest Quick QuickControls2 QuickShapes)
+find_package(Qt6 REQUIRED COMPONENTS QuickTest Quick QuickControls2)
 
 qt_add_executable(tst_ui_shared tst_ui_shared.cpp)
 target_link_libraries(tst_ui_shared PRIVATE Qt6::QuickTest logviewer_ui logviewer_uiplugin)

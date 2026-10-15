@@ -18,10 +18,10 @@ ColumnLayout {
     Rectangle {
         Layout.fillWidth: true
         implicitHeight: bar.implicitHeight + 20
-        color: Theme.warnSoft
+        color: Theme.tint(Theme.accent, 0.08)
         Accessible.role: Accessible.Grouping
         Accessible.name: qsTr("Focus mode")
-        Rectangle { anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom; height: 1; color: Theme.border }
+        Rectangle { anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom; height: 1; color: Theme.accentBorder }
 
         RowLayout {
             id: bar
@@ -30,13 +30,24 @@ ColumnLayout {
             anchors.rightMargin: 16
             spacing: 14
             AppButton {
-                variant: "link"
-                iconName: "chevronLeft"
+                id: backButton
                 text: qsTr("Back to search results")
+                Accessible.name: text
                 onClicked: root.session.close()
+                contentItem: Row {
+                    spacing: 6
+                    Icon { anchors.verticalCenter: parent.verticalCenter; name: "chevronLeft"; size: 14; color: backButton._fg }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: backButton.text
+                        font: backButton.font
+                        color: backButton._fg
+                    }
+                    Kbd { anchors.verticalCenter: parent.verticalCenter; text: "Esc" }
+                }
             }
-            Kbd { text: "Esc" }
             SegmentedControl {
+                accent: true
                 accessibleName: qsTr("What to show around the entry")
                 model: root.session.canShowTrace
                        ? [{ label: qsTr("Context"), value: 1 }, { label: qsTr("Trace %1…").arg(root.session.traceId.slice(0, 6)), value: 2 }]
@@ -71,15 +82,63 @@ ColumnLayout {
         onActionTriggered: root.session.showContext()
     }
 
-    LogTable {
-        id: table
+    Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        model: root.session.logs
-        anchorRow: root.session.anchorRow
-        currentRow: root.selectedRow
-        onRowClicked: row => root.selectedRow = row
-        onMoveRequested: delta => root.selectedRow = Math.max(0, Math.min(root.session.logs.totalCount - 1, root.selectedRow + delta))
+
+        LogTable {
+            id: table
+            anchors.fill: parent
+            model: root.session.logs
+            anchorRow: root.session.anchorRow
+            currentRow: root.selectedRow
+            onRowClicked: row => root.selectedRow = row
+            onMoveRequested: delta => root.selectedRow = Math.max(0, Math.min(root.session.logs.totalCount - 1, root.selectedRow + delta))
+        }
+
+        // Still loading: grey rows under the header.
+        Column {
+            anchors.fill: parent
+            anchors.topMargin: 36
+            visible: root.session.loading && root.session.logs.totalCount === 0
+            spacing: 18
+            leftPadding: 16
+            Repeater {
+                model: [0.7, 0.55, 0.8, 0.6, 0.75, 0.5]
+                delegate: Rectangle {
+                    required property real modelData
+                    width: (parent.width - 32) * modelData
+                    height: 10
+                    radius: Theme.radiusSm
+                    color: Theme.subtle
+                }
+            }
+        }
+        // Loaded, but nothing around the entry.
+        EmptyState {
+            anchors.centerIn: parent
+            width: Math.min(parent.width - 48, 460)
+            // A trace of the entry alone counts as empty; the entry stays visible above.
+            anchors.verticalCenterOffset: root.session.logs.totalCount > 0 ? 40 : 0
+            visible: !root.session.loading && !root.session.error.active
+                     && root.session.logs.totalCount <= (root.session.mode === 2 ? 1 : 0)
+            iconName: root.session.mode === 2 ? "trace" : "clock"
+            title: root.session.mode === 2
+                   ? qsTr("No other entries with trace_id %1 within ±5 min").arg(root.session.traceId.slice(0, 8) + "…")
+                   : qsTr("No entries around %1").arg(root.session.anchorTimeText)
+            message: root.session.mode === 2 ? qsTr("Other services may write the trace id into another field.")
+                                             : qsTr("Try a wider window.")
+            AppButton {
+                visible: root.session.mode === 2
+                text: qsTr("Show the context")
+                onClicked: root.session.showContext()
+            }
+            AppButton {
+                visible: root.session.mode !== 2 && root.session.windowSeconds < 300
+                text: qsTr("Widen to ±5 min")
+                onClicked: root.session.windowSeconds = 300
+            }
+        }
     }
 
     Rectangle {

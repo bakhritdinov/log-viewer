@@ -27,6 +27,10 @@ ListView {
         required property int distinct
         required property bool expanded
         required property var values
+        // The most frequent values first; "N more…" adds 20 at a time.
+        property int shown: 5
+        // `values` is an array from the view-model (a list model in tests).
+        readonly property int valueCount: Array.isArray(values) ? values.length : (values ? values.count ?? 0 : 0)
 
         width: ListView.view.width
         spacing: 2
@@ -74,7 +78,7 @@ ListView {
         }
 
         Repeater {
-            model: fieldItem.expanded ? fieldItem.values : []
+            model: !fieldItem.expanded ? [] : Array.isArray(fieldItem.values) ? fieldItem.values.slice(0, fieldItem.shown) : fieldItem.values
             delegate: ItemDelegate {
                 id: valueItem
                 // Basic's 12 px vertical padding pushes the content below the row's centre.
@@ -103,7 +107,9 @@ ListView {
                     Text {
                         Layout.fillWidth: true
                         text: valueItem.modelData.value
-                        elide: Text.ElideRight
+                        // The end of an id or a pod name tells them apart: cut on the left.
+                        elide: Text.ElideLeft
+                        font.strikeout: valueItem.modelData.excluded
                         font.family: Theme.mono
                         font.pixelSize: Theme.fontSm
                         color: valueItem.modelData.active ? Theme.accentText
@@ -133,6 +139,26 @@ ListView {
                         onClicked: root.valueActivated(fieldItem.field, valueItem.modelData.value, true)
                     }
                 }
+            }
+        }
+        Button {
+            id: moreButton
+            visible: fieldItem.expanded && fieldItem.valueCount > fieldItem.shown
+            x: root.touch ? 24 : 18
+            leftPadding: 8
+            topPadding: 0
+            bottomPadding: 0
+            implicitHeight: root.touch ? 44 : 24
+            text: qsTr("%n more value(s)…", "", fieldItem.distinct - fieldItem.shown)
+            onClicked: fieldItem.shown += 20
+            background: Item { }
+            contentItem: Text {
+                text: moreButton.text
+                font.family: Theme.sans
+                font.pixelSize: Theme.fontSm
+                font.weight: Font.Medium
+                color: moreButton.hovered ? Theme.focusRing : Theme.accent
+                verticalAlignment: Text.AlignVCenter
             }
         }
     }

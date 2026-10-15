@@ -13,6 +13,13 @@ Popup {
     property string query
     property int nsIndex: 0
     readonly property var rows: opened ? Session.sourceMatches(query) : []
+    // "" the lists; "loading", "error" (nothing found yet) or "nomatch" (typed text).
+    readonly property string state: Session.namespaces.length === 0
+                                    ? (Session.discovering ? "loading" : Session.hasError ? "error" : "")
+                                    : (query !== "" && rows.length === 0 ? "nomatch" : "")
+
+    signal settingsRequested()
+    signal labelsRequested()
     readonly property var currentNs: rows.length > 0 ? rows[Math.min(nsIndex, rows.length - 1)] : null
 
     function openFirstApp() {
@@ -143,10 +150,142 @@ Popup {
             visible: Session.recentSources.count > 0 && root.query === ""
         }
 
+        // The list is not there: still being found, or finding it failed.
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 300
+            visible: root.state !== ""
+            // Loading: grey lines in both columns.
+            RowLayout {
+                anchors.fill: parent
+                visible: root.state === "loading"
+                spacing: 0
+                Repeater {
+                    model: [[0.7, 0.55, 0.8, 0.6], [0.65, 0.5]]
+                    delegate: Column {
+                        id: skeletonColumn
+                        required property var modelData
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: 1
+                        padding: 14
+                        spacing: 16
+                        Repeater {
+                            model: skeletonColumn.modelData
+                            delegate: Rectangle {
+                                required property real modelData
+                                width: (skeletonColumn.width - 28) * modelData
+                                height: 12
+                                radius: Theme.radiusSm
+                                color: Theme.subtle
+                            }
+                        }
+                    }
+                }
+            }
+            // Nothing matches the typed text.
+            ColumnLayout {
+                anchors.centerIn: parent
+                width: Math.min(parent.width - 80, 460)
+                visible: root.state === "nomatch"
+                spacing: 8
+                Text {
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.Wrap
+                    text: qsTr("No namespace or app “%1” in %2").arg(root.query).arg(Session.environmentName)
+                    font.family: Theme.sans
+                    font.pixelSize: Theme.fontMd
+                    font.weight: Font.Medium
+                    color: Theme.textStrong
+                }
+                Text {
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    text: qsTr("Check the spelling or search in another environment.")
+                    font.family: Theme.sans
+                    font.pixelSize: Theme.fontSm
+                    color: Theme.textMuted
+                }
+                Row {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.topMargin: 4
+                    spacing: 8
+                    Repeater {
+                        model: Session.environments
+                        delegate: AppButton {
+                            required property string id
+                            required property string name
+                            required property string color
+                            required property bool current
+                            visible: !current
+                            text: qsTr("Search in %1").arg(name)
+                            onClicked: { const q = root.query; Session.switchEnvironment(id); root.query = q }
+                        }
+                    }
+                }
+            }
+            // The list could not be loaded (unreachable, login, labels…).
+            RowLayout {
+                id: failure
+                anchors.centerIn: parent
+                width: Math.min(parent.width - 64, 480)
+                visible: root.state === "error"
+                spacing: 12
+                readonly property bool labels: Session.error.kind === ErrorInfo.UnknownLabels
+                Icon {
+                    Layout.alignment: Qt.AlignTop
+                    name: failure.labels ? "search" : "offline"
+                    size: 18
+                    color: failure.labels ? Theme.warn : Theme.danger
+                }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
+                    Text {
+                        Layout.fillWidth: true
+                        wrapMode: Text.Wrap
+                        text: Session.error.title
+                        font.family: Theme.sans
+                        font.pixelSize: Theme.fontMd
+                        font.weight: Font.DemiBold
+                        color: Theme.textStrong
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        wrapMode: Text.Wrap
+                        text: Session.error.message
+                        font.family: Theme.sans
+                        font.pixelSize: Theme.fontMd
+                        color: Theme.text
+                    }
+                    Row {
+                        spacing: 8
+                        AppButton {
+                            implicitHeight: 28
+                            variant: "primary"
+                            text: failure.labels ? qsTr("Choose the labels") : qsTr("Retry")
+                            onClicked: {
+                                if (failure.labels) { root.close(); root.labelsRequested() }
+                                else Session.rediscover()
+                            }
+                        }
+                        AppButton {
+                            implicitHeight: 28
+                            visible: !failure.labels
+                            text: qsTr("Connection settings")
+                            onClicked: { root.close(); root.settingsRequested() }
+                        }
+                    }
+                }
+            }
+        }
+
         // Namespaces | apps
         RowLayout {
             Layout.fillWidth: true
             Layout.preferredHeight: 300
+            visible: root.state === ""
             spacing: 0
 
             ColumnLayout {
@@ -270,7 +409,11 @@ Popup {
                 Row { spacing: 4; Kbd { text: "Enter" } HintText { text: qsTr("open") } }
                 Item { Layout.fillWidth: true }
                 HintText {
-                    visible: Session.namespaceLabel !== ""
+                    visible: root.state === "loading"
+                    text: qsTr("Finding namespaces and apps in %1…").arg(Session.environmentName)
+                }
+                HintText {
+                    visible: Session.namespaceLabel !== "" && root.state !== "loading"
                     text: qsTr("Labels: %1 / %2 (found automatically)").arg(Session.namespaceLabel).arg(Session.appLabel)
                 }
             }

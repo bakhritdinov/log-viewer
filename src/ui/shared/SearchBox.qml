@@ -12,6 +12,7 @@ FocusScope {
     property var suggestions            // model: kind, field, value, count, completedText, exclude
     property var history: []            // recent search texts
     property bool touch: false
+    property bool invalid: false        // the text was refused (red frame)
     property string placeholder: qsTr("Search: word, key:value, key:~regex, -key:value")
 
     signal submitted()
@@ -33,7 +34,7 @@ FocusScope {
         radius: root.touch ? Theme.radiusLg : Theme.radiusMd + 2
         color: Theme.inputBg
         border.width: 1
-        border.color: input.activeFocus ? Theme.focusRing : Theme.border
+        border.color: root.invalid ? Theme.danger : input.activeFocus ? Theme.focusRing : Theme.border
 
         RowLayout {
             anchors.fill: parent
@@ -44,7 +45,7 @@ FocusScope {
             Icon {
                 name: "search"
                 size: root.touch ? 18 : 16
-                color: input.activeFocus ? Theme.accent : Theme.textMuted
+                color: root.invalid ? Theme.danger : input.activeFocus ? Theme.accent : Theme.textMuted
             }
             TextInput {
                 id: input
@@ -65,6 +66,11 @@ FocusScope {
                 Keys.onEnterPressed: { popup.close(); root.submitted() }
                 Keys.onEscapePressed: popup.close()
                 Keys.onDownPressed: if (popup.opened) list.forceActiveFocus()
+                // Tab completes the first suggestion without searching.
+                Keys.onTabPressed: event => {
+                    if (popup.opened && list.count > 0) root.suggestionActivated(0, false)
+                    else event.accepted = false
+                }
                 onActiveFocusChanged: if (activeFocus) root._showPopup()
                 onTextEdited: root._showPopup()
 
@@ -104,7 +110,9 @@ FocusScope {
             SectionLabel {
                 Layout.leftMargin: 6
                 visible: list.count > 0
-                text: qsTr("Suggestions")
+                text: list.count > 0 && root.suggestions.get(0).kind === "value"
+                      ? qsTr("%1 · %n value(s)", "", list.count).arg(root.suggestions.get(0).field)
+                      : qsTr("Fields")
             }
             ListView {
                 id: list
@@ -113,7 +121,8 @@ FocusScope {
                 clip: true
                 model: root.suggestions
                 keyNavigationWraps: true
-                Keys.onReturnPressed: root.suggestionActivated(currentIndex, false)
+                Keys.onReturnPressed: event => root.suggestionActivated(currentIndex, (event.modifiers & Qt.ShiftModifier) !== 0)
+                Keys.onTabPressed: root.suggestionActivated(currentIndex, false)
                 Keys.onUpPressed: if (currentIndex === 0) input.forceActiveFocus(); else decrementCurrentIndex()
 
                 delegate: ItemDelegate {
@@ -140,6 +149,13 @@ FocusScope {
                     }
                     contentItem: RowLayout {
                         spacing: 8
+                        Rectangle {
+                            visible: suggestion.kind === "value" && suggestion.field === "level"
+                            implicitWidth: 8
+                            implicitHeight: 8
+                            radius: 2
+                            color: Theme.levelColor(suggestion.value.toUpperCase())
+                        }
                         Text {
                             Layout.fillWidth: true
                             text: suggestion.kind === "field" ? suggestion.field + ":" : suggestion.value
@@ -211,6 +227,27 @@ FocusScope {
                         }
                     }
                 }
+            }
+            // Key hints
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                visible: !root.touch
+                implicitHeight: 1
+                color: Theme.borderMuted
+            }
+            Text {
+                Layout.fillWidth: true
+                Layout.leftMargin: 6
+                Layout.topMargin: 2
+                visible: !root.touch
+                text: list.count === 0 ? qsTr("↑ ↓ choose · Enter search · Esc close")
+                    : root.suggestions.get(0).kind === "value" ? qsTr("Enter show only · Shift+Enter exclude · Esc close")
+                    : qsTr("Tab complete · Enter search as typed · Esc close")
+                elide: Text.ElideRight
+                font.family: Theme.sans
+                font.pixelSize: Theme.fontXs
+                color: Theme.textMuted
             }
         }
     }

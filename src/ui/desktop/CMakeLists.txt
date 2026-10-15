@@ -28,6 +28,8 @@ qt_add_qml_module(logviewer_ui_desktop
         DetailsPanel.qml
         StatusBar.qml
         SettingsDialog.qml
+        UnsavedChangesDialog.qml
+        ChoiceDialog.qml
         ConnectionsPage.qml
         LanguagePage.qml
         AppearancePage.qml

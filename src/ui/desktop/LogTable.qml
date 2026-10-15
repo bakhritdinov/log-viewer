@@ -15,6 +15,8 @@ ColumnLayout {
     property int anchorRow: -1          // emphasised row (focus mode)
     property string serviceTitle: qsTr("Service")
     property var highlightTerms: []
+    property bool showService: width >= 640      // narrow results: the service column gives way
+    property real newerThanMs: Infinity          // rows after this time arrived with a refresh: green for a moment
     property alias view: list
 
     signal rowClicked(int row)
@@ -40,7 +42,7 @@ ColumnLayout {
             spacing: 0
             HeaderText { Layout.preferredWidth: root.timeWidth; text: qsTr("Time") }
             HeaderText { Layout.preferredWidth: root.levelWidth; text: qsTr("Level") }
-            HeaderText { Layout.preferredWidth: root.serviceWidth; text: root.serviceTitle }
+            HeaderText { Layout.preferredWidth: root.serviceWidth; visible: root.showService; text: root.serviceTitle }
             HeaderText { Layout.fillWidth: true; text: qsTr("Message") }
         }
     }
@@ -69,11 +71,19 @@ ColumnLayout {
             required property string level
             required property string service
             required property string message
+            required property real timeMs
+            readonly property bool fresh: row.timeMs > root.newerThanMs
             readonly property bool selected: row.index === root.currentRow
             readonly property bool anchored: row.index === root.anchorRow
+            // One line in the table; the rest of a multi-line message is counted.
+            readonly property int firstBreak: row.message.indexOf("
+")
+            readonly property string firstLine: firstBreak < 0 ? row.message : row.message.slice(0, firstBreak)
+            readonly property int moreLines: firstBreak < 0 ? 0 : row.message.split("
+").length - 1
 
             width: ListView.view.width
-            height: 28
+            height: anchored ? 34 : 28
             focusPolicy: Qt.NoFocus
             hoverEnabled: true
             Accessible.role: Accessible.Row
@@ -81,7 +91,13 @@ ColumnLayout {
             onClicked: { list.forceActiveFocus(); root.rowClicked(row.index) }
 
             background: Rectangle {
-                color: row.selected ? Theme.accentSoft : row.anchored ? Theme.warnSoft : (row.hovered ? Theme.surface : "transparent")
+                color: row.selected ? (row.hovered ? Theme.tint(Theme.accent, 0.22) : Theme.accentSoft)
+                     : row.anchored ? Theme.tint(Theme.accent, 0.16)
+                     : row.fresh ? Theme.successSoft
+                     : (row.hovered ? Theme.surface : "transparent")
+                Behavior on color { ColorAnimation { duration: 600 } }
+                border.width: row.anchored || (row.selected && list.activeFocus) ? 1 : 0
+                border.color: Theme.focusRing
                 Rectangle { anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom; height: 1; color: Theme.surface }
                 Rectangle {
                     anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
@@ -97,11 +113,11 @@ ColumnLayout {
                     text: row.timeText
                     font.family: Theme.mono
                     font.pixelSize: Theme.fontSm
-                    color: Theme.textMuted
+                    color: row.anchored ? Theme.textStrong : Theme.textMuted
                 }
                 Text {
                     Layout.preferredWidth: root.levelWidth
-                    text: row.level
+                    text: row.level !== "" ? row.level : "—"
                     font.family: Theme.mono
                     font.pixelSize: Theme.fontSm
                     font.weight: Font.Medium
@@ -109,6 +125,7 @@ ColumnLayout {
                 }
                 Text {
                     Layout.preferredWidth: root.serviceWidth
+                    visible: root.showService
                     rightPadding: 8
                     text: row.service
                     elide: Text.ElideRight
@@ -116,16 +133,35 @@ ColumnLayout {
                     font.pixelSize: Theme.fontSm
                     color: Theme.accentText
                 }
-                Text {
+                RowLayout {
                     Layout.fillWidth: true
                     Layout.rightMargin: 16
-                    textFormat: root.highlightTerms.length > 0 ? Text.StyledText : Text.PlainText
-                    text: root.highlightTerms.length > 0 ? Session.highlight(row.message, root.highlightTerms, Theme.warnText) : row.message
-                    elide: Text.ElideRight
-                    maximumLineCount: 1
-                    font.family: Theme.mono
-                    font.pixelSize: Theme.fontSm
-                    color: Theme.text
+                    spacing: 8
+                    Text {
+                        Layout.fillWidth: true
+                        textFormat: root.highlightTerms.length > 0 ? Text.StyledText : Text.PlainText
+                        text: root.highlightTerms.length > 0 ? Session.highlight(row.firstLine, root.highlightTerms, Theme.warnText) : row.firstLine
+                        elide: Text.ElideRight
+                        maximumLineCount: 1
+                        font.family: Theme.mono
+                        font.pixelSize: Theme.fontSm
+                        color: row.anchored ? Theme.textStrong : Theme.text
+                    }
+                    Rectangle {
+                        visible: row.moreLines > 0
+                        implicitWidth: moreText.implicitWidth + 12
+                        implicitHeight: 18
+                        radius: 9
+                        color: Theme.subtle
+                        Text {
+                            id: moreText
+                            anchors.centerIn: parent
+                            text: qsTr("↵ +%n line(s)", "", row.moreLines)
+                            font.family: Theme.mono
+                            font.pixelSize: Theme.fontXs
+                            color: Theme.textMuted
+                        }
+                    }
                 }
             }
         }

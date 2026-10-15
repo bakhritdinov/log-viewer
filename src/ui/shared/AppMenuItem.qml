@@ -10,6 +10,7 @@ AbstractButton {
     property color dotColor: "transparent"
     property string hint
     property bool danger: false
+    property bool hintDanger: false      // the hint as a red badge ("LIVE")
 
     signal triggered()
 
@@ -33,7 +34,9 @@ AbstractButton {
 
     background: Rectangle {
         radius: Theme.radiusMd
-        color: control.hovered || control.visualFocus ? Theme.subtle : "transparent"
+        color: control.enabled && (control.hovered || control.visualFocus) ? Theme.subtle : "transparent"
+        border.width: control.visualFocus ? 1 : 0
+        border.color: Theme.focusRing
     }
 
     contentItem: RowLayout {
@@ -64,7 +67,7 @@ AbstractButton {
             font.family: Theme.sans
             font.pixelSize: Theme.fontMd
             font.weight: control.checkedMark ? Font.DemiBold : Font.Normal
-            color: control.danger ? Theme.dangerText : control.checkedMark ? Theme.textStrong : Theme.text
+            color: !control.enabled ? Theme.textDisabled : control.danger ? Theme.dangerText : control.checkedMark ? Theme.textStrong : Theme.text
         }
         Icon {
             visible: control.checkedMark && control.dotColor.a > 0
@@ -73,12 +76,23 @@ AbstractButton {
             strokeWidth: 2.4
             color: Theme.success
         }
-        Text {
+        Item { Layout.fillWidth: true; visible: control.hint !== "" }
+        Rectangle {
             visible: control.hint !== ""
-            text: control.hint
-            font.family: Theme.mono
-            font.pixelSize: Theme.fontXs
-            color: Theme.textMuted
+            implicitWidth: hintText.implicitWidth + (control.hintDanger ? 10 : 0)
+            implicitHeight: hintText.implicitHeight + (control.hintDanger ? 2 : 0)
+            radius: Theme.radiusSm
+            color: "transparent"
+            border.width: control.hintDanger ? 1 : 0
+            border.color: Theme.dangerBorder
+            Text {
+                id: hintText
+                anchors.centerIn: parent
+                text: control.hint
+                font.family: Theme.mono
+                font.pixelSize: Theme.fontXs
+                color: control.hintDanger ? Theme.dangerText : Theme.textMuted
+            }
         }
     }
 }

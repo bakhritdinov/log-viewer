@@ -41,18 +41,47 @@ ColumnLayout {
         }
     }
 
+    // The skeleton waits 300 ms: a quick answer must not flash it.
+    property bool skeletonDue: false
+    readonly property bool firstBatch: Session.loading && root.empty
+    onFirstBatchChanged: { skeletonDue = false; if (firstBatch) skeletonTimer.restart() }
+    Timer { id: skeletonTimer; interval: 300; onTriggered: root.skeletonDue = root.firstBatch }
+
+    signal sourceRequested()
+
+    // A refresh over shown entries: the ones newer than the old top glow green
+    // for 3 s (nothing jumps; the old rows stay where they were).
+    property real previousTopMs: Infinity
+    property string previousSource
+    Connections {
+        target: Session
+        function onLoadingChanged() {
+            if (Session.loading) {
+                const top = Session.logs.totalCount > 0 ? Session.logs.rowData(0).timeMs : NaN
+                const source = Session.namespaceName + "/" + Session.app
+                root.previousTopMs = !isNaN(top) && source === root.previousSource ? top : Infinity
+                root.previousSource = source
+            } else if (root.previousTopMs !== Infinity) {
+                freshTimer.restart()
+            }
+        }
+    }
+    Timer { id: freshTimer; interval: 3000; onTriggered: root.previousTopMs = Infinity }
+
     HistogramPanel {
         id: histogram
         Layout.fillWidth: true
-        visible: !Session.needsSetup && !(root.empty && !Session.histogramFilterActive)
+        visible: !Session.needsSetup && !(root.empty && !Session.histogramFilterActive && !root.skeletonDue)
+                 && !(Session.hasError && root.empty)
     }
 
     StackLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         currentIndex: Session.needsSetup ? 0
-                    : !root.empty ? 3
-                    : Session.loading ? 1 : 2
+                    : !root.empty ? 5
+                    : Session.loading ? (root.skeletonDue ? 1 : 4)
+                    : Session.hasError ? 3 : 2
 
         // 0 — first launch
         Item {
@@ -79,6 +108,7 @@ ColumnLayout {
                     id: skeletonRow
                     required property real modelData
                     leftPadding: 16
+                    topPadding: 9                       // bars centred in the 28 px row
                     spacing: 12
                     height: 28
                     SkeletonBar { width: 96 }
@@ -89,35 +119,80 @@ ColumnLayout {
             }
         }
 
-        // 2 — nothing found
+        // 2 — nothing found: why, and the ways out that fit
         Item {
+            id: nothing
+            readonly property bool noSource: Session.namespaceName === ""
+            readonly property bool byInterval: Session.histogramFilterActive
+            readonly property bool bySearch: Session.chips.count > 0
+            readonly property var lastChip: bySearch ? Session.chips.get(Session.chips.count - 1) : null
+            readonly property bool wide: ["1d", "2d", "7d"].indexOf(Session.timeRangeKey) >= 0
             EmptyState {
                 anchors.centerIn: parent
                 width: Math.min(parent.width - 48, 420)
-                iconName: "search"
-                title: qsTr("No entries match")
-                message: Session.namespaceName === ""
-                         ? qsTr("Choose a namespace and an app.")
-                         : qsTr("Nothing in %1 for the period “%2”.").arg(Session.app).arg(Session.timeRangeLabel)
+                iconName: nothing.noSource ? "source" : "search"
+                title: nothing.noSource ? qsTr("Choose a source")
+                     : nothing.byInterval ? qsTr("Nothing in the picked interval")
+                     : nothing.bySearch ? qsTr("No entries match")
+                     : qsTr("No entries for “%1”").arg(Session.timeRangeLabel)
+                message: nothing.noSource ? qsTr("Pick a namespace and an app to see their logs.")
+                       : nothing.byInterval ? qsTr("%1 holds no entries of this level.").arg(Session.histogramFilterLabel)
+                       : nothing.bySearch ? qsTr("For “%1” there are no entries in %2 matching %3.")
+                                            .arg(Session.timeRangeLabel).arg(Session.app).arg(Session.searchText)
+                       : qsTr("Nothing came from %1 during this period.").arg(Session.app)
                 AppButton {
-                    visible: Session.timeRangeKey !== "1d" && Session.timeRangeKey !== "2d" && Session.timeRangeKey !== "7d"
+                    visible: nothing.noSource
+                    variant: "primary"
+                    text: qsTr("Choose a source")
+                    onClicked: root.sourceRequested()
+                }
+                AppButton {
+                    visible: !nothing.noSource && nothing.byInterval
+                    text: qsTr("Show the whole period")
+                    onClicked: Session.clearHistogramFilter()
+                }
+                AppButton {
+                    visible: !nothing.noSource && !nothing.byInterval && !nothing.wide
                     text: qsTr("Widen to 24 hours")
                     onClicked: Session.setPreset("1d")
                 }
                 AppButton {
-                    visible: Session.histogramFilterActive
-                    text: qsTr("Remove the %1 filter").arg(Session.histogramFilterLabel)
-                    onClicked: Session.clearHistogramFilter()
+                    visible: !nothing.noSource && !nothing.byInterval && nothing.bySearch
+                    text: nothing.lastChip ? qsTr("Remove %1").arg(nothing.lastChip.text) : ""
+                    onClicked: Session.removeChip(Session.chips.count - 1)
                 }
                 AppButton {
-                    visible: Session.chips.count > 0
+                    visible: !nothing.noSource && !nothing.byInterval && Session.chips.count > 1
                     text: qsTr("Clear the search")
-                    onClicked: { Session.clearSearch(); Session.search() }
+                    onClicked: Session.clearSearch()
+                }
+                AppButton {
+                    visible: !nothing.noSource && !nothing.byInterval && !nothing.bySearch
+                    text: qsTr("Turn on live tail")
+                    onClicked: Session.live.start()
                 }
             }
         }
 
-        // 3 — results
+        // 3 — the request failed and there is nothing to show (the banner explains)
+        Item {
+            Column {
+                anchors.centerIn: parent
+                spacing: 8
+                Icon { anchors.horizontalCenter: parent.horizontalCenter; name: "logs"; size: 28; strokeWidth: 1.6; color: Theme.border }
+                Text {
+                    text: qsTr("No entries — the request failed")
+                    font.family: Theme.sans
+                    font.pixelSize: Theme.fontMd
+                    color: Theme.textDisabled
+                }
+            }
+        }
+
+        // 4 — the first 300 ms of a load: nothing yet
+        Item { }
+
+        // 5 — results
         ColumnLayout {
             spacing: 0
             LogTable {
@@ -127,6 +202,7 @@ ColumnLayout {
                 model: Session.logs
                 currentRow: Session.selectedRow
                 highlightTerms: Session.searchTerms
+                newerThanMs: Session.loading ? Infinity : root.previousTopMs
                 onRowClicked: row => Session.selectRow(row)
                 onMoveRequested: delta => delta < 0 ? Session.selectPrevious() : Session.selectNext()
             }
@@ -139,8 +215,7 @@ ColumnLayout {
     }
 
     component SkeletonBar: Rectangle {
-        anchors.verticalCenter: parent.verticalCenter
-        height: 10
+        implicitHeight: 10
         radius: Theme.radiusSm
         color: Theme.subtle
         SequentialAnimation on opacity {

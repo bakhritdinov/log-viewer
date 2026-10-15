@@ -11,6 +11,7 @@ Control {
     property var value
     property bool touch: false
     property bool fill: false          // stretch options to the full width
+    property bool accent: false        // the selected option filled blue (mode tabs)
     property string accessibleName
 
     signal activated(var value)
@@ -68,15 +69,15 @@ Control {
 
                 background: Rectangle {
                     radius: control.touch ? Theme.radiusMd + 2 : Theme.radiusSm
-                    color: option.current ? Theme.hover : (option.hovered ? Theme.subtle : "transparent")
+                    color: option.current ? (control.accent ? Theme.accentStrong : Theme.hover) : (option.hovered ? Theme.surface : "transparent")
                 }
                 contentItem: Text {
                     id: optionText
                     text: control.labelOf(option.modelData)
                     font.family: Theme.sans
                     font.pixelSize: control.touch ? Theme.fontLg : Theme.fontSm
-                    font.weight: Font.Medium
-                    color: option.current ? Theme.textStrong : Theme.textMuted
+                    color: option.current ? (control.accent ? Theme.textOnAccent : Theme.textStrong) : (option.hovered ? Theme.text : Theme.textMuted)
+                    font.weight: control.accent ? Font.DemiBold : Font.Medium
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }

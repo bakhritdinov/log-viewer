@@ -59,6 +59,8 @@ Item {
                 Column {
                     anchors.bottom: parent.bottom
                     width: parent.width
+                    // A picked interval keeps its colour; the rest steps back.
+                    opacity: root.selectedIndex >= 0 && bar.index !== root.selectedIndex ? 0.35 : 1
                     Repeater {
                         // A Column lays out top-down: reversed so WARN sits at the bottom.
                         model: bar.segments.slice().reverse()
@@ -91,11 +93,15 @@ Item {
                     }
                     return ""
                 }
-                ToolTip.visible: root.showTooltip && hover.hovered
-                ToolTip.delay: 150
-                ToolTip.text: qsTr("%1 · %n entries", "", bar.error + bar.warn).arg(bar.timeText)
-                              + (bar.error > 0 ? "\n" + qsTr("ERROR %1").arg(bar.error) : "")
-                              + (bar.warn > 0 ? "\n" + qsTr("WARN %1").arg(bar.warn) : "")
+                AppToolTip {
+                    visible: root.showTooltip && hover.hovered
+                    delay: 150
+                    y: -height - 6
+                    text: qsTr("%1 · %n entries", "", bar.error + bar.warn).arg(bar.timeText)
+                          + (bar.error > 0 ? "\n" + qsTr("ERROR %1").arg(bar.error) : "")
+                          + (bar.warn > 0 ? "\n" + qsTr("WARN %1").arg(bar.warn) : "")
+                          + (root.interactive ? "\n" + qsTr("Click to show only this interval") : "")
+                }
             }
         }
     }

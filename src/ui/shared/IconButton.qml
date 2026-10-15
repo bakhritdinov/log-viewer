@@ -7,9 +7,11 @@ Button {
 
     property string iconName
     required property string label
+    property string shortcut               // shown in the tooltip
     property bool touch: false
     property bool showTooltip: !touch
-    property color iconColor: control.checked ? Theme.accent : (control.hovered ? Theme.text : Theme.textMuted)
+    property color iconColor: control.checked ? Theme.accent
+                            : (control.down ? Theme.textStrong : (control.hovered ? Theme.text : Theme.textMuted))
 
     implicitWidth: touch ? Theme.touchHeight : Theme.controlHeight
     implicitHeight: implicitWidth
@@ -17,9 +19,12 @@ Button {
     focusPolicy: Qt.StrongFocus
     display: AbstractButton.IconOnly
     Accessible.name: label
-    ToolTip.visible: showTooltip && hovered && label !== ""
-    ToolTip.text: label
-    ToolTip.delay: 500
+
+    AppToolTip {
+        visible: control.showTooltip && control.hovered && control.label !== ""
+        text: control.label
+        shortcut: control.shortcut
+    }
 
     contentItem: Item {
         Icon {
@@ -32,8 +37,10 @@ Button {
 
     background: Rectangle {
         radius: control.touch ? width / 2 : Theme.radiusMd
-        color: control.down || control.checked ? Theme.subtle : (control.hovered ? Theme.subtle : "transparent")
-        border.width: control.visualFocus ? 1 : 0
+        color: control.checked ? (control.hovered ? Theme.tint(Theme.accent, 0.25) : Theme.accentSoft)
+             : control.down ? Theme.hover
+             : (control.hovered ? Theme.subtle : "transparent")
+        border.width: control.visualFocus ? 2 : 0
         border.color: Theme.focusRing
     }
 }

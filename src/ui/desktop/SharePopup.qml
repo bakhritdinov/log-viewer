@@ -44,11 +44,35 @@ Popup {
                 onTextChanged: cursorPosition = 0
             }
             AppButton {
+                id: copyButton
                 implicitHeight: Theme.inputHeight      // as tall as the link field
                 variant: "primary"
                 iconName: copied.running ? "check" : "copy"
                 text: copied.running ? qsTr("Copied") : qsTr("Copy")
                 onClicked: { clipboard.copy(root.link); copied.restart() }
+                // Done: a green outline instead of the filled button, for 1.5 s.
+                contentItem: Row {
+                    spacing: 6
+                    Icon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        name: copyButton.iconName
+                        size: 14
+                        strokeWidth: copied.running ? 2.6 : 2
+                        color: copied.running ? Theme.successText : Theme.textOnAccent
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: copyButton.text
+                        font: copyButton.font
+                        color: copied.running ? Theme.successText : Theme.textOnAccent
+                    }
+                }
+                background: Rectangle {
+                    radius: Theme.radiusMd
+                    color: copied.running ? Theme.successSoft : (copyButton.hovered ? Theme.successBorder : Theme.successStrong)
+                    border.width: 1
+                    border.color: Theme.successBorder
+                }
             }
         }
 

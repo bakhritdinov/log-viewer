@@ -27,6 +27,12 @@ ApplicationWindow {
         else if (liveMode) liveView.selectedRow = -1
         else Session.clearSelection()
     }
+    // A short notice at the bottom, optionally with one action ("Undo").
+    function notify(text, actionText, action) { toast.show(text, actionText ?? "", action ?? null) }
+
+    // The environment a share link points to, when it is not set up here.
+    property string missingEnvironment
+
     function handleError(action, error) {
         switch (action) {
         case ErrorInfo.Retry: Session.retry(); break
@@ -39,20 +45,26 @@ ApplicationWindow {
     }
 
     readonly property var shortcutList: [
+        { header: qsTr("General") },
         { keys: [refreshShortcut.nativeText], text: qsTr("Refresh") },
-        { keys: [findShortcut.nativeText], text: qsTr("Search") },
         { keys: [sourceShortcut.nativeText], text: qsTr("Choose the source") },
         { keys: [timeShortcut.nativeText], text: qsTr("Choose the period") },
-        { keys: ["[", "]"], text: qsTr("Newer / older page") },
-        { keys: ["Shift+[", "Shift+]"], text: qsTr("First / last page") },
-        { keys: ["↑", "↓"], text: qsTr("Previous / next entry") },
-        { keys: ["Esc"], text: qsTr("Close the details or the focus") },
-        { keys: [saveShortcut.nativeText], text: qsTr("Save the query") },
-        { keys: [qsTr("Ctrl+1…9")], text: qsTr("Run a saved query") },
         { keys: [shareShortcut.nativeText], text: qsTr("Share a link") },
-        { keys: [qsTr("Space")], text: qsTr("Pause / resume live tail") },
         { keys: [settingsShortcut.nativeText], text: qsTr("Settings") },
         { keys: ["?"], text: qsTr("All keyboard shortcuts") },
+        { header: qsTr("Search") },
+        { keys: [findShortcut.nativeText], text: qsTr("Search") },
+        { keys: [saveShortcut.nativeText], text: qsTr("Save the query") },
+        { keys: [qsTr("Ctrl+1…9")], text: qsTr("Run a saved query") },
+        { keys: ["Tab"], text: qsTr("Complete the suggestion") },
+        { header: qsTr("Table and details") },
+        { keys: ["↑", "↓"], text: qsTr("Previous / next entry") },
+        { keys: ["[", "]"], text: qsTr("Newer / older page") },
+        { keys: ["Shift+[", "Shift+]"], text: qsTr("First / last page") },
+        { keys: ["Esc"], text: qsTr("Close the details or the focus") },
+        { keys: ["Esc"], text: qsTr("Stop loading") },
+        { header: qsTr("Live tail") },
+        { keys: [qsTr("Space")], text: qsTr("Pause / resume live tail") },
     ]
 
     width: 1440
@@ -92,11 +104,15 @@ ApplicationWindow {
     Shortcut { sequence: "]"; enabled: window.mainMode; onActivated: Session.logs.goToPage(Session.logs.page + 1) }
     Shortcut { sequence: "{"; enabled: window.mainMode; onActivated: Session.logs.goToPage(0) }
     Shortcut { sequence: "}"; enabled: window.mainMode; onActivated: Session.logs.goToPage(Session.logs.pageCount - 1) }
-    Shortcut { sequence: "Space"; enabled: window.liveMode; onActivated: Session.live.paused = !Session.live.paused }
+    Shortcut { sequence: "Space"; enabled: window.liveMode; onActivated: { liveView.pauseReason = "button"; Session.live.paused = !Session.live.paused } }
     Shortcut {
         sequence: "Esc"
-        enabled: window.detailsOpen || window.focusMode
-        onActivated: window.detailsOpen ? window.closeDetails() : Session.focus.close()
+        enabled: window.detailsOpen || window.focusMode || (Session.loading && window.mainMode)
+        onActivated: {
+            if (Session.loading && window.mainMode) Session.stopLoading()
+            else if (window.detailsOpen) window.closeDetails()
+            else Session.focus.close()
+        }
     }
     Instantiator {
         model: 9
@@ -111,9 +127,8 @@ ApplicationWindow {
 
     Connections {
         target: Session
-        function onLinkEnvironmentMissing(name) {
-            toast.show(qsTr("The link points to the environment “%1”, which is not set up here.").arg(name))
-        }
+        function onLinkEnvironmentMissing(name) { window.missingEnvironment = name }
+        function onEnvironmentChanged() { window.missingEnvironment = "" }
     }
 
     ColumnLayout {
@@ -123,14 +138,23 @@ ApplicationWindow {
         TopBar {
             id: topBar
             Layout.fillWidth: true
+            sourceKey: sourceShortcut.nativeText
+            timeKey: timeShortcut.nativeText
+            refreshKey: refreshShortcut.nativeText
+            shareKey: shareShortcut.nativeText
+            settingsKey: settingsShortcut.nativeText
             onSettingsRequested: settings.openSection(0)
+            onLabelsRequested: settings.openLabels()
             onThemeToggled: prefs.dark = !prefs.dark
         }
 
         LinkBanner {
             Layout.fillWidth: true
-            visible: Session.openedFromLink && window.mainMode
+            visible: (Session.openedFromLink && window.mainMode) || missing
+            missingEnvironment: window.missingEnvironment
             onSaveRequested: searchBar.openSaving()
+            onAddEnvironmentRequested: name => { window.missingEnvironment = ""; settings.openNewEnvironment(name) }
+            onDismissed: window.missingEnvironment = ""
         }
 
         SearchBar {
@@ -138,7 +162,9 @@ ApplicationWindow {
             Layout.fillWidth: true
             visible: !window.focusMode && !Session.needsSetup
             showViewSwitch: window.mainMode
+            liveMode: window.liveMode
             findShortcut: findShortcut.nativeText
+            saveShortcut: saveShortcut.nativeText
             // The placeholder already explains the syntax; live mode says what the filter does.
             hint: window.liveMode ? qsTr("The filter applies to the stream on the fly") : ""
         }
@@ -153,6 +179,8 @@ ApplicationWindow {
                 visible: window.mainMode && !Session.needsSetup
                 expanded: prefs.fieldsOpen
                 onExpandedChanged: prefs.fieldsOpen = expanded
+                // Results narrower than 480 px: the fields step aside (not remembered).
+                squeezed: window.width - 248 - (window.detailsOpen ? prefs.detailsWidth : 0) < 480
             }
 
             ColumnLayout {
@@ -172,12 +200,15 @@ ApplicationWindow {
                     Layout.fillHeight: true
                     currentIndex: window.focusMode ? 2 : window.liveMode ? 3 : Session.patternsEnabled ? 1 : 0
                     // Stale results stay visible but dimmed under an error.
-                    opacity: Session.hasError && !Session.needsSetup && window.mainMode ? 0.55 : 1
+                    // A warning (heavy query, rate limit) keeps the partial result as is.
+                    opacity: Session.hasError && !Session.needsSetup && window.mainMode
+                             && [ErrorInfo.TooHeavy, ErrorInfo.RateLimited, ErrorInfo.BlockedByBrowser].indexOf(Session.error.kind) < 0 ? 0.55 : 1
 
                     ResultsView {
                         histogramExpanded: prefs.histogramOpen
                         onHistogramExpandedChanged: prefs.histogramOpen = histogramExpanded
                         onSettingsRequested: settings.openSection(0)
+                        onSourceRequested: topBar.openSourcePicker()
                     }
                     PatternsView { }
                     FocusView { id: focusView }
@@ -197,6 +228,7 @@ ApplicationWindow {
                 onCloseRequested: window.closeDetails()
                 onContextRequested: Session.focus.openContext(window.detailsModel, window.detailsRow, 60)
                 onTraceRequested: Session.focus.openTrace(window.detailsModel, window.detailsRow)
+                maxWidth: Math.round(window.width * 0.6)
                 onResizeRequested: w => prefs.detailsWidth = Math.round(Math.max(360, Math.min(window.width * 0.6, w)))
             }
         }
@@ -222,23 +254,64 @@ ApplicationWindow {
         shortcuts: window.shortcutList
     }
 
-    // Short notices that need no action.
+    // Short notices: confirmation of an action without a visible result,
+    // optionally with one action ("Undo"). One at a time; hover keeps it.
     Popup {
         id: toast
-        function show(text) { toastText.text = text; open(); toastTimer.restart() }
+        property var action: null
+        function show(text, actionText, action) {
+            toastText.text = text
+            toastAction.text = actionText
+            toast.action = action
+            open()
+            toastTimer.interval = actionText !== "" ? 8000 : 5000
+            toastTimer.restart()
+        }
         parent: Overlay.overlay
         x: (parent.width - width) / 2
         y: parent.height - height - 48
-        padding: 12
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        background: Surface { elevated: true }
-        contentItem: Text {
-            id: toastText
-            font.family: Theme.sans
-            font.pixelSize: Theme.fontMd
-            color: Theme.textStrong
-            Accessible.role: Accessible.AlertMessage
+        width: Math.min(560, implicitWidth)
+        leftPadding: 14
+        rightPadding: toastAction.visible ? 8 : 14
+        topPadding: 8
+        bottomPadding: 8
+        // A notice never takes Esc from the window (details, focus, loading use it).
+        closePolicy: Popup.NoAutoClose
+        background: Rectangle {
+            radius: Theme.radiusLg
+            color: Theme.surface
+            border.width: 1
+            border.color: Theme.border
+            HoverHandler { id: toastHover }
         }
-        Timer { id: toastTimer; interval: 5000; onTriggered: toast.close() }
+        contentItem: RowLayout {
+            spacing: 12
+            Text {
+                id: toastText
+                Layout.fillWidth: true
+                Layout.minimumHeight: 28
+                verticalAlignment: Text.AlignVCenter
+                wrapMode: Text.Wrap
+                font.family: Theme.sans
+                font.pixelSize: Theme.fontMd
+                color: Theme.textStrong
+                Accessible.role: Accessible.AlertMessage
+            }
+            AppButton {
+                id: toastAction
+                visible: text !== ""
+                variant: "ghost"
+                implicitHeight: 28
+                onClicked: { const run = toast.action; toast.close(); if (run) run() }
+                contentItem: Text {
+                    text: toastAction.text
+                    font.family: Theme.sans
+                    font.pixelSize: Theme.fontMd
+                    font.weight: Font.DemiBold
+                    color: Theme.accent
+                }
+            }
+        }
+        Timer { id: toastTimer; interval: 5000; running: false; onTriggered: if (toastHover.hovered) restart(); else toast.close() }
     }
 }

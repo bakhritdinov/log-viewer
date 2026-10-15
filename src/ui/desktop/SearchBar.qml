@@ -9,8 +9,10 @@ Rectangle {
     id: root
 
     property bool showViewSwitch: true
+    property bool liveMode: false       // a stream filter: no saving, history or chips
     property string hint
     property string findShortcut
+    property string saveShortcut
 
     function focusSearch() { searchBox.focusInput() }
     function openSaving() { savedPopup.openSaving() }
@@ -41,6 +43,7 @@ Rectangle {
                 onTextChanged: if (text !== Session.searchText) Session.searchText = text
                 suggestions: Session.suggestions
                 history: Session.history
+                invalid: Session.searchError !== ""
                 onSubmitted: Session.search()
                 onSuggestionActivated: (index, exclude) => Session.applySuggestion(index, exclude)
                 onHistoryActivated: text => { Session.searchText = text; Session.search() }
@@ -55,13 +58,16 @@ Rectangle {
             }
             IconButton {
                 id: starButton
+                visible: !root.liveMode
                 iconName: "star"
                 label: qsTr("Save query")
+                shortcut: root.saveShortcut
                 iconColor: Theme.warnText
                 onClicked: savedPopup.openSaving()
             }
             IconButton {
                 id: historyButton
+                visible: !root.liveMode
                 iconName: "history"
                 label: qsTr("History and saved queries")
                 onClicked: savedPopup.openBrowsing()
@@ -72,13 +78,40 @@ Rectangle {
                     x: historyButton.width - width
                 }
             }
-            Kbd { visible: root.findShortcut !== ""; text: root.findShortcut }
+            // "Enter" while the text differs from the search that ran.
+            Kbd {
+                visible: root.findShortcut !== "" && !root.liveMode
+                text: Session.searchText !== Session.appliedSearchText ? "Enter" : root.findShortcut
+            }
+        }
+
+        // Why the search was not run.
+        RowLayout {
+            Layout.fillWidth: true
+            visible: Session.searchError !== ""
+            spacing: 6
+            Icon { name: "warning"; size: 13; color: Theme.dangerText }
+            Text {
+                text: Session.searchError
+                font.family: Theme.sans
+                font.pixelSize: Theme.fontSm
+                color: Theme.dangerText
+            }
+            AppButton {
+                // An odd number of unescaped quotes: offer to close the last one.
+                visible: (Session.searchText.replace(/\\./g, "").match(/"/g) || []).length % 2 === 1
+                variant: "link"
+                implicitHeight: 22
+                text: qsTr("Close the quote")
+                onClicked: { Session.searchText = Session.searchText + "\""; Session.search() }
+            }
+            Item { Layout.fillWidth: true }
         }
 
         RowLayout {
             Layout.fillWidth: true
             spacing: 6
-            visible: Session.chips.count > 0 || root.showViewSwitch
+            visible: (Session.chips.count > 0 || root.showViewSwitch) && !root.liveMode
             Text {
                 visible: Session.chips.count > 0
                 text: qsTr("Filters")
@@ -102,8 +135,10 @@ Rectangle {
                 visible: root.showViewSwitch
                 accessibleName: qsTr("Results view")
                 model: [
-                    { label: qsTr("Records %1").arg(Session.logs.loadedCount.toLocaleString(Qt.locale(), "f", 0)), value: false },
-                    { label: Session.patterns.count > 0 ? qsTr("Patterns %1").arg(Session.patterns.count) : qsTr("Patterns"), value: true },
+                    // "…": the counts still grow while loading.
+                    { label: qsTr("Records %1").arg(Session.logs.loadedCount.toLocaleString(Qt.locale(), "f", 0) + (Session.loading ? "…" : "")), value: false },
+                    { label: Session.loading ? qsTr("Patterns %1").arg("…")
+                           : Session.patterns.count > 0 ? qsTr("Patterns %1").arg(Session.patterns.count) : qsTr("Patterns"), value: true },
                 ]
                 value: Session.patternsEnabled
                 onActivated: v => Session.patternsEnabled = v

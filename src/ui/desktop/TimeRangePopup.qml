@@ -73,6 +73,8 @@ Popup {
                         anchors.fill: parent
                         anchors.margins: 10
                         selected: Session.boundDate(form.activeField === 0 ? form.fromText : form.toText)
+                        rangeFrom: Session.boundDate(form.fromText)
+                        rangeTo: Session.boundDate(form.toText)
                         onPicked: day => root.pickDay(day)
                     }
                 }

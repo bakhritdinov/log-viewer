@@ -4,13 +4,23 @@ import QtQuick.Controls.Basic
 import QtQuick.Layouts
 import LogViewer.Ui
 
-// Month grid for the custom period: highlights `selected`, reports a picked day.
+// Month grid for the custom period: the range between `rangeFrom` and `rangeTo`
+// as a band with filled ends, today outlined; days after today cannot be picked.
 ColumnLayout {
     id: root
 
     property date selected: new Date()
     property int month: selected.getMonth()
     property int year: selected.getFullYear()
+    property date rangeFrom
+    property date rangeTo
+
+    function dayNumber(d) { return isNaN(d) ? NaN : Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 86400000) }
+    readonly property real today: dayNumber(new Date())
+    readonly property real fromDay: dayNumber(rangeFrom)
+    readonly property real toDay: dayNumber(rangeTo)
+    readonly property bool atCurrentMonth: year > new Date().getFullYear()
+                                           || (year === new Date().getFullYear() && month >= new Date().getMonth())
 
     signal picked(date day)
 
@@ -38,7 +48,7 @@ ColumnLayout {
             font.weight: Font.DemiBold
             color: Theme.textStrong
         }
-        IconButton { iconName: "chevronRight"; label: qsTr("Next month"); onClicked: root.shiftMonth(1) }
+        IconButton { iconName: "chevronRight"; label: qsTr("Next month"); enabled: !root.atCurrentMonth; onClicked: root.shiftMonth(1) }
     }
 
     DayOfWeekRow {
@@ -66,18 +76,25 @@ ColumnLayout {
             id: day
             required property var model
             readonly property bool inMonth: day.model.month === grid.month
-            readonly property bool isSelected: day.model.date.getFullYear() === root.selected.getFullYear()
-                                               && day.model.date.getMonth() === root.selected.getMonth()
-                                               && day.model.date.getDate() === root.selected.getDate()
+            readonly property real number: root.dayNumber(day.model.date)
+            readonly property bool isSelected: number === root.dayNumber(root.selected)
+            readonly property bool isEnd: number === root.fromDay || number === root.toDay
+            readonly property bool inRange: number > root.fromDay && number < root.toDay
+            readonly property bool future: number > root.today
             implicitHeight: 28
-            enabled: inMonth
+            enabled: inMonth && !future
             focusPolicy: Qt.NoFocus
             Accessible.name: day.model.date.toLocaleDateString(Qt.locale(), Locale.LongFormat)
             Accessible.role: Accessible.Button
             onClicked: root.picked(day.model.date)
             background: Rectangle {
-                radius: Theme.radiusMd
-                color: day.isSelected ? Theme.accentStrong : (day.hovered && day.inMonth ? Theme.subtle : "transparent")
+                radius: day.inRange ? 0 : Theme.radiusMd
+                color: !day.inMonth ? "transparent"
+                     : day.isSelected || day.isEnd ? Theme.accentStrong
+                     : day.inRange ? Theme.tint(Theme.accentStrong, 0.2)
+                     : (day.hovered && day.enabled ? Theme.subtle : "transparent")
+                border.width: day.inMonth && day.model.today && !day.isEnd && !day.isSelected ? 1 : 0
+                border.color: Theme.textMuted
             }
             contentItem: Text {
                 text: day.inMonth ? day.model.day : ""
@@ -85,7 +102,9 @@ ColumnLayout {
                 verticalAlignment: Text.AlignVCenter
                 font.family: Theme.mono
                 font.pixelSize: Theme.fontSm
-                color: day.isSelected ? Theme.textOnAccent : (day.model.today ? Theme.accent : Theme.text)
+                color: day.isSelected || day.isEnd ? Theme.textOnAccent
+                     : day.future ? Theme.textDisabled
+                     : (day.model.today ? Theme.accent : Theme.text)
             }
         }
     }

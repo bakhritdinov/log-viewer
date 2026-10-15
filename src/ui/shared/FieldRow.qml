@@ -10,6 +10,8 @@ Control {
     required property string key
     required property string value
     property bool touch: false
+    // Desktop: the actions show on the hovered row only, so values stay readable.
+    readonly property bool actionsShown: touch || hover.hovered || root.activeFocus || root.visualFocus
 
     signal includeRequested()
     signal excludeRequested()
@@ -59,6 +61,7 @@ Control {
         }
         IconButton {
             Layout.alignment: Qt.AlignTop
+            opacity: root.actionsShown ? 1 : 0
             iconName: "plus"
             label: qsTr("Show only %1 = %2").arg(root.key).arg(root.value)
             touch: root.touch
@@ -67,6 +70,7 @@ Control {
         }
         IconButton {
             Layout.alignment: Qt.AlignTop
+            opacity: root.actionsShown ? 1 : 0
             iconName: "minus"
             label: qsTr("Exclude %1 = %2").arg(root.key).arg(root.value)
             touch: root.touch
@@ -76,6 +80,7 @@ Control {
         IconButton {
             Layout.alignment: Qt.AlignTop
             visible: !root.touch                       // touch: long-press copies
+            opacity: root.actionsShown ? 1 : 0
             iconName: "copy"
             label: qsTr("Copy value")
             onClicked: root.copyRequested()

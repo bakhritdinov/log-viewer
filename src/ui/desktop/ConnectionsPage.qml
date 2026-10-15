@@ -16,6 +16,18 @@ ColumnLayout {
 
     EnvironmentEditor { id: editor }
 
+    function createNamed(name) {
+        editor.createNew()
+        editor.name = name
+    }
+    function showLabels() { advanced.open = true }
+    // Runs `then` now, or after the user decides about unsaved changes.
+    function confirmLeave(then) {
+        if (!editor.dirty) { then(); return }
+        unsaved.then = then
+        unsaved.open()
+    }
+
     Component.onCompleted: editor.load(Session.environmentId)
     onVisibleChanged: if (visible) editor.load(Session.environmentId)
 
@@ -51,7 +63,7 @@ ColumnLayout {
                         Accessible.role: Accessible.PageTab
                         Accessible.name: envTab.name
                         Accessible.selected: envTab.selected
-                        onClicked: editor.load(envTab.id)
+                        onClicked: if (!envTab.selected) root.confirmLeave(() => editor.load(envTab.id))
                         background: Rectangle {
                             radius: Theme.radiusLg - 2
                             color: envTab.selected ? Theme.tint(envTab.color, 0.1) : "transparent"
@@ -74,11 +86,18 @@ ColumnLayout {
                     }
                 }
                 AppButton {
+                    id: newTab
                     implicitHeight: 34
-                    variant: editor.isNew ? "secondary" : "ghost"
+                    variant: "ghost"
                     iconName: "plus"
-                    text: qsTr("Environment")
-                    onClicked: editor.createNew()
+                    text: editor.isNew ? qsTr("New") : qsTr("Environment")
+                    onClicked: if (!editor.isNew) root.confirmLeave(() => editor.createNew())
+                    background: Rectangle {
+                        radius: Theme.radiusLg - 2
+                        color: editor.isNew ? Theme.accentSoft : (newTab.hovered ? Theme.subtle : "transparent")
+                        border.width: 1
+                        border.color: editor.isNew ? Theme.focusRing : Theme.border
+                    }
                 }
             }
 
@@ -208,6 +227,84 @@ ColumnLayout {
                 Accessible.role: Accessible.AlertMessage
             }
 
+            // Advanced: the labels of namespace and app (automatic by default).
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: 24
+                Layout.rightMargin: 24
+                spacing: 10
+                property bool open: editor.nsLabel !== "" || editor.appLabel !== ""
+                id: advanced
+                AppButton {
+                    variant: "ghost"
+                    leftPadding: 0
+                    text: qsTr("Advanced")
+                    Accessible.name: text
+                    onClicked: advanced.open = !advanced.open
+                    contentItem: Row {
+                        spacing: 6
+                        Icon {
+                            anchors.verticalCenter: parent.verticalCenter
+                            name: "chevronRight"; size: 12
+                            color: Theme.text
+                            rotation: advanced.open ? 90 : 0
+                        }
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: qsTr("Advanced")
+                            font.family: Theme.sans
+                            font.pixelSize: Theme.fontMd
+                            font.weight: Font.Medium
+                            color: Theme.text
+                        }
+                    }
+                }
+                GridLayout {
+                    visible: advanced.open
+                    Layout.fillWidth: true
+                    columns: 2
+                    columnSpacing: 16
+                    rowSpacing: 8
+                    Field {
+                        label: qsTr("Namespace label")
+                        AppTextField {
+                            mono: true
+                            placeholderText: qsTr("found automatically")
+                            text: editor.nsLabel
+                            onTextEdited: editor.nsLabel = text
+                            Accessible.name: qsTr("Namespace label")
+                        }
+                    }
+                    Field {
+                        label: qsTr("App label")
+                        AppTextField {
+                            mono: true
+                            placeholderText: qsTr("found automatically")
+                            text: editor.appLabel
+                            onTextEdited: editor.appLabel = text
+                            Accessible.name: qsTr("App label")
+                        }
+                    }
+                }
+                RowLayout {
+                    visible: advanced.open
+                    spacing: 10
+                    Text {
+                        Layout.fillWidth: true
+                        wrapMode: Text.Wrap
+                        text: qsTr("Empty fields: the labels are found automatically (_namespace / _appName and similar). Set both when your logs use other labels, e.g. kubernetes_namespace and app.")
+                        font.family: Theme.sans
+                        font.pixelSize: Theme.fontSm
+                        color: Theme.textMuted
+                    }
+                    AppButton {
+                        visible: editor.nsLabel !== "" || editor.appLabel !== ""
+                        text: qsTr("Find automatically")
+                        onClicked: { editor.nsLabel = ""; editor.appLabel = "" }
+                    }
+                }
+            }
+
             // Connection test
             Rectangle {
                 Layout.fillWidth: true
@@ -216,9 +313,11 @@ ColumnLayout {
                 visible: editor.testState !== EnvironmentEditor.Failed
                 implicitHeight: testRow.implicitHeight + 24
                 radius: Theme.radiusLg - 2
-                color: editor.testState === EnvironmentEditor.Passed ? Theme.successSoft : "transparent"
+                color: editor.testState === EnvironmentEditor.Passed ? Theme.successSoft
+                     : editor.testState === EnvironmentEditor.Testing ? Theme.tint(Theme.accent, 0.06) : "transparent"
                 border.width: 1
-                border.color: editor.testState === EnvironmentEditor.Passed ? Theme.successBorder : Theme.border
+                border.color: editor.testState === EnvironmentEditor.Passed ? Theme.successBorder
+                            : editor.testState === EnvironmentEditor.Testing ? Theme.accentBorder : Theme.border
                 RowLayout {
                     id: testRow
                     anchors.fill: parent
@@ -255,6 +354,26 @@ ColumnLayout {
                             font.weight: Font.Medium
                             color: Theme.textStrong
                         }
+                        // Steps as they pass: where a problem is shows at once.
+                        Column {
+                            visible: editor.testState === EnvironmentEditor.Testing
+                            Layout.topMargin: 4
+                            spacing: 3
+                            Repeater {
+                                model: [
+                                    { text: editor.testStep >= 1 ? qsTr("Server responds · %1 ms").arg(editor.testServerMs) : qsTr("Connecting to the server…"), state: editor.testStep >= 1 ? 2 : 1 },
+                                    { text: qsTr("Login and datasource accepted"), state: editor.testStep >= 1 ? 2 : 0 },
+                                    { text: qsTr("Finding namespaces and apps"), state: editor.testStep >= 1 ? 1 : 0 },
+                                ]
+                                delegate: Text {
+                                    required property var modelData
+                                    text: (modelData.state === 2 ? "✓ " : modelData.state === 1 ? "… " : "○ ") + modelData.text
+                                    font.family: Theme.sans
+                                    font.pixelSize: Theme.fontSm
+                                    color: modelData.state === 2 ? Theme.success : modelData.state === 1 ? Theme.text : Theme.textMuted
+                                }
+                            }
+                        }
                         Text {
                             Layout.fillWidth: true
                             visible: editor.testState === EnvironmentEditor.Passed
@@ -266,9 +385,14 @@ ColumnLayout {
                         }
                     }
                     AppButton {
-                        enabled: editor.testState !== EnvironmentEditor.Testing
+                        visible: editor.testState !== EnvironmentEditor.Testing
                         text: editor.testState === EnvironmentEditor.Passed ? qsTr("Test again") : qsTr("Test connection")
                         onClicked: editor.testConnection()
+                    }
+                    AppButton {
+                        visible: editor.testState === EnvironmentEditor.Testing
+                        text: qsTr("Cancel the test")
+                        onClicked: editor.cancelTest()
                     }
                 }
             }
@@ -319,19 +443,56 @@ ColumnLayout {
             anchors.leftMargin: 24
             anchors.rightMargin: 24
             spacing: 8
-            AppButton {
-                visible: editor.canRemove
-                variant: "danger"
-                text: qsTr("Delete environment")
-                onClicked: confirmRemove.open()
+            // The only environment cannot go; the reason shows on hover.
+            Item {
+                visible: !editor.isNew
+                implicitWidth: deleteButton.implicitWidth
+                implicitHeight: deleteButton.implicitHeight
+                HoverHandler { id: deleteHover }
+                AppButton {
+                    id: deleteButton
+                    variant: "danger"
+                    enabled: editor.canRemove
+                    text: qsTr("Delete environment")
+                    onClicked: confirmRemove.open()
+                }
+                AppToolTip {
+                    visible: deleteHover.hovered && !deleteButton.enabled
+                    text: qsTr("The only environment cannot be deleted")
+                }
             }
             Item { Layout.fillWidth: true }
-            AppButton { text: qsTr("Cancel"); onClicked: root.done() }
+            AppButton { text: qsTr("Cancel"); onClicked: root.confirmLeave(() => root.done()) }
+            AppButton {
+                visible: editor.testState === EnvironmentEditor.Failed
+                variant: "ghost"
+                text: qsTr("Save without the test")
+                onClicked: if (editor.save(true)) root.done()
+            }
             AppButton {
                 variant: "primary"
                 text: qsTr("Save and connect")
+                enabled: editor.testState !== EnvironmentEditor.Testing
                 onClicked: if (editor.save(true)) root.done()
             }
+        }
+    }
+
+    // Leaving the form with unsaved changes.
+    UnsavedChangesDialog {
+        id: unsaved
+        property var then: null
+        title: editor.isNew ? qsTr("Save the new environment?") : qsTr("Save the changes to %1?").arg(editor.name)
+        onDiscardRequested: {
+            const then = unsaved.then
+            unsaved.close()
+            if (editor.isNew) editor.createNew(); else editor.load(editor.environmentId)
+            if (then) then()
+        }
+        onSaveRequested: {
+            const then = unsaved.then
+            unsaved.close()
+            if (editor.save(true) && then) then()
         }
     }
 

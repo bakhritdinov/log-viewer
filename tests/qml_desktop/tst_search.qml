@@ -115,8 +115,8 @@ TestCase {
 
     function test_10_savedQuery() {
         keySequence("Ctrl+S")
-        tryVerify(() => overlayText("Сохранить текущий") !== null)
-        mouseClick(overlayText("Сохранить текущий"))
+        tryVerify(() => overlayText("Сохранить") !== null)
+        mouseClick(overlayText("Сохранить"))
         tryCompare(Session.savedQueries, "count", 1)
         keyClick(Qt.Key_Escape)
     }
@@ -229,7 +229,7 @@ TestCase {
         mouseClick(button)
         const items = () => H.findAll(root(), it => it.hasOwnProperty("checkedMark") && H.isShown(it))
         tryVerify(() => items().length === 6)
-        compare(items().map(i => i.text), ["Без автообновления", "Каждые 5 с", "Каждые 10 с", "Каждые 30 с", "Каждые 1 мин", "Live tail (хвост)"])
+        compare(items().map(i => i.text), ["Без автообновления", "Каждые 5 с", "Каждые 10 с", "Каждые 30 с", "Каждую минуту", "Live tail (хвост)"])
         verify(items()[0].checkedMark)
         waitForRendering(root())
         mouseClick(items()[2])

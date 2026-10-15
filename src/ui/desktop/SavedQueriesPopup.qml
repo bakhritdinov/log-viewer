@@ -24,6 +24,30 @@ Popup {
         tab = 0
         open()
     }
+    // Notices go to the window's toast (with an optional action).
+    function notify(text, actionText, action) {
+        const w = body.ApplicationWindow.window
+        if (w && w.notify) w.notify(text, actionText, action)   // qmllint disable missing-property
+    }
+
+    // A saved query with the typed name: saving replaces it.
+    readonly property string conflictId: opened && nameField.text.trim() !== "" ? Session.savedQueryIdByName(nameField.text) : ""
+    readonly property int conflictNumber: {
+        if (conflictId === "") return 0
+        for (let i = 0; i < Session.savedQueries.count; ++i)
+            if (Session.savedQueries.get(i).id === conflictId) return i + 1
+        return 0
+    }
+
+    function save() {
+        const name = nameField.text.trim()
+        if (name === "" || Session.namespaceName === "") return
+        if (conflictId !== "") Session.replaceSavedQuery(conflictId)
+        else Session.saveCurrentQuery(name)
+        const number = conflictId !== "" ? conflictNumber : Session.savedQueries.count
+        nameField.text = ""
+        notify(number <= 9 ? qsTr("Query “%1” saved · Ctrl+%2").arg(name).arg(number) : qsTr("Query “%1” saved").arg(name))
+    }
 
     width: 520
     padding: 0
@@ -33,48 +57,78 @@ Popup {
 
     background: Surface { elevated: true; radius: Theme.radiusLg + 2 }
 
+    Clipboard { id: clipboard }
+
     contentItem: ColumnLayout {
+        id: body
         spacing: 0
         Accessible.role: Accessible.Dialog
         Accessible.name: qsTr("Saved queries")
 
         SegmentedControl {
             Layout.margins: 12
+            Layout.bottomMargin: 0
             model: [{ label: qsTr("Saved"), value: 0 }, { label: qsTr("Recent searches"), value: 1 }]
             value: root.tab
             onActivated: v => root.tab = v
         }
 
         // ── Saved ──
-        RowLayout {
+        ColumnLayout {
             visible: root.tab === 0
             Layout.fillWidth: true
-            Layout.leftMargin: 12
-            Layout.rightMargin: 12
+            Layout.margins: 12
             spacing: 8
-            AppTextField {
-                id: nameField
+            RowLayout {
                 Layout.fillWidth: true
-                placeholderText: qsTr("Query name")
-                Accessible.name: qsTr("Query name")
-                onAccepted: saveButton.clicked()
+                spacing: 8
+                AppTextField {
+                    id: nameField
+                    Layout.fillWidth: true
+                    implicitHeight: 34
+                    placeholderText: qsTr("Name of the current query")
+                    Accessible.name: qsTr("Query name")
+                    onAccepted: root.save()
+                    Keys.onEscapePressed: event => { if (text !== "") { text = ""; event.accepted = true } else event.accepted = false }
+                    background: Rectangle {
+                        radius: Theme.radiusMd
+                        color: Theme.inputBg
+                        border.width: 1
+                        border.color: root.conflictId !== "" ? Theme.warn : nameField.activeFocus ? Theme.focusRing : Theme.border
+                    }
+                }
+                AppButton {
+                    variant: "primary"
+                    implicitHeight: 34
+                    iconName: "star"
+                    text: root.conflictId !== "" ? qsTr("Replace") : qsTr("Save")
+                    enabled: nameField.text.trim() !== "" && Session.namespaceName !== ""
+                    onClicked: root.save()
+                }
             }
-            AppButton {
-                id: saveButton
-                variant: "primary"
-                iconName: "star"
-                text: qsTr("Save current")
-                enabled: nameField.text.trim() !== "" && Session.namespaceName !== ""
-                onClicked: { Session.saveCurrentQuery(nameField.text.trim()); nameField.text = "" }
+            RowLayout {
+                visible: root.conflictId !== ""
+                spacing: 6
+                Icon { name: "warning"; size: 13; color: Theme.warnText }
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.Wrap
+                    text: qsTr("Query “%1” already exists (No. %2). Saving replaces it.").arg(nameField.text.trim()).arg(root.conflictNumber)
+                    font.family: Theme.sans
+                    font.pixelSize: Theme.fontSm
+                    color: Theme.warnText
+                }
             }
         }
+
         ListView {
             id: savedList
             visible: root.tab === 0
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.min(contentHeight, 320)
-            Layout.margins: 6
-            Layout.topMargin: 10
+            Layout.preferredHeight: Math.min(contentHeight, 336)
+            Layout.leftMargin: 6
+            Layout.rightMargin: 6
+            Layout.bottomMargin: 6
             clip: true
             model: Session.savedQueries
             boundsBehavior: Flickable.StopAtBounds
@@ -83,6 +137,8 @@ Popup {
                 // Basic's 12 px vertical padding pushes the content below the row's centre.
                 topPadding: 0
                 bottomPadding: 0
+                leftPadding: 10
+                rightPadding: 8
                 hoverEnabled: true
                 required property int index
                 required property string id
@@ -91,18 +147,24 @@ Popup {
                 required property string environmentName
                 required property string environmentColor
                 readonly property bool renaming: root.renamingId === query.id
+                readonly property bool actionsShown: hovered || moreMenu.opened || query.visualFocus
                 width: ListView.view.width
                 height: 48
                 Accessible.name: qsTr("%1: %2").arg(query.name).arg(query.summary)
                 onClicked: if (!query.renaming) { Session.runSavedQuery(query.id); root.close() }
-                background: Rectangle { radius: Theme.radiusMd; color: query.hovered ? Theme.subtle : "transparent" }
+                background: Rectangle {
+                    radius: Theme.radiusLg - 2
+                    color: query.renaming || query.actionsShown ? Theme.subtle : "transparent"
+                    border.width: query.renaming || query.visualFocus ? 1 : 0
+                    border.color: Theme.focusRing
+                }
                 contentItem: RowLayout {
                     spacing: 10
                     Text {
-                        visible: query.index < 9
-                        text: query.index + 1
+                        Layout.preferredWidth: 14
+                        text: query.index < 9 ? query.index + 1 : ""
                         font.family: Theme.mono
-                        font.pixelSize: Theme.fontXs
+                        font.pixelSize: Theme.fontSm
                         color: Theme.textMuted
                     }
                     ColumnLayout {
@@ -128,47 +190,112 @@ Popup {
                         }
                     }
                     AppTextField {
+                        id: renameField
                         Layout.fillWidth: true
+                        implicitHeight: 32
                         visible: query.renaming
                         text: query.name
                         Accessible.name: qsTr("New name")
-                        onVisibleChanged: if (visible) { forceActiveFocus(); selectAll() }
-                        onAccepted: { Session.renameSavedQuery(query.id, text.trim()); root.renamingId = "" }
+                        onVisibleChanged: if (visible) { text = query.name; forceActiveFocus(); selectAll() }
+                        onAccepted: if (text.trim() !== "") { Session.renameSavedQuery(query.id, text.trim()); root.renamingId = "" }
                         Keys.onEscapePressed: root.renamingId = ""
                     }
+                    IconButton {
+                        visible: query.renaming
+                        iconName: "check"
+                        iconColor: Theme.success
+                        label: qsTr("Save the name")
+                        onClicked: if (renameField.text.trim() !== "") { Session.renameSavedQuery(query.id, renameField.text.trim()); root.renamingId = "" }
+                    }
+                    IconButton {
+                        visible: query.renaming
+                        iconName: "close"
+                        label: qsTr("Cancel")
+                        onClicked: root.renamingId = ""
+                    }
                     Text {
+                        visible: !query.renaming
                         text: query.environmentName
                         font.family: Theme.sans
                         font.pixelSize: Theme.fontXs
                         font.weight: Font.DemiBold
                         color: query.environmentColor
                     }
+                    // Shown on the hovered row; the place stays reserved so nothing jumps.
+                    IconButton {
+                        visible: !query.renaming
+                        opacity: query.actionsShown ? 1 : 0
+                        implicitWidth: 28
+                        implicitHeight: 28
+                        iconName: "link"
+                        label: qsTr("Copy the link to “%1”").arg(query.name)
+                        onClicked: { clipboard.copy(Session.savedQueryLink(query.id)); root.notify(qsTr("Link copied")) }
+                    }
                     IconButton {
                         id: moreButton
+                        visible: !query.renaming
+                        opacity: query.actionsShown ? 1 : 0
+                        implicitWidth: 28
+                        implicitHeight: 28
                         iconName: "more"
+                        checked: moreMenu.opened
                         label: qsTr("More actions with “%1”").arg(query.name)
                         onClicked: moreMenu.open()
                         AppMenu {
                             id: moreMenu
-                            y: moreButton.height
+                            y: moreButton.height + 4
                             x: moreButton.width - width
-                            minimumWidth: 160
+                            minimumWidth: 230
                             AppMenuItem { text: qsTr("Rename"); onTriggered: root.renamingId = query.id }
-                            AppMenuItem { text: qsTr("Delete"); danger: true; onTriggered: Session.removeSavedQuery(query.id) }
+                            AppMenuItem {
+                                text: qsTr("Replace with the current query")
+                                enabled: Session.namespaceName !== ""
+                                onTriggered: { Session.replaceSavedQuery(query.id); root.notify(qsTr("Query “%1” updated").arg(query.name)) }
+                            }
+                            AppMenuItem {
+                                text: qsTr("Move up")
+                                enabled: query.index > 0
+                                onTriggered: Session.moveSavedQueryUp(query.id)
+                            }
+                            AppMenuSeparator { }
+                            AppMenuItem {
+                                text: qsTr("Delete")
+                                danger: true
+                                onTriggered: {
+                                    const name = query.name
+                                    Session.removeSavedQuery(query.id)
+                                    root.notify(qsTr("Query “%1” deleted").arg(name), qsTr("Undo"), () => Session.restoreSavedQuery())
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-        Text {
+        ColumnLayout {
             visible: root.tab === 0 && savedList.count === 0
             Layout.fillWidth: true
-            Layout.margins: 16
-            wrapMode: Text.Wrap
-            text: qsTr("No saved queries yet. Name the current search and press “Save current”.")
-            font.family: Theme.sans
-            font.pixelSize: Theme.fontMd
-            color: Theme.textMuted
+            Layout.margins: 24
+            Layout.topMargin: 12
+            spacing: 8
+            Icon { Layout.alignment: Qt.AlignHCenter; name: "star"; size: 28; strokeWidth: 1.6; color: Theme.textMuted }
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: qsTr("No saved queries yet")
+                font.family: Theme.sans
+                font.pixelSize: Theme.fontMd
+                font.weight: Font.Medium
+                color: Theme.textStrong
+            }
+            Text {
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                text: qsTr("Name the current search and press “Save”. The first nine run with Ctrl+1…Ctrl+9.")
+                font.family: Theme.sans
+                font.pixelSize: Theme.fontSm
+                color: Theme.textMuted
+            }
         }
 
         // ── History ──
@@ -201,7 +328,7 @@ Popup {
                         text: item.modelData
                         elide: Text.ElideRight
                         font.family: Theme.mono
-                        font.pixelSize: Theme.fontMd
+                        font.pixelSize: Theme.fontSm
                         color: Theme.text
                     }
                 }
@@ -209,10 +336,12 @@ Popup {
         }
         Text {
             visible: root.tab === 1 && historyList.count === 0
+            Layout.fillWidth: true
             Layout.margins: 16
+            horizontalAlignment: Text.AlignHCenter
             text: qsTr("No recent searches.")
             font.family: Theme.sans
-            font.pixelSize: Theme.fontMd
+            font.pixelSize: Theme.fontSm
             color: Theme.textMuted
         }
 
@@ -231,7 +360,7 @@ Popup {
                 Kbd { visible: root.tab === 0; text: qsTr("Ctrl+1…9") }
                 Text {
                     Layout.fillWidth: true
-                    text: root.tab === 0 ? qsTr("run by number · stored on this device") : ""
+                    text: root.tab === 0 ? qsTr("run by number · stored on this device") : qsTr("Last 50 searches")
                     elide: Text.ElideRight
                     font.family: Theme.sans
                     font.pixelSize: Theme.fontSm
@@ -240,6 +369,7 @@ Popup {
                 AppButton {
                     visible: root.tab === 1 && historyList.count > 0
                     variant: "ghost"
+                    implicitHeight: 28
                     text: qsTr("Clear history")
                     onClicked: Session.clearHistory()
                 }

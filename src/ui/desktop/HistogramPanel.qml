@@ -18,7 +18,25 @@ Rectangle {
         { label: qsTr("1 h"), value: 3600000 },
     ]
 
-    implicitHeight: column.implicitHeight + 18
+    // Bucket of the picked interval (dims the other bars), -1 when none.
+    readonly property int selectedIndex: {
+        const from = Session.histogramFilterFromMs
+        if (from <= 0) return -1
+        for (let i = 0; i < Session.histogram.count; ++i)
+            if (Session.histogram.get(i).startMs === from) return i
+        return -1
+    }
+    // WARN and above per bucket, for the one-line trend of the collapsed chart.
+    readonly property var trend: {
+        void Session.histogramMax                    // re-evaluated with the chart
+        const out = []
+        for (let i = 0; i < Session.histogram.count; ++i) out.push(Session.histogram.get(i).important)
+        return out
+    }
+    // First batch on its way: grey bars instead of an empty frame.
+    readonly property bool skeleton: Session.loading && Session.histogram.count === 0
+
+    implicitHeight: column.implicitHeight + (expanded ? 18 : 12)
     color: Theme.bg
     Accessible.role: Accessible.Grouping
     Accessible.name: qsTr("Distribution over time")
@@ -29,7 +47,7 @@ Rectangle {
         id: column
         anchors { left: parent.left; right: parent.right; top: parent.top }
         anchors.margins: 16
-        anchors.topMargin: 10
+        anchors.topMargin: root.expanded ? 10 : 6
         spacing: 8
 
         RowLayout {
@@ -53,6 +71,21 @@ Rectangle {
                 }
                 // Only a time bucket or a pattern needs a chip; a level shows on the
                 // legend and is turned off there (or by double-clicking the chart).
+                // Collapsed: the trend in one line (the level buttons still filter).
+                Item {
+                    visible: !root.expanded && root.trend.length > 0
+                    implicitWidth: 160
+                    implicitHeight: legend.implicitHeight
+                    Sparkline {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width
+                        height: 16
+                        values: root.trend
+                        maxValue: Math.max(1, Session.histogramMax)
+                        color: Theme.warn
+                        opacity: 0.8
+                    }
+                }
                 FilterChip {
                     visible: Session.histogramRangeOrPatternFilter
                     pill: false
@@ -79,10 +112,34 @@ Rectangle {
             }
         }
 
+        Row {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 76
+            visible: root.expanded && root.skeleton
+            spacing: 2
+            Repeater {
+                model: 48
+                delegate: Rectangle {
+                    required property int index
+                    anchors.bottom: parent ? parent.bottom : undefined
+                    width: (parent.width - 47 * 2) / 48
+                    height: 76 * (0.3 + 0.3 * Math.abs(Math.sin(index / 4)))
+                    radius: 1
+                    color: Theme.subtle
+                    SequentialAnimation on opacity {
+                        running: root.skeleton
+                        loops: Animation.Infinite
+                        NumberAnimation { from: 0.45; to: 0.85; duration: 700 }
+                        NumberAnimation { from: 0.85; to: 0.45; duration: 700 }
+                    }
+                }
+            }
+        }
         HistogramView {
             Layout.fillWidth: true
             Layout.preferredHeight: 76
-            visible: root.expanded
+            visible: root.expanded && !root.skeleton
+            selectedIndex: root.selectedIndex
             model: Session.histogram
             maxTotal: Session.histogramMax
             onBucketClicked: (index, level) => Session.applyBucketFilter(index, level)
@@ -90,7 +147,7 @@ Rectangle {
         }
         RowLayout {
             Layout.fillWidth: true
-            visible: root.expanded
+            visible: root.expanded && !root.skeleton
             Repeater {
                 model: Session.histogramAxis
                 delegate: Text {
