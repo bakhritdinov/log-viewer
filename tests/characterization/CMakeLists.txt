@@ -8,3 +8,7 @@ logviewer_add_test(tst_legacy_logmodel
 logviewer_add_test(tst_golden_fixtures
     SOURCES tst_golden_fixtures.cpp
     LIBS Qt6::Core)
+
+logviewer_add_test(tst_histogram_vs_legacy
+    SOURCES tst_histogram_vs_legacy.cpp
+    LIBS LogViewerLogs logviewer_core)

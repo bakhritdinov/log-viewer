@@ -59,6 +59,41 @@ inline QByteArray header(const lv::HttpRequest& r, const QByteArray& name)
     return {};
 }
 
+struct Row {
+    qint64 ms;
+    QString message;
+    QString level = QStringLiteral("info");
+};
+
+// A /api/ds/query logs response with one frame holding `rows`.
+inline QByteArray logsBody(const QList<Row>& rows)
+{
+    QJsonArray labels, times, lines;
+    for (const Row& r : rows) {
+        labels.append(QJsonObject{ { "_namespace", "ns" }, { "_appName", "app" }, { "level", r.level } });
+        times.append(r.ms);
+        lines.append(r.message);
+    }
+    const QJsonObject frame{
+        { "schema", QJsonObject{ { "fields", QJsonArray{ QJsonObject{ { "name", "labels" } },
+                                                          QJsonObject{ { "name", "Time" } },
+                                                          QJsonObject{ { "name", "Line" } } } } } },
+        { "data", QJsonObject{ { "values", QJsonArray{ labels, times, lines } } } },
+    };
+    const QJsonObject body{ { "results", QJsonObject{ { "A", QJsonObject{ { "status", 200 },
+                                                                         { "frames", QJsonArray{ frame } } } } } } };
+    return QJsonDocument(body).toJson(QJsonDocument::Compact);
+}
+
+// `count` unique rows going back from `newestMs` every `stepMs`.
+inline QByteArray logsBody(qint64 newestMs, int count, int stepMs = 10, const QString& prefix = QStringLiteral("m"))
+{
+    QList<Row> rows;
+    rows.reserve(count);
+    for (int i = 0; i < count; ++i) rows.append({ newestMs - qint64(i) * stepMs, prefix + QString::number(i) });
+    return logsBody(rows);
+}
+
 class FakeHttpCall : public lv::HttpCall {
 public:
     void abort() override { finish(failure(lv::HttpResponse::Failure::Cancelled, QStringLiteral("aborted"))); }

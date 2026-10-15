@@ -10,9 +10,21 @@ QString escapeLogsQL(QStringView value)
     return out;
 }
 
-QString timeWindowFilter(qint64 windowSeconds, qint64 offsetSeconds)
+namespace {
+QString isoMs(const QDateTime& t)
 {
-    return QStringLiteral("_time:%1s offset %2s").arg(windowSeconds).arg(offsetSeconds);
+    return t.toUTC().toString(Qt::ISODateWithMs);
+}
+} // namespace
+
+QString timeRangeFilter(const QDateTime& from, const QDateTime& to)
+{
+    return QStringLiteral("_time:[%1, %2]").arg(isoMs(from), isoMs(to));
+}
+
+QString timeSinceFilter(const QDateTime& from)
+{
+    return QStringLiteral("_time:>=%1").arg(isoMs(from));
 }
 
 QString levelFilterExpression(Level level)

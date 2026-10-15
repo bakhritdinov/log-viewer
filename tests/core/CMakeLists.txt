@@ -8,3 +8,7 @@ logviewer_add_test(tst_core_error_classifier SOURCES tst_error_classifier.cpp LI
 logviewer_add_test(tst_core_label_discovery  SOURCES tst_label_discovery.cpp  LIBS logviewer_core)
 logviewer_add_test(tst_core_qt_http_client   SOURCES tst_qt_http_client.cpp   LIBS logviewer_core)
 logviewer_add_test(tst_core_parse_executor   SOURCES tst_parse_executor.cpp   LIBS logviewer_core)
+logviewer_add_test(tst_core_log_store       SOURCES tst_log_store.cpp       LIBS logviewer_core)
+logviewer_add_test(tst_core_analysis        SOURCES tst_analysis.cpp        LIBS logviewer_core)
+logviewer_add_test(tst_core_chained_loader  SOURCES tst_chained_loader.cpp  LIBS logviewer_core)
+logviewer_add_test(tst_core_live_tail       SOURCES tst_live_tail.cpp       LIBS logviewer_core)

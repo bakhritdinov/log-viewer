@@ -131,9 +131,13 @@ private slots:
         QCOMPARE(buildLogsQL(r), QStringLiteral("{ns=\"a\", app=\"b\"} -pod:~\"canary.*\" msg:\"say \\\"hi\\\"\""));
     }
 
-    void timeWindowFilter()
+    void timeFilters()
     {
-        QCOMPARE(lv::timeWindowFilter(3600, 1834), QStringLiteral("_time:3600s offset 1834s"));
+        const QDateTime from = QDateTime::fromString("2026-10-15T09:00:00.250Z", Qt::ISODateWithMs);
+        const QDateTime to = QDateTime(QDate(2026, 10, 15), QTime(14, 30), QTimeZone::fromSecondsAheadOfUtc(5 * 3600));
+        QCOMPARE(lv::timeRangeFilter(from, to),
+                 QStringLiteral("_time:[2026-10-15T09:00:00.250Z, 2026-10-15T09:30:00.000Z]"));
+        QCOMPARE(lv::timeSinceFilter(from), QStringLiteral("_time:>=2026-10-15T09:00:00.250Z"));
     }
 };
 

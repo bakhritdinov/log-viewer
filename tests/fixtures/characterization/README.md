@@ -48,3 +48,10 @@ Legacy `GrafanaClient` behaviour (asserted in `tests/core/tst_grafana_api.cpp` a
 |---|---|---|
 | 10 | a datasource error inside a 200 body (`results.A.error`, e.g. a LogsQL syntax error) was ignored and looked like "no logs" | classified as BadQuery / TooHeavy and shown to the user |
 | 11 | errors were pre-formatted English strings | typed `RequestError` kinds; wording lives in the UI layer |
+
+Loader (asserted in `tests/core/tst_chained_loader.cpp`; to be confirmed against live Grafana in stage 9):
+
+| # | Old behaviour | New behaviour |
+|---|---|---|
+| 12 | `_time:<range>s offset <n>s` relative to *now*, recomputed per batch: the window drifted while loading, a past custom range intersected "last N seconds" (often empty), and each batch skipped up to 1 s of entries (`offset + 1`) | the window is fixed at start and walked back with `_time:[from, oldest]`; overlap removed by de-duplication; an all-duplicate batch stops the walk |
+| 13 | trace lookup searched `trace_id` over the current range | trace and context views search ±5 min / ±N around the entry |

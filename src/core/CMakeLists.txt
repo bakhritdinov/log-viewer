@@ -12,6 +12,11 @@ add_library(logviewer_core STATIC
     data/ErrorClassifier.cpp data/ErrorClassifier.h
     data/LabelDiscovery.cpp data/LabelDiscovery.h
     data/ParseExecutor.cpp data/ParseExecutor.h
+    features/LogStore.cpp features/LogStore.h
+    features/Analysis.cpp features/Analysis.h
+    features/ChainedLoader.cpp features/ChainedLoader.h
+    features/LiveTail.cpp features/LiveTail.h
+    features/Focus.cpp features/Focus.h
     query/Query.cpp query/Query.h
     query/LogsQL.cpp query/LogsQL.h
     query/Suggestions.cpp query/Suggestions.h
