@@ -495,10 +495,6 @@
         <translation>Шаг гистограммы</translation>
     </message>
     <message>
-        <source>Tap a bar to see the entries of that interval; tap a level to show only it.</source>
-        <translation>Нажмите на столбец, чтобы увидеть записи этого интервала; на уровень — чтобы показать только его.</translation>
-    </message>
-    <message>
         <source>No chart — the request failed</source>
         <translation>Графика нет — запрос не выполнен</translation>
     </message>
@@ -513,6 +509,30 @@
     <message>
         <source>No entries for “%1”.</source>
         <translation>Нет записей за «%1».</translation>
+    </message>
+    <message>
+        <source>picked interval</source>
+        <translation>выбранный интервал</translation>
+    </message>
+    <message>
+        <source>No %1 in this interval</source>
+        <translation>В этом интервале нет %1</translation>
+    </message>
+    <message>
+        <source>Show the whole period</source>
+        <translation>Показать весь период</translation>
+    </message>
+    <message>
+        <source>All entries</source>
+        <translation>Все записи</translation>
+    </message>
+    <message>
+        <source>Only ERROR</source>
+        <translation>Только ERROR</translation>
+    </message>
+    <message>
+        <source>Slide a finger over the chart to pick an interval; tap a level to show only it.</source>
+        <translation>Проведите пальцем по графику, чтобы выбрать интервал; нажмите на уровень — чтобы показать только его.</translation>
     </message>
 </context>
 <context>
@@ -777,6 +797,97 @@
     <message>
         <source>Context</source>
         <translation>Контекст</translation>
+    </message>
+</context>
+<context>
+    <name>DetailsScreen</name>
+    <message>
+        <source>Logs</source>
+        <translation>Логи</translation>
+    </message>
+    <message>
+        <source>Entry details</source>
+        <translation>Подробности записи</translation>
+    </message>
+    <message>
+        <source>Previous entry</source>
+        <translation>Предыдущая запись</translation>
+    </message>
+    <message>
+        <source>Next entry</source>
+        <translation>Следующая запись</translation>
+    </message>
+    <message numerus="yes">
+        <source>Message · %n line(s)</source>
+        <translation>
+            <numerusform>Сообщение · %n строка</numerusform>
+            <numerusform>Сообщение · %n строки</numerusform>
+            <numerusform>Сообщение · %n строк</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation>Сообщение</translation>
+    </message>
+    <message>
+        <source>Format</source>
+        <translation>Формат</translation>
+    </message>
+    <message>
+        <source>Text</source>
+        <translation>Текст</translation>
+    </message>
+    <message>
+        <source>Collapse</source>
+        <translation>Свернуть</translation>
+    </message>
+    <message>
+        <source>Show all</source>
+        <translation>Показать полностью</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>Скопировано</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Копировать</translation>
+    </message>
+    <message>
+        <source>Entry copied</source>
+        <translation>Запись скопирована</translation>
+    </message>
+    <message>
+        <source>Message copied</source>
+        <translation>Сообщение скопировано</translation>
+    </message>
+    <message>
+        <source>Trace</source>
+        <translation>Трейс</translation>
+    </message>
+    <message>
+        <source>Context</source>
+        <translation>Контекст</translation>
+    </message>
+    <message>
+        <source>No trace: the entry has no trace_id</source>
+        <translation>Трейс недоступен: у записи нет trace_id</translation>
+    </message>
+    <message>
+        <source>Fields · %1</source>
+        <translation>Поля · %1</translation>
+    </message>
+    <message>
+        <source>hold to copy</source>
+        <translation>удерживайте, чтобы скопировать</translation>
+    </message>
+    <message>
+        <source>Show only %1 = %2</source>
+        <translation>Показать только %1 = %2</translation>
+    </message>
+    <message>
+        <source>Exclude %1 = %2</source>
+        <translation>Исключить %1 = %2</translation>
     </message>
 </context>
 <context>
@@ -1069,6 +1180,29 @@
     </message>
 </context>
 <context>
+    <name>FieldSheet</name>
+    <message>
+        <source>Show only this value</source>
+        <translation>Показать только это значение</translation>
+    </message>
+    <message>
+        <source>Exclude this value</source>
+        <translation>Исключить это значение</translation>
+    </message>
+    <message>
+        <source>Copy the value</source>
+        <translation>Копировать значение</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>Скопировано</translation>
+    </message>
+    <message>
+        <source>Copy as %1</source>
+        <translation>Копировать как %1</translation>
+    </message>
+</context>
+<context>
     <name>FieldsPanel</name>
     <message>
         <source>Show fields</source>
@@ -1112,6 +1246,105 @@
     <message>
         <source>Remove filter %1</source>
         <translation>Убрать фильтр %1</translation>
+    </message>
+</context>
+<context>
+    <name>FocusScreen</name>
+    <message>
+        <source>Around the entry</source>
+        <translation>Вокруг записи</translation>
+    </message>
+    <message>
+        <source>Entry</source>
+        <translation>Запись</translation>
+    </message>
+    <message>
+        <source>Trace %1…</source>
+        <translation>Трейс %1…</translation>
+    </message>
+    <message>
+        <source>Around %1</source>
+        <translation>Вокруг %1</translation>
+    </message>
+    <message>
+        <source>What to show around the entry</source>
+        <translation>Что показать вокруг записи</translation>
+    </message>
+    <message>
+        <source>Context</source>
+        <translation>Контекст</translation>
+    </message>
+    <message>
+        <source>Window</source>
+        <translation>Окно</translation>
+    </message>
+    <message>
+        <source>±30 s</source>
+        <translation>±30 с</translation>
+    </message>
+    <message>
+        <source>±1 min</source>
+        <translation>±1 мин</translation>
+    </message>
+    <message>
+        <source>±5 min</source>
+        <translation>±5 мин</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n entries</source>
+        <translation>
+            <numerusform>%n запись</numerusform>
+            <numerusform>%n записи</numerusform>
+            <numerusform>%n записей</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n service(s)</source>
+        <translation>
+            <numerusform>%n сервис</numerusform>
+            <numerusform>%n сервиса</numerusform>
+            <numerusform>%n сервисов</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>All %1 entries · search filters are lifted</source>
+        <translation>Все записи %1 · фильтры поиска сняты</translation>
+    </message>
+    <message>
+        <source>Entries around</source>
+        <translation>Записи вокруг</translation>
+    </message>
+    <message>
+        <source>No other entries of the trace within ±5 min</source>
+        <translation>Других записей трейса за ±5 мин нет</translation>
+    </message>
+    <message>
+        <source>No entries around %1</source>
+        <translation>Вокруг %1 нет записей</translation>
+    </message>
+    <message>
+        <source>Other services may write the trace id into another field.</source>
+        <translation>Другие сервисы могут писать идентификатор трейса в другое поле.</translation>
+    </message>
+    <message>
+        <source>Try a wider window.</source>
+        <translation>Попробуйте окно пошире.</translation>
+    </message>
+    <message>
+        <source>Show the context</source>
+        <translation>Показать контекст</translation>
+    </message>
+    <message>
+        <source>Widen to ±5 min</source>
+        <translation>Расширить до ±5 мин</translation>
+    </message>
+    <message>
+        <source>Loading…</source>
+        <translation>Загрузка…</translation>
+    </message>
+    <message>
+        <source>Open as search</source>
+        <translation>Открыть как поиск</translation>
     </message>
 </context>
 <context>
@@ -1728,6 +1961,10 @@
     <message>
         <source>Live tail</source>
         <translation>Live tail</translation>
+    </message>
+    <message>
+        <source>Around</source>
+        <translation>Вокруг</translation>
     </message>
 </context>
 <context>

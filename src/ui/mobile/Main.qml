@@ -50,6 +50,7 @@ ApplicationWindow {
                 onSourceRequested: sourceSheet.open()
                 onEnvironmentRequested: environmentSheet.open()
                 onPeriodRequested: timeSheet.open()
+                onEntryRequested: row => details.show(Session.logs, row)
                 onSaveRequested: saveSheet.openSaving()
                 onAddEnvironmentRequested: name => { missingEnvironment = ""; window.section = 2 }
             }
@@ -92,6 +93,40 @@ ApplicationWindow {
         onNotice: (text, actionText, action) => window.notify(text, actionText, action)
         onRan: searchScreen.close()
         onRenameRequested: id => saveSheet.openRenaming(id)
+    }
+    // An entry, the view around it, and an entry of that view.
+    function backToFeed() {
+        focusDetails.close()
+        if (Session.focus.active) Session.focus.close()
+        focusScreen.close()
+        details.close()
+        window.section = 0
+    }
+    DetailsScreen {
+        id: details
+        onNotice: (text, actionText, action) => window.notify(text, actionText, action)
+        onContextRequested: (model, row) => { Session.focus.openContext(model, row, 60); focusScreen.open() }
+        onTraceRequested: (model, row) => { Session.focus.openTrace(model, row); focusScreen.open() }
+        onFieldMenuRequested: (key, value) => fieldSheet.openFor(key, value)
+        onFiltered: window.backToFeed()
+    }
+    FocusScreen {
+        id: focusScreen
+        onEntryRequested: row => focusDetails.show(Session.focus.logs, row)
+        onSearchOpened: { focusDetails.close(); details.close(); window.section = 0 }
+    }
+    DetailsScreen {
+        id: focusDetails
+        backLabel: qsTr("Around")
+        canOpenFocus: false
+        onNotice: (text, actionText, action) => window.notify(text, actionText, action)
+        onFieldMenuRequested: (key, value) => fieldSheet.openFor(key, value)
+        onFiltered: window.backToFeed()
+    }
+    FieldSheet {
+        id: fieldSheet
+        onNotice: (text, actionText, action) => window.notify(text, actionText, action)
+        onFiltered: window.backToFeed()
     }
     SourceSheet { id: sourceSheet; onSettingsRequested: window.section = 2 }
     TimeSheet { id: timeSheet }

@@ -33,6 +33,16 @@
     </message>
 </context>
 <context>
+    <name>DetailsScreen</name>
+    <message numerus="yes">
+        <source>Message · %n line(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>EnvironmentEditor</name>
     <message numerus="yes">
         <source>Found %n namespace(s) · labels %1 / %2 · %3 ms</source>
@@ -53,6 +63,23 @@
     </message>
     <message numerus="yes">
         <source>%n more value(s)…</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>FocusScreen</name>
+    <message numerus="yes">
+        <source>%n entries</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n service(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
             <numerusform></numerusform>

@@ -13,6 +13,8 @@ Item {
     property int selectedIndex: -1
     property bool interactive: true
     property bool showTooltip: true
+    // Only this level's segments ("ERROR"/"WARN"; "" both): a level filter hides the other.
+    property string onlyLevel
 
     signal bucketClicked(int index, string level)
     signal resetRequested()                 // double click: back to all entries
@@ -46,7 +48,7 @@ Item {
                 readonly property var segments: [
                     { level: "WARN", count: warn },
                     { level: "ERROR", count: error },
-                ]
+                ].filter(s => root.onlyLevel === "" || s.level === root.onlyLevel)
 
                 width: (bars.width - bars.spacing * (repeater.count - 1)) / Math.max(1, repeater.count)
                 height: bars.height

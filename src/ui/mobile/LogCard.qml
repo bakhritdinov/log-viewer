@@ -19,6 +19,10 @@ AbstractButton {
     property int lines: 3
     // Came with the last refresh: a green glow that fades.
     property bool fresh: false
+    // The entry a focus is around (blue frame), and the service (trace: entries
+    // of several services, so it is always shown).
+    property bool anchor: false
+    property string service
 
     // "12 s", "4 min", "2 h", "3 d" since the entry.
     readonly property string ago: {
@@ -36,9 +40,9 @@ AbstractButton {
 
     background: Rectangle {
         radius: Theme.radiusLg
-        color: root.pressed ? Theme.subtle : root.fresh ? Theme.successSoft : Theme.surface
-        border.width: 1
-        border.color: root.fresh ? Theme.tint(Theme.success, 0.5) : Theme.borderMuted
+        color: root.pressed ? Theme.subtle : root.fresh ? Theme.successSoft : root.anchor ? Theme.accentSoft : Theme.surface
+        border.width: root.anchor ? 2 : 1
+        border.color: root.anchor ? Theme.accent : root.fresh ? Theme.tint(Theme.success, 0.5) : Theme.borderMuted
         Behavior on color { ColorAnimation { duration: 400 } }
         scale: root.pressed ? 0.98 : 1
         Behavior on scale { NumberAnimation { duration: 80 } }
@@ -81,6 +85,16 @@ AbstractButton {
                 }
                 Item { Layout.fillWidth: true }
                 Text {
+                    visible: root.service !== ""
+                    Layout.maximumWidth: root.width / 3
+                    text: root.service
+                    elide: Text.ElideRight
+                    font.family: Theme.mono
+                    font.pixelSize: Theme.fontSm
+                    color: Theme.accentText
+                }
+                Text {
+                    visible: root.service === ""
                     text: root.ago
                     font.family: Theme.mono
                     font.pixelSize: Theme.fontSm

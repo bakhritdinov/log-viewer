@@ -61,9 +61,12 @@ public:
         return jsonBody(http.requests.last()).value("queries").toArray().first().toObject().value("expr").toString();
     }
 
-    static QList<Row> rows(int count)
+    // The same entries every time (the first answer's clock): a later answer,
+    // e.g. the context around an entry, holds that very entry again.
+    QList<Row> rows(int count)
     {
-        const qint64 now = QDateTime::currentMSecsSinceEpoch();
+        if (baseMs == 0) baseMs = QDateTime::currentMSecsSinceEpoch();
+        const qint64 now = baseMs;
         QList<Row> out;
         const char* levels[] = { "error", "warn", "info" };
         for (int i = 0; i < count; ++i)
@@ -73,6 +76,7 @@ public:
         return out;
     }
 
+    qint64 baseMs = 0;
     FakeHttpClient http;
     MemoryStore kv;
     MemorySecretStore secrets;

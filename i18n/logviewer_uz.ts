@@ -491,10 +491,6 @@
         <translation>Gistogramma qadami</translation>
     </message>
     <message>
-        <source>Tap a bar to see the entries of that interval; tap a level to show only it.</source>
-        <translation>Shu oraliq yozuvlarini koʻrish uchun ustunga, faqat shu darajani koʻrsatish uchun darajaga bosing.</translation>
-    </message>
-    <message>
         <source>No chart — the request failed</source>
         <translation>Grafik yoʻq — soʻrov bajarilmadi</translation>
     </message>
@@ -509,6 +505,30 @@
     <message>
         <source>No entries for “%1”.</source>
         <translation>«%1» uchun yozuvlar yoʻq.</translation>
+    </message>
+    <message>
+        <source>picked interval</source>
+        <translation>tanlangan oraliq</translation>
+    </message>
+    <message>
+        <source>No %1 in this interval</source>
+        <translation>Bu oraliqda %1 yoʻq</translation>
+    </message>
+    <message>
+        <source>Show the whole period</source>
+        <translation>Butun davrni koʻrsatish</translation>
+    </message>
+    <message>
+        <source>All entries</source>
+        <translation>Barcha yozuvlar</translation>
+    </message>
+    <message>
+        <source>Only ERROR</source>
+        <translation>Faqat ERROR</translation>
+    </message>
+    <message>
+        <source>Slide a finger over the chart to pick an interval; tap a level to show only it.</source>
+        <translation>Oraliqni tanlash uchun grafik boʻylab barmogʻingizni suring; faqat shu darajani koʻrsatish uchun darajaga bosing.</translation>
     </message>
 </context>
 <context>
@@ -773,6 +793,96 @@
     <message>
         <source>Context</source>
         <translation>Kontekst</translation>
+    </message>
+</context>
+<context>
+    <name>DetailsScreen</name>
+    <message>
+        <source>Logs</source>
+        <translation>Loglar</translation>
+    </message>
+    <message>
+        <source>Entry details</source>
+        <translation>Yozuv tafsilotlari</translation>
+    </message>
+    <message>
+        <source>Previous entry</source>
+        <translation>Oldingi yozuv</translation>
+    </message>
+    <message>
+        <source>Next entry</source>
+        <translation>Keyingi yozuv</translation>
+    </message>
+    <message numerus="yes">
+        <source>Message · %n line(s)</source>
+        <translation>
+            <numerusform>Xabar · %n qator</numerusform>
+            <numerusform />
+        </translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation>Xabar</translation>
+    </message>
+    <message>
+        <source>Format</source>
+        <translation>Format</translation>
+    </message>
+    <message>
+        <source>Text</source>
+        <translation>Matn</translation>
+    </message>
+    <message>
+        <source>Collapse</source>
+        <translation>Yigʻish</translation>
+    </message>
+    <message>
+        <source>Show all</source>
+        <translation>Toʻliq koʻrsatish</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>Nusxalandi</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Nusxalash</translation>
+    </message>
+    <message>
+        <source>Entry copied</source>
+        <translation>Yozuv nusxalandi</translation>
+    </message>
+    <message>
+        <source>Message copied</source>
+        <translation>Xabar nusxalandi</translation>
+    </message>
+    <message>
+        <source>Trace</source>
+        <translation>Treys</translation>
+    </message>
+    <message>
+        <source>Context</source>
+        <translation>Kontekst</translation>
+    </message>
+    <message>
+        <source>No trace: the entry has no trace_id</source>
+        <translation>Treys yoʻq: yozuvda trace_id yoʻq</translation>
+    </message>
+    <message>
+        <source>Fields · %1</source>
+        <translation>Maydonlar · %1</translation>
+    </message>
+    <message>
+        <source>hold to copy</source>
+        <translation>nusxalash uchun bosib turing</translation>
+    </message>
+    <message>
+        <source>Show only %1 = %2</source>
+        <translation>Faqat %1 = %2 ni koʻrsatish</translation>
+    </message>
+    <message>
+        <source>Exclude %1 = %2</source>
+        <translation>%1 = %2 ni chiqarib tashlash</translation>
     </message>
 </context>
 <context>
@@ -1062,6 +1172,29 @@
     </message>
 </context>
 <context>
+    <name>FieldSheet</name>
+    <message>
+        <source>Show only this value</source>
+        <translation>Faqat shu qiymatni koʻrsatish</translation>
+    </message>
+    <message>
+        <source>Exclude this value</source>
+        <translation>Bu qiymatni chiqarib tashlash</translation>
+    </message>
+    <message>
+        <source>Copy the value</source>
+        <translation>Qiymatni nusxalash</translation>
+    </message>
+    <message>
+        <source>Copied</source>
+        <translation>Nusxalandi</translation>
+    </message>
+    <message>
+        <source>Copy as %1</source>
+        <translation>%1 sifatida nusxalash</translation>
+    </message>
+</context>
+<context>
     <name>FieldsPanel</name>
     <message>
         <source>Show fields</source>
@@ -1105,6 +1238,103 @@
     <message>
         <source>Remove filter %1</source>
         <translation>%1 filtrini olib tashlash</translation>
+    </message>
+</context>
+<context>
+    <name>FocusScreen</name>
+    <message>
+        <source>Around the entry</source>
+        <translation>Yozuv atrofida</translation>
+    </message>
+    <message>
+        <source>Entry</source>
+        <translation>Yozuv</translation>
+    </message>
+    <message>
+        <source>Trace %1…</source>
+        <translation>Treys %1…</translation>
+    </message>
+    <message>
+        <source>Around %1</source>
+        <translation>%1 atrofida</translation>
+    </message>
+    <message>
+        <source>What to show around the entry</source>
+        <translation>Yozuv atrofida nimani koʻrsatish</translation>
+    </message>
+    <message>
+        <source>Context</source>
+        <translation>Kontekst</translation>
+    </message>
+    <message>
+        <source>Window</source>
+        <translation>Oyna</translation>
+    </message>
+    <message>
+        <source>±30 s</source>
+        <translation>±30 s</translation>
+    </message>
+    <message>
+        <source>±1 min</source>
+        <translation>±1 daq</translation>
+    </message>
+    <message>
+        <source>±5 min</source>
+        <translation>±5 daq</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n entries</source>
+        <translation>
+            <numerusform>%n ta yozuv</numerusform>
+            <numerusform />
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n service(s)</source>
+        <translation>
+            <numerusform>%n ta servis</numerusform>
+            <numerusform />
+        </translation>
+    </message>
+    <message>
+        <source>All %1 entries · search filters are lifted</source>
+        <translation>%1 ning barcha yozuvlari · qidiruv filtrlari olib tashlangan</translation>
+    </message>
+    <message>
+        <source>Entries around</source>
+        <translation>Atrofdagi yozuvlar</translation>
+    </message>
+    <message>
+        <source>No other entries of the trace within ±5 min</source>
+        <translation>±5 daq ichida treysning boshqa yozuvlari yoʻq</translation>
+    </message>
+    <message>
+        <source>No entries around %1</source>
+        <translation>%1 atrofida yozuvlar yoʻq</translation>
+    </message>
+    <message>
+        <source>Other services may write the trace id into another field.</source>
+        <translation>Boshqa servislar treys identifikatorini boshqa maydonga yozishi mumkin.</translation>
+    </message>
+    <message>
+        <source>Try a wider window.</source>
+        <translation>Kengroq oynani sinab koʻring.</translation>
+    </message>
+    <message>
+        <source>Show the context</source>
+        <translation>Kontekstni koʻrsatish</translation>
+    </message>
+    <message>
+        <source>Widen to ±5 min</source>
+        <translation>±5 daqiqagacha kengaytirish</translation>
+    </message>
+    <message>
+        <source>Loading…</source>
+        <translation>Yuklanmoqda…</translation>
+    </message>
+    <message>
+        <source>Open as search</source>
+        <translation>Qidiruv sifatida ochish</translation>
     </message>
 </context>
 <context>
@@ -1717,6 +1947,10 @@
     <message>
         <source>Live tail</source>
         <translation>Live tail</translation>
+    </message>
+    <message>
+        <source>Around</source>
+        <translation>Atrofida</translation>
     </message>
 </context>
 <context>

@@ -144,4 +144,20 @@ TestCase {
         Session.search()
         tryCompare(Session.logs, "totalCount", 12, 3000)
     }
+
+    // A long message wraps inside the card (it ran past the right edge).
+    function test_13_longMessageStaysInsideTheCard() {
+        const component = Qt.createComponent("LogViewer.Mobile", "LogCard")
+        verify(component.status === Component.Ready, component.errorString())
+        const message = "ContractDebtController: overdueBalance request {\"contractId\":\"48213\",\"clientId\":\"77120034\",\"amount\":1250000,\"currency\":\"UZS\"}"
+        const card = component.createObject(window.contentItem, { index: 0, timeText: "03:39:06.778", level: "INFO",
+                                                                  message: message, timeMs: Date.now(), width: 366, lines: 2 })
+        waitForRendering(window.contentItem)
+        const text = H.find(card, it => it.text === message)
+        verify(text)
+        verify(text.lineCount === 2, "lines: " + text.lineCount)
+        const right = text.mapToItem(card, text.width, 0).x
+        verify(right <= card.width - 12, "text ends at " + right + " in a card of " + card.width)
+        card.destroy()
+    }
 }

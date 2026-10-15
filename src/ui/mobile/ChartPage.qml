@@ -24,6 +24,26 @@ ColumnLayout {
     // step switch or hints over an empty chart, just why.
     readonly property bool hasData: Session.histogram.count > 0 && Session.histogramMax > 0
 
+    // The bucket under the finger while sliding over the chart (-1: none).
+    property int scrubIndex: -1
+    // The picked interval (its bucket), when the feed is narrowed to one.
+    readonly property int selectedIndex: {
+        void Session.histogramMax
+        const from = Session.histogramFilterFromMs
+        if (from <= 0) return -1
+        for (let i = 0; i < Session.histogram.count; ++i)
+            if (Session.histogram.get(i).startMs === from) return i
+        return -1
+    }
+    readonly property int cardIndex: scrubIndex >= 0 ? scrubIndex : selectedIndex
+    readonly property var cardBucket: cardIndex >= 0 ? Session.histogram.get(cardIndex) : null
+    function intervalText(bucket) {
+        const from = new Date(bucket.startMs)
+        const to = new Date(bucket.startMs + Session.histogramBucketMs)
+        const format = Session.histogramBucketMs < 60000 ? "HH:mm:ss" : "HH:mm"
+        return Qt.formatTime(from, format) + " – " + Qt.formatTime(to, format)
+    }
+
     spacing: 0
 
     Rectangle {
@@ -69,6 +89,28 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         visible: !root.hasData && !Session.needsSetup
+        // Still loading: grey bars.
+        Row {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: 16
+            anchors.topMargin: 76
+            height: 200
+            spacing: 3
+            visible: Session.loading
+            Repeater {
+                model: 24
+                delegate: Rectangle {
+                    required property int index
+                    anchors.bottom: parent ? parent.bottom : undefined
+                    width: (parent ? parent.width - 23 * 3 : 0) / 24
+                    height: 200 * (0.25 + 0.5 * Math.abs(Math.sin(index / 3)))
+                    radius: 2
+                    color: Theme.subtle
+                }
+            }
+        }
         EmptyState {
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -103,16 +145,37 @@ ColumnLayout {
                 touch: true
                 totals: Session.levelTotals
                 activeLevel: Session.activeLevel
-                onToggled: level => { Session.applyLevelFilter(level); root.showEntriesRequested() }
+                // A filter, as on the desktop: the chart shows that level only.
+                onToggled: level => Session.applyLevelFilter(level)
             }
+            // Slide a finger over the chart: the card below follows the interval
+            // under it; lifting the finger picks that interval.
             HistogramView {
+                id: chart
                 Layout.fillWidth: true
                 Layout.preferredHeight: 200
                 model: Session.histogram
                 maxTotal: Session.histogramMax
                 showTooltip: false
-                onBucketClicked: (index, level) => { Session.applyBucketFilter(index, level); root.showEntriesRequested() }
-                onResetRequested: Session.clearHistogramFilter()
+                interactive: false
+                selectedIndex: root.cardIndex
+                onlyLevel: Session.activeLevel
+                MouseArea {
+                    anchors.fill: parent
+                    preventStealing: true
+                    function indexAt(x) {
+                        const n = Session.histogram.count
+                        return Math.max(0, Math.min(n - 1, Math.floor(x / width * n)))
+                    }
+                    onPressed: mouse => root.scrubIndex = indexAt(mouse.x)
+                    onPositionChanged: mouse => { if (pressed) root.scrubIndex = indexAt(mouse.x) }
+                    onReleased: {
+                        const index = root.scrubIndex
+                        root.scrubIndex = -1
+                        if (index >= 0) Session.applyBucketFilter(index, Session.activeLevel)
+                    }
+                    onCanceled: root.scrubIndex = -1
+                }
             }
             RowLayout {
                 Layout.fillWidth: true
@@ -139,8 +202,110 @@ ColumnLayout {
                 value: Session.manualBucketMs
                 onActivated: v => Session.manualBucketMs = v
             }
+            // The interval under the finger, or the one picked.
+            Rectangle {
+                id: intervalCard
+                readonly property var bucket: root.cardBucket
+                readonly property bool picked: root.scrubIndex < 0
+                // A level filter and no entries of it here.
+                readonly property bool emptyForLevel: bucket !== null && Session.activeLevel !== ""
+                                                      && (Session.activeLevel === "ERROR" ? bucket.error : bucket.warn) === 0
+                readonly property bool offerErrors: !emptyForLevel && bucket !== null && bucket.error > 0 && Session.activeLevel !== "ERROR"
+                Layout.fillWidth: true
+                visible: bucket !== null
+                implicitHeight: cardColumn.implicitHeight + 24
+                radius: Theme.radiusLg
+                color: Theme.surface
+                border.width: 1
+                border.color: picked ? Theme.accentBorder : Theme.border
+                ColumnLayout {
+                    id: cardColumn
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 12
+                    spacing: 8
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+                        Text {
+                            text: intervalCard.bucket ? root.intervalText(intervalCard.bucket) : ""
+                            font.family: Theme.mono
+                            font.pixelSize: Theme.fontLg
+                            font.weight: Font.DemiBold
+                            color: Theme.textStrong
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            visible: intervalCard.picked
+                            text: qsTr("picked interval")
+                            elide: Text.ElideRight
+                            font.family: Theme.sans
+                            font.pixelSize: Theme.fontSm
+                            color: Theme.textMuted
+                        }
+                    }
+                    Row {
+                        visible: !intervalCard.emptyForLevel
+                        spacing: 16
+                        Repeater {
+                            model: ["ERROR", "WARN"]
+                            delegate: Row {
+                                id: count
+                                required property string modelData
+                                spacing: 6
+                                Text {
+                                    text: count.modelData
+                                    font.family: Theme.sans
+                                    font.pixelSize: Theme.fontSm
+                                    font.weight: Font.DemiBold
+                                    color: Theme.levelTextColor(count.modelData)
+                                }
+                                Text {
+                                    text: !intervalCard.bucket ? "" : count.modelData === "ERROR" ? intervalCard.bucket.error : intervalCard.bucket.warn
+                                    font.family: Theme.mono
+                                    font.pixelSize: Theme.fontMd
+                                    color: Theme.text
+                                }
+                            }
+                        }
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        visible: intervalCard.emptyForLevel
+                        text: qsTr("No %1 in this interval").arg(Session.activeLevel)
+                        wrapMode: Text.Wrap
+                        font.family: Theme.sans
+                        font.pixelSize: Theme.fontLg
+                        color: Theme.textStrong
+                    }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        visible: intervalCard.picked
+                        columns: intervalCard.offerErrors ? 2 : 1
+                        columnSpacing: 8
+                        AppButton {
+                            Layout.fillWidth: true
+                            touch: true
+                            variant: intervalCard.emptyForLevel ? "secondary" : "primary"
+                            text: intervalCard.emptyForLevel ? qsTr("Show the whole period") : qsTr("All entries")
+                            onClicked: {
+                                if (intervalCard.emptyForLevel) Session.clearHistogramFilter()
+                                else root.showEntriesRequested()
+                            }
+                        }
+                        AppButton {
+                            Layout.fillWidth: true
+                            visible: intervalCard.offerErrors
+                            touch: true
+                            text: qsTr("Only ERROR")
+                            onClicked: { Session.applyBucketFilter(root.cardIndex, "ERROR"); root.showEntriesRequested() }
+                        }
+                    }
+                }
+            }
             FilterChip {
-                visible: Session.histogramRangeOrPatternFilter
+                visible: Session.histogramRangeOrPatternFilter && root.selectedIndex < 0
                 touch: true
                 text: Session.histogramFilterLabel
                 onRemoveRequested: Session.clearHistogramFilter()
@@ -148,7 +313,7 @@ ColumnLayout {
             Text {
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
-                text: qsTr("Tap a bar to see the entries of that interval; tap a level to show only it.")
+                text: qsTr("Slide a finger over the chart to pick an interval; tap a level to show only it.")
                 font.family: Theme.sans
                 font.pixelSize: Theme.fontSm
                 color: Theme.textMuted

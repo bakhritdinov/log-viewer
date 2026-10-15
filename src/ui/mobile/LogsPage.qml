@@ -18,6 +18,7 @@ Item {
     signal sourceRequested()
     signal environmentRequested()
     signal periodRequested()
+    signal entryRequested(int row)
     signal notice(string text)
     signal searchRequested()
     signal saveRequested()
@@ -658,6 +659,7 @@ Item {
             nowMs: root.nowMs
             lines: Math.max(2, Session.prefs.messageLines)
             fresh: !Session.loading && timeMs > root.previousTopMs
+            onClicked: root.entryRequested(index)
         }
         // The end of what is loaded: more from the server, or that's all.
         footer: Column {
