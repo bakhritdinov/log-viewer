@@ -456,6 +456,13 @@ TestCase {
         tryVerify(() => button() !== null)
         const row = button().parent
         const icon = H.find(row, it => it.hasOwnProperty("strokeWidth") && H.isShown(it))
+        // The status icon stands upright and never turns: the "checking" spinner is a
+        // separate icon (one shared icon kept the spinner's last angle — a tilted check).
+        compare(icon.rotation, 0)
+        const icons = H.findAll(icon.parent, it => it.hasOwnProperty("strokeWidth"))
+        compare(icons.length, 2)
+        const spinner = icons.find(it => it !== icon)
+        verify(!spinner.visible && spinner.name === "refresh")
         const title = H.find(row, it => it.hasOwnProperty("firstLineHeight"))
         // Within a pixel: a text line's height is fractional and layouts round it.
         const mid = (it, h) => it.mapToItem(root(), 0, 0).y + h / 2

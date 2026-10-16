@@ -68,21 +68,36 @@ ColumnLayout {
                 spacing: 12
                 // Icon, first text line and buttons share one centre line: everything is
                 // top-aligned and the shorter items are pushed down to the buttons' middle.
-                Icon {
+                // The status icon never turns; only the separate "checking" spinner
+                // does (a stopped animation would leave the check mark tilted).
+                Item {
                     id: updateIcon
+                    readonly property int size: 18
                     Layout.alignment: Qt.AlignTop
                     Layout.topMargin: Math.round((Theme.controlHeight - size) / 2)
-                    name: update.state === "checking" ? "refresh"
-                        : update.state === "uptodate" ? "check"
-                        : update.state === "ready" ? "refresh"
-                        : update.state === "failed" ? "warning" : "download"
-                    size: 18
-                    color: update.state === "uptodate" || update.state === "ready" ? Theme.success
-                         : update.state === "failed" ? Theme.warn : Theme.accent
-                    RotationAnimator on rotation {
-                        running: update.state === "checking"
-                        loops: Animation.Infinite
-                        from: 0; to: 360; duration: 900
+                    implicitWidth: size
+                    implicitHeight: size
+                    Icon {
+                        anchors.fill: parent
+                        visible: update.state !== "checking"
+                        name: update.state === "uptodate" ? "check"
+                            : update.state === "ready" ? "refresh"
+                            : update.state === "failed" ? "warning" : "download"
+                        size: updateIcon.size
+                        color: update.state === "uptodate" || update.state === "ready" ? Theme.success
+                             : update.state === "failed" ? Theme.warn : Theme.accent
+                    }
+                    Icon {
+                        anchors.fill: parent
+                        visible: update.state === "checking"
+                        name: "refresh"
+                        size: updateIcon.size
+                        color: Theme.accent
+                        RotationAnimator on rotation {
+                            running: update.state === "checking"
+                            loops: Animation.Infinite
+                            from: 0; to: 360; duration: 900
+                        }
                     }
                 }
                 ColumnLayout {
