@@ -27,12 +27,12 @@ class ErrorInfo {
 public:
     enum class Kind {
         None, Unreachable, BlockedByBrowser, Tls, Unauthorized, Forbidden, NotFound, TooHeavy,
-        RateLimited, BadQuery, Server, InvalidResponse, NotConfigured, UnknownLabels
+        RateLimited, BadQuery, Server, InvalidResponse, NotConfigured, UnknownLabels, CorsBlocked
     };
     Q_ENUM(Kind)
 
     // What the error banner's buttons do; the design maps them to its actions.
-    enum class Action { None, Retry, OpenSettings, NarrowRange, CopyCorsHint, CopyDetails, EditQuery };
+    enum class Action { None, Retry, OpenSettings, NarrowRange, CopyCorsHint, CopyDetails, EditQuery, OpenCorsHelp };
     Q_ENUM(Action)
 
     Kind kind = Kind::None;

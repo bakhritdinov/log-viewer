@@ -53,7 +53,7 @@ Flickable {
                 id: rangeButton
                 text: root.rangeLabel
                 Accessible.name: qsTr("Period at start: %1").arg(root.rangeLabel)
-                onClicked: rangeMenu.open()
+                onClicked: rangeMenu.toggle()
                 AppMenu {
                     id: rangeMenu
                     y: rangeButton.height + 4

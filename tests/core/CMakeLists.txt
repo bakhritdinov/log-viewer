@@ -15,3 +15,4 @@ logviewer_add_test(tst_core_live_tail       SOURCES tst_live_tail.cpp       LIBS
 logviewer_add_test(tst_core_storage         SOURCES tst_storage.cpp         LIBS logviewer_core)
 logviewer_add_test(tst_core_migration       SOURCES tst_migration.cpp       LIBS logviewer_core)
 logviewer_add_test(tst_core_share_link      SOURCES tst_share_link.cpp      LIBS logviewer_core)
+logviewer_add_test(tst_core_retrying_http_client SOURCES tst_retrying_http_client.cpp LIBS logviewer_core)

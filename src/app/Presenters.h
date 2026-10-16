@@ -95,6 +95,13 @@ struct JsonColors
 };
 QString jsonStyled(const QString& json, const JsonColors& colors);
 
+// ── Messages in lists ──
+// A message as lists show it: blank lines around it and the indentation all
+// its lines share are dropped, and the first line starts at its first
+// character (some services log a line break and deep indentation first).
+// Details and copying keep the original.
+QString listMessage(const QString& message);
+
 // ── Highlighting ──
 // `text` as Qt StyledText with every case-insensitive occurrence of `terms`
 // wrapped in bold `color`; everything else HTML-escaped.

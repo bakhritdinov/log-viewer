@@ -39,6 +39,7 @@ ApplicationWindow {
         case ErrorInfo.OpenSettings: settings.openSection(0); break
         case ErrorInfo.NarrowRange: Session.narrowRange(); break
         case ErrorInfo.CopyCorsHint: clipboard.copy(Session.corsHint()); break
+        case ErrorInfo.OpenCorsHelp: Qt.openUrlExternally("https://github.com/bakhritdinov/log-viewer/blob/master/docs/PWA.md"); break
         case ErrorInfo.CopyDetails: clipboard.copy(error.detail); break
         case ErrorInfo.EditQuery: searchBar.focusSearch(); break
         }
@@ -212,7 +213,7 @@ ApplicationWindow {
                     // Stale results stay visible but dimmed under an error.
                     // A warning (heavy query, rate limit) keeps the partial result as is.
                     opacity: Session.hasError && !Session.needsSetup && window.mainMode
-                             && [ErrorInfo.TooHeavy, ErrorInfo.RateLimited, ErrorInfo.BlockedByBrowser].indexOf(Session.error.kind) < 0 ? 0.55 : 1
+                             && [ErrorInfo.TooHeavy, ErrorInfo.RateLimited, ErrorInfo.BlockedByBrowser, ErrorInfo.CorsBlocked].indexOf(Session.error.kind) < 0 ? 0.55 : 1
 
                     ResultsView {
                         histogramExpanded: prefs.histogramOpen

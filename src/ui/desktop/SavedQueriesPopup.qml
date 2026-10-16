@@ -260,7 +260,7 @@ Popup {
                         iconName: "more"
                         checked: moreMenu.opened
                         label: qsTr("More actions with “%1”").arg(query.name)
-                        onClicked: moreMenu.open()
+                        onClicked: moreMenu.toggle()
                         AppMenu {
                             id: moreMenu
                             y: moreButton.height + 4

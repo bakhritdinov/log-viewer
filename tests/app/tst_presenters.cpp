@@ -25,6 +25,21 @@ class TestPresenters : public QObject {
     Q_OBJECT
 
 private slots:
+    // Feedback (broker-api): messages starting with a line break and deep
+    // indentation showed as an empty row with "+5 lines".
+    void listMessageDropsLeadingBlanksAndIndentation()
+    {
+        QCOMPARE(listMessage("plain message"), QString("plain message"));
+        QCOMPARE(listMessage("line one\nline two"), QString("line one\nline two"));
+        QCOMPARE(listMessage("\n\n        Message sent to topic\n          partition: 3\n        offset: 42\n   \n"),
+                 QString("Message sent to topic\n  partition: 3\noffset: 42"));
+        QCOMPARE(listMessage("\r\n\t\tA\r\n\t\t\tB\r\n"), QString("A\n\tB"));
+        QCOMPARE(listMessage("    first line indented\nsecond"), QString("first line indented\nsecond"));
+        QCOMPARE(listMessage("a\n\n  b"), QString("a\n\n  b"));
+        QCOMPARE(listMessage("   \n  \t "), QString());
+        QCOMPARE(listMessage(""), QString());
+    }
+
     void highlightEscapesAndMarksEveryMatch()
     {
         QCOMPARE(highlightStyled("a <b> Timeout & timeout", { "timeout" }, "#e3b341"),

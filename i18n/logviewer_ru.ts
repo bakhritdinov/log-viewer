@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
+<?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="ru" sourcelanguage="en">
 <context>
     <name>AboutPage</name>
@@ -1293,7 +1292,7 @@
         <translation>API-токен</translation>
     </message>
     <message>
-        <source>In the browser the password is kept in the site&apos;s storage on this phone.</source>
+        <source>In the browser the password is kept in the site's storage on this phone.</source>
         <translation>В браузере пароль хранится в памяти сайта на этом телефоне.</translation>
     </message>
     <message>
@@ -1401,7 +1400,7 @@
         <translation>Продолжить редактирование</translation>
     </message>
     <message>
-        <source>Don&apos;t save</source>
+        <source>Don't save</source>
         <translation>Не сохранять</translation>
     </message>
 </context>
@@ -1588,6 +1587,14 @@
     <message>
         <source>Edit query</source>
         <translation>Изменить запрос</translation>
+    </message>
+    <message>
+        <source>Grafana %1 does not allow requests from the app's address. This is set up on the server, not on your side.</source>
+        <translation>Grafana %1 не разрешает запросы с адреса приложения. Это настраивается на сервере, не у вас.</translation>
+    </message>
+    <message>
+        <source>What is CORS</source>
+        <translation>Что такое CORS</translation>
     </message>
 </context>
 <context>
@@ -2462,6 +2469,10 @@
     <message>
         <source>Sort the patterns</source>
         <translation>Сортировать шаблоны</translation>
+    </message>
+    <message>
+        <source>Instructions copied</source>
+        <translation>Инструкция скопирована</translation>
     </message>
 </context>
 <context>
@@ -4297,7 +4308,7 @@ a colleague sees exactly the same</source>
         <translation>Без сохранения они будут потеряны.</translation>
     </message>
     <message>
-        <source>Don&apos;t save</source>
+        <source>Don't save</source>
         <translation>Не сохранять</translation>
     </message>
     <message>

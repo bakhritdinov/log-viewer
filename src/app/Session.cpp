@@ -571,6 +571,14 @@ void Session::fail(const RequestError& error)
 {
     m_requestError = error;
     setError(ErrorInfo::from(error, environmentName(), m_services.environments().current().url.host()));
+    // In the browser: CORS or no connection? Asked of the server; the answer
+    // replaces the error if it is still the one shown.
+    const quint64 failure = ++m_failureGeneration;
+    m_services.refineBrowserError(error, m_services.environments().current().url, this, [this, failure](const RequestError& refined) {
+        if (failure != m_failureGeneration || !m_error.isActive() || refined.kind == m_requestError.kind) return;
+        m_requestError = refined;
+        setError(ErrorInfo::from(refined, environmentName(), m_services.environments().current().url.host()));
+    });
 }
 
 void Session::retranslate()

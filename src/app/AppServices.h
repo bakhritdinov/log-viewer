@@ -1,6 +1,10 @@
 #pragma once
 
+#include <functional>
 #include <memory>
+
+#include <QPointer>
+#include <QUrl>
 
 #include "core/data/ErrorClassifier.h"
 #include "core/data/Http.h"
@@ -37,6 +41,16 @@ public:
     // Reloads the stores from settings (after a migration rewrote them).
     void reloadStores();
 
+    // Browser builds: whether a server answers at all — a request the browser
+    // sends without letting the app read the answer. The page provides it.
+    using ReachabilityProbe = std::function<void(const QUrl& url, std::function<void(bool reachable)> done)>;
+    void setReachabilityProbe(ReachabilityProbe probe) { m_probe = std::move(probe); }
+    // A "blocked by the browser" error told apart: CORS when the server at
+    // `server` answers, unreachable when it does not. Any other error, or no
+    // probe: `done` gets `error` unchanged, at once. Nothing after `context` is gone.
+    void refineBrowserError(const RequestError& error, const QUrl& server, QObject* context,
+                            std::function<void(const RequestError&)> done) const;
+
 private:
     HttpClient& m_http;
     KeyValueStore& m_settings;
@@ -44,6 +58,7 @@ private:
     std::unique_ptr<ParseExecutor> m_parser;
     ClassifyOptions m_classify;
     Clock m_clock;
+    ReachabilityProbe m_probe;
     std::unique_ptr<EnvironmentsStore> m_environments;
     std::unique_ptr<SavedQueriesStore> m_savedQueries;
     std::unique_ptr<SearchHistory> m_history;

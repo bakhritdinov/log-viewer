@@ -83,7 +83,7 @@ Rectangle {
             rightPadding: 10
             visible: !root.firstRun && !root.focusMode
             Accessible.name: qsTr("Environment: %1").arg(Session.environmentName)
-            onClicked: envMenu.open()
+            onClicked: envMenu.toggle()
             contentItem: Row {
                 spacing: 8
                 Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 8; height: 8; radius: 4; color: Session.environmentColor }
@@ -153,7 +153,7 @@ Rectangle {
             rightPadding: 10
             Accessible.name: root.noSource ? qsTr("Choose a source")
                                            : qsTr("Source: %1 / %2").arg(Session.namespaceName).arg(Session.app)
-            onClicked: sourcePicker.open()
+            onClicked: sourcePicker.opened ? sourcePicker.close() : sourcePicker.open()   // a second click closes
 
             AppToolTip {
                 visible: sourceButton.hovered && !sourcePicker.opened
@@ -226,7 +226,7 @@ Rectangle {
             text: root.shortPeriod ? Session.timeRangeShortLabel : Session.timeRangeLabel
             tooltip: timePopup.opened ? "" : qsTr("%1 – %2").arg(Session.absoluteFromText).arg(Session.absoluteToText)
             shortcut: root.timeKey
-            onClicked: timePopup.open()
+            onClicked: timePopup.opened ? timePopup.close() : timePopup.open()
 
             TimeRangePopup {
                 id: timePopup
@@ -349,7 +349,7 @@ Rectangle {
                 enabled: !root.noSource
                 tooltip: sharePopup.opened ? "" : qsTr("Link to the current selection")
                 shortcut: root.shareKey
-                onClicked: sharePopup.open()
+                onClicked: sharePopup.opened ? sharePopup.close() : sharePopup.open()
             }
             IconButton {
                 id: shareIcon
@@ -358,7 +358,7 @@ Rectangle {
                 label: qsTr("Link to the current selection")
                 shortcut: root.shareKey
                 enabled: !root.noSource
-                onClicked: sharePopup.open()
+                onClicked: sharePopup.opened ? sharePopup.close() : sharePopup.open()
                 background: Rectangle {
                     radius: Theme.radiusMd
                     color: shareIcon.hovered ? Theme.hover : Theme.subtle

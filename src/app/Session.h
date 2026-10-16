@@ -375,6 +375,7 @@ private:
     QString m_rangeError;
     ErrorInfo m_error;
     RequestError m_requestError;   // source of m_error, to rebuild its texts
+    quint64 m_failureGeneration = 0;
     int m_lastQueryMs = 0;
     int m_autoRefreshSeconds = 0;
 

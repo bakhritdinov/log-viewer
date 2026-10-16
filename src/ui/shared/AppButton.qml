@@ -26,7 +26,9 @@ Button {
     }
 
     implicitHeight: touch ? Theme.touchHeight : Theme.controlHeight
-    implicitWidth: Math.max(implicitHeight, contentItem.implicitWidth + leftPadding + rightPadding)
+    // implicitContentWidth follows a contentItem a button replaces (text + chevron);
+    // contentItem.implicitWidth measured the default label only.
+    implicitWidth: Math.max(implicitHeight, implicitContentWidth + leftPadding + rightPadding)
     leftPadding: variant === "link" ? 4 : (touch ? 16 : 12)
     rightPadding: leftPadding
     font.weight: variant === "primary" || variant === "dangerSolid" ? Font.DemiBold : Font.Medium

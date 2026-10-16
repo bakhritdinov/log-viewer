@@ -27,14 +27,30 @@ ColumnLayout {
     spacing: 0
 
     // Text size, row height and time format come from the preferences; the
-    // columns are measured for them.
+    // columns are measured for them — by Text items laid out exactly as the
+    // cells (FontMetrics came out narrower on a scaled Windows screen and the
+    // time ran into the level).
     readonly property int fontSize: Session.prefs.logFontSize
     readonly property int lines: Session.prefs.messageLines
     readonly property var extraColumns: Session.prefs.extraColumns
-    FontMetrics { id: cellMetrics; font.family: Theme.mono; font.pixelSize: root.fontSize }
-    readonly property int timeWidth: Math.ceil(cellMetrics.advanceWidth(
-        Session.prefs.timeFormat === "s" ? "00:00:00" : Session.prefs.timeFormat === "date" ? "00 MMM. 00:00:00" : "00:00:00.000")) + 16
-    readonly property int levelWidth: Math.ceil(cellMetrics.advanceWidth("ERROR")) + 22
+    Text {
+        id: timeProbe
+        visible: false
+        text: Session.prefs.timeFormat === "s" ? "00:00:00" : Session.prefs.timeFormat === "date" ? "00 MMM. 00:00:00" : "00:00:00.000"
+        font.family: Theme.mono
+        font.pixelSize: root.fontSize
+    }
+    Text {
+        id: levelProbe
+        visible: false
+        text: "ERROR"
+        font.family: Theme.mono
+        font.pixelSize: root.fontSize
+        font.weight: Font.Medium
+    }
+    // Wide enough for the value and for the column title ("УРОВЕНЬ" is wider than "ERROR").
+    readonly property int timeWidth: Math.max(Math.ceil(timeProbe.implicitWidth) + 16, Math.ceil(timeHeader.implicitWidth) + 12)
+    readonly property int levelWidth: Math.max(Math.ceil(levelProbe.implicitWidth) + 22, Math.ceil(levelHeader.implicitWidth) + 12)
     readonly property int serviceWidth: Math.round(120 * fontSize / 12)
     readonly property int extraWidth: Math.round(140 * fontSize / 12)
 
@@ -50,8 +66,8 @@ ColumnLayout {
             anchors.leftMargin: 16
             anchors.rightMargin: 16
             spacing: 0
-            HeaderText { Layout.preferredWidth: root.timeWidth; text: qsTr("Time") }
-            HeaderText { Layout.preferredWidth: root.levelWidth; visible: root.showLevel; text: qsTr("Level") }
+            HeaderText { id: timeHeader; Layout.preferredWidth: root.timeWidth; text: qsTr("Time") }
+            HeaderText { id: levelHeader; Layout.preferredWidth: root.levelWidth; visible: root.showLevel; text: qsTr("Level") }
             HeaderText { Layout.preferredWidth: root.serviceWidth; visible: root.showService; text: root.serviceTitle }
             Repeater {
                 model: root.extraColumns

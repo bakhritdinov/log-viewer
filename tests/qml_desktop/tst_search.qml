@@ -340,6 +340,56 @@ TestCase {
     }
 
     // Feedback: the distribution label is centred on the level buttons.
+    // Feedback (3.0.0 on a scaled Windows screen): the time ran into the level.
+    // Every time and level text fits its column, the next one starts after it.
+    function test_23b_columnsFitTheirText() {
+        const row = rows()[0]
+        verify(row)
+        const texts = H.findAll(row, it => it.hasOwnProperty("textFormat") && it.hasOwnProperty("elide") && it.visible && it.text !== "")
+        const time = texts.find(t => t.text === row.timeText)
+        const level = texts.find(t => t.text === row.level)
+        verify(time && level, texts.map(t => t.text).join(" | "))
+        verify(time.implicitWidth <= time.width, "time " + time.implicitWidth + " in " + time.width)
+        verify(level.implicitWidth <= level.width, "level " + level.implicitWidth + " in " + level.width)
+        const timeEnd = time.mapToItem(row, time.implicitWidth, 0).x
+        const levelStart = level.mapToItem(row, 0, 0).x
+        verify(timeEnd + 8 <= levelStart, "time ends at " + timeEnd + ", level starts at " + levelStart)
+        // The titles too: "УРОВЕНЬ" is wider than "ERROR".
+        const titles = H.findAll(window.contentItem, it => it.font !== undefined && it.font.capitalization === Font.AllUppercase
+                                                           && (it.text === "Время" || it.text === "Уровень") && H.isShown(it))
+        compare(titles.length, 2)
+        for (const t of titles) verify(t.implicitWidth + 8 <= t.width, t.text + " " + t.implicitWidth + " in " + t.width)
+    }
+
+    // Feedback (3.0.0): the pattern sort button's chevron hung outside it.
+    // Every shown button holds its content (a replaced contentItem included).
+    function test_23c_buttonsHoldTheirContent() {
+        Session.patternsEnabled = true
+        tryVerify(() => Session.patterns.count > 0)
+        waitForRendering(window.contentItem)
+        const tight = H.findAll(window.contentItem, it => it.hasOwnProperty("variant") && it.hasOwnProperty("iconName") && H.isShown(it)
+                                                         && it.contentItem && it.contentItem.implicitWidth > it.width - it.leftPadding - it.rightPadding + 0.5)
+            .map(it => (it.Accessible.name || it.text) + ": " + it.contentItem.implicitWidth + " in " + (it.width - it.leftPadding - it.rightPadding))
+        Session.patternsEnabled = false
+        compare(tight.join("; "), "")
+    }
+
+    // Feedback (3.0.0): a second click on the button that opened a menu or a
+    // popup left it open.
+    function test_23d_secondClickCloses() {
+        const check = (button, shownText) => {
+            verify(button)
+            mouseClick(button)
+            tryVerify(() => overlayText(shownText) !== null, 2000, shownText + " not shown")
+            mouseClick(button)
+            tryVerify(() => overlayText(shownText) === null, 2000, "still open: " + shownText)
+        }
+        check(H.find(window.contentItem, it => it.Accessible && String(it.Accessible.name).indexOf("Автообновление") === 0
+                                              && it.hasOwnProperty("pressed") && H.isShown(it)), "Без автообновления")
+        check(H.find(window.contentItem, it => it.hasOwnProperty("iconName") && it.iconName === "clock" && it.hasOwnProperty("variant")
+                                              && H.isShown(it)), "Сегодня")
+    }
+
     function test_24_distributionHeaderAligned() {
         const label = H.find(window.contentItem, it => it.text === "Распределение" && H.isShown(it))
         const chip = H.find(window.contentItem, it => it.hasOwnProperty("count") && it.hasOwnProperty("active") && H.isShown(it))

@@ -56,4 +56,21 @@ void runLegacyMigration(AppServices& services, std::function<void(bool ok)> done
     }
 }
 
+void AppServices::refineBrowserError(const RequestError& error, const QUrl& server, QObject* context,
+                                     std::function<void(const RequestError&)> done) const
+{
+    if (error.kind != RequestError::Kind::BlockedByBrowser || !m_probe || !server.isValid()) {
+        done(error);
+        return;
+    }
+    QUrl health = server;
+    health.setPath(health.path().chopped(health.path().endsWith(u'/') ? 1 : 0) + QStringLiteral("/api/health"));
+    m_probe(health, [guard = QPointer<QObject>(context), error, done = std::move(done)](bool reachable) {
+        if (!guard) return;
+        RequestError refined = error;
+        refined.kind = reachable ? RequestError::Kind::CorsBlocked : RequestError::Kind::Unreachable;
+        done(refined);
+    });
+}
+
 } // namespace lv

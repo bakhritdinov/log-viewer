@@ -785,6 +785,38 @@ private slots:
         QCOMPARE(h.session->logs()->rowCount(), b.value("total").toInt());
     }
 
+    // Feedback (PWA): a request CORS blocked showed "cannot reach the server".
+    // In the browser the server is asked: an answer means CORS, none means
+    // no connection.
+    void browserTellsCorsFromNoConnection()
+    {
+        for (const bool reachable : { true, false }) {
+            FakeHttpClient http;
+            MemoryStore kv;
+            MemorySecretStore secrets;
+            ClassifyOptions browser;
+            browser.browser = true;
+            AppServices services(http, kv, secrets, makeInlineParseExecutor(), browser, [] { return kNow; });
+            Environment dev = *services.environments().find("dev");
+            dev.url = QUrl("https://dev-grafana");
+            dev.datasourceUid = "dev-uid";
+            dev.auth = Environment::Auth::None;
+            services.environments().upsert(dev);
+            QUrl probed;
+            std::function<void(bool)> answer;
+            services.setReachabilityProbe([&](const QUrl& url, std::function<void(bool)> done) { probed = url; answer = std::move(done); });
+            Session session(services);
+            http.script(failure(HttpResponse::Failure::Other, "TypeError: Failed to fetch"));
+            session.start();
+            QTRY_COMPARE(session.error().kind, ErrorInfo::Kind::BlockedByBrowser);
+            QCOMPARE(probed, QUrl("https://dev-grafana/api/health"));
+            QVERIFY(answer);
+            answer(reachable);
+            QCOMPARE(session.error().kind, reachable ? ErrorInfo::Kind::CorsBlocked : ErrorInfo::Kind::Unreachable);
+            QCOMPARE(session.error().primaryAction, reachable ? ErrorInfo::Action::CopyCorsHint : ErrorInfo::Action::Retry);
+        }
+    }
+
     void modelsHonourTheModelContract()
     {
         Harness h;

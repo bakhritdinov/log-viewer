@@ -15,6 +15,10 @@ Popup {
     focus: true
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
 
+    // For the button that opens it: a second click closes it. (A press on that
+    // button is not "outside", so the menu stays open for the click to decide.)
+    function toggle() { if (opened) close(); else open() }
+
     background: Surface { elevated: true; radius: Theme.radiusLg }
 
     contentItem: ColumnLayout {

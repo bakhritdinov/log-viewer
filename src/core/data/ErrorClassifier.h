@@ -13,6 +13,7 @@ struct RequestError {
         None,
         Unreachable,     // no connection: offline, VPN off, DNS, refused
         BlockedByBrowser,// browser builds: request blocked (CORS) or unreachable — indistinguishable
+        CorsBlocked,     // browser builds: the server answers, the browser hid it (CORS not allowed)
         Tls,             // certificate / handshake problem
         Unauthorized,    // 401 — wrong credentials
         Forbidden,       // 403 — no access to the datasource

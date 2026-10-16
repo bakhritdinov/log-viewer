@@ -55,7 +55,7 @@ ColumnLayout {
             ]
             text: options.find(o => o.value === Session.patternSort).label
             Accessible.name: qsTr("Sort patterns: %1").arg(text)
-            onClicked: sortMenu.open()
+            onClicked: sortMenu.toggle()
             contentItem: Row {
                 spacing: 6
                 Text {

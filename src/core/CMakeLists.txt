@@ -8,6 +8,7 @@ add_library(logviewer_core STATIC
     domain/LogEntry.h
     data/Http.h
     data/QtHttpClient.cpp data/QtHttpClient.h
+    data/RetryingHttpClient.cpp data/RetryingHttpClient.h
     data/GrafanaApi.cpp data/GrafanaApi.h
     data/ErrorClassifier.cpp data/ErrorClassifier.h
     data/LabelDiscovery.cpp data/LabelDiscovery.h

@@ -55,6 +55,13 @@ EnvironmentEditor::EnvironmentEditor(Session& session, QObject* parent)
     connect(m_discovery.get(), &LabelDiscovery::failed, this, [this](const RequestError& e) {
         const ErrorInfo info = ErrorInfo::from(e, m_name, QUrl(m_url).host());
         setTest(TestState::Failed, info.title, info);
+        // In the browser: CORS or no connection? (the server is asked)
+        const QString url = m_url;
+        m_session->services().refineBrowserError(e, QUrl(url), this, [this, url, kind = e.kind](const RequestError& refined) {
+            if (refined.kind == kind || url != m_url || m_testState != TestState::Failed) return;
+            const ErrorInfo better = ErrorInfo::from(refined, m_name, QUrl(m_url).host());
+            setTest(TestState::Failed, better.title, better);
+        });
     });
     createNew();
 }

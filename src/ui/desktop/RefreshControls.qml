@@ -78,7 +78,7 @@ Row {
                 if (o.seconds === Session.autoRefreshSeconds) return o.label
             return qsTr("%1 s").arg(Session.autoRefreshSeconds)
         }
-        onClicked: refreshMenu.open()
+        onClicked: refreshMenu.toggle()
         contentItem: Row {
             spacing: 6
             Rectangle {

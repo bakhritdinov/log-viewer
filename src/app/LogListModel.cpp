@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "app/Preferences.h"
+#include "app/Presenters.h"
 #include "core/features/Focus.h"
 #include "core/query/Query.h"
 
@@ -48,7 +49,7 @@ QVariant LogListModel::data(const QModelIndex& index, int role) const
     const LogEntry& e = m_rows.at(index.row());
     switch (role) {
         case Qt::DisplayRole:
-        case MessageRole: return e.message;
+        case MessageRole: return presenters::listMessage(e.message);
         case TimeTextRole: return m_prefs ? m_prefs->timeText(e.timestamp)
                                           : e.timestamp.toLocalTime().toString(QStringLiteral("HH:mm:ss.zzz"));
         case DateTimeTextRole: return m_prefs ? m_prefs->dateTimeText(e.timestamp)

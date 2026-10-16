@@ -488,7 +488,8 @@ Item {
                     case ErrorInfo.Retry: Session.retry(); break
                     case ErrorInfo.OpenSettings: root.settingsRequested(); break
                     case ErrorInfo.NarrowRange: Session.narrowRange(); break
-                    case ErrorInfo.CopyCorsHint: clipboard.copy(Session.corsHint()); root.notice(qsTr("Copied")); break
+                    case ErrorInfo.CopyCorsHint: clipboard.copy(Session.corsHint()); root.notice(qsTr("Instructions copied")); break
+                    case ErrorInfo.OpenCorsHelp: Qt.openUrlExternally("https://github.com/bakhritdinov/log-viewer/blob/master/docs/PWA.md"); break
                     case ErrorInfo.CopyDetails: clipboard.copy(Session.error.detail); root.notice(qsTr("Copied")); break
                     case ErrorInfo.EditQuery: root.searchRequested(); break
                     }

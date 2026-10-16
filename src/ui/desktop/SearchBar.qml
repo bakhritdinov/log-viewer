@@ -65,7 +65,7 @@ Rectangle {
                 shortcut: root.saveShortcut
                 iconColor: Theme.warnText
                 showTooltip: !savedPopup.opened         // the hint would cover the open popup
-                onClicked: savedPopup.openSaving()
+                onClicked: savedPopup.opened && savedPopup.tab === 0 ? savedPopup.close() : savedPopup.openSaving()
             }
             IconButton {
                 id: historyButton
@@ -73,7 +73,7 @@ Rectangle {
                 iconName: "history"
                 label: qsTr("Recent searches")
                 showTooltip: !savedPopup.opened
-                onClicked: savedPopup.openRecent()
+                onClicked: savedPopup.opened && savedPopup.tab === 1 ? savedPopup.close() : savedPopup.openRecent()
 
                 SavedQueriesPopup {
                     id: savedPopup

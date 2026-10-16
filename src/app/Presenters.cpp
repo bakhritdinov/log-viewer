@@ -310,6 +310,43 @@ QString jsonStyled(const QString& json, const JsonColors& colors)
     return out;
 }
 
+// ── Messages in lists ───────────────────────────────────────────────────────
+
+QString listMessage(const QString& message)
+{
+    const auto isBlank = [](QStringView line) { return line.trimmed().isEmpty(); };
+    const auto indentOf = [](QStringView line) {
+        qsizetype n = 0;
+        while (n < line.size() && (line[n] == u' ' || line[n] == u'\t')) ++n;
+        return n;
+    };
+    // The common case: nothing to tidy.
+    if (!message.isEmpty() && !message.front().isSpace() && !message.back().isSpace() && !message.contains(u'\r')
+        && !message.contains(QLatin1String("\n ")) && !message.contains(QLatin1String("\n\t")))
+        return message;
+    QList<QStringView> lines;
+    for (QStringView line : QStringView(message).split(u'\n')) {
+        if (line.endsWith(u'\r')) line.chop(1);
+        lines.append(line);
+    }
+    while (!lines.isEmpty() && isBlank(lines.front())) lines.removeFirst();
+    while (!lines.isEmpty() && isBlank(lines.back())) lines.removeLast();
+    if (lines.isEmpty()) return {};
+    qsizetype common = -1;
+    for (QStringView line : lines)
+        if (!isBlank(line)) common = common < 0 ? indentOf(line) : std::min(common, indentOf(line));
+    QString out;
+    out.reserve(message.size());
+    for (qsizetype i = 0; i < lines.size(); ++i) {
+        QStringView line = lines.at(i);
+        line = isBlank(line) ? QStringView() : line.mid(common);
+        if (i == 0) line = line.mid(indentOf(line));
+        if (i > 0) out += u'\n';
+        out += line;
+    }
+    return out;
+}
+
 // ── Highlighting ────────────────────────────────────────────────────────────
 
 QString highlightStyled(const QString& text, const QStringList& terms, const QString& color)

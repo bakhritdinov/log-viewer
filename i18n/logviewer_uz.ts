@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
+<?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1" language="uz" sourcelanguage="en">
 <context>
     <name>AboutPage</name>
@@ -186,7 +185,7 @@
         <source>%n saved</source>
         <translation>
             <numerusform>%n ta saqlangan</numerusform>
-            <numerusform></numerusform>
+            <numerusform />
         </translation>
     </message>
     <message>
@@ -197,7 +196,7 @@
         <source>%n recent queries</source>
         <translation>
             <numerusform>%n ta soʻnggi soʻrov</numerusform>
-            <numerusform></numerusform>
+            <numerusform />
         </translation>
     </message>
     <message>
@@ -240,7 +239,7 @@
         <source>%n query(-ies) added</source>
         <translation>
             <numerusform>%n ta soʻrov qoʻshildi</numerusform>
-            <numerusform></numerusform>
+            <numerusform />
         </translation>
     </message>
 </context>
@@ -1119,7 +1118,7 @@
         <source>Message · %n line(s)</source>
         <translation>
             <numerusform>Xabar · %n qator</numerusform>
-            <numerusform></numerusform>
+            <numerusform />
         </translation>
     </message>
     <message>
@@ -1283,7 +1282,7 @@
         <translation>API token</translation>
     </message>
     <message>
-        <source>In the browser the password is kept in the site&apos;s storage on this phone.</source>
+        <source>In the browser the password is kept in the site's storage on this phone.</source>
         <translation>Brauzerda parol shu telefondagi sayt xotirasida saqlanadi.</translation>
     </message>
     <message>
@@ -1391,7 +1390,7 @@
         <translation>Tahrirlashni davom ettirish</translation>
     </message>
     <message>
-        <source>Don&apos;t save</source>
+        <source>Don't save</source>
         <translation>Saqlamaslik</translation>
     </message>
 </context>
@@ -1578,6 +1577,14 @@
     <message>
         <source>Edit query</source>
         <translation>Soʻrovni tahrirlash</translation>
+    </message>
+    <message>
+        <source>Grafana %1 does not allow requests from the app's address. This is set up on the server, not on your side.</source>
+        <translation>Grafana %1 ilova manzilidan soʻrovlarga ruxsat bermaydi. Bu sizda emas, serverda sozlanadi.</translation>
+    </message>
+    <message>
+        <source>What is CORS</source>
+        <translation>CORS nima</translation>
     </message>
 </context>
 <context>
@@ -1826,14 +1833,14 @@
         <source>%n entries</source>
         <translation>
             <numerusform>%n ta yozuv</numerusform>
-            <numerusform></numerusform>
+            <numerusform />
         </translation>
     </message>
     <message numerus="yes">
         <source>%n service(s)</source>
         <translation>
             <numerusform>%n ta servis</numerusform>
-            <numerusform></numerusform>
+            <numerusform />
         </translation>
     </message>
     <message>
@@ -2173,14 +2180,14 @@
         <source>While you were away: %n new · resume</source>
         <translation>
             <numerusform>Siz yoʻqligingizda: %n ta yangi · davom ettirish</numerusform>
-            <numerusform></numerusform>
+            <numerusform />
         </translation>
     </message>
     <message numerus="yes">
         <source>%n new · resume</source>
         <translation>
             <numerusform>%n ta yangi · davom ettirish</numerusform>
-            <numerusform></numerusform>
+            <numerusform />
         </translation>
     </message>
     <message>
@@ -2442,6 +2449,10 @@
     <message>
         <source>Sort the patterns</source>
         <translation>Andozalarni saralash</translation>
+    </message>
+    <message>
+        <source>Instructions copied</source>
+        <translation>Yoʻriqnoma nusxalandi</translation>
     </message>
 </context>
 <context>
@@ -3681,7 +3692,7 @@
         <source>%1 · %n line(s)</source>
         <translation>
             <numerusform>%1 · %n qator</numerusform>
-            <numerusform></numerusform>
+            <numerusform />
         </translation>
     </message>
     <message>
@@ -4261,7 +4272,7 @@ hamkasbingiz aynan shuni koʻradi</translation>
         <translation>Saqlanmasa, ular yoʻqoladi.</translation>
     </message>
     <message>
-        <source>Don&apos;t save</source>
+        <source>Don't save</source>
         <translation>Saqlamaslik</translation>
     </message>
     <message>

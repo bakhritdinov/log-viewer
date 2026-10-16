@@ -30,6 +30,14 @@ ErrorInfo ErrorInfo::from(const RequestError& error, const QString& environmentN
             e.primaryAction = Action::Retry;
             e.secondaryAction = Action::CopyCorsHint;
             break;
+        case RK::CorsBlocked:
+            // Yellow, not red: nothing is broken on the user's side.
+            e.kind = Kind::CorsBlocked;
+            e.title = QCoreApplication::translate("ErrorInfo", "The browser blocked the request");
+            e.message = QCoreApplication::translate("ErrorInfo", "Grafana %1 does not allow requests from the app's address. This is set up on the server, not on your side.").arg(environmentName.isEmpty() ? host : environmentName);
+            e.primaryAction = Action::CopyCorsHint;
+            e.secondaryAction = Action::OpenCorsHelp;
+            break;
         case RK::Tls:
             e.kind = Kind::Tls;
             e.title = QCoreApplication::translate("ErrorInfo", "Secure connection failed");
@@ -119,6 +127,7 @@ ErrorInfo ErrorInfo::from(const RequestError& error, const QString& environmentN
             case Action::CopyCorsHint: return QCoreApplication::translate("ErrorInfo", "Copy instructions for DevOps");
             case Action::CopyDetails: return QCoreApplication::translate("ErrorInfo", "Copy details");
             case Action::EditQuery: return QCoreApplication::translate("ErrorInfo", "Edit query");
+            case Action::OpenCorsHelp: return QCoreApplication::translate("ErrorInfo", "What is CORS");
             case Action::None: break;
         }
         return {};

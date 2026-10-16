@@ -130,7 +130,14 @@
 
     // ── the app ──
     let app = null;
-    const setOffline = () => show("offline", !navigator.onLine);
+    // The offline strip waits a few seconds: a blip of the phone's network
+    // (a lift, a tunnel) is not worth a message; back online hides it at once.
+    let offlineTimer = 0;
+    const setOffline = () => {
+      clearTimeout(offlineTimer);
+      if (navigator.onLine) show("offline", false);
+      else offlineTimer = setTimeout(() => show("offline", !navigator.onLine), 4000);
+    };
     window.addEventListener("offline", setOffline);
     window.addEventListener("online", () => { setOffline(); app?.logviewerOnline?.(); });
     // Another share link opened while the app runs.
@@ -169,6 +176,40 @@
     };
     window.logviewerKeepAwake = on => { keepAwake = on; holdScreen(); };
     document.addEventListener("visibilitychange", holdScreen);   // the lock is dropped when hidden
+    // CORS or no connection? (WebShell) A request the page may send but not
+    // read: any answer means the server is reachable and CORS blocked the app.
+    window.logviewerProbe = probe => {
+      const abort = new AbortController();
+      const timer = setTimeout(() => abort.abort(), 8000);
+      fetch(probe.url, { mode: "no-cors", cache: "no-store", credentials: "omit", signal: abort.signal })
+        .then(() => true, () => false)
+        .then(reachable => { clearTimeout(timer); app?.logviewerProbeResult?.(probe.id, reachable); });
+    };
+    // The keyboard opens for the app's text fields only. Qt keeps a hidden
+    // <input> for typing and focuses it on touches; iOS took every swipe for
+    // typing. While no field is being edited (WebShell reports it) the input
+    // asks for no keyboard and loses the focus it gets.
+    let editing = false;
+    const qtInputs = () => [...document.querySelectorAll('input:not([type]), input[type="text"]')];
+    const guardInputs = () => {
+      for (const input of qtInputs()) {
+        if (editing) input.removeAttribute("inputmode");
+        else input.setAttribute("inputmode", "none");
+      }
+    };
+    document.addEventListener("focusin", e => {
+      if (!qtInputs().includes(e.target)) return;
+      setTimeout(() => { if (!editing && document.activeElement === e.target) e.target.blur(); }, 0);
+    });
+    window.logviewerEditing = on => {
+      const was = editing;
+      editing = on;
+      guardInputs();
+      const active = document.activeElement;
+      if (!on && qtInputs().includes(active)) active.blur();                     // closes the keyboard
+      else if (on && !was && qtInputs().includes(active)) { active.blur(); active.focus(); }   // now with a keyboard
+    };
+    new MutationObserver(guardInputs).observe(document.body, { childList: true, subtree: true });
     // The bar colour follows the app's theme (WebShell).
     window.logviewerThemeColor = color => {
       document.querySelector('meta[name="theme-color"]').setAttribute("content", color);

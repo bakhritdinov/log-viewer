@@ -17,7 +17,8 @@ Rectangle {
         if (!active) return ""
         switch (error.kind) {
         case ErrorInfo.Unreachable: return "offline"
-        case ErrorInfo.BlockedByBrowser: return "shield"
+        case ErrorInfo.BlockedByBrowser:
+        case ErrorInfo.CorsBlocked: return "shield"
         case ErrorInfo.Unauthorized:
         case ErrorInfo.Forbidden: return "lock"
         case ErrorInfo.TooHeavy: return "clock"
@@ -28,7 +29,7 @@ Rectangle {
         return "warning"
     }
     readonly property bool severe: active && error.kind !== ErrorInfo.TooHeavy && error.kind !== ErrorInfo.RateLimited
-                                   && error.kind !== ErrorInfo.BlockedByBrowser
+                                   && error.kind !== ErrorInfo.BlockedByBrowser && error.kind !== ErrorInfo.CorsBlocked
 
     visible: active
     implicitHeight: content.implicitHeight + 2 * (touch ? 14 : 12)

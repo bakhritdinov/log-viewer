@@ -20,6 +20,7 @@
 #include "LinkHandler.h"
 #endif
 #include "core/data/QtHttpClient.h"
+#include "core/data/RetryingHttpClient.h"
 #include "core/storage/KeyValueStore.h"
 #include "core/storage/SecretStore.h"
 
@@ -60,8 +61,14 @@ int main(int argc, char* argv[])
     // Browser and phone builds: the settings (the environment form says so).
     lv::SettingsSecretStore secrets(settings);
 #endif
-    lv::QtHttpClient http;
-    lv::AppServices services(http, settings, secrets, lv::makeDefaultParseExecutor());
+    lv::QtHttpClient network;
+    // A short network blip is retried before it shows as "cannot reach the server".
+    lv::RetryingHttpClient http(network);
+    lv::ClassifyOptions classify;
+#ifdef Q_OS_WASM
+    classify.browser = true;      // a failed fetch() may be CORS: the error says so
+#endif
+    lv::AppServices services(http, settings, secrets, lv::makeDefaultParseExecutor(), classify);
 
     lv::Language language(settings);
     lv::Language::setInstance(&language);
