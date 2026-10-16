@@ -757,6 +757,33 @@ private slots:
         QVERIFY(h.session->histogramRangeOrPatternFilter());
     }
 
+    // Feedback: the histogram draws WARN and ERROR, so a picked interval shows
+    // those — the INFO around them only when all levels are asked for.
+    void bucketPickShowsWhatTheChartDraws()
+    {
+        Harness h;
+        h.scriptStartup(mixedLogs());
+        h.session->start();
+        QVERIFY(h.waitIdle(3));
+        QVERIFY(h.settle());
+        int bucket = -1;
+        for (int i = 0; i < h.session->histogram()->count() && bucket < 0; ++i) {
+            const QVariantMap b = h.session->histogram()->get(i);
+            if (b.value("info").toInt() > 0 && b.value("important").toInt() > 0) bucket = i;
+        }
+        QVERIFY2(bucket >= 0, "no interval with INFO next to a problem");
+        const QVariantMap b = h.session->histogram()->get(bucket);
+        h.session->applyBucketFilter(bucket, {}, true);
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->logs()->rowCount(), b.value("important").toInt());
+        for (int row = 0; row < h.session->logs()->rowCount(); ++row)
+            QVERIFY(h.session->logs()->data(h.session->logs()->index(row), LogListModel::LevelRole).toString() != "INFO");
+        QVERIFY(h.session->histogramFilterLabel().endsWith("ERROR + WARN"));
+        h.session->applyBucketFilter(bucket);                  // all levels
+        QVERIFY(h.settle());
+        QCOMPARE(h.session->logs()->rowCount(), b.value("total").toInt());
+    }
+
     void modelsHonourTheModelContract()
     {
         Harness h;

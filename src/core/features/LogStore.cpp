@@ -35,8 +35,9 @@ bool LogStore::Filter::matches(const LogEntry& e) const
         if (t < fromMs || t >= toMs) return false;
     }
     if (level != Level::Unknown && e.level != level) return false;
+    const bool problem = e.level == Level::Warn || e.level == Level::Error;
+    if (problemsOnly && !problem) return false;
     if (!messageTemplate.isEmpty()) {
-        const bool problem = e.level == Level::Warn || e.level == Level::Error;
         const bool inPattern = (!templateProblemsOnly || problem) && templateMessage(e.message).templateText == messageTemplate;
         return inPattern != excludeTemplate;
     }

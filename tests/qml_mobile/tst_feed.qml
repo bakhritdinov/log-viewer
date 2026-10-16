@@ -160,4 +160,26 @@ TestCase {
         verify(right <= card.width - 12, "text ends at " + right + " in a card of " + card.width)
         card.destroy()
     }
+
+    // Feedback: an interval picked on the chart narrowed the feed with no sign
+    // of it — the counter kept the loaded total and no chip said why. Now the
+    // feed shows the pick as a chip (× undoes it) and counts what it shows.
+    function test_14_chartPickShownInTheFeed() {
+        harness.scriptLogs(12)
+        Session.search()
+        tryCompare(Session.logs, "totalCount", 12, 3000)
+        tryCompare(Session, "loading", false)
+        Session.applyLevelFilter("ERROR")          // the same chip as an interval; 4 of the 12 entries
+        tryVerify(() => Session.histogramFilterActive && Session.logs.totalCount < 12)
+        const shown = Session.logs.totalCount
+        tryVerify(() => H.visibleText(window.contentItem, "Записи · " + shown) !== null)
+        const chip = H.find(window.contentItem, it => it.hasOwnProperty("pill") && it.text === Session.histogramFilterLabel && H.isShown(it))
+        verify(chip, "no chip for " + Session.histogramFilterLabel)
+        const label = chip.text
+        const remove = H.find(chip, it => it.hasOwnProperty("pressed") && it !== chip && H.isShown(it))
+        verify(remove)
+        mouseClick(remove)
+        tryVerify(() => !Session.histogramFilterActive && Session.logs.totalCount === 12)
+        verify(!H.find(window.contentItem, it => it.hasOwnProperty("pill") && it.text === label && H.isShown(it)))
+    }
 }

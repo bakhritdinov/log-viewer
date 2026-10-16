@@ -57,6 +57,16 @@
     </message>
 </context>
 <context>
+    <name>ChartPage</name>
+    <message numerus="yes">
+        <source>Show %n entries</source>
+        <translation type="unfinished">
+            <numerusform>Show %n entry</numerusform>
+            <numerusform>Show %n entries</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
     <name>DetailsScreen</name>
     <message numerus="yes">
         <source>Message · %n line(s)</source>

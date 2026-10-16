@@ -238,6 +238,14 @@ Item {
                                         }
                                     }
                                 }
+                                // A pick on the chart (interval, level, pattern): the feed is
+                                // narrowed, so it says so here and can be undone in place.
+                                FilterChip {
+                                    visible: Session.histogramFilterActive
+                                    touch: true
+                                    text: Session.histogramFilterLabel
+                                    onRemoveRequested: Session.clearHistogramFilter()
+                                }
                                 FilterChipBar {
                                     id: chipBar
                                     touch: true
@@ -365,7 +373,8 @@ Item {
                     fill: true
                     accessibleName: qsTr("Results view")
                     model: [
-                        { label: qsTr("Records · %1").arg(root.num(Session.logs.loadedCount) + (Session.loading ? "…" : "")), value: false },
+                        // The entries shown: fewer than loaded while the chart narrows the feed.
+                        { label: qsTr("Records · %1").arg(root.num(Session.logs.totalCount) + (Session.loading ? "…" : "")), value: false },
                         { label: Session.loading ? qsTr("Patterns · …")
                                : Session.patterns.count > 0 ? qsTr("Patterns · %1").arg(Session.patterns.count) : qsTr("Patterns"), value: true },
                     ]

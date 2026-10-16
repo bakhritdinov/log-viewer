@@ -115,6 +115,24 @@ private slots:
         QCOMPARE(s.visible().size(), 5);
     }
 
+    // A pick on the histogram: WARN and ERROR of the window, not the INFO around them.
+    void filterProblemsOnly()
+    {
+        LogStore s;
+        s.add({ entry(0, "e0", Level::Error), entry(1000, "i1"), entry(2000, "w2", Level::Warn), entry(3000, "d3", Level::Debug),
+                entry(70000, "e70", Level::Error) });
+        const qint64 t0 = kT0.toMSecsSinceEpoch();
+        LogStore::Filter f{ t0, t0 + 60000 };
+        f.problemsOnly = true;
+        QVERIFY(f.isActive());
+        s.setFilter(f);
+        QCOMPARE(messages(s.visible()), (QStringList{ "w2", "e0" }));
+        LogStore::Filter anyTime;                          // the whole period
+        anyTime.problemsOnly = true;
+        s.setFilter(anyTime);
+        QCOMPARE(messages(s.visible()), (QStringList{ "e70", "w2", "e0" }));
+    }
+
     void filterByMessageTemplate()
     {
         LogStore s;

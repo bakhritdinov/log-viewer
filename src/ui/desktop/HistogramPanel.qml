@@ -151,7 +151,13 @@ Rectangle {
             selectedIndex: root.selectedIndex
             model: Session.histogram
             maxTotal: Session.histogramMax
-            onBucketClicked: (index, level) => Session.applyBucketFilter(index, level)
+            // The bars draw WARN and ERROR: a click on a segment shows its level,
+            // above the bar the level picked in the legend or both of them —
+            // never the INFO of the interval (as on the phone).
+            onBucketClicked: (index, level) => {
+                const picked = level !== "" ? level : Session.activeLevel
+                Session.applyBucketFilter(index, picked, picked === "")
+            }
             onResetRequested: Session.clearHistogramFilter()
         }
         // Evenly spaced times; each label sits at its point of the time line

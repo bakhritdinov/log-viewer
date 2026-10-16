@@ -809,16 +809,27 @@
         <translation>Butun davrni koʻrsatish</translation>
     </message>
     <message>
-        <source>All entries</source>
-        <translation>Barcha yozuvlar</translation>
-    </message>
-    <message>
         <source>Only ERROR</source>
         <translation>Faqat ERROR</translation>
     </message>
     <message>
         <source>Slide a finger over the chart to pick an interval; tap a level to show only it.</source>
         <translation>Oraliqni tanlash uchun grafik boʻylab barmogʻingizni suring; faqat shu darajani koʻrsatish uchun darajaga bosing.</translation>
+    </message>
+    <message>
+        <source>No ERROR or WARN in this interval</source>
+        <translation>Bu oraliqda ERROR va WARN yoʻq</translation>
+    </message>
+    <message numerus="yes">
+        <source>Show %n entries</source>
+        <translation>
+            <numerusform>%n ta yozuvni koʻrsatish</numerusform>
+            <numerusform>%n ta yozuvni koʻrsatish</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>All levels · %1</source>
+        <translation>Barcha darajalar · %1</translation>
     </message>
 </context>
 <context>

@@ -816,16 +816,28 @@
         <translation>Показать весь период</translation>
     </message>
     <message>
-        <source>All entries</source>
-        <translation>Все записи</translation>
-    </message>
-    <message>
         <source>Only ERROR</source>
         <translation>Только ERROR</translation>
     </message>
     <message>
         <source>Slide a finger over the chart to pick an interval; tap a level to show only it.</source>
         <translation>Проведите пальцем по графику, чтобы выбрать интервал; нажмите на уровень — чтобы показать только его.</translation>
+    </message>
+    <message>
+        <source>No ERROR or WARN in this interval</source>
+        <translation>В этом интервале нет ERROR и WARN</translation>
+    </message>
+    <message numerus="yes">
+        <source>Show %n entries</source>
+        <translation>
+            <numerusform>Показать %n запись</numerusform>
+            <numerusform>Показать %n записи</numerusform>
+            <numerusform>Показать %n записей</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>All levels · %1</source>
+        <translation>Все уровни · %1</translation>
     </message>
 </context>
 <context>

@@ -172,7 +172,9 @@ ColumnLayout {
                     onReleased: {
                         const index = root.scrubIndex
                         root.scrubIndex = -1
-                        if (index >= 0) Session.applyBucketFilter(index, Session.activeLevel)
+                        // The chart draws WARN and ERROR: a pick shows those (or the
+                        // level chosen above), not the INFO around them.
+                        if (index >= 0) Session.applyBucketFilter(index, Session.activeLevel, Session.activeLevel === "")
                     }
                     onCanceled: root.scrubIndex = -1
                 }
@@ -207,10 +209,17 @@ ColumnLayout {
                 id: intervalCard
                 readonly property var bucket: root.cardBucket
                 readonly property bool picked: root.scrubIndex < 0
-                // A level filter and no entries of it here.
-                readonly property bool emptyForLevel: bucket !== null && Session.activeLevel !== ""
-                                                      && (Session.activeLevel === "ERROR" ? bucket.error : bucket.warn) === 0
-                readonly property bool offerErrors: !emptyForLevel && bucket !== null && bucket.error > 0 && Session.activeLevel !== "ERROR"
+                // What a pick shows: the chosen level, or WARN and ERROR together.
+                readonly property int shownHere: bucket === null ? 0
+                                                 : Session.activeLevel === "ERROR" ? bucket.error
+                                                 : Session.activeLevel === "WARN" ? bucket.warn
+                                                 : bucket.important
+                // Nothing of that here (a finger can pick a quiet interval too).
+                readonly property bool emptyForLevel: bucket !== null && shownHere === 0
+                readonly property bool offerErrors: !emptyForLevel && bucket !== null && bucket.error > 0 && bucket.warn > 0
+                                                    && Session.activeLevel !== "ERROR"
+                // The rest of the interval (INFO, DEBUG…) on request.
+                readonly property bool offerAllLevels: bucket !== null && bucket.total > Session.logs.totalCount
                 Layout.fillWidth: true
                 visible: bucket !== null
                 implicitHeight: cardColumn.implicitHeight + 24
@@ -273,33 +282,48 @@ ColumnLayout {
                     Text {
                         Layout.fillWidth: true
                         visible: intervalCard.emptyForLevel
-                        text: qsTr("No %1 in this interval").arg(Session.activeLevel)
+                        text: Session.activeLevel !== "" ? qsTr("No %1 in this interval").arg(Session.activeLevel)
+                                                         : qsTr("No ERROR or WARN in this interval")
                         wrapMode: Text.Wrap
                         font.family: Theme.sans
                         font.pixelSize: Theme.fontLg
                         color: Theme.textStrong
                     }
-                    GridLayout {
+                    ColumnLayout {
                         Layout.fillWidth: true
                         visible: intervalCard.picked
-                        columns: intervalCard.offerErrors ? 2 : 1
-                        columnSpacing: 8
+                        spacing: 8
                         AppButton {
                             Layout.fillWidth: true
                             touch: true
                             variant: intervalCard.emptyForLevel ? "secondary" : "primary"
-                            text: intervalCard.emptyForLevel ? qsTr("Show the whole period") : qsTr("All entries")
+                            text: intervalCard.emptyForLevel ? qsTr("Show the whole period")
+                                                             : qsTr("Show %n entries", "", Session.logs.totalCount)
                             onClicked: {
                                 if (intervalCard.emptyForLevel) Session.clearHistogramFilter()
                                 else root.showEntriesRequested()
                             }
                         }
-                        AppButton {
+                        RowLayout {
                             Layout.fillWidth: true
-                            visible: intervalCard.offerErrors
-                            touch: true
-                            text: qsTr("Only ERROR")
-                            onClicked: { Session.applyBucketFilter(root.cardIndex, "ERROR"); root.showEntriesRequested() }
+                            visible: intervalCard.offerErrors || intervalCard.offerAllLevels
+                            spacing: 8
+                            AppButton {
+                                Layout.fillWidth: true
+                                Layout.preferredWidth: 1
+                                visible: intervalCard.offerErrors
+                                touch: true
+                                text: qsTr("Only ERROR")
+                                onClicked: { Session.applyBucketFilter(root.cardIndex, "ERROR"); root.showEntriesRequested() }
+                            }
+                            AppButton {
+                                Layout.fillWidth: true
+                                Layout.preferredWidth: 1
+                                visible: intervalCard.offerAllLevels
+                                touch: true
+                                text: qsTr("All levels · %1").arg(intervalCard.bucket ? intervalCard.bucket.total : 0)
+                                onClicked: { Session.applyBucketFilter(root.cardIndex, ""); root.showEntriesRequested() }
+                            }
                         }
                     }
                 }

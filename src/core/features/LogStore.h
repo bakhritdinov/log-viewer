@@ -21,8 +21,10 @@ public:
         bool excludeTemplate = false;
         // Patterns are built from WARN/ERROR entries: showing one keeps only those.
         bool templateProblemsOnly = false;
+        // WARN and ERROR only (what the histogram draws), without naming a level.
+        bool problemsOnly = false;
 
-        bool isActive() const { return toMs > 0 || level != Level::Unknown || !messageTemplate.isEmpty(); }
+        bool isActive() const { return toMs > 0 || level != Level::Unknown || problemsOnly || !messageTemplate.isEmpty(); }
         bool matches(const LogEntry& e) const;
         bool operator==(const Filter& other) const = default;
     };

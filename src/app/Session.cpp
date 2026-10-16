@@ -630,7 +630,7 @@ void Session::refreshHistogram()
     scheduleAnalysis();
 }
 
-void Session::applyBucketFilter(int bucketIndex, const QString& level)
+void Session::applyBucketFilter(int bucketIndex, const QString& level, bool problemsOnly)
 {
     if (bucketIndex < 0 || bucketIndex >= m_buckets.size()) return;
     const qint64 from = m_buckets.at(bucketIndex).startMs;
@@ -638,8 +638,13 @@ void Session::applyBucketFilter(int bucketIndex, const QString& level)
     m_levelServerSide = false;
     const auto fmt = [](qint64 ms) { return QDateTime::fromMSecsSinceEpoch(ms).toLocalTime().toString(QStringLiteral("HH:mm:ss")); };
     QString label = QStringLiteral("%1 → %2").arg(fmt(from), fmt(from + m_bucketMs));
+    LogStore::Filter filter{ from, from + m_bucketMs, m_activeLevel };
     if (m_activeLevel != Level::Unknown) label += QStringLiteral(" · ") + level;
-    applyStoreFilter({ from, from + m_bucketMs, m_activeLevel }, label);
+    else if (problemsOnly) {
+        filter.problemsOnly = true;
+        label += QStringLiteral(" · ERROR + WARN");
+    }
+    applyStoreFilter(filter, label);
 }
 
 void Session::applyLevelFilter(const QString& level)

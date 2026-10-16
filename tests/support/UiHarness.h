@@ -28,7 +28,7 @@ class Harness : public QObject {
 public:
     explicit Harness(bool configured)
     {
-        services = std::make_unique<AppServices>(http, kv, secrets, makeInlineParseExecutor());
+        services = std::make_unique<AppServices>(http, kv, secrets, qEnvironmentVariableIsSet("LOGVIEWER_TEST_THREADED") ? makeThreadedParseExecutor() : makeInlineParseExecutor());
         if (configured) {
             Environment dev = *services->environments().find("dev");
             dev.url = QUrl("https://dev-grafana");

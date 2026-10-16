@@ -165,7 +165,8 @@ public:
 
     // Histogram filter (client-side narrowing; level can be promoted by loadMore)
     void setManualBucketMs(qint64 ms);
-    Q_INVOKABLE void applyBucketFilter(int bucketIndex, const QString& level = {});
+    // `problemsOnly`: WARN and ERROR of the bucket (what the chart draws) when no level is named.
+    Q_INVOKABLE void applyBucketFilter(int bucketIndex, const QString& level = {}, bool problemsOnly = false);
     Q_INVOKABLE void applyLevelFilter(const QString& level);
     Q_INVOKABLE void clearHistogramFilter();
 

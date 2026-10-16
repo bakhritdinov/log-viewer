@@ -120,7 +120,15 @@ TestCase {
         mouseRelease(chart, 20, 100)
         tryVerify(() => Session.histogramFilterActive)
         tryVerify(() => shownText("выбранный интервал"))
-        tap(H.find(root(), it => it.text === "Все записи" && it.hasOwnProperty("variant") && H.isShown(it)))
+        // Feedback: the chart draws WARN and ERROR, so a pick shows those —
+        // not the INFO of the interval; all its levels are one tap away.
+        const levels = () => { const out = []; for (let i = 0; i < Session.logs.totalCount; ++i) out.push(Session.logs.rowData(i).level); return out }
+        tryVerify(() => Session.logs.totalCount > 0 && levels().every(l => l === "ERROR" || l === "WARN"), 3000, levels().join(","))
+        const button = text => H.find(root(), it => String(it.text).indexOf(text) === 0 && it.hasOwnProperty("variant") && H.isShown(it))
+        verify(button("Показать " + Session.logs.totalCount + " "))
+        const problems = Session.logs.totalCount
+        tap(button("Все уровни"))
+        tryVerify(() => Session.logs.totalCount > problems && levels().indexOf("INFO") >= 0)
         tryCompare(window, "section", 0)
         Session.clearHistogramFilter()
     }
