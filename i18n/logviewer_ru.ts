@@ -1,4 +1,5 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
 <TS version="2.1" language="ru" sourcelanguage="en">
 <context>
     <name>AboutPage</name>
@@ -1292,7 +1293,7 @@
         <translation>API-токен</translation>
     </message>
     <message>
-        <source>In the browser the password is kept in the site's storage on this phone.</source>
+        <source>In the browser the password is kept in the site&apos;s storage on this phone.</source>
         <translation>В браузере пароль хранится в памяти сайта на этом телефоне.</translation>
     </message>
     <message>
@@ -1400,7 +1401,7 @@
         <translation>Продолжить редактирование</translation>
     </message>
     <message>
-        <source>Don't save</source>
+        <source>Don&apos;t save</source>
         <translation>Не сохранять</translation>
     </message>
 </context>
@@ -2954,6 +2955,73 @@
     </message>
 </context>
 <context>
+    <name>RefreshControls</name>
+    <message>
+        <source>Off</source>
+        <translation>Выкл</translation>
+    </message>
+    <message>
+        <source>5 s</source>
+        <translation>5 с</translation>
+    </message>
+    <message>
+        <source>10 s</source>
+        <translation>10 с</translation>
+    </message>
+    <message>
+        <source>30 s</source>
+        <translation>30 с</translation>
+    </message>
+    <message>
+        <source>1 min</source>
+        <translation>1 мин</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Обновить</translation>
+    </message>
+    <message>
+        <source>Stop loading</source>
+        <translation>Остановить загрузку</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Остановить</translation>
+    </message>
+    <message>
+        <source>Auto refresh: every %1</source>
+        <translation>Автообновление: каждые %1</translation>
+    </message>
+    <message>
+        <source>Auto refresh: off</source>
+        <translation>Автообновление: выкл</translation>
+    </message>
+    <message>
+        <source>%1 s</source>
+        <translation>%1 с</translation>
+    </message>
+    <message>
+        <source>Auto refresh off</source>
+        <translation>Без автообновления</translation>
+    </message>
+    <message>
+        <source>Every minute</source>
+        <translation>Каждую минуту</translation>
+    </message>
+    <message>
+        <source>Every %1</source>
+        <translation>Каждые %1</translation>
+    </message>
+    <message>
+        <source>A fixed period needs no auto refresh</source>
+        <translation>Для фиксированного периода автообновление не нужно</translation>
+    </message>
+    <message>
+        <source>Live tail</source>
+        <translation>Live tail (хвост)</translation>
+    </message>
+</context>
+<context>
     <name>ResultsView</name>
     <message>
         <source>Loading logs</source>
@@ -4133,26 +4201,6 @@ a colleague sees exactly the same</source>
 <context>
     <name>TopBar</name>
     <message>
-        <source>Off</source>
-        <translation>Выкл</translation>
-    </message>
-    <message>
-        <source>5 s</source>
-        <translation>5 с</translation>
-    </message>
-    <message>
-        <source>10 s</source>
-        <translation>10 с</translation>
-    </message>
-    <message>
-        <source>30 s</source>
-        <translation>30 с</translation>
-    </message>
-    <message>
-        <source>1 min</source>
-        <translation>1 мин</translation>
-    </message>
-    <message>
         <source>Environment: %1</source>
         <translation>Окружение: %1</translation>
     </message>
@@ -4171,34 +4219,6 @@ a colleague sees exactly the same</source>
     <message>
         <source>No period needed — new entries are shown</source>
         <translation>Период не нужен — показываются новые записи</translation>
-    </message>
-    <message>
-        <source>Refresh</source>
-        <translation>Обновить</translation>
-    </message>
-    <message>
-        <source>Auto refresh: every %1</source>
-        <translation>Автообновление: каждые %1</translation>
-    </message>
-    <message>
-        <source>Auto refresh: off</source>
-        <translation>Автообновление: выкл</translation>
-    </message>
-    <message>
-        <source>%1 s</source>
-        <translation>%1 с</translation>
-    </message>
-    <message>
-        <source>Auto refresh off</source>
-        <translation>Без автообновления</translation>
-    </message>
-    <message>
-        <source>Every %1</source>
-        <translation>Каждые %1</translation>
-    </message>
-    <message>
-        <source>Live tail</source>
-        <translation>Live tail (хвост)</translation>
     </message>
     <message>
         <source>LIVE · ~%1 lines/s</source>
@@ -4241,22 +4261,6 @@ a colleague sees exactly the same</source>
         <source>%1 – %2</source>
         <translation>%1 – %2</translation>
     </message>
-    <message>
-        <source>Stop loading</source>
-        <translation>Остановить загрузку</translation>
-    </message>
-    <message>
-        <source>Stop</source>
-        <translation>Остановить</translation>
-    </message>
-    <message>
-        <source>Every minute</source>
-        <translation>Каждую минуту</translation>
-    </message>
-    <message>
-        <source>A fixed period needs no auto refresh</source>
-        <translation>Для фиксированного периода автообновление не нужно</translation>
-    </message>
     <message numerus="yes">
         <source>PAUSED · %n new</source>
         <translation>
@@ -4293,7 +4297,7 @@ a colleague sees exactly the same</source>
         <translation>Без сохранения они будут потеряны.</translation>
     </message>
     <message>
-        <source>Don't save</source>
+        <source>Don&apos;t save</source>
         <translation>Не сохранять</translation>
     </message>
     <message>

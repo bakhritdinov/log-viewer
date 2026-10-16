@@ -420,4 +420,61 @@ TestCase {
         compare(Session.prefs.extraColumns, [])
         keyClick(Qt.Key_Escape)
     }
+    // Feedback: Refresh sits at the end of the search field (not in the top bar)
+    // and runs the search.
+    function test_28_refreshAtTheEndOfTheSearch() {
+        const search = byName(window.contentItem, "Поиск по логам")
+        const refresh = H.find(window.contentItem, it => it.text === "Обновить" && it.hasOwnProperty("variant") && H.isShown(it))
+        verify(search && refresh)
+        compare(H.findAll(window.contentItem, it => it.text === "Обновить" && it.hasOwnProperty("variant") && H.isShown(it)).length, 1)
+        const s = search.mapToItem(root(), 0, 0), r = refresh.mapToItem(root(), 0, 0)
+        verify(r.x > s.x + search.width, "after the search field")
+        compare(Math.round(r.y + refresh.height / 2), Math.round(s.y + search.height / 2))   // same line
+        const before = harness.requestCount
+        harness.scriptLogs(5)
+        mouseClick(refresh)
+        tryVerify(() => harness.requestCount > before)
+        tryCompare(Session, "loading", false)
+    }
+
+    // Feedback: no service column by default (the source picks one app).
+    function test_29_noServiceColumnByDefault() {
+        verify(H.find(window.contentItem, it => it.text === "Сервис" && H.isShown(it)) === null)
+        Session.prefs.showService = true
+        tryVerify(() => H.find(window.contentItem, it => it.text === "Сервис" && H.isShown(it)) !== null)
+        Session.prefs.showService = false
+    }
+
+    // Feedback: in "Version" the status icon, its text and the button share a centre line.
+    function test_30_updateStatusAligned() {
+        keySequence("Ctrl+,")
+        const nav = () => H.find(root(), it => it.Accessible.name === "Версия" && it.hasOwnProperty("current") && H.isShown(it))
+        tryVerify(() => nav() !== null)
+        waitForRendering(root())
+        mouseClick(nav())
+        const button = () => H.find(root(), it => it.hasOwnProperty("variant") && (it.text === "Проверить обновления" || it.text === "Проверить снова" || it.text === "Повторить") && H.isShown(it))
+        tryVerify(() => button() !== null)
+        const row = button().parent
+        const icon = H.find(row, it => it.hasOwnProperty("strokeWidth") && H.isShown(it))
+        const title = H.find(row, it => it.hasOwnProperty("firstLineHeight"))
+        // Within a pixel: a text line's height is fractional and layouts round it.
+        const mid = (it, h) => it.mapToItem(root(), 0, 0).y + h / 2
+        verify(Math.abs(mid(icon, icon.height) - mid(button(), button().height)) <= 1)
+        verify(Math.abs(mid(title, title.firstLineHeight) - mid(button(), button().height)) <= 1,
+               `${mid(title, title.firstLineHeight)} vs ${mid(button(), button().height)}`)
+        keyClick(Qt.Key_Escape)
+    }
+    // Feedback: the refresh keys work — F5 and Ctrl+R (⌘R on macOS); a key bound
+    // twice is ambiguous and Qt fires neither.
+    function test_31_refreshKey() {
+        mouseClick(rows()[0])                         // focus in the list, not in a text field
+        for (const key of ["Ctrl+R", "F5", "Ctrl+R"]) {
+            const before = harness.requestCount
+            harness.scriptLogs(5)
+            keySequence(key)
+            tryVerify(() => harness.requestCount > before, 2000, key)
+            tryCompare(Session, "loading", false)
+        }
+        keyClick(Qt.Key_Escape)
+    }
 }

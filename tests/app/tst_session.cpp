@@ -102,6 +102,7 @@ private slots:
         QCOMPARE(p.rowHeight(), 28);
         QCOMPARE(p.loadStep(), 5000);
         QVERIFY(p.prettyJson());
+        QVERIFY(!p.showService());                    // the list shows one app: no service column
 
         QSignalSpy changed(&p, &Preferences::changed);
         p.setDensity("compact");

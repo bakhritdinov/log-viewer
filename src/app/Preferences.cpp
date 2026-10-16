@@ -98,7 +98,9 @@ void Preferences::setUtc(bool v) { set("utc", v); }
 bool Preferences::showLevel() const { return value("showLevel", true).toBool(); }
 void Preferences::setShowLevel(bool v) { set("showLevel", v); }
 
-bool Preferences::showService() const { return value("showService", true).toBool(); }
+// Off by default: the list shows the one app picked in the source, so the column
+// repeats it on every row. Still available in the table settings.
+bool Preferences::showService() const { return value("showService", false).toBool(); }
 void Preferences::setShowService(bool v) { set("showService", v); }
 
 QStringList Preferences::extraColumns() const { return value("extraColumns", QStringList()).toStringList(); }

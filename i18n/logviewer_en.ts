@@ -5,30 +5,30 @@
     <name>AboutPage</name>
     <message numerus="yes">
         <source>Search history · %n search(es)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Search history · %n search</numerusform>
+            <numerusform>Search history · %n searches</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n query(ies) exported</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n query exported</numerusform>
+            <numerusform>%n queries exported</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n query(ies) added</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n query added</numerusform>
+            <numerusform>%n queries added</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>The %n recent search(es) are removed from this device. Saved queries stay.</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>The %n recent search is removed from this device. Saved queries stay.</numerusform>
+            <numerusform>The %n recent searches are removed from this device. Saved queries stay.</numerusform>
         </translation>
     </message>
 </context>
@@ -36,23 +36,23 @@
     <name>AboutScreen</name>
     <message numerus="yes">
         <source>%n saved</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n saved</numerusform>
+            <numerusform>%n saved</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n recent queries</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n recent query</numerusform>
+            <numerusform>%n recent queries</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n query(-ies) added</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n query added</numerusform>
+            <numerusform>%n queries added</numerusform>
         </translation>
     </message>
 </context>
@@ -60,7 +60,7 @@
     <name>ChartPage</name>
     <message numerus="yes">
         <source>Show %n entries</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>Show %n entry</numerusform>
             <numerusform>Show %n entries</numerusform>
         </translation>
@@ -70,9 +70,9 @@
     <name>DetailsScreen</name>
     <message numerus="yes">
         <source>Message · %n line(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Message · %n line</numerusform>
+            <numerusform>Message · %n lines</numerusform>
         </translation>
     </message>
 </context>
@@ -97,9 +97,9 @@
     </message>
     <message numerus="yes">
         <source>%n more value(s)…</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n more value…</numerusform>
+            <numerusform>%n more values…</numerusform>
         </translation>
     </message>
 </context>
@@ -107,16 +107,16 @@
     <name>FocusScreen</name>
     <message numerus="yes">
         <source>%n entries</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n entry</numerusform>
+            <numerusform>%n entries</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n service(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n service</numerusform>
+            <numerusform>%n services</numerusform>
         </translation>
     </message>
 </context>
@@ -151,16 +151,16 @@
     </message>
     <message numerus="yes">
         <source>While you were away: %n new · resume</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>While you were away: %n new · resume</numerusform>
+            <numerusform>While you were away: %n new · resume</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n new · resume</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n new · resume</numerusform>
+            <numerusform>%n new · resume</numerusform>
         </translation>
     </message>
 </context>
@@ -168,9 +168,9 @@
     <name>LogTable</name>
     <message numerus="yes">
         <source>↵ +%n line(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>↵ +%n line</numerusform>
+            <numerusform>↵ +%n lines</numerusform>
         </translation>
     </message>
 </context>
@@ -178,23 +178,23 @@
     <name>PatternsList</name>
     <message numerus="yes">
         <source>%n one-off message(s) not shown.</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%n one-off message not shown.</numerusform>
             <numerusform>%n one-off messages not shown.</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Show %n entries</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>Show %n entry</numerusform>
             <numerusform>Show %n entries</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>All %n warnings and errors occur once.</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>The one warning or error occurs once.</numerusform>
+            <numerusform>All %n warnings and errors occur once.</numerusform>
         </translation>
     </message>
 </context>
@@ -216,9 +216,9 @@
     </message>
     <message numerus="yes">
         <source>All %n warnings and errors occur once.</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>The one warning or error occurs once.</numerusform>
+            <numerusform>All %n warnings and errors occur once.</numerusform>
         </translation>
     </message>
 </context>
@@ -264,9 +264,9 @@
     </message>
     <message numerus="yes">
         <source>%1 · %n value(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%1 · %n value</numerusform>
+            <numerusform>%1 · %n values</numerusform>
         </translation>
     </message>
 </context>
@@ -274,7 +274,7 @@
     <name>SearchScreen</name>
     <message numerus="yes">
         <source>%n value(s)</source>
-        <translation type="unfinished">
+        <translation>
             <numerusform>%n value</numerusform>
             <numerusform>%n values</numerusform>
         </translation>
@@ -284,9 +284,9 @@
     <name>SettingsPage</name>
     <message numerus="yes">
         <source>%1 · %n line(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%1 · %n line</numerusform>
+            <numerusform>%1 · %n lines</numerusform>
         </translation>
     </message>
 </context>
@@ -304,9 +304,9 @@
     <name>TopBar</name>
     <message numerus="yes">
         <source>PAUSED · %n new</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>PAUSED · %n new</numerusform>
+            <numerusform>PAUSED · %n new</numerusform>
         </translation>
     </message>
 </context>

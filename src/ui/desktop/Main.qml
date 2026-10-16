@@ -46,7 +46,7 @@ ApplicationWindow {
 
     readonly property var shortcutList: [
         { header: qsTr("General") },
-        { keys: [refreshShortcut.nativeText, refreshShortcutAlt.nativeText].filter(k => k !== ""), text: qsTr("Refresh") },
+        { keys: [refreshShortcut.nativeText, refreshShortcutAlt.nativeText].filter((k, i, all) => k !== "" && all.indexOf(k) === i), text: qsTr("Refresh") },
         { keys: [sourceShortcut.nativeText], text: qsTr("Choose the source") },
         { keys: [timeShortcut.nativeText], text: qsTr("Choose the period") },
         { keys: [shareShortcut.nativeText], text: qsTr("Share a link") },
@@ -96,8 +96,12 @@ ApplicationWindow {
 
     // ── Shortcuts ──
     // One sequence per Shortcut: nativeText only describes `sequence`, not `sequences`.
-    Shortcut { id: refreshShortcut; sequence: StandardKey.Refresh; enabled: window.mainMode; onActivated: Session.search() }
-    Shortcut { id: refreshShortcutAlt; sequence: "Ctrl+R"; enabled: window.mainMode; onActivated: Session.search() }
+    // Refresh keys spelled out (F5 and Ctrl+R, ⌘R on macOS): StandardKey.Refresh
+    // differs per platform and repeats one of them, and a key bound twice is
+    // ambiguous — Qt then fires neither.
+    Shortcut { id: refreshShortcut; sequences: ["F5", "Ctrl+R"]; enabled: window.mainMode; onActivated: Session.search() }
+    // Only for its text in the shortcut list (never enabled, so never ambiguous).
+    Shortcut { id: refreshShortcutAlt; sequence: "Ctrl+R"; enabled: false }
     Shortcut { id: findShortcut; sequence: "Ctrl+F"; enabled: !window.focusMode; onActivated: searchBar.focusSearch() }
     Shortcut { id: sourceShortcut; sequence: "Ctrl+K"; onActivated: topBar.openSourcePicker() }
     Shortcut { id: timeShortcut; sequence: "Ctrl+T"; enabled: window.mainMode; onActivated: topBar.openTimePicker() }
@@ -146,7 +150,6 @@ ApplicationWindow {
             Layout.fillWidth: true
             sourceKey: sourceShortcut.nativeText
             timeKey: timeShortcut.nativeText
-            refreshKey: refreshShortcut.nativeText
             shareKey: shareShortcut.nativeText
             settingsKey: settingsShortcut.nativeText
             onSettingsRequested: settings.openSection(0)
@@ -171,6 +174,7 @@ ApplicationWindow {
             liveMode: window.liveMode
             findShortcut: findShortcut.nativeText
             saveShortcut: saveShortcut.nativeText
+            refreshShortcut: refreshShortcut.nativeText
             // The placeholder already explains the syntax; live mode says what the filter does.
             hint: window.liveMode ? qsTr("The filter applies to the stream on the fly") : ""
         }

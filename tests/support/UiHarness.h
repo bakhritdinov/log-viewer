@@ -1,4 +1,7 @@
 #pragma once
+
+#include <QSettings>
+#include <QTemporaryDir>
 // A design under test against a fake Grafana. `harness` (a context property)
 // scripts responses and reports the requests the app made; Setup creates it
 // before QML loads (QUICK_TEST_MAIN_WITH_SETUP). Shared by the desktop and
@@ -177,6 +180,11 @@ class Setup : public QObject {
 public slots:
     void applicationAvailable()
     {
+        // The window keeps its own state with QML's Settings (QSettings): give each
+        // run fresh, private settings so nothing leaks between runs (a widened
+        // details panel left by one run collapsed the fields in the next).
+        QSettings::setDefaultFormat(QSettings::IniFormat);
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, m_settingsDir.path());
         m_harness = std::make_unique<Harness>(qEnvironmentVariable("LOGVIEWER_TEST_SCENARIO") != u"first_run");
     }
     void qmlEngineAvailable(QQmlEngine* engine)
@@ -187,6 +195,7 @@ public slots:
     void cleanupTestCase() { m_harness.reset(); }
 
 private:
+    QTemporaryDir m_settingsDir;
     std::unique_ptr<Harness> m_harness;
 };
 

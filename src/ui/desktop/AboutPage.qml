@@ -66,8 +66,12 @@ ColumnLayout {
                 anchors.margins: 12
                 anchors.leftMargin: 14
                 spacing: 12
+                // Icon, first text line and buttons share one centre line: everything is
+                // top-aligned and the shorter items are pushed down to the buttons' middle.
                 Icon {
+                    id: updateIcon
                     Layout.alignment: Qt.AlignTop
+                    Layout.topMargin: Math.round((Theme.controlHeight - size) / 2)
                     name: update.state === "checking" ? "refresh"
                         : update.state === "uptodate" ? "check"
                         : update.state === "ready" ? "refresh"
@@ -83,8 +87,12 @@ ColumnLayout {
                 }
                 ColumnLayout {
                     Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    Layout.topMargin: Math.round((Theme.controlHeight - updateTitle.firstLineHeight) / 2)
                     spacing: 4
                     Text {
+                        id: updateTitle
+                        readonly property real firstLineHeight: lineCount > 0 ? implicitHeight / lineCount : implicitHeight
                         Layout.fillWidth: true
                         wrapMode: Text.Wrap
                         text: {

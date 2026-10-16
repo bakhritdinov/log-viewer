@@ -10,6 +10,7 @@ qt_add_qml_module(logviewer_ui_desktop
         Main.qml
         Kbd.qml
         TopBar.qml
+        RefreshControls.qml
         SourcePicker.qml
         TimeRangePopup.qml
         CalendarView.qml

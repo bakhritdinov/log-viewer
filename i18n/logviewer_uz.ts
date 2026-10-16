@@ -1,4 +1,5 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
 <TS version="2.1" language="uz" sourcelanguage="en">
 <context>
     <name>AboutPage</name>
@@ -185,7 +186,7 @@
         <source>%n saved</source>
         <translation>
             <numerusform>%n ta saqlangan</numerusform>
-            <numerusform />
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -196,7 +197,7 @@
         <source>%n recent queries</source>
         <translation>
             <numerusform>%n ta soʻnggi soʻrov</numerusform>
-            <numerusform />
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -239,7 +240,7 @@
         <source>%n query(-ies) added</source>
         <translation>
             <numerusform>%n ta soʻrov qoʻshildi</numerusform>
-            <numerusform />
+            <numerusform></numerusform>
         </translation>
     </message>
 </context>
@@ -1118,7 +1119,7 @@
         <source>Message · %n line(s)</source>
         <translation>
             <numerusform>Xabar · %n qator</numerusform>
-            <numerusform />
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -1282,7 +1283,7 @@
         <translation>API token</translation>
     </message>
     <message>
-        <source>In the browser the password is kept in the site's storage on this phone.</source>
+        <source>In the browser the password is kept in the site&apos;s storage on this phone.</source>
         <translation>Brauzerda parol shu telefondagi sayt xotirasida saqlanadi.</translation>
     </message>
     <message>
@@ -1390,7 +1391,7 @@
         <translation>Tahrirlashni davom ettirish</translation>
     </message>
     <message>
-        <source>Don't save</source>
+        <source>Don&apos;t save</source>
         <translation>Saqlamaslik</translation>
     </message>
 </context>
@@ -1825,14 +1826,14 @@
         <source>%n entries</source>
         <translation>
             <numerusform>%n ta yozuv</numerusform>
-            <numerusform />
+            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n service(s)</source>
         <translation>
             <numerusform>%n ta servis</numerusform>
-            <numerusform />
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -2172,14 +2173,14 @@
         <source>While you were away: %n new · resume</source>
         <translation>
             <numerusform>Siz yoʻqligingizda: %n ta yangi · davom ettirish</numerusform>
-            <numerusform />
+            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n new · resume</source>
         <translation>
             <numerusform>%n ta yangi · davom ettirish</numerusform>
-            <numerusform />
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -2924,6 +2925,73 @@
     </message>
 </context>
 <context>
+    <name>RefreshControls</name>
+    <message>
+        <source>Off</source>
+        <translation>Oʻchiq</translation>
+    </message>
+    <message>
+        <source>5 s</source>
+        <translation>5 s</translation>
+    </message>
+    <message>
+        <source>10 s</source>
+        <translation>10 s</translation>
+    </message>
+    <message>
+        <source>30 s</source>
+        <translation>30 s</translation>
+    </message>
+    <message>
+        <source>1 min</source>
+        <translation>1 daq</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Yangilash</translation>
+    </message>
+    <message>
+        <source>Stop loading</source>
+        <translation>Yuklashni toʻxtatish</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Toʻxtatish</translation>
+    </message>
+    <message>
+        <source>Auto refresh: every %1</source>
+        <translation>Avtoyangilash: har %1</translation>
+    </message>
+    <message>
+        <source>Auto refresh: off</source>
+        <translation>Avtoyangilash: oʻchiq</translation>
+    </message>
+    <message>
+        <source>%1 s</source>
+        <translation>%1 s</translation>
+    </message>
+    <message>
+        <source>Auto refresh off</source>
+        <translation>Avtoyangilashsiz</translation>
+    </message>
+    <message>
+        <source>Every minute</source>
+        <translation>Har daqiqada</translation>
+    </message>
+    <message>
+        <source>Every %1</source>
+        <translation>Har %1</translation>
+    </message>
+    <message>
+        <source>A fixed period needs no auto refresh</source>
+        <translation>Qatʼiy davr uchun avtoyangilash kerak emas</translation>
+    </message>
+    <message>
+        <source>Live tail</source>
+        <translation>Live tail (dum)</translation>
+    </message>
+</context>
+<context>
     <name>ResultsView</name>
     <message>
         <source>Loading logs</source>
@@ -3613,7 +3681,7 @@
         <source>%1 · %n line(s)</source>
         <translation>
             <numerusform>%1 · %n qator</numerusform>
-            <numerusform />
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -4098,26 +4166,6 @@ hamkasbingiz aynan shuni koʻradi</translation>
 <context>
     <name>TopBar</name>
     <message>
-        <source>Off</source>
-        <translation>Oʻchiq</translation>
-    </message>
-    <message>
-        <source>5 s</source>
-        <translation>5 son</translation>
-    </message>
-    <message>
-        <source>10 s</source>
-        <translation>10 son</translation>
-    </message>
-    <message>
-        <source>30 s</source>
-        <translation>30 son</translation>
-    </message>
-    <message>
-        <source>1 min</source>
-        <translation>1 daq</translation>
-    </message>
-    <message>
         <source>Environment: %1</source>
         <translation>Muhit: %1</translation>
     </message>
@@ -4136,34 +4184,6 @@ hamkasbingiz aynan shuni koʻradi</translation>
     <message>
         <source>No period needed — new entries are shown</source>
         <translation>Davr kerak emas — yangi yozuvlar koʻrsatiladi</translation>
-    </message>
-    <message>
-        <source>Refresh</source>
-        <translation>Yangilash</translation>
-    </message>
-    <message>
-        <source>Auto refresh: every %1</source>
-        <translation>Avtoyangilash: har %1</translation>
-    </message>
-    <message>
-        <source>Auto refresh: off</source>
-        <translation>Avtoyangilash: oʻchiq</translation>
-    </message>
-    <message>
-        <source>%1 s</source>
-        <translation>%1 son</translation>
-    </message>
-    <message>
-        <source>Auto refresh off</source>
-        <translation>Avtoyangilashsiz</translation>
-    </message>
-    <message>
-        <source>Every %1</source>
-        <translation>Har %1</translation>
-    </message>
-    <message>
-        <source>Live tail</source>
-        <translation>Live tail (dum)</translation>
     </message>
     <message>
         <source>LIVE · ~%1 lines/s</source>
@@ -4206,22 +4226,6 @@ hamkasbingiz aynan shuni koʻradi</translation>
         <source>%1 – %2</source>
         <translation>%1 – %2</translation>
     </message>
-    <message>
-        <source>Stop loading</source>
-        <translation>Yuklashni toʻxtatish</translation>
-    </message>
-    <message>
-        <source>Stop</source>
-        <translation>Toʻxtatish</translation>
-    </message>
-    <message>
-        <source>Every minute</source>
-        <translation>Har daqiqada</translation>
-    </message>
-    <message>
-        <source>A fixed period needs no auto refresh</source>
-        <translation>Qatʼiy davr uchun avtoyangilash kerak emas</translation>
-    </message>
     <message numerus="yes">
         <source>PAUSED · %n new</source>
         <translation>
@@ -4257,7 +4261,7 @@ hamkasbingiz aynan shuni koʻradi</translation>
         <translation>Saqlanmasa, ular yoʻqoladi.</translation>
     </message>
     <message>
-        <source>Don't save</source>
+        <source>Don&apos;t save</source>
         <translation>Saqlamaslik</translation>
     </message>
     <message>

@@ -25,6 +25,8 @@ Rectangle {
         visible: !root.open
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Show fields")
         onClicked: { root.expanded = true; root.peeked = root.squeezed }
         Rectangle { anchors.fill: parent; color: parent.containsMouse ? Theme.surface : "transparent" }
         IconButton {

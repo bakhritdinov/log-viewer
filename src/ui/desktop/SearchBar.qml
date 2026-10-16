@@ -13,6 +13,7 @@ Rectangle {
     property string hint
     property string findShortcut
     property string saveShortcut
+    property string refreshShortcut
 
     function focusSearch() { searchBox.focusInput() }
     function openSaving() { savedPopup.openSaving() }
@@ -84,6 +85,12 @@ Rectangle {
             Kbd {
                 visible: root.findShortcut !== "" && !root.liveMode
                 text: Session.searchText !== Session.appliedSearchText ? "Enter" : root.findShortcut
+            }
+            // Refresh at the end of the search, as in 2.x (live tail has its own controls).
+            RefreshControls {
+                Layout.leftMargin: 8
+                visible: !root.liveMode
+                refreshKey: root.refreshShortcut
             }
         }
 
