@@ -80,7 +80,11 @@ TestCase {
     }
 
     function test_06_shortcutsHelp() {
-        window.contentItem.forceActiveFocus()
+        // Not from the search field (there "?" is typed): focus the log table.
+        // contentItem.forceActiveFocus() would hand focus back to the field.
+        const table = H.find(window.contentItem, it => it.hasOwnProperty("highlightTerms") && it.hasOwnProperty("currentRow") && H.isShown(it))
+        verify(table)
+        table.forceActiveFocus()
         keyClick("?")
         const overlay = H.windowRoot(window)
         tryVerify(() => H.visibleText(overlay, "Горячие клавиши") !== null)

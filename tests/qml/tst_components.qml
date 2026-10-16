@@ -259,7 +259,8 @@ Item {
                 // The name sits on the row's vertical centre (the highlight is not shifted).
                 const name = findAll(r, it => it.text === "level" || String(it.text).indexOf("context.") === 0)[0]
                 verify(name)
-                compare(Math.round(name.mapToItem(r, 0, 0).y + name.height / 2), Math.round(r.height / 2))
+                // (within a pixel: an odd text line height rounds either way)
+                fuzzyCompare(name.mapToItem(r, 0, 0).y + name.height / 2, r.height / 2, 1)
             }
         }
 

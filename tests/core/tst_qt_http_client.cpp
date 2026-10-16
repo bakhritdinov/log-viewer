@@ -92,7 +92,8 @@ private slots:
         QVERIFY(r.ok());
         QCOMPARE(r.body, QByteArray(R"({"x":1})"));
         QVERIFY(server.lastRequest.startsWith("POST /ok "));
-        QVERIFY(server.lastRequest.contains("Authorization: Bearer t"));
+        // Header names are case-insensitive; Qt 6.8 sends them in lower case.
+        QVERIFY(server.lastRequest.toLower().contains("authorization: bearer t"));
     }
 
     void httpErrorIsAResponseNotAFailure()
