@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <!-- 1 CSS px = 1 Qt px, the page fills the screen under the notch (safe areas below). -->
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>LogViewer</title>
+  <meta name="description" content="Logs from Grafana (VictoriaLogs / Loki) on the phone">
+  <meta name="theme-color" content="#161b22">
+  <meta name="color-scheme" content="dark light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LogViewer">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <style>
+    :root { --bg: #0d1117; --bar: #161b22; --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --border: #30363d; }
+    @media (prefers-color-scheme: light) {
+      :root { --bg: #ffffff; --bar: #f6f8fa; --text: #1f2328; --muted: #59636e; --accent: #0969da; --border: #d0d7de; }
+    }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bar); color: var(--text);
+                 font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    /* Qt draws into #screen, inside the safe areas (notch, gesture bar). */
+    #screen { position: fixed; top: env(safe-area-inset-top); right: env(safe-area-inset-right);
+              bottom: env(safe-area-inset-bottom); left: env(safe-area-inset-left); display: none; }
+    #splash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+              gap: 14px; background: var(--bg); }
+    #splash img { width: 96px; height: 96px; border-radius: 22px; }
+    #splash strong { font-size: 20px; font-weight: 600; }
+    #splash .bar { width: 160px; height: 3px; border-radius: 2px; background: var(--border); overflow: hidden; position: relative; }
+    #splash .bar span { position: absolute; top: 0; left: -40%; width: 40%; height: 100%; background: var(--accent);
+                        animation: run 1.2s linear infinite; }
+    @keyframes run { to { left: 100%; } }
+    #status { color: var(--muted); min-height: 1.4em; text-align: center; padding: 0 24px; }
+    /* Notices over the app: a new version, install, offline. */
+    .notice { position: fixed; left: 12px; right: 12px; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 10;
+              display: none; align-items: center; gap: 10px; padding: 10px 10px 10px 14px; border-radius: 12px;
+              background: #30363d; color: #f0f6fc; box-shadow: 0 8px 24px rgba(1, 4, 9, .45); }
+    .notice.top { top: calc(8px + env(safe-area-inset-top)); bottom: auto; background: #3d2e00; color: #f2cc60; }
+    .notice span { flex: 1; }
+    .notice small { display: block; color: #8b949e; }
+    .notice button { height: 36px; padding: 0 14px; border: 0; border-radius: 8px; background: #238636; color: #fff;
+                     font: 600 14px system-ui, sans-serif; }
+    .notice button.close { width: 36px; padding: 0; background: transparent; color: #8b949e; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <div id="splash">
+    <img src="icons/icon-192.png" alt="">
+    <strong>LogViewer</strong>
+    <div class="bar"><span></span></div>
+    <div id="status"></div>
+    <noscript>JavaScript is off: LogViewer needs it.</noscript>
+  </div>
+  <div id="screen"></div>
+
+  <div class="notice" id="update" role="status">
+    <span id="update-text"></span>
+    <button id="update-go"></button>
+  </div>
+  <div class="notice" id="install" role="status">
+    <span><b id="install-title"></b><small id="install-text"></small></span>
+    <button id="install-go"></button>
+    <button class="close" id="install-close" aria-label="×">×</button>
+  </div>
+  <div class="notice top" id="offline" role="status"><span id="offline-text"></span></div>
+
+  <script>
+    // Texts of the page itself, in the phone's language (the app has its own).
+    const lang = (navigator.language || "en").slice(0, 2);
+    const texts = {
+      ru: { loading: "Загрузка…", failed: "Не удалось запустить приложение", update: "Доступна новая версия", updateGo: "Обновить",
+            installTitle: "Установить на экран", installText: "Открывается без браузера, на весь экран", installGo: "Установить",
+            iosText: "Поделиться → На экран «Домой»", offline: "Телефон не в сети · показаны последние данные" },
+      uz: { loading: "Yuklanmoqda…", failed: "Ilovani ishga tushirib boʻlmadi", update: "Yangi versiya mavjud", updateGo: "Yangilash",
+            installTitle: "Ekranga oʻrnatish", installText: "Brauzersiz, butun ekranda ochiladi", installGo: "Oʻrnatish",
+            iosText: "Ulashish → «Uy» ekraniga", offline: "Telefon tarmoqda emas · oxirgi maʼlumotlar koʻrsatilgan" },
+      en: { loading: "Loading…", failed: "The app could not start", update: "A new version is available", updateGo: "Update",
+            installTitle: "Install on the home screen", installText: "Opens without the browser, full screen", installGo: "Install",
+            iosText: "Share → Add to Home Screen", offline: "The phone is offline · showing the last data" },
+    };
+    const text = texts[lang] || texts.en;
+    const $ = id => document.getElementById(id);
+    $("status").textContent = text.loading;
+    $("update-text").textContent = text.update;
+    $("update-go").textContent = text.updateGo;
+    $("install-title").textContent = text.installTitle;
+    $("install-go").textContent = text.installGo;
+    $("offline-text").textContent = text.offline;
+    const show = (id, on) => $(id).style.display = on ? "flex" : "none";
+
+    // ── a new version: the service worker has it ready; reload on request ──
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").then(reg => {
+        const offer = () => { if (reg.waiting && navigator.serviceWorker.controller) show("update", true); };
+        offer();
+        reg.addEventListener("updatefound", () => {
+          reg.installing?.addEventListener("statechange", offer);
+        });
+        $("update-go").onclick = () => reg.waiting?.postMessage("skipWaiting");
+        // A new version is checked when the app comes back to the screen.
+        document.addEventListener("visibilitychange", () => { if (!document.hidden) reg.update(); });
+      });
+      let reloading = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (!reloading) { reloading = true; location.reload(); }
+      });
+    }
+
+    // ── install: offered after the second successful search, not on the first screen ──
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+    const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+    let installEvent = null;
+    window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvent = e; });
+    const installDeclined = () => Number(localStorage.getItem("lv.installDeclined") || 0) > Date.now();
+    let searches = 0;
+    // Called by the app (WebShell) after each successful search.
+    window.logviewerSearchSucceeded = () => {
+      if (++searches !== 2 || standalone || installDeclined()) return;
+      if (ios) { $("install-text").textContent = text.iosText; $("install-go").style.display = "none"; show("install", true); }
+      else if (installEvent) { $("install-text").textContent = text.installText; show("install", true); }
+    };
+    $("install-go").onclick = async () => { show("install", false); await installEvent?.prompt(); installEvent = null; };
+    $("install-close").onclick = () => {          // not offered again for 30 days
+      show("install", false);
+      try { localStorage.setItem("lv.installDeclined", String(Date.now() + 30 * 86400000)); } catch (e) {}
+    };
+
+    // ── the app ──
+    let app = null;
+    const setOffline = () => show("offline", !navigator.onLine);
+    window.addEventListener("offline", setOffline);
+    window.addEventListener("online", () => { setOffline(); app?.logviewerOnline?.(); });
+    // Another share link opened while the app runs.
+    window.addEventListener("hashchange", () => app?.logviewerOpenLink?.(location.href));
+    // Live tail keeps the screen on while the app is visible (WebShell).
+    let keepAwake = false, wakeLock = null;
+    const holdScreen = async () => {
+      try {
+        if (keepAwake && !wakeLock && navigator.wakeLock && !document.hidden) {
+          wakeLock = await navigator.wakeLock.request("screen");
+          wakeLock.addEventListener("release", () => { wakeLock = null; });
+        } else if (!keepAwake && wakeLock) {
+          await wakeLock.release();
+          wakeLock = null;
+        }
+      } catch (e) { /* not allowed (battery saver): the screen may go dark */ }
+    };
+    window.logviewerKeepAwake = on => { keepAwake = on; holdScreen(); };
+    document.addEventListener("visibilitychange", holdScreen);   // the lock is dropped when hidden
+    // The bar colour follows the app's theme (WebShell).
+    window.logviewerThemeColor = color => {
+      document.querySelector('meta[name="theme-color"]').setAttribute("content", color);
+      document.body.style.background = color;
+    };
+
+    async function start() {
+      try {
+        app = await qtLoad({
+          qt: {
+            entryFunction: window.logviewer_next_entry,
+            containerElements: [$("screen")],
+            onLoaded: () => { $("splash").style.display = "none"; $("screen").style.display = "block"; setOffline(); },
+            onExit: exit => {
+              $("screen").style.display = "none";
+              $("splash").style.display = "flex";
+              $("status").textContent = text.failed + (exit.text ? ": " + exit.text : "");
+            },
+          },
+        });
+      } catch (e) {
+        console.error(e);
+        $("status").textContent = text.failed + ": " + e;
+      }
+    }
+  </script>
+  <script src="LogViewerNext.js"></script>
+  <script src="qtloader.js" onload="start()"></script>
+</body>
+</html>

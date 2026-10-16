@@ -1,0 +1,51 @@
+// Service worker of the LogViewer PWA: keeps the app shell (page, loader,
+// WebAssembly, icons) so the app opens without the network, and holds a new
+// version back until the page asks for it ("A new version is available ·
+// Update"). Requests to Grafana are never cached.
+const CACHE = "logviewer-@LOGVIEWER_PWA_VERSION@";
+const SHELL = [
+  "./",
+  "index.html",
+  "manifest.webmanifest",
+  "qtloader.js",
+  "LogViewerNext.js",
+  "LogViewerNext.wasm",
+  "icons/icon-192.png",
+  "icons/icon-512.png",
+  "icons/maskable-192.png",
+  "icons/maskable-512.png",
+];
+
+self.addEventListener("install", event => {
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)));
+  // No skipWaiting here: the running page decides when to switch.
+});
+
+self.addEventListener("activate", event => {
+  event.waitUntil((async () => {
+    for (const key of await caches.keys())
+      if (key.startsWith("logviewer-") && key !== CACHE) await caches.delete(key);
+    await self.clients.claim();
+  })());
+});
+
+self.addEventListener("message", event => {
+  if (event.data === "skipWaiting") self.skipWaiting();
+});
+
+self.addEventListener("fetch", event => {
+  const request = event.request;
+  if (request.method !== "GET") return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;          // Grafana and the rest: the network
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    // The page itself (also with a share link after #): the cached shell.
+    if (request.mode === "navigate") {
+      const page = await cache.match("index.html");
+      if (page) return page;
+    }
+    const hit = await cache.match(request, { ignoreSearch: true });
+    return hit || fetch(request);
+  })());
+});

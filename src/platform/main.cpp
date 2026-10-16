@@ -12,6 +12,7 @@
 #include "app/Preferences.h"
 #include "app/Session.h"
 #include "app/UpdateService.h"
+#include "WebShell.h"
 #include "core/data/QtHttpClient.h"
 #include "core/storage/KeyValueStore.h"
 #include "core/storage/SecretStore.h"
@@ -54,12 +55,12 @@ int main(int argc, char* argv[])
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,
                      [] { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
     engine.loadFromModule(LOGVIEWER_UI_MODULE, "Main");
+    auto* window = engine.rootObjects().isEmpty() ? nullptr : qobject_cast<QQuickWindow*>(engine.rootObjects().constFirst());
 #ifdef Q_OS_WASM
     // In the browser the window is the whole page (its size follows the tab).
-    if (!engine.rootObjects().isEmpty())
-        if (auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().constFirst()))
-            window->showFullScreen();
+    if (window) window->showFullScreen();
 #endif
+    lv::webshell::attach(window, session);
 
     // The update check at start-up (throttled inside; off in Settings → Version).
     if (auto* updates = engine.singletonInstance<lv::UpdateService*>("LogViewer.App", "Updates"); updates && updates->autoCheck())
@@ -67,7 +68,8 @@ int main(int argc, char* argv[])
 
     lv::runLegacyMigration(services, [&](bool) {
         session.environmentsEdited();
-        session.start();
+        // Opened from a share link (the browser page's address): that view.
+        if (!lv::webshell::openInitialLink(session)) session.start();
     });
     return app.exec();
 }

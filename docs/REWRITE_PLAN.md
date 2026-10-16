@@ -71,7 +71,8 @@ tests/{characterization,core,app,qml}, tests/fixtures/
 | 4 app view-models | done — `LogViewer.App`; core + app line coverage 93 % |
 | 5 ui/shared + i18n | done — `LogViewer.Ui` (25 components, Qt Quick tests), `Language`, ru/uz + en plurals; translations to be reviewed by native speakers |
 | 6 ui/desktop | done — `LogViewer.Desktop`, `logviewer-next` executable (`src/platform`), scenario tests over a fake Grafana, qmllint clean |
-| 7–9 | pending |
+| 7 ui/mobile + PWA | done — `LogViewer.Mobile` (feed, search, sheets, details / focus, chart, live, patterns, settings), phone preference defaults, scenario tests; WebAssembly build with a PWA shell (`src/platform/wasm`: page, manifest, service worker, update and install notices, wake lock in live tail) and a page ↔ app bridge (`WebShell`). Left for stage 8: system "Send…", file export/import on the phone, the last result kept offline |
+| 8–9 | pending |
 
 ## Stages
 

@@ -2,7 +2,7 @@
 # LOGVIEWER_UI. Named logviewer-next until the legacy app is removed (stage 8).
 find_package(Qt6 6.8 REQUIRED COMPONENTS Gui Quick)
 
-qt_add_executable(logviewer-next MACOSX_BUNDLE main.cpp)
+qt_add_executable(logviewer-next MACOSX_BUNDLE main.cpp WebShell.cpp WebShell.h)
 qt_add_resources(logviewer-next "logviewer_icon"
     PREFIX /logviewer
     BASE ${PROJECT_SOURCE_DIR}/src/resources
@@ -48,4 +48,22 @@ elseif(APPLE)
     set_source_files_properties(${LOGVIEWER_ICNS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(logviewer-next PRIVATE ${LOGVIEWER_ICNS})
     set_target_properties(logviewer-next PROPERTIES MACOSX_BUNDLE_ICON_FILE icon.icns)
+endif()
+
+# The browser build is a PWA: our page instead of Qt's, the manifest, icons
+# and a service worker next to the WebAssembly. The worker's cache name
+# changes with every build, so the browser sees a new version.
+if(EMSCRIPTEN)
+    set(LOGVIEWER_WEB ${CMAKE_CURRENT_SOURCE_DIR}/wasm)
+    set(LOGVIEWER_WEB_OUT $<TARGET_FILE_DIR:logviewer-next>)
+    add_custom_command(TARGET logviewer-next POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LOGVIEWER_WEB}/index.html ${LOGVIEWER_WEB}/manifest.webmanifest ${LOGVIEWER_WEB_OUT}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${LOGVIEWER_WEB_OUT}/icons
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${PROJECT_SOURCE_DIR}/src/resources/pwa/icon-192.png ${PROJECT_SOURCE_DIR}/src/resources/pwa/icon-512.png
+                ${PROJECT_SOURCE_DIR}/src/resources/pwa/maskable-192.png ${PROJECT_SOURCE_DIR}/src/resources/pwa/maskable-512.png
+                ${LOGVIEWER_WEB_OUT}/icons
+        COMMAND ${CMAKE_COMMAND} -DIN=${LOGVIEWER_WEB}/sw.js.in -DOUT=${LOGVIEWER_WEB_OUT}/sw.js
+                -DVERSION=${PROJECT_VERSION} -P ${LOGVIEWER_WEB}/stamp_sw.cmake
+        VERBATIM)
 endif()
