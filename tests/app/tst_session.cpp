@@ -751,7 +751,7 @@ private slots:
         QCOMPARE(h.session->patterns()->count() + h.session->hiddenSinglePatterns(), problems);
     }
 
-    void legacyMigrationMovesSecrets()
+    void legacyMigrationCarriesSecretsAndKeeps2x()
     {
         FakeHttpClient http;
         MemoryStore kv;
@@ -767,11 +767,15 @@ private slots:
         runLegacyMigration(services, [&](bool ok) { done = ok; });
         QVERIFY(done);
         QCOMPARE(secrets.values().value("env/prod/password"), "secret");
-        QVERIFY(!kv.contains("PROD/pass"));
+        QCOMPARE(kv.value("PROD/pass").toString(), "secret");      // 2.x keeps working with its own
         QVERIFY(!kv.contains("PROD/ecotone/password"));
         QCOMPARE(services.environments().current().id, "prod");
         QCOMPARE(services.environments().current().user, "bob");
         QCOMPARE(kv.value(kSchemaKey).toInt(), kSettingsSchemaVersion);
+        // Once: a later change in 3.x is not overwritten by the 2.x keys.
+        services.secrets().write("env/prod/password", "changed", [](bool) {});
+        runLegacyMigration(services, [](bool) {});
+        QCOMPARE(secrets.values().value("env/prod/password"), "changed");
     }
 };
 

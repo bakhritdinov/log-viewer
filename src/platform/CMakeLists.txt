@@ -1,27 +1,32 @@
 # The application executable: platform services + the design chosen with
-# LOGVIEWER_UI. Named logviewer-next until the legacy app is removed (stage 8).
+# LOGVIEWER_UI.
 find_package(Qt6 6.8 REQUIRED COMPONENTS Gui Quick)
 
-qt_add_executable(logviewer-next MACOSX_BUNDLE main.cpp WebShell.cpp WebShell.h)
-qt_add_resources(logviewer-next "logviewer_icon"
+qt_add_executable(LogViewer MACOSX_BUNDLE main.cpp WebShell.cpp WebShell.h)
+qt_add_resources(LogViewer "logviewer_icon"
     PREFIX /logviewer
     BASE ${PROJECT_SOURCE_DIR}/src/resources
     FILES ${PROJECT_SOURCE_DIR}/src/resources/icon.png)
-target_link_libraries(logviewer-next PRIVATE
+target_link_libraries(LogViewer PRIVATE
     Qt6::Gui Qt6::Quick
     logviewer_app logviewer_appplugin
     logviewer_ui logviewer_uiplugin
     ${LOGVIEWER_UI_TARGET} ${LOGVIEWER_UI_TARGET}plugin)
-target_compile_definitions(logviewer-next PRIVATE
+target_compile_definitions(LogViewer PRIVATE
     LOGVIEWER_UI_MODULE="${LOGVIEWER_UI_URI}"
     LOGVIEWER_UI_PLUGIN=${LOGVIEWER_UI_PLUGIN_CLASS})
 # The phone design starts with its own preference defaults (Preferences::Defaults).
 if(LOGVIEWER_UI_URI STREQUAL "LogViewer.Mobile")
-    target_compile_definitions(logviewer-next PRIVATE LOGVIEWER_UI_PHONE)
+    target_compile_definitions(LogViewer PRIVATE LOGVIEWER_UI_PHONE)
 endif()
-set_target_properties(logviewer-next PROPERTIES
-    OUTPUT_NAME "LogViewerNext"
-    MACOSX_BUNDLE_GUI_IDENTIFIER com.logviewer.LogViewerNext)
+# Must match setOrganizationDomain("logviewer.com") + setApplicationName("LogViewer")
+# in main.cpp: QSettings, the Homebrew cask's `quit:` and `zap` paths and 2.x's
+# settings all use this reverse-DNS identifier.
+set_target_properties(LogViewer PROPERTIES
+    MACOSX_BUNDLE_GUI_IDENTIFIER com.logviewer.LogViewer
+    MACOSX_BUNDLE_BUNDLE_NAME LogViewer
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION})
 
 # Static Qt (WebAssembly, iOS): Qt links in the QML modules qmlimportscanner
 # finds in this target's resources and, through their qmldir files, everything
@@ -34,7 +39,7 @@ import LogViewer.Ui
 import ${LOGVIEWER_UI_URI}
 Item {}
 ")
-qt_add_resources(logviewer-next "logviewer_qml_imports"
+qt_add_resources(LogViewer "logviewer_qml_imports"
     PREFIX /logviewer
     BASE ${CMAKE_CURRENT_BINARY_DIR}/qml_imports
     FILES ${CMAKE_CURRENT_BINARY_DIR}/qml_imports/imports.qml)
@@ -42,12 +47,12 @@ qt_add_resources(logviewer-next "logviewer_qml_imports"
 # The file icon: Windows takes it from the resource script, macOS from the
 # bundle (sources: src/resources/icon.svg, rebuilt with tools/icons).
 if(WIN32)
-    target_sources(logviewer-next PRIVATE ${PROJECT_SOURCE_DIR}/src/resources/resources.rc)
+    target_sources(LogViewer PRIVATE ${PROJECT_SOURCE_DIR}/src/resources/resources.rc)
 elseif(APPLE)
     set(LOGVIEWER_ICNS ${PROJECT_SOURCE_DIR}/src/resources/icon.icns)
     set_source_files_properties(${LOGVIEWER_ICNS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    target_sources(logviewer-next PRIVATE ${LOGVIEWER_ICNS})
-    set_target_properties(logviewer-next PROPERTIES MACOSX_BUNDLE_ICON_FILE icon.icns)
+    target_sources(LogViewer PRIVATE ${LOGVIEWER_ICNS})
+    set_target_properties(LogViewer PROPERTIES MACOSX_BUNDLE_ICON_FILE icon.icns)
 endif()
 
 # The browser build is a PWA: our page instead of Qt's, the manifest, icons
@@ -55,8 +60,8 @@ endif()
 # changes with every build, so the browser sees a new version.
 if(EMSCRIPTEN)
     set(LOGVIEWER_WEB ${CMAKE_CURRENT_SOURCE_DIR}/wasm)
-    set(LOGVIEWER_WEB_OUT $<TARGET_FILE_DIR:logviewer-next>)
-    add_custom_command(TARGET logviewer-next POST_BUILD
+    set(LOGVIEWER_WEB_OUT $<TARGET_FILE_DIR:LogViewer>)
+    add_custom_command(TARGET LogViewer POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LOGVIEWER_WEB}/index.html ${LOGVIEWER_WEB}/manifest.webmanifest ${LOGVIEWER_WEB_OUT}
         COMMAND ${CMAKE_COMMAND} -E make_directory ${LOGVIEWER_WEB_OUT}/icons
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -66,4 +71,27 @@ if(EMSCRIPTEN)
         COMMAND ${CMAKE_COMMAND} -DIN=${LOGVIEWER_WEB}/sw.js.in -DOUT=${LOGVIEWER_WEB_OUT}/sw.js
                 -DVERSION=${PROJECT_VERSION} -P ${LOGVIEWER_WEB}/stamp_sw.cmake
         VERBATIM)
+endif()
+
+# --- Install and Qt deployment (desktop) ---
+if(NOT EMSCRIPTEN AND NOT ANDROID AND NOT IOS)
+    include(GNUInstallDirs)
+    install(TARGETS LogViewer
+        BUNDLE DESTINATION .
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    # windeployqt / macdeployqt copy the Qt libraries and the QML modules the
+    # designs import (scanned from src/ui). On Linux CPack DEB relies on the
+    # system Qt and the AppImage target runs linuxdeploy-qt instead.
+    if(NOT (UNIX AND NOT APPLE))
+        set(deploy_args "-qmldir=${PROJECT_SOURCE_DIR}/src/ui")
+        if(WIN32)
+            list(APPEND deploy_args "--no-translations" "--compiler-runtime")
+        endif()
+        qt_generate_deploy_app_script(
+            TARGET LogViewer
+            OUTPUT_SCRIPT deploy_script
+            DEPLOY_TOOL_OPTIONS ${deploy_args}
+            NO_UNSUPPORTED_PLATFORM_ERROR)
+        install(SCRIPT ${deploy_script})
+    endif()
 endif()

@@ -37,16 +37,13 @@ brew install --cask bakhritdinov/tap/log-viewer
 brew upgrade --cask log-viewer
 ```
 
-### Ubuntu (PPA)
+### Linux (AppImage)
+Скачайте `LogViewer-Linux.AppImage` со страницы релизов, сделайте его исполняемым и запустите — Qt внутри, установка не нужна:
 ```bash
-sudo add-apt-repository ppa:bakhritdinov/log-viewer
-sudo apt update
-sudo apt install log-viewer
+chmod +x LogViewer-Linux.AppImage
+./LogViewer-Linux.AppImage
 ```
-Обновление:
-```bash
-sudo apt update && sudo apt upgrade log-viewer
-```
+Пакеты PPA и `.deb` выпускались для версий 2.x: системный Qt в Ubuntu 22.04/24.04 старше нужного 3.x Qt 6.8.
 
 ### Прямая загрузка
 Установщики и portable-сборки для всех платформ доступны на странице релизов:
@@ -55,12 +52,12 @@ sudo apt update && sudo apt upgrade log-viewer
 
 - Windows: `LogViewer-Windows-x64.exe` (NSIS-installer) или `LogViewer-Windows-Portable.zip`.
 - macOS: `LogViewer-macOS-Universal.dmg` (Intel + Apple Silicon).
-- Linux: `LogViewer-Linux.AppImage` (никакая установка не нужна) или `.deb`.
+- Linux: `LogViewer-Linux.AppImage` (никакая установка не нужна).
 
 ## 🛠 Технологический стек
 
 - **Язык**: C++ 20
-- **Фреймворк**: Qt 6.x (Core, Quick, Network, Svg, Gui)
+- **Фреймворк**: Qt 6.8+ (Core, Quick, Quick Controls, Quick Shapes, Network, Linguist Tools)
 - **UI**: QML + Qt Quick Controls 2 (singleton-Theme, переиспользуемые компоненты)
 - **Сборка**: CMake 3.16+
 - **Стиль**: GitHub Dark / Light themes
@@ -69,7 +66,7 @@ sudo apt update && sudo apt upgrade log-viewer
 
 ### Требования
 - CMake 3.16 или выше
-- Qt 6 (модули: Core, Quick, Network, Svg, Gui)
+- Qt 6.8 или новее (модули: Core, Quick, Quick Controls 2, Quick Shapes, Network, Linguist Tools)
 - Компилятор с поддержкой C++ 20 (GCC 10+, Clang 11+, MSVC 2019+)
 
 ### Инструкция по сборке

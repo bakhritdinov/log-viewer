@@ -67,14 +67,16 @@ private slots:
         QCOMPARE(m.currentId, "prod");
     }
 
-    void movesSecretsOutOfSettings()
+    void carriesTheCredentials()
     {
         const LegacyMigration m = planLegacyMigration(legacyStore());
         QCOMPARE(m.secrets.size(), 2);
         QCOMPARE(m.secrets.value("env/dev/password"), "dev-pass");
         QCOMPARE(m.secrets.value("env/prod/token"), "prod-token");
-        QVERIFY(m.keysToRemove.contains("DEV/pass"));
-        QVERIFY(m.keysToRemove.contains("PROD/token"));
+        QCOMPARE(m.environments.at(0).user, "alice");
+        // 2.x keeps its own copy: whoever stays on it keeps working.
+        QVERIFY(!m.keysToRemove.contains("DEV/pass"));
+        QVERIFY(!m.keysToRemove.contains("PROD/token"));
     }
 
     void carriesSelectionAndRange()
@@ -98,14 +100,23 @@ private slots:
         QCOMPARE(r.resolve(QDateTime::currentDateTimeUtc()).seconds(), qint64(10800));
     }
 
-    void dropsEcotoneAndLegacyKeysButKeepsCompatibleOnes()
+    void dropsOnlyEcotone()
     {
         const LegacyMigration m = planLegacyMigration(legacyStore());
-        for (const char* k : { "PROD/ecotone/host", "PROD/ecotone/password", "ecotone/filters/autoRefresh",
-                               "currentEnv", "lastTimeRange", "DEV/url", "PROD/lastApp" })
+        QCOMPARE(m.keysToRemove.size(), 3);
+        for (const char* k : { "PROD/ecotone/host", "PROD/ecotone/password", "ecotone/filters/autoRefresh" })
             QVERIFY2(m.keysToRemove.contains(QLatin1StringView(k)), k);
-        for (const char* k : { "theme/dark", "searchHistory", "histogram/height" })
+        for (const char* k : { "currentEnv", "lastTimeRange", "DEV/url", "DEV/pass", "PROD/lastApp",
+                               "theme/dark", "searchHistory", "histogram/height" })
             QVERIFY2(!m.keysToRemove.contains(QLatin1StringView(k)), k);
+    }
+
+    void carriesTheTheme()
+    {
+        QCOMPARE(settingValue(planLegacyMigration(legacyStore()), "prefs/theme").toString(), "dark");
+        MemoryStore light = legacyStore();
+        light.setValue("theme/dark", false);
+        QCOMPARE(settingValue(planLegacyMigration(light), "prefs/theme").toString(), "light");
     }
 
     void onlyDevConfiguredStillOffersProd()

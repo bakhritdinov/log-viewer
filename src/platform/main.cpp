@@ -27,9 +27,9 @@ int main(int argc, char* argv[])
     QGuiApplication app(argc, argv);
     app.setOrganizationName(QStringLiteral("LogViewer"));
     app.setOrganizationDomain(QStringLiteral("logviewer.com"));
-    // Own settings while the legacy app is still in use: running both must not
-    // migrate (and remove) its keys. Stage 8 switches to "LogViewer".
-    app.setApplicationName(QStringLiteral("LogViewerNext"));
+    // The settings of LogViewer 2.x: 3.x takes its environments and passwords
+    // once (runLegacyMigration) and leaves 2.x's own keys in place.
+    app.setApplicationName(QStringLiteral("LogViewer"));
     app.setApplicationVersion(QStringLiteral(APP_VERSION));
     app.setWindowIcon(QIcon(QStringLiteral(":/logviewer/icon.png")));
 

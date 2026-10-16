@@ -97,7 +97,7 @@ jobs:
 
   build-linux:
     name: Build Linux
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04          # the oldest glibc the AppImage still runs on
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -105,35 +105,31 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libegl1-mesa-dev \
-          libdbus-1-dev libfontconfig1-dev libfreetype6-dev libice-dev libsm-dev \
-          libx11-dev libx11-xcb-dev libxcb-icccm4-dev libxcb-image0-dev \
-          libxcb-keysyms1-dev libxcb-randr0-dev libxcb-render-util0-dev \
-          libxcb-render0-dev libxcb-shape0-dev libxcb-shm0-dev libxcb-sync-dev \
-          libxcb-util-dev libxcb-xfixes0-dev libxcb-xinerama0-dev libxcb-xkb-dev \
-          libxcb1-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev \
-          libxkbcommon-x11-dev binutils qt6-base-dev qt6-declarative-dev \
-          qt6-multimedia-dev libqt6svg6-dev libvulkan-dev imagemagick libpng-dev \
-          qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
-          qml6-module-qtquick-templates qml6-module-qtquick-window
+        sudo apt-get install -y ninja-build libgl1-mesa-dev libglu1-mesa-dev libxkbcommon-dev libegl1-mesa-dev \
+          libdbus-1-dev libfontconfig1-dev libfreetype6-dev libxkbcommon-x11-0 libxcb-cursor0 \
+          libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 \
+          libxcb-xinerama0 libxcb-xkb1 libfuse2
+
+    # The AppImage carries this Qt with it: users need nothing else.
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.2'
+        host: 'linux'
+        target: 'desktop'
+        arch: 'linux_gcc_64'
 
     - name: Build and Package AppImage
       run: |
-        cmake -B build -DCMAKE_BUILD_TYPE=Release -Wno-dev
-        cmake --build build --config Release -j $(nproc)
+        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -Wno-dev
+        cmake --build build -j $(nproc)
         cmake --build build --target appimage
-
-    - name: Build and Package DEB
-      run: |
-        cpack --config build/CPackConfig.cmake -B dist/ -C Release
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: LogViewer-Linux
-        path: |
-          dist/LogViewer-Linux.AppImage
-          dist/*.deb
+        path: dist/LogViewer-Linux.AppImage
 
   release:
     name: Create GitHub Release
@@ -158,7 +154,6 @@ jobs:
           artifacts/LogViewer-Windows-Portable.zip
           artifacts/LogViewer-macOS-Universal.dmg
           artifacts/LogViewer-Linux.AppImage
-          artifacts/*.deb
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -261,66 +256,3 @@ jobs:
         user_email: 'action@github.com'
         user_name: 'GitHub Action'
         commit_message: 'Update LogViewer Cask to ${{ github.ref_name }}'
-
-  publish-ppa:
-    name: Publish to PPA (${{ matrix.distro }})
-    needs: [release]
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        distro: [jammy, noble]
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Install build tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y devscripts debhelper build-essential dput gnupg
-
-    - name: Import GPG key
-      env:
-        GPG_KEY: ${{ secrets.LAUNCHPAD_PPA_GPG_KEY }}
-      run: |
-        # Force gpg-agent into loopback mode before importing -- otherwise
-        # debsign on the next step tries to open pinentry through a TTY that
-        # does not exist in CI ("Inappropriate ioctl for device").
-        mkdir -p ~/.gnupg
-        chmod 700 ~/.gnupg
-        printf 'allow-loopback-pinentry\n' > ~/.gnupg/gpg-agent.conf
-        printf 'use-agent\npinentry-mode loopback\nbatch\n' > ~/.gnupg/gpg.conf
-        gpgconf --kill gpg-agent || true
-
-        echo "$GPG_KEY" | gpg --import --batch --yes
-        # Use the full fingerprint, not the 16-char key id -- debsign warns
-        # "long key IDs are discouraged; please use key fingerprints instead".
-        FINGERPRINT=$(gpg --list-secret-keys --with-colons --fingerprint | awk -F: '/^fpr:/ {print $10; exit}')
-        echo "GPG_KEY_ID=$FINGERPRINT" >> "$GITHUB_ENV"
-
-    - name: Build source package
-      env:
-        # Must match the UID of LAUNCHPAD_PPA_GPG_KEY -- Launchpad rejects
-        # uploads where the changelog signer's email does not match the key.
-        DEBEMAIL: bobur.bakhritdinov@gmail.com
-        DEBFULLNAME: Bobur Bakhritdinov
-      run: |
-        VERSION=$(echo "${{ github.ref_name }}" | sed 's/^v//')
-        DISTRO=${{ matrix.distro }}
-        PPA_REV="${VERSION}-1ppa${{ github.run_number }}~${DISTRO}"
-        mkdir -p "build-ppa/log-viewer-${VERSION}"
-        cp -r src CMakeLists.txt "build-ppa/log-viewer-${VERSION}/"
-        cp -r deploy/debian "build-ppa/log-viewer-${VERSION}/"
-        cd "build-ppa/log-viewer-${VERSION}"
-        dch --create --package log-viewer -v "${PPA_REV}" \
-            --distribution "${DISTRO}" \
-            "Release ${VERSION} to PPA for ${DISTRO}"
-        # -d skips dpkg-checkbuilddeps: build dependencies (cmake, qt6-*) are
-        # resolved on the Launchpad builder farm, not on this runner.
-        dpkg-buildpackage -S -sa -us -uc -d
-
-    - name: Sign and upload to PPA
-      run: |
-        cd build-ppa
-        debsign -k "${GPG_KEY_ID}" *.changes
-        dput ppa:bakhritdinov/log-viewer *.changes

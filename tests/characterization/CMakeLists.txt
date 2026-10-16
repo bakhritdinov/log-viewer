@@ -1,14 +1,7 @@
-# Characterization tests: pin down the behaviour of the pre-rewrite code so the
-# new core can be checked against it. They test legacy sources directly and are
-# removed together with those sources at the end of the rewrite.
-logviewer_add_test(tst_legacy_logmodel
-    SOURCES tst_legacy_logmodel.cpp
-    LIBS LogViewerLogs)
-
+# Characterization: the golden files in tests/fixtures/characterization capture
+# what the pre-rewrite query code did (generated from its git revision, see the
+# README there); the core tests check the new code against them. This test
+# keeps the files themselves well-formed.
 logviewer_add_test(tst_golden_fixtures
     SOURCES tst_golden_fixtures.cpp
     LIBS Qt6::Core)
-
-logviewer_add_test(tst_histogram_vs_legacy
-    SOURCES tst_histogram_vs_legacy.cpp
-    LIBS LogViewerLogs logviewer_core)

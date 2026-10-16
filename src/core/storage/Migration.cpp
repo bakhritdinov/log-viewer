@@ -61,8 +61,6 @@ LegacyMigration planLegacyMigration(const KeyValueStore& store)
             m.settings.append({ QStringLiteral("selection/%1/namespace").arg(e.id), ns });
             m.settings.append({ QStringLiteral("selection/%1/app").arg(e.id), app });
         }
-        for (const QString& f : kEnvFields)
-            if (store.contains(name + u'/' + f)) m.keysToRemove << name + u'/' + f;
         m.environments.append(e);
     }
 
@@ -75,8 +73,9 @@ LegacyMigration planLegacyMigration(const KeyValueStore& store)
     } else if (!lastRange.isEmpty()) {
         m.settings.append({ QStringLiteral("selection/timeRange"), encodeTimeRange(TimeRange::fromKey(lastRange)) });
     }
-    for (const char* k : { "currentEnv", "lastTimeRange", "lastCustomFrom", "lastCustomTo" })
-        if (store.contains(QLatin1StringView(k))) m.keysToRemove << QLatin1StringView(k);
+    // The theme chosen in 2.x.
+    if (store.contains(QStringLiteral("theme/dark")) && !store.contains(QStringLiteral("prefs/theme")))
+        m.settings.append({ QStringLiteral("prefs/theme"), store.value(QStringLiteral("theme/dark")).toBool() ? "dark" : "light" });
 
     // Ecotone is gone: drop its settings, including its plaintext DB password.
     for (const QString& k : keys) {

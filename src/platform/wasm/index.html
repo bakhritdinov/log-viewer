@@ -160,7 +160,7 @@
       try {
         app = await qtLoad({
           qt: {
-            entryFunction: window.logviewer_next_entry,
+            entryFunction: window.LogViewer_entry,
             containerElements: [$("screen")],
             onLoaded: () => { $("splash").style.display = "none"; $("screen").style.display = "block"; setOffline(); },
             onExit: exit => {
@@ -176,7 +176,7 @@
       }
     }
   </script>
-  <script src="LogViewerNext.js"></script>
+  <script src="LogViewer.js"></script>
   <script src="qtloader.js" onload="start()"></script>
 </body>
 </html>
