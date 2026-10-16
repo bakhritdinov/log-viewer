@@ -113,11 +113,9 @@ ColumnLayout {
             readonly property bool selected: row.index === root.currentRow
             readonly property bool anchored: row.index === root.anchorRow
             // One line in the table; the rest of a multi-line message is counted.
-            readonly property int firstBreak: row.message.indexOf("
-")
+            readonly property int firstBreak: row.message.indexOf("\n")
             readonly property string firstLine: firstBreak < 0 ? row.message : row.message.slice(0, firstBreak)
-            readonly property int moreLines: firstBreak < 0 ? 0 : row.message.split("
-").length - 1
+            readonly property int moreLines: firstBreak < 0 ? 0 : row.message.split("\n").length - 1
 
             // Taller for wrapped messages; the anchored row (focus mode) a bit taller still.
             width: ListView.view.width

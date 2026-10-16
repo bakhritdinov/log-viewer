@@ -13,8 +13,8 @@ TestCase {
     function root() { return H.windowRoot(window) }
     // Popups live in the window's data until they open.
     function popup(prop) {
-        for (let i = 0; i < window.contentData.length; ++i)
-            if (window.contentData[i] && window.contentData[i].hasOwnProperty(prop)) return window.contentData[i]
+        for (let i = 0; i < H.contentData(window).length; ++i)
+            if (H.contentData(window)[i] && H.contentData(window)[i].hasOwnProperty(prop)) return H.contentData(window)[i]
         return null
     }
     function screen() { return popup("textBefore") }
@@ -36,8 +36,8 @@ TestCase {
     // DelegateModel::cancel: Qt's harmless note when a search resets the feed.
     function init() { failOnWarning(/^(?!.*(qt\.qpa\.fonts|Populating font|DelegateModel::cancel)).*$/) }
     function cleanup() {
-        for (let i = 0; i < window.contentData.length; ++i) {
-            const p = window.contentData[i]
+        for (let i = 0; i < H.contentData(window).length; ++i) {
+            const p = H.contentData(window)[i]
             if (!p || !p.hasOwnProperty("closePolicy")) continue
             if (p.opened) p.close()
             tryCompare(p, "visible", false)            // the closing animation ends too

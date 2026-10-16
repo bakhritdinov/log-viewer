@@ -1,6 +1,5 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Controls.Basic
 
 // Stacked bars of log volume per time bucket (ERROR, WARN, INFO, other from the
 // bottom). Clicking a level segment filters by bucket and level; clicking the

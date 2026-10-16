@@ -17,6 +17,20 @@ ApplicationWindow {
     // A short notice above the navigation, optionally with one action ("Undo").
     function notify(text, actionText, action) { snackbar.show(text, actionText ?? "", action ?? null) }
 
+    // Built the first time it is needed and kept: building every screen and
+    // sheet up front made the start seconds slower in the browser, and most are
+    // never opened. get() builds it; item stays null until then.
+    component Lazy: Loader {
+        active: false
+        function get() { active = true; return item }
+        // A popup goes over the window, like one declared in it.
+        onLoaded: if (item.hasOwnProperty("closePolicy")) item.parent = window.contentItem
+    }
+    onSectionChanged: {
+        if (section === 1) chartPage.get()
+        if (section === 2) settingsPage.get()
+    }
+
     width: 390
     height: 844
     minimumWidth: 320
@@ -46,23 +60,28 @@ ApplicationWindow {
                 onChartRequested: window.section = 1
                 onSettingsRequested: window.section = 2
                 onNotice: text => window.notify(text)
-                onSearchRequested: searchScreen.open()
-                onSourceRequested: sourceSheet.open()
-                onEnvironmentRequested: environmentSheet.open()
-                onPeriodRequested: timeSheet.open()
-                onEntryRequested: row => details.show(Session.logs, row)
-                onLiveEntryRequested: row => details.show(Session.live.logs, row)
-                onPatternSortRequested: patternSortSheet.open()
-                onSaveRequested: saveSheet.openSaving()
-                onAddEnvironmentRequested: name => { missingEnvironment = ""; window.section = 2; settingsPage.openEnvironment("", name) }
+                onSearchRequested: searchScreen.get().open()
+                onSourceRequested: sourceSheet.get().open()
+                onEnvironmentRequested: environmentSheet.get().open()
+                onPeriodRequested: timeSheet.get().open()
+                onEntryRequested: row => details.get().show(Session.logs, row)
+                onLiveEntryRequested: row => details.get().show(Session.live.logs, row)
+                onPatternSortRequested: patternSortSheet.get().open()
+                onSaveRequested: saveSheet.get().openSaving()
+                onAddEnvironmentRequested: name => { missingEnvironment = ""; window.section = 2; settingsPage.get().openEnvironment("", name) }
             }
-            ChartPage {
-                onShowEntriesRequested: window.section = 0
-                onSettingsRequested: window.section = 2
+            Lazy {
+                id: chartPage
+                sourceComponent: ChartPage {
+                    onShowEntriesRequested: window.section = 0
+                    onSettingsRequested: window.section = 2
+                }
             }
-            SettingsPage {
+            Lazy {
                 id: settingsPage
-                onNotice: text => window.notify(text)
+                sourceComponent: SettingsPage {
+                    onNotice: text => window.notify(text)
+                }
             }
         }
 
@@ -74,80 +93,103 @@ ApplicationWindow {
             settingsAlert: Session.needsSetup || (Session.hasError && Session.error.kind === ErrorInfo.Unreachable)
             onPicked: index => {
                 if (index === window.section && index === 0) logsPage.scrollToTop()   // second tap: to the top
-                if (index === window.section && index === 2) settingsPage.popToRoot()
+                if (index === window.section && index === 2) settingsPage.item?.popToRoot()
                 window.section = index
             }
         }
     }
 
-    // A share link whose environment is not set up here.
+    // A share link whose environment is not set up here; credentials the keychain refused.
     Connections {
         target: Session
         function onLinkEnvironmentMissing(name) { logsPage.missingEnvironment = name }
         function onEnvironmentChanged() { logsPage.missingEnvironment = "" }
+        function onSecretsNotSaved(name) { window.notify(qsTr("The system keychain did not accept the credentials of %1").arg(name)) }
     }
 
-    SearchScreen {
+    Lazy {
         id: searchScreen
-        onSaveRequested: saveSheet.openSaving()
-        onShareRequested: shareSheet.open()
-        onSavedQueryMenuRequested: id => savedSheet.openFor(id)
+        sourceComponent: SearchScreen {
+            onSaveRequested: saveSheet.get().openSaving()
+            onShareRequested: shareSheet.get().open()
+            onSavedQueryMenuRequested: id => savedSheet.get().openFor(id)
+        }
     }
-    SaveQuerySheet { id: saveSheet; onNotice: (text, actionText, action) => window.notify(text, actionText, action) }
-    SavedQuerySheet {
+    Lazy {
+        id: saveSheet
+        sourceComponent: SaveQuerySheet { onNotice: (text, actionText, action) => window.notify(text, actionText, action) }
+    }
+    Lazy {
         id: savedSheet
-        onNotice: (text, actionText, action) => window.notify(text, actionText, action)
-        onRan: searchScreen.close()
-        onRenameRequested: id => saveSheet.openRenaming(id)
+        sourceComponent: SavedQuerySheet {
+            onNotice: (text, actionText, action) => window.notify(text, actionText, action)
+            onRan: searchScreen.item?.close()
+            onRenameRequested: id => saveSheet.get().openRenaming(id)
+        }
     }
     // An entry, the view around it, and an entry of that view.
     function backToFeed() {
-        focusDetails.close()
+        focusDetails.item?.close()
         if (Session.focus.active) Session.focus.close()
-        focusScreen.close()
-        details.close()
+        focusScreen.item?.close()
+        details.item?.close()
         window.section = 0
     }
-    DetailsScreen {
+    Lazy {
         id: details
-        onNotice: (text, actionText, action) => window.notify(text, actionText, action)
-        onContextRequested: (model, row) => { Session.focus.openContext(model, row, 60); focusScreen.open() }
-        onTraceRequested: (model, row) => { Session.focus.openTrace(model, row); focusScreen.open() }
-        onFieldMenuRequested: (key, value) => fieldSheet.openFor(key, value)
-        onFiltered: window.backToFeed()
-        onClosed: logsPage.resumeLiveAfterEntry()
+        sourceComponent: DetailsScreen {
+            onNotice: (text, actionText, action) => window.notify(text, actionText, action)
+            onContextRequested: (model, row) => { Session.focus.openContext(model, row, 60); focusScreen.get().open() }
+            onTraceRequested: (model, row) => { Session.focus.openTrace(model, row); focusScreen.get().open() }
+            onFieldMenuRequested: (key, value) => fieldSheet.get().openFor(key, value)
+            onFiltered: window.backToFeed()
+            onClosed: logsPage.resumeLiveAfterEntry()
+        }
     }
-    PatternSortSheet { id: patternSortSheet }
-    FocusScreen {
+    Lazy { id: patternSortSheet; sourceComponent: PatternSortSheet {} }
+    Lazy {
         id: focusScreen
-        onEntryRequested: row => focusDetails.show(Session.focus.logs, row)
-        onSearchOpened: { focusDetails.close(); details.close(); window.section = 0 }
+        sourceComponent: FocusScreen {
+            onEntryRequested: row => focusDetails.get().show(Session.focus.logs, row)
+            onSearchOpened: { focusDetails.item?.close(); details.item?.close(); window.section = 0 }
+        }
     }
-    DetailsScreen {
+    Lazy {
         id: focusDetails
-        backLabel: qsTr("Around")
-        canOpenFocus: false
-        onNotice: (text, actionText, action) => window.notify(text, actionText, action)
-        onFieldMenuRequested: (key, value) => fieldSheet.openFor(key, value)
-        onFiltered: window.backToFeed()
+        sourceComponent: DetailsScreen {
+            backLabel: qsTr("Around")
+            canOpenFocus: false
+            onNotice: (text, actionText, action) => window.notify(text, actionText, action)
+            onFieldMenuRequested: (key, value) => fieldSheet.get().openFor(key, value)
+            onFiltered: window.backToFeed()
+        }
     }
-    FieldSheet {
+    Lazy {
         id: fieldSheet
-        onNotice: (text, actionText, action) => window.notify(text, actionText, action)
-        onFiltered: window.backToFeed()
+        sourceComponent: FieldSheet {
+            onNotice: (text, actionText, action) => window.notify(text, actionText, action)
+            onFiltered: window.backToFeed()
+        }
     }
-    SourceSheet {
+    Lazy {
         id: sourceSheet
-        onSettingsRequested: window.section = 2
-        onAddEnvironmentRequested: { window.section = 2; settingsPage.openEnvironment("", "") }
+        sourceComponent: SourceSheet {
+            onSettingsRequested: window.section = 2
+            onAddEnvironmentRequested: { window.section = 2; settingsPage.get().openEnvironment("", "") }
+        }
     }
-    TimeSheet { id: timeSheet }
-    EnvironmentSheet {
+    Lazy { id: timeSheet; sourceComponent: TimeSheet {} }
+    Lazy {
         id: environmentSheet
-        onSettingsRequested: window.section = 2
-        onSourceMissing: sourceSheet.open()
+        sourceComponent: EnvironmentSheet {
+            onSettingsRequested: window.section = 2
+            onSourceMissing: sourceSheet.get().open()
+        }
     }
-    ShareSheet { id: shareSheet; onNotice: (text, actionText, action) => window.notify(text, actionText, action) }
+    Lazy {
+        id: shareSheet
+        sourceComponent: ShareSheet { onNotice: (text, actionText, action) => window.notify(text, actionText, action) }
+    }
 
     // In the overlay, so it shows over the search screen and the sheets too.
     Snackbar {

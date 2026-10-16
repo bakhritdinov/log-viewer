@@ -2590,6 +2590,10 @@
         <source>Around</source>
         <translation>Вокруг</translation>
     </message>
+    <message>
+        <source>The system keychain did not accept the credentials of %1</source>
+        <translation>Системное хранилище ключей не приняло учётные данные %1</translation>
+    </message>
 </context>
 <context>
     <name>MessageView</name>

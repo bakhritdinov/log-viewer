@@ -170,8 +170,10 @@ QList<QVariantMap> patternRows(const QList<MessagePattern>& patterns)
         }
         // One-line views show the first line and how many more there are.
         const QStringList lines = p.templateText.split(QLatin1Char('\n'));
+        QString firstLine = lines.first();
+        if (firstLine.endsWith(QLatin1Char('\r'))) firstLine.chop(1);   // CRLF logs
         rows << QVariantMap{ { "templateText", p.templateText }, { "templateParts", p.templateText.split(QLatin1Char('*')) },
-                             { "firstLineParts", lines.first().split(QLatin1Char('*')) },
+                             { "firstLineParts", firstLine.split(QLatin1Char('*')) },
                              { "moreLines", int(lines.size()) - 1 },
                              { "level", levelName(p.level) },
                              { "count", p.count }, { "share", maxCount ? double(p.count) / maxCount : 0.0 },

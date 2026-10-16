@@ -235,11 +235,20 @@ bool EnvironmentEditor::save(bool makeCurrent)
     // Keep only the secret the chosen auth uses. The session reads them back, so
     // it switches once the keychain has them (a write finishes later; reading
     // first connected without the password just entered).
-    auto pending = std::make_shared<int>(2);
+    // The editor may be gone by then (the screen closes on save): the session
+    // reports a refused write.
+    struct Pending {
+        int left = 2;
+        bool ok = true;
+    };
+    auto pending = std::make_shared<Pending>();
     QPointer<Session> session(m_session);
     const QString id = env.id;
-    auto done = [pending, session, id, makeCurrent](bool) {
-        if (--*pending > 0 || !session) return;
+    const QString name = env.name;
+    auto done = [pending, session, id, name, makeCurrent](bool ok) {
+        pending->ok = pending->ok && ok;
+        if (--pending->left > 0 || !session) return;
+        if (!pending->ok) emit session->secretsNotSaved(name);
         if (makeCurrent) session->services().environments().setCurrent(id);
         session->environmentsEdited(id);
     };

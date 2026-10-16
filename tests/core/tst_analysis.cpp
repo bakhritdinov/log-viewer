@@ -86,6 +86,19 @@ private slots:
         QVERIFY(!f.contains("error_detail"));
         QVERIFY(!f.contains("body"));
     }
+    // One long URL among many short ones does not hide the field; the long value
+    // itself is not offered.
+    void facetsKeepAFieldWithARareLongValue()
+    {
+        LogEntries list;
+        for (int i = 0; i < 20; ++i)
+            list << entry(i, "m", Level::Info, { { "url", "/api/orders" } });
+        const QString longUrl = "/api/search?q=" + QString(300, QLatin1Char('x'));
+        list << entry(20, "m", Level::Info, { { "url", longUrl } });
+        const FieldValueCounts f = computeFacets(list);
+        QCOMPARE(f.value("url").value("/api/orders"), 20);
+        QVERIFY(!f.value("url").contains(longUrl));
+    }
 
     void templateMessage_data()
     {

@@ -39,9 +39,10 @@ Item {
                 { y: 362, stripe: "#58a6ff", bar: "#8b949e", length: 160 },
             ]
             delegate: Item {
+                id: line
                 required property var modelData
-                Rectangle { x: 88; y: modelData.y; width: 48; height: 64; radius: 12; color: modelData.stripe }
-                Rectangle { x: 160; y: modelData.y + 10; width: modelData.length; height: 44; radius: 22; color: modelData.bar }
+                Rectangle { x: 88; y: line.modelData.y; width: 48; height: 64; radius: 12; color: line.modelData.stripe }
+                Rectangle { x: 160; y: line.modelData.y + 10; width: line.modelData.length; height: 44; radius: 22; color: line.modelData.bar }
             }
         }
     }

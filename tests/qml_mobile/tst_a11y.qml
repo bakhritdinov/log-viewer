@@ -14,8 +14,8 @@ TestCase {
     function root() { return H.windowRoot(window) }
     function sheets() {
         const out = []
-        for (let i = 0; i < window.contentData.length; ++i) {
-            const p = window.contentData[i]
+        for (let i = 0; i < H.contentData(window).length; ++i) {
+            const p = H.contentData(window)[i]
             if (p && p.hasOwnProperty("closePolicy") && typeof p.open === "function") out.push(p)
         }
         return out
@@ -55,10 +55,8 @@ TestCase {
     function audit(where, scope) {
         scope = scope || root()
         waitForRendering(window.contentItem)
-        compare(unnamed(scope).join("
-"), "", where + ": unnamed")
-        compare(smallTargets(scope).join("
-"), "", where + ": small targets")
+        compare(unnamed(scope).join("\n"), "", where + ": unnamed")
+        compare(smallTargets(scope).join("\n"), "", where + ": small targets")
     }
 
     function test_logs() { audit("logs") }

@@ -144,6 +144,7 @@ ApplicationWindow {
         target: Session
         function onLinkEnvironmentMissing(name) { window.missingEnvironment = name }
         function onEnvironmentChanged() { window.missingEnvironment = "" }
+        function onSecretsNotSaved(name) { window.notify(qsTr("The system keychain did not accept the credentials of %1").arg(name)) }
     }
 
     ColumnLayout {

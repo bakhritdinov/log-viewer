@@ -12,8 +12,8 @@ TestCase {
 
     function root() { return H.windowRoot(window) }
     function popup(test) {
-        for (let i = 0; i < window.contentData.length; ++i)
-            if (window.contentData[i] && test(window.contentData[i])) return window.contentData[i]
+        for (let i = 0; i < H.contentData(window).length; ++i)
+            if (H.contentData(window)[i] && test(H.contentData(window)[i])) return H.contentData(window)[i]
         return null
     }
     function byName(name) { return H.find(root(), it => it.Accessible && it.Accessible.name === name && H.isShown(it)) }
@@ -37,8 +37,8 @@ TestCase {
     function cleanup() {
         Session.live.stop()
         Session.patternsEnabled = false
-        for (let i = 0; i < window.contentData.length; ++i) {
-            const p = window.contentData[i]
+        for (let i = 0; i < H.contentData(window).length; ++i) {
+            const p = H.contentData(window)[i]
             if (!p || !p.hasOwnProperty("closePolicy")) continue
             if (p.opened) p.close()
             tryCompare(p, "visible", false)

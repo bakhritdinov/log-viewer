@@ -16,6 +16,17 @@ function findAll(item, predicate, out) {
     return out
 }
 
+// The window's data with the screens and sheets the phone design builds on
+// first use (Main's Lazy loaders) built, so a test finds every popup.
+function contentData(window) {
+    const out = []
+    for (let i = 0; i < window.contentData.length; ++i) {
+        const d = window.contentData[i]
+        out.push(d && typeof d.get === "function" && d.hasOwnProperty("sourceComponent") ? d.get() : d)
+    }
+    return out
+}
+
 function find(item, predicate) {
     return findAll(item, predicate)[0] || null
 }

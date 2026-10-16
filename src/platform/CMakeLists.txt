@@ -84,6 +84,9 @@ endif()
 # and a service worker next to the WebAssembly. The worker's cache name
 # changes with every build, so the browser sees a new version.
 if(EMSCRIPTEN)
+    # The page may pass environment variables (qtLoad's qt.environment), e.g.
+    # QSG_RENDER_TIMING when measuring on a phone.
+    set_target_properties(LogViewer PROPERTIES QT_WASM_EXTRA_EXPORTED_METHODS "ENV")
     set(LOGVIEWER_WEB ${CMAKE_CURRENT_SOURCE_DIR}/wasm)
     set(LOGVIEWER_WEB_OUT $<TARGET_FILE_DIR:LogViewer>)
     add_custom_command(TARGET LogViewer POST_BUILD

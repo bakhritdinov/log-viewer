@@ -2570,6 +2570,10 @@
         <source>Around</source>
         <translation>Atrofida</translation>
     </message>
+    <message>
+        <source>The system keychain did not accept the credentials of %1</source>
+        <translation>Tizim kalitlar ombori %1 hisob maʼlumotlarini qabul qilmadi</translation>
+    </message>
 </context>
 <context>
     <name>MessageView</name>

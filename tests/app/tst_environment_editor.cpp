@@ -27,6 +27,11 @@ public:
         QTimer::singleShot(20, [this, key, value, done] { MemorySecretStore::write(key, value, done); });
     }
 };
+// A keychain that refuses writes (locked, access denied).
+class RefusingSecretStore : public MemorySecretStore {
+public:
+    void write(const QString&, const QString&, DoneCallback done) override { done(false); }
+};
 } // namespace
 
 class TestEnvironmentEditor : public QObject {
@@ -121,6 +126,25 @@ private slots:
         QVERIFY(editor.save());
         QTRY_COMPARE(http.requests.size(), 1);
         QCOMPARE(header(http.requests.first(), "Authorization"), "Basic " + QByteArray("alice:pw").toBase64());
+    }
+
+    void refusedSecretIsReported()
+    {
+        FakeHttpClient http;
+        MemoryStore kv;
+        RefusingSecretStore secrets;
+        AppServices services{ http, kv, secrets, makeInlineParseExecutor() };
+        Session session{ services };
+        EnvironmentEditor editor{ session };
+        QSignalSpy refused(&session, &Session::secretsNotSaved);
+        editor.load("dev");
+        editor.setProperty("url", "https://grafana.dev");
+        editor.setProperty("datasourceUid", "uid");
+        editor.setProperty("user", "alice");
+        editor.setProperty("password", "pw");
+        QVERIFY(editor.save());
+        QCOMPARE(refused.size(), 1);
+        QCOMPARE(refused.first().first().toString(), editor.property("name").toString());
     }
 
     void loadReadsSecretsAndRemoves()

@@ -329,6 +329,9 @@ signals:
     void openedFromLinkChanged();
     // A share link named an environment that does not exist here.
     void linkEnvironmentMissing(const QString& name);
+    // The keychain refused a password or token of this environment (saved
+    // without it; the connection asks again).
+    void secretsNotSaved(const QString& environmentName);
 
 private:
     void runSearch(bool keepSlice);

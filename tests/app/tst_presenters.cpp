@@ -127,6 +127,9 @@ private slots:
         QCOMPARE(rows[0]["firstLineParts"].toStringList(), QStringList({ "ERROR: ", " duplicate" }));
         QCOMPARE(rows[0]["moreLines"].toInt(), 2);
         QCOMPARE(patternRows({ pattern("one line *", Level::Warn, 2, 0) })[0]["moreLines"].toInt(), 0);
+        const auto crlf = patternRows({ pattern("ERROR: *\r\n  at *", Level::Error, 2, 0) });
+        QCOMPARE(crlf[0]["firstLineParts"].toStringList(), QStringList({ "ERROR: ", "" }));
+        QCOMPARE(crlf[0]["moreLines"].toInt(), 1);
     }
 
 

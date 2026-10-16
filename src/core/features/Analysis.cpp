@@ -2,7 +2,6 @@
 
 #include <QHash>
 #include <QRegularExpression>
-#include <QSet>
 #include <algorithm>
 
 #include "core/query/Query.h"
@@ -68,25 +67,30 @@ qint64 autoBucketMs(qint64 rangeSeconds)
 FieldValueCounts computeFacets(const LogEntries& entries)
 {
     // Free text (stack traces, exception bodies, request dumps) is read in the
-    // entry, not filtered by: such a field is left out whole.
+    // entry, not filtered by: such a value is never offered, and a field where
+    // it is common is left out whole. A rare long value (one URL with a big
+    // query string) keeps the field.
     constexpr qsizetype filterableLength = 200;
+    constexpr int freeTextPercent = 10;
     FieldValueCounts out;
-    QSet<QString> freeText;
+    QHash<QString, int> freeText;   // field → free-text values
+    QHash<QString, int> total;      // field → non-empty values
     for (const LogEntry& e : entries) {
         for (auto it = e.fields.cbegin(); it != e.fields.cend(); ++it) {
             const QString& k = it.key();
             if (k == u"Line" || k == u"message" || k == u"Time" || k == u"ts") continue;
-            if (freeText.contains(k)) continue;
             const QString v = formatFieldValue(it.value());
             if (v.isEmpty()) continue;
+            ++total[k];
             if (v.size() > filterableLength || v.contains(QLatin1Char('\n'))) {
-                freeText.insert(k);
-                out.remove(k);
+                ++freeText[k];
                 continue;
             }
             ++out[k][v];
         }
     }
+    for (auto it = freeText.cbegin(); it != freeText.cend(); ++it)
+        if (it.value() * 100 > total.value(it.key()) * freeTextPercent) out.remove(it.key());
     return out;
 }
 

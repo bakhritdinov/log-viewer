@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <!-- 1 CSS px = 1 Qt px, the page fills the screen under the notch (safe areas below). -->
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
   <title>LogViewer</title>
   <meta name="description" content="Logs from Grafana (VictoriaLogs / Loki) on the phone">
   <meta name="theme-color" content="#161b22">
@@ -22,14 +22,24 @@
     }
     html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bar); color: var(--text);
                  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    /* An app, not a document: the page never scrolls or zooms and the browser
+       takes no gestures — every touch goes to Qt. iOS scrolled the page (the top
+       band then missed the app) and took swipes as a scroll, cancelling the
+       touch under Qt. */
+    html, body { position: fixed; inset: 0; overscroll-behavior: none; touch-action: none; }
     /* Qt draws into #screen, inside the safe areas (notch, gesture bar). It stays
        laid out (hidden, not display:none) under the splash, so Qt measures its real
        size at start — a display:none container measured short on iPhone and left a
        band under the tab bar. */
     #screen { position: fixed; top: env(safe-area-inset-top); right: env(safe-area-inset-right);
               bottom: env(safe-area-inset-bottom); left: env(safe-area-inset-left); visibility: hidden; }
-    #splash { z-index: 1; }
-    #splash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    /* Installed (home screen), there are no browser bars and the large viewport
+       is the whole screen; iOS reported the layout viewport short by the status
+       bar, so the bottom is not pinned to it there. */
+    @media (display-mode: standalone) {
+      #screen { bottom: auto; height: calc(100lvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+    }
+    #splash { position: fixed; inset: 0; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
               gap: 14px; background: var(--bg); }
     #splash img { width: 96px; height: 96px; border-radius: 22px; }
     #splash strong { font-size: 20px; font-weight: 600; }
@@ -239,14 +249,13 @@
         $("status").textContent = text.failed + ": " + e;
         return;
       }
-      // Keep Qt's screen the size of #screen: after the splash, on rotation, when
-      // the safe areas or the visual viewport change (iOS reports them late).
-      const fit = () => requestAnimationFrame(() => app && app.qtResizeAllScreens && app.qtResizeAllScreens());
-      fit();
-      addEventListener("orientationchange", fit);
-      addEventListener("pageshow", fit);
-      if (window.visualViewport) visualViewport.addEventListener("resize", fit);
+      // Qt follows the size of #screen itself (a ResizeObserver on it): sizes
+      // are CSS only.
     }
+    // iOS still scrolls a fixed page to bring a focused field into view: back.
+    const unscroll = () => { if (scrollX || scrollY) scrollTo(0, 0); };
+    addEventListener("scroll", unscroll, { passive: true });
+    window.visualViewport?.addEventListener("resize", unscroll);
   </script>
   <script src="LogViewer.js"></script>
   <script src="qtloader.js" onload="start()"></script>
