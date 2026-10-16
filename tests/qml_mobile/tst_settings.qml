@@ -120,4 +120,17 @@ TestCase {
         tryCompare(Session.savedQueries, "count", 1)
         tryVerify(() => shownText("Добавлен 1 запрос"))
     }
+
+    // Feedback: going between settings screens flickered — the screens were
+    // transparent, so the one sliding away showed through the new one.
+    function test_08_screensAreOpaque() {
+        tryVerify(() => !stack().busy)
+        verify(stack().clip)
+        compare(stack().currentItem.color.a, 1)
+        tap(byName("Внешний вид"))
+        tryVerify(() => stackDepth() === 2 && !stack().busy)
+        compare(stack().currentItem.color.a, 1)
+        tap(byName("Настройки"))
+        tryVerify(() => stackDepth() === 1)
+    }
 }

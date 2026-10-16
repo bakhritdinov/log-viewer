@@ -2,6 +2,7 @@
 
 #include <QCoreApplication>
 #include <QLocale>
+#include <QRegularExpression>
 #include <algorithm>
 
 namespace lv::presenters {
@@ -20,17 +21,24 @@ QString localTime(qint64 ms, const QString& format)
 
 QByteArrayList chipRoles() { return { "text", "kind", "field", "value", "exclude", "regex" }; }
 
+QString oneLineQuery(const QString& text)
+{
+    if (!text.contains(u'\n') && !text.contains(u'\r')) return text;
+    static const QRegularExpression lineBreak(QStringLiteral("\\s*[\\r\\n]\\s*"));
+    return text.trimmed().replace(lineBreak, QStringLiteral(" ↵ "));
+}
+
 QList<QVariantMap> chipRows(const QString& searchText)
 {
     QList<QVariantMap> rows;
     const Query query = Query::parse(searchText);   // keep alive: terms() returns a reference
     for (const QueryTerm& t : query.terms()) {
         if (t.kind == QueryTerm::Kind::Word) {
-            rows << QVariantMap{ { "text", t.word }, { "kind", "word" }, { "field", QString() },
+            rows << QVariantMap{ { "text", oneLineQuery(t.word) }, { "kind", "word" }, { "field", QString() },
                                  { "value", t.word }, { "exclude", false }, { "regex", false } };
         } else {
             const FieldFilter& f = t.filter;
-            rows << QVariantMap{ { "text", f.toText() }, { "kind", "filter" }, { "field", f.field },
+            rows << QVariantMap{ { "text", oneLineQuery(f.toText()) }, { "kind", "filter" }, { "field", f.field },
                                  { "value", f.value }, { "exclude", f.exclude }, { "regex", f.regex } };
         }
     }
@@ -143,7 +151,7 @@ QList<QVariantMap> facetRows(const FieldValueCounts& facets, const QString& filt
 
 QByteArrayList patternRoles()
 {
-    return { "templateText", "templateParts", "level", "count", "share", "firstSeen", "lastSeen", "examples", "trend", "trendMax" };
+    return { "templateText", "templateParts", "firstLineParts", "moreLines", "level", "count", "share", "firstSeen", "lastSeen", "examples", "trend", "trendMax" };
 }
 
 QList<QVariantMap> patternRows(const QList<MessagePattern>& patterns)
@@ -160,7 +168,11 @@ QList<QVariantMap> patternRows(const QList<MessagePattern>& patterns)
             trend << c;
             trendMax = std::max(trendMax, c);
         }
+        // One-line views show the first line and how many more there are.
+        const QStringList lines = p.templateText.split(QLatin1Char('\n'));
         rows << QVariantMap{ { "templateText", p.templateText }, { "templateParts", p.templateText.split(QLatin1Char('*')) },
+                             { "firstLineParts", lines.first().split(QLatin1Char('*')) },
+                             { "moreLines", int(lines.size()) - 1 },
                              { "level", levelName(p.level) },
                              { "count", p.count }, { "share", maxCount ? double(p.count) / maxCount : 0.0 },
                              { "firstSeen", p.firstSeen.toLocalTime().toString(QStringLiteral("HH:mm:ss")) },

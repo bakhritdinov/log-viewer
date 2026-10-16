@@ -333,6 +333,7 @@ Popup {
             boundsBehavior: Flickable.StopAtBounds
             delegate: ItemDelegate {
                 id: item
+                required property int index
                 // Basic's 12 px vertical padding pushes the content below the row's centre.
                 topPadding: 0
                 bottomPadding: 0
@@ -350,7 +351,8 @@ Popup {
                     Icon { name: "history"; size: 14; color: Theme.textMuted }
                     Text {
                         Layout.fillWidth: true
-                        text: item.modelData
+                        text: Session.historyLabels[item.index] ?? item.modelData
+                        maximumLineCount: 1
                         elide: Text.ElideRight
                         font.family: Theme.mono
                         font.pixelSize: Theme.fontSm

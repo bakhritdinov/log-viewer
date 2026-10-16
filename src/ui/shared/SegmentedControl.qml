@@ -37,16 +37,17 @@ Control {
 
     padding: 2
     focusPolicy: Qt.StrongFocus
-    implicitHeight: (touch ? 44 : compact ? 18 : 26) + 2 * padding
+    implicitHeight: touch ? 44 + 2 * padding : compact ? Theme.chipHeight : 26 + 2 * padding
     implicitWidth: row.implicitWidth + 2 * padding
     Accessible.role: Accessible.PageTabList
     Accessible.name: accessibleName
     Keys.onLeftPressed: select(indexOfValue(value) - 1)
     Keys.onRightPressed: select(indexOfValue(value) + 1)
 
+    // Compact (in a header row): drawn like the chips beside it — no dark field.
     background: Rectangle {
-        radius: control.touch ? Theme.radiusLg : Theme.radiusMd
-        color: Theme.inputBg
+        radius: control.touch ? Theme.radiusLg : control.compact ? Theme.radiusSm + 1 : Theme.radiusMd
+        color: control.compact ? "transparent" : Theme.inputBg
         border.width: 1
         border.color: control.visualFocus ? Theme.focusRing : Theme.border
     }
@@ -79,7 +80,7 @@ Control {
                     id: optionText
                     text: control.labelOf(option.modelData)
                     font.family: Theme.sans
-                    font.pixelSize: control.touch ? Theme.fontLg : control.compact ? Theme.fontXs : Theme.fontSm
+                    font.pixelSize: control.touch ? Theme.fontLg : Theme.fontSm
                     color: option.current ? (control.accent ? Theme.textOnAccent : Theme.textStrong) : (option.hovered ? Theme.text : Theme.textMuted)
                     font.weight: control.accent ? Font.DemiBold : Font.Medium
                     horizontalAlignment: Text.AlignHCenter

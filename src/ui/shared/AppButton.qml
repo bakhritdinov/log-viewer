@@ -43,7 +43,11 @@ Button {
 
     // Centred when the button is wider than its label (full-width on the phone).
     contentItem: Item {
-        implicitWidth: label.implicitWidth
+        // From the label's natural width, not its laid-out one: the text is cut to
+        // the button's width, and the button takes its width from here (a cycle
+        // that collapsed buttons to their icon).
+        readonly property real iconSpace: control.iconName !== "" ? (control.touch ? 16 : 14) + label.spacing : 0
+        implicitWidth: iconSpace + labelText.implicitWidth
         implicitHeight: label.implicitHeight
         Row {
             id: label
@@ -57,7 +61,11 @@ Button {
                 size: control.touch ? 16 : 14
             }
             Text {
+                id: labelText
                 anchors.verticalCenter: parent.verticalCenter
+                // Never wider than the button: a long label is cut with "…".
+                width: Math.min(implicitWidth, control.availableWidth - label.parent.iconSpace)
+                elide: Text.ElideRight
                 text: control.text
                 font.family: control.font.family
                 font.pixelSize: control.font.pixelSize

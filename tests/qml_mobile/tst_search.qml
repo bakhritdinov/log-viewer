@@ -171,4 +171,16 @@ TestCase {
         verify(harness.lastShared.startsWith(Session.app + "|"))
         verify(harness.lastShared.indexOf("logviewer://open?") > 0)
     }
+
+    // Feedback: the period chip lost its rounded left end (the row was cut at the
+    // column's margin) and a long chart pick left empty space after its ×.
+    function test_11_chipRowEdgeToEdge() {
+        const period = H.find(window.contentItem, it => String(it.Accessible.name).indexOf("Период:") === 0 && H.isShown(it))
+        verify(period)
+        let flick = period.parent
+        while (flick && !flick.hasOwnProperty("contentX")) flick = flick.parent
+        compare(flick.mapToItem(null, 0, 0).x, 0)
+        compare(flick.width, window.width)
+        compare(period.mapToItem(null, 0, 0).x, 12)
+    }
 }

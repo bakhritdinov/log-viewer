@@ -323,6 +323,13 @@ QString Session::historySource(const QString& text) const
     return m_services.history().source(text);
 }
 
+QStringList Session::historyLabels() const
+{
+    QStringList labels = history();
+    for (QString& text : labels) text = presenters::oneLineQuery(text);
+    return labels;
+}
+
 void Session::search()
 {
     // A broken query is not sent: the results stay and the field says why.

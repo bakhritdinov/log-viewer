@@ -136,7 +136,11 @@ ApplicationWindow {
         onNotice: (text, actionText, action) => window.notify(text, actionText, action)
         onFiltered: window.backToFeed()
     }
-    SourceSheet { id: sourceSheet; onSettingsRequested: window.section = 2 }
+    SourceSheet {
+        id: sourceSheet
+        onSettingsRequested: window.section = 2
+        onAddEnvironmentRequested: { window.section = 2; settingsPage.openEnvironment("", "") }
+    }
     TimeSheet { id: timeSheet }
     EnvironmentSheet {
         id: environmentSheet

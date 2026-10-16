@@ -139,6 +139,14 @@ TestCase {
         tryCompare(Session, "loading", false)
         verify(H.visibleText(window.contentItem, "Записей нет — запрос не выполнен"))
         verify(H.visibleText(window.contentItem, "Неверный логин или пароль"))
+        // The banner's actions: one per line, full width, labels inside the buttons
+        // (two columns pushed long labels like "Copy instructions for DevOps" out).
+        const first = H.find(window.contentItem, it => it.text === "Настройки" && it.hasOwnProperty("variant") && H.isShown(it))
+        const second = H.find(window.contentItem, it => it.text === "Повторить" && it.hasOwnProperty("variant") && H.isShown(it))
+        verify(first && second)
+        compare(first.mapToItem(null, 0, 0).x, second.mapToItem(null, 0, 0).x)
+        compare(first.width, second.width)
+        verify(second.mapToItem(null, 0, 0).y >= first.mapToItem(null, 0, 0).y + first.height)
         harness.scriptLogs(12)
         Session.searchText = ""
         Session.search()
@@ -173,6 +181,8 @@ TestCase {
         tryVerify(() => Session.histogramFilterActive && Session.logs.totalCount < 12)
         const shown = Session.logs.totalCount
         tryVerify(() => H.visibleText(window.contentItem, "Записи · " + shown) !== null)
+        // The chip row is laid out on the next frame: click where the chip is, not was.
+        waitForRendering(window.contentItem)
         const chip = H.find(window.contentItem, it => it.hasOwnProperty("pill") && it.text === Session.histogramFilterLabel && H.isShown(it))
         verify(chip, "no chip for " + Session.histogramFilterLabel)
         const label = chip.text

@@ -120,7 +120,9 @@ Rectangle {
         GridLayout {
             Layout.alignment: Qt.AlignTop
             Layout.fillWidth: root.touch
-            columns: root.touch ? 2 : 1
+            // One button per line on the phone: labels like "Copy instructions for
+            // DevOps" do not fit half the width in any language.
+            columns: 1
             rowSpacing: 6
             columnSpacing: 8
             AppButton {

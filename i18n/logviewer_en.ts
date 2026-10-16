@@ -208,6 +208,13 @@
         </translation>
     </message>
     <message numerus="yes">
+        <source>↵ +%n line(s)</source>
+        <translation>
+            <numerusform>↵ +%n line</numerusform>
+            <numerusform>↵ +%n lines</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
         <source>Show %n entries</source>
         <translation>
             <numerusform>Show %n entry</numerusform>

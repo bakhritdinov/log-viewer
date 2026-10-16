@@ -63,7 +63,7 @@ Rectangle {
                 spacing: 10
                 Item {
                     implicitWidth: distributionLabel.implicitWidth
-                    implicitHeight: 22                      // the height of every header control
+                    implicitHeight: Theme.chipHeight        // the height of every header control
                     SectionLabel { id: distributionLabel; anchors.verticalCenter: parent.verticalCenter; text: qsTr("Distribution") }
                 }
                 LevelLegend {
@@ -79,7 +79,7 @@ Rectangle {
                 Item {
                     visible: !root.expanded && root.trend.length > 0
                     implicitWidth: 160
-                    implicitHeight: 22
+                    implicitHeight: Theme.chipHeight
                     Sparkline {
                         anchors.verticalCenter: parent.verticalCenter
                         width: parent.width
@@ -93,7 +93,7 @@ Rectangle {
                 FilterChip {
                     visible: Session.histogramRangeOrPatternFilter
                     pill: false
-                    implicitHeight: 22
+                    implicitHeight: Theme.chipHeight
                     text: Session.histogramFilterLabel
                     onRemoveRequested: Session.clearHistogramFilter()
                 }
@@ -112,8 +112,8 @@ Rectangle {
                 }
                 IconButton {
                     anchors.verticalCenter: parent.verticalCenter
-                    implicitWidth: 22
-                    implicitHeight: 22
+                    implicitWidth: Theme.chipHeight
+                    implicitHeight: Theme.chipHeight
                     iconName: root.expanded ? "chevronUp" : "chevronDown"
                     label: root.expanded ? qsTr("Collapse the chart") : qsTr("Expand the chart")
                     onClicked: root.expanded = !root.expanded

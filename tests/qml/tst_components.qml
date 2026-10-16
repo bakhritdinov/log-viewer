@@ -71,6 +71,9 @@ Item {
         }
     }
     Component { id: radio; AppRadioButton { text: "Option" } }
+    Component { id: plainButton; AppButton { iconName: "clock"; text: "Last 1 hour" } }
+    Component { id: longChip; FilterChip { touch: true; text: "Шаблон: У вас установлен запрет на получение кредита в КАТМ и ещё длинный хвост" } }
+    Component { id: longButton; AppButton { width: 140; iconName: "copy"; text: "Copy instructions for DevOps, a very long label" } }
     Component { id: check; AppCheckBox { text: "Option" } }
     Component { id: toggle; AppSwitch { } }
     Component { id: confirm; ConfirmDialog { title: "Delete?" } }
@@ -366,7 +369,7 @@ Item {
             const l = createTemporaryObject(legend, host)
             waitForRendering(l)
             const chip = findAll(l, it => it.hasOwnProperty("count") && it.hasOwnProperty("active"))[0]
-            const name = findAll(chip, it => it.text === "ERROR")[0]
+            const name = findAll(chip, it => it.text === "Error")[0]
             const count = findAll(chip, it => it.text === "3")[0]
             compare(name.mapToItem(chip, 0, 0).y + name.baselineOffset, count.mapToItem(chip, 0, 0).y + count.baselineOffset)
         }
@@ -406,6 +409,37 @@ Item {
                 verify(t.lineCount > 1, t.text)
             }
             verify(row.height > 30)
+        }
+        // A label longer than its button is cut with "…" inside the button.
+        function test_buttonLabelStaysInside() {
+            const b = createTemporaryObject(longButton, host)
+            waitForRendering(b)
+            const label = findAll(b.contentItem, it => it.text === b.text)[0]
+            verify(label.width <= b.availableWidth)
+            const right = label.mapToItem(b, 0, 0).x + label.width
+            verify(right <= b.width - b.rightPadding + 0.5, right)
+            compare(label.elide, Text.ElideRight)
+        }
+        // A button sized by its content shows its whole label (cutting the label
+        // to the button's width once collapsed such buttons to their icon).
+        function test_buttonShowsItsLabel() {
+            const b = createTemporaryObject(plainButton, host)
+            waitForRendering(b)
+            const label = findAll(b.contentItem, it => it.text === b.text)[0]
+            verify(label.implicitWidth > 20)
+            compare(label.width, label.implicitWidth)
+            verify(b.width >= label.implicitWidth + b.leftPadding + b.rightPadding)
+        }
+
+        // A long chip ends with its cut label: no empty space after the ×.
+        function test_longChipHasNoGap() {
+            const chip = createTemporaryObject(longChip, host)
+            waitForRendering(chip)
+            const label = findAll(chip.contentItem, it => it.text === chip.text && it.elide === Text.ElideRight)[0]
+            verify(label.width < label.implicitWidth)
+            const remove = findAll(chip.contentItem, it => it.hasOwnProperty("pressed"))[0]
+            verify(remove)
+            verify(chip.width - (remove.mapToItem(chip, 0, 0).x + remove.width) <= 2, chip.width)
         }
     }
 }

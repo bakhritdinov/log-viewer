@@ -28,6 +28,7 @@ Item {
         id: stack
         anchors.fill: parent
         initialItem: list
+        clip: true
         pushEnter: Transition { NumberAnimation { property: "x"; from: stack.width; to: 0; duration: 160; easing.type: Easing.OutCubic } }
         pushExit: Transition { NumberAnimation { property: "x"; from: 0; to: -stack.width * 0.3; duration: 160 } }
         popEnter: Transition { NumberAnimation { property: "x"; from: -stack.width * 0.3; to: 0; duration: 140 } }
@@ -48,7 +49,8 @@ Item {
 
     Component {
         id: list
-        Item {
+        Rectangle {
+            color: Theme.bg
             Rectangle {
                 id: bar
                 anchors.left: parent.left

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QCoreApplication>
 #include <QSettings>
 #include <QTemporaryDir>
 // A design under test against a fake Grafana. `harness` (a context property)
@@ -123,6 +124,10 @@ public:
                 { "duration_ms", QString::number(5 + (i * 37) % 4000) }, { "customer_id", QStringLiteral("cus_%1").arg(100000 + i % 977) },
                 { "region", i % 2 ? "eu-west-1" : "us-east-1" }, { "version", "3.14.2" },
             };
+            // Errors carry a multi-line field, like an SQL error with its DETAIL line.
+            if (kind == 0)
+                labels.insert("error_detail", QStringLiteral("ERROR: duplicate key value violates unique constraint \"orders_pkey\"\n"
+                                                             "DETAIL: Key (id)=(%1) already exists.").arg(48000 + i % 7));
             QString message;
             switch (kind) {
             case 0:
@@ -183,6 +188,7 @@ public slots:
         // The window keeps its own state with QML's Settings (QSettings): give each
         // run fresh, private settings so nothing leaks between runs (a widened
         // details panel left by one run collapsed the fields in the next).
+        QCoreApplication::setOrganizationName(QStringLiteral("LogViewerTests"));   // QML Settings needs one
         QSettings::setDefaultFormat(QSettings::IniFormat);
         QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, m_settingsDir.path());
         m_harness = std::make_unique<Harness>(qEnvironmentVariable("LOGVIEWER_TEST_SCENARIO") != u"first_run");

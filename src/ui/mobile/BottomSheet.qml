@@ -41,7 +41,9 @@ Popup {
         color: Theme.surface
         topLeftRadius: 16
         topRightRadius: 16
-        Rectangle { anchors.left: parent.left; anchors.right: parent.right; height: 1; color: Theme.border }
+        // Follows the rounded corners (a straight top line ran past them).
+        border.width: 1
+        border.color: Theme.border
     }
 
     // Swiping the handle or the title down closes the sheet.

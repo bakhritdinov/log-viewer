@@ -2,6 +2,7 @@
 
 #include <QCoreApplication>
 #include <QPointer>
+#include <memory>
 
 #include "app/Session.h"
 
@@ -228,21 +229,28 @@ bool EnvironmentEditor::save(bool makeCurrent)
     m_isNew = false;
     m_snapshot = formSnapshot();
 
-    // Keep only the secret the chosen auth uses.
-    auto ignore = [](bool) {};
-    if (env.auth == Environment::Auth::Basic && !m_password.isEmpty())
-        services.secrets().write(env.passwordKey(), m_password, ignore);
-    else
-        services.secrets().remove(env.passwordKey(), ignore);
-    if (env.auth == Environment::Auth::Token && !m_token.isEmpty())
-        services.secrets().write(env.tokenKey(), m_token, ignore);
-    else
-        services.secrets().remove(env.tokenKey(), ignore);
-
-    if (makeCurrent) services.environments().setCurrent(env.id);
     emit loaded();
     emit saved(env.id);
-    m_session->environmentsEdited(env.id);
+
+    // Keep only the secret the chosen auth uses. The session reads them back, so
+    // it switches once the keychain has them (a write finishes later; reading
+    // first connected without the password just entered).
+    auto pending = std::make_shared<int>(2);
+    QPointer<Session> session(m_session);
+    const QString id = env.id;
+    auto done = [pending, session, id, makeCurrent](bool) {
+        if (--*pending > 0 || !session) return;
+        if (makeCurrent) session->services().environments().setCurrent(id);
+        session->environmentsEdited(id);
+    };
+    if (env.auth == Environment::Auth::Basic && !m_password.isEmpty())
+        services.secrets().write(env.passwordKey(), m_password, done);
+    else
+        services.secrets().remove(env.passwordKey(), done);
+    if (env.auth == Environment::Auth::Token && !m_token.isEmpty())
+        services.secrets().write(env.tokenKey(), m_token, done);
+    else
+        services.secrets().remove(env.tokenKey(), done);
     return true;
 }
 

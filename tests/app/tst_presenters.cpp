@@ -27,6 +27,13 @@ class TestPresenters : public QObject {
 private slots:
     // Feedback (broker-api): messages starting with a line break and deep
     // indentation showed as an empty row with "+5 lines".
+    // Feedback: a multi-line search spread over the recent searches.
+    void oneLineQueryJoinsLines()
+    {
+        QCOMPARE(oneLineQuery("level:error"), QString("level:error"));
+        QCOMPARE(oneLineQuery("msg:\"failed:\n{\n  \\\"code\\\" : 1\r\n}\"\n"),
+                 QString("msg:\"failed: ↵ { ↵ \\\"code\\\" : 1 ↵ }\""));
+    }
     void listMessageDropsLeadingBlanksAndIndentation()
     {
         QCOMPARE(listMessage("plain message"), QString("plain message"));
@@ -113,6 +120,15 @@ private slots:
         const auto rows = patternRows({ pattern("took * ms for *", Level::Info, 1, 0) });
         QCOMPARE(rows[0]["templateParts"].toStringList(), QStringList({ "took ", " ms for ", "" }));
     }
+
+    void multiLineTemplatesShowTheirFirstLine()
+    {
+        const auto rows = patternRows({ pattern("ERROR: * duplicate\nDETAIL: Key (*)\n  at *", Level::Error, 2, 0) });
+        QCOMPARE(rows[0]["firstLineParts"].toStringList(), QStringList({ "ERROR: ", " duplicate" }));
+        QCOMPARE(rows[0]["moreLines"].toInt(), 2);
+        QCOMPARE(patternRows({ pattern("one line *", Level::Warn, 2, 0) })[0]["moreLines"].toInt(), 0);
+    }
+
 
     void histogramAxisSpreadsLabels()
     {

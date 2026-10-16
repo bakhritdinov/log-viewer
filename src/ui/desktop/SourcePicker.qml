@@ -413,14 +413,18 @@ Popup {
                 Row { spacing: 4; Kbd { text: "↑" } Kbd { text: "↓" } HintText { text: qsTr("choose") } }
                 Row { spacing: 4; Kbd { text: "→" } HintText { text: qsTr("apps") } }
                 Row { spacing: 4; Kbd { text: "Enter" } HintText { text: qsTr("open") } }
-                Item { Layout.fillWidth: true }
+                // The rest of the line, right-aligned and cut with "…": it ran past the
+                // popup's edge with long label names or in a narrow window.
                 HintText {
-                    visible: root.state === "loading"
-                    text: qsTr("Finding namespaces and apps in %1…").arg(Session.environmentName)
-                }
-                HintText {
-                    visible: Session.namespaceLabel !== "" && root.state !== "loading"
-                    text: qsTr("Labels: %1 / %2 (found automatically)").arg(Session.namespaceLabel).arg(Session.appLabel)
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 0
+                    horizontalAlignment: Text.AlignRight
+                    elide: Text.ElideRight
+                    text: root.state === "loading"
+                          ? qsTr("Finding namespaces and apps in %1…").arg(Session.environmentName)
+                          : Session.namespaceLabel !== ""
+                            ? qsTr("Labels: %1 / %2 (found automatically)").arg(Session.namespaceLabel).arg(Session.appLabel)
+                            : ""
                 }
             }
         }

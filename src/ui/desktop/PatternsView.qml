@@ -162,6 +162,8 @@ ColumnLayout {
                 id: pattern
                 required property int index
                 required property var templateParts
+                required property var firstLineParts
+                required property int moreLines
                 required property string level
                 required property int count
                 required property real share
@@ -223,21 +225,37 @@ ColumnLayout {
                             color: Theme.textMuted
                             rotation: pattern.open ? 90 : 0
                         }
-                        // Literal parts and "*" variables alternate (variables at odd indexes).
+                        // The first line only (a multi-line template made its row grow over the
+                        // next ones); literal parts and "*" variables alternate (variables at odd indexes).
                         Row {
                             Layout.fillWidth: true
                             clip: true
                             Repeater {
-                                model: pattern.templateParts.length * 2 - 1
+                                model: pattern.firstLineParts.length * 2 - 1
                                 delegate: Text {
                                     id: part
                                     required property int index
                                     readonly property bool variable: part.index % 2 === 1
-                                    text: part.variable ? "*" : pattern.templateParts[part.index / 2]
+                                    text: part.variable ? "*" : pattern.firstLineParts[part.index / 2]
                                     font.family: Theme.mono
                                     font.pixelSize: Theme.fontSm
                                     color: part.variable ? Theme.variable : Theme.text
                                 }
+                            }
+                        }
+                        Rectangle {
+                            visible: pattern.moreLines > 0
+                            implicitWidth: moreLinesText.implicitWidth + 12
+                            implicitHeight: 18
+                            radius: 9
+                            color: Theme.subtle
+                            Text {
+                                id: moreLinesText
+                                anchors.centerIn: parent
+                                text: qsTr("↵ +%n line(s)", "", pattern.moreLines)
+                                font.family: Theme.mono
+                                font.pixelSize: Theme.fontXs
+                                color: Theme.textMuted
                             }
                         }
                         Sparkline {

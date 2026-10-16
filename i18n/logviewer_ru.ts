@@ -1,4 +1,5 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
 <TS version="2.1" language="ru" sourcelanguage="en">
 <context>
     <name>AboutPage</name>
@@ -1292,7 +1293,7 @@
         <translation>API-токен</translation>
     </message>
     <message>
-        <source>In the browser the password is kept in the site's storage on this phone.</source>
+        <source>In the browser the password is kept in the site&apos;s storage on this phone.</source>
         <translation>В браузере пароль хранится в памяти сайта на этом телефоне.</translation>
     </message>
     <message>
@@ -1400,7 +1401,7 @@
         <translation>Продолжить редактирование</translation>
     </message>
     <message>
-        <source>Don't save</source>
+        <source>Don&apos;t save</source>
         <translation>Не сохранять</translation>
     </message>
 </context>
@@ -1589,7 +1590,7 @@
         <translation>Изменить запрос</translation>
     </message>
     <message>
-        <source>Grafana %1 does not allow requests from the app's address. This is set up on the server, not on your side.</source>
+        <source>Grafana %1 does not allow requests from the app&apos;s address. This is set up on the server, not on your side.</source>
         <translation>Grafana %1 не разрешает запросы с адреса приложения. Это настраивается на сервере, не у вас.</translation>
     </message>
     <message>
@@ -2832,6 +2833,14 @@
     <message>
         <source>%1 entries: %2</source>
         <translation>Записей %1: %2</translation>
+    </message>
+    <message numerus="yes">
+        <source>↵ +%n line(s)</source>
+        <translation>
+            <numerusform>↵ +%n строка</numerusform>
+            <numerusform>↵ +%n строки</numerusform>
+            <numerusform>↵ +%n строк</numerusform>
+        </translation>
     </message>
     <message>
         <source>Variable values</source>
@@ -4308,7 +4317,7 @@ a colleague sees exactly the same</source>
         <translation>Без сохранения они будут потеряны.</translation>
     </message>
     <message>
-        <source>Don't save</source>
+        <source>Don&apos;t save</source>
         <translation>Не сохранять</translation>
     </message>
     <message>

@@ -54,6 +54,7 @@ class Session : public QObject {
     Q_PROPERTY(lv::MapListModel* suggestions READ suggestions CONSTANT)
     Q_PROPERTY(QStringList searchTerms READ searchTerms NOTIFY searchTextChanged)
     Q_PROPERTY(QStringList history READ history NOTIFY historyChanged)
+    Q_PROPERTY(QStringList historyLabels READ historyLabels NOTIFY historyChanged)   // the same on one line
     Q_PROPERTY(QString appliedSearchText READ appliedSearchText NOTIFY appliedSearchChanged)   // the text of the last search run
     Q_PROPERTY(QString searchError READ searchError NOTIFY searchErrorChanged)   // why search() refused the text
     // Time range
@@ -247,6 +248,7 @@ public:
     QString searchError() const { return m_searchError; }
     QStringList searchTerms() const;
     QStringList history() const;
+    QStringList historyLabels() const;
     QString timeRangeKey() const;
     QString timeRangeLabel() const;
     QString timeRangeShortLabel() const;

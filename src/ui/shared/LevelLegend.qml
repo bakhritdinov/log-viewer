@@ -16,6 +16,8 @@ GridLayout {
 
     // WARN and above, as in 2.8; a level without entries is not shown.
     readonly property var levels: ["ERROR", "WARN"]
+    // Shown in sentence case: capitals read as shouting next to the chart.
+    readonly property var labels: ({ ERROR: "Error", WARN: "Warn" })
 
     columns: 2
     columnSpacing: touch ? 8 : 4
@@ -31,7 +33,7 @@ GridLayout {
 
             Layout.fillWidth: root.touch
             visible: count > 0 || active
-            implicitHeight: root.touch ? Theme.touchHeight : root.compact ? 22 : 24
+            implicitHeight: root.touch ? Theme.touchHeight : root.compact ? Theme.chipHeight : 24
             implicitWidth: row.implicitWidth + (root.compact ? 12 : 16)
             Accessible.role: Accessible.CheckBox
             Accessible.checked: active
@@ -57,9 +59,9 @@ GridLayout {
                     Layout.fillWidth: root.touch
                     // Name and count share a baseline although their fonts differ.
                     Layout.alignment: Qt.AlignBaseline
-                    text: chip.modelData
+                    text: root.labels[chip.modelData]
                     font.family: Theme.sans
-                    font.pixelSize: root.compact ? Theme.fontXs : Theme.fontSm
+                    font.pixelSize: Theme.fontSm
                     font.weight: Font.Medium
                     color: chip.active ? Theme.textStrong : Theme.text
                 }
@@ -67,7 +69,7 @@ GridLayout {
                     Layout.alignment: Qt.AlignBaseline
                     text: chip.count.toLocaleString(Qt.locale(), "f", 0)
                     font.family: Theme.mono
-                    font.pixelSize: root.compact ? Theme.fontXs : Theme.fontSm
+                    font.pixelSize: Theme.fontSm
                     color: Theme.textMuted
                 }
             }

@@ -22,9 +22,13 @@
     }
     html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bar); color: var(--text);
                  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    /* Qt draws into #screen, inside the safe areas (notch, gesture bar). */
+    /* Qt draws into #screen, inside the safe areas (notch, gesture bar). It stays
+       laid out (hidden, not display:none) under the splash, so Qt measures its real
+       size at start — a display:none container measured short on iPhone and left a
+       band under the tab bar. */
     #screen { position: fixed; top: env(safe-area-inset-top); right: env(safe-area-inset-right);
-              bottom: env(safe-area-inset-bottom); left: env(safe-area-inset-left); display: none; }
+              bottom: env(safe-area-inset-bottom); left: env(safe-area-inset-left); visibility: hidden; }
+    #splash { z-index: 1; }
     #splash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
               gap: 14px; background: var(--bg); }
     #splash img { width: 96px; height: 96px; border-radius: 22px; }
@@ -222,9 +226,9 @@
           qt: {
             entryFunction: window.LogViewer_entry,
             containerElements: [$("screen")],
-            onLoaded: () => { $("splash").style.display = "none"; $("screen").style.display = "block"; setOffline(); },
+            onLoaded: () => { $("splash").style.display = "none"; $("screen").style.visibility = "visible"; setOffline(); },
             onExit: exit => {
-              $("screen").style.display = "none";
+              $("screen").style.visibility = "hidden";
               $("splash").style.display = "flex";
               $("status").textContent = text.failed + (exit.text ? ": " + exit.text : "");
             },
@@ -233,7 +237,15 @@
       } catch (e) {
         console.error(e);
         $("status").textContent = text.failed + ": " + e;
+        return;
       }
+      // Keep Qt's screen the size of #screen: after the splash, on rotation, when
+      // the safe areas or the visual viewport change (iOS reports them late).
+      const fit = () => requestAnimationFrame(() => app && app.qtResizeAllScreens && app.qtResizeAllScreens());
+      fit();
+      addEventListener("orientationchange", fit);
+      addEventListener("pageshow", fit);
+      if (window.visualViewport) visualViewport.addEventListener("resize", fit);
     }
   </script>
   <script src="LogViewer.js"></script>

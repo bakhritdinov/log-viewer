@@ -44,6 +44,7 @@ Rectangle {
                 onTextChanged: if (text !== Session.searchText) Session.searchText = text
                 suggestions: Session.suggestions
                 history: Session.history
+                historyLabels: Session.historyLabels
                 invalid: Session.searchError !== ""
                 onSubmitted: Session.search()
                 onSuggestionActivated: (index, exclude) => Session.applySuggestion(index, exclude)

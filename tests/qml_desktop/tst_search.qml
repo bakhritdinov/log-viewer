@@ -551,4 +551,113 @@ TestCase {
         harness.completeLast(5)
         tryCompare(Session, "loading", false)
     }
+    // Feedback: a multi-line pattern (an SQL error with DETAIL, a stack trace) keeps
+    // to one line with "↵ +N lines"; rows no longer run into each other.
+    function test_33_multiLinePatternsKeepToOneLine() {
+        harness.scriptRealisticLogs(400)
+        Session.search()
+        tryCompare(Session, "loading", false)
+        Session.patternsEnabled = true
+        tryCompare(Session, "analyzing", false)
+        let multi = -1
+        for (let i = 0; i < Session.patterns.count; ++i) if (Session.patterns.get(i).moreLines > 0) multi = i
+        verify(multi >= 0, "the realistic data has a multi-line pattern")
+        waitForRendering(window.contentItem)
+        const rows = H.findAll(window.contentItem, it => it.hasOwnProperty("templateParts") && it.hasOwnProperty("moreLines") && H.isShown(it))
+        verify(rows.length > 1)
+        const top = it => it.mapToItem(root(), 0, 0).y
+        rows.sort((a, b) => top(a) - top(b))
+        for (let i = 1; i < rows.length; ++i)
+            verify(top(rows[i]) >= top(rows[i - 1]) + rows[i - 1].height - 0.5, "rows overlap")
+        const header = rows.find(r => r.moreLines > 0)
+        verify(H.find(header, it => String(it.text).indexOf("↵ +") === 0 && H.isShown(it)))
+        Session.patternsEnabled = false
+    }
+    // Feedback: a multi-line field value keeps to one line in the fields list
+    // (it spilled over the next rows).
+    // Feedback: a multi-line field (an error body) broke the fields list and its
+    // chip; such free text is not offered as a filter.
+    function test_34_freeTextFieldsLeftOutOfTheList() {
+        harness.scriptRealisticLogs(300)
+        Session.search()
+        tryCompare(Session, "loading", false)
+        tryCompare(Session, "analyzing", false)
+        verify(H.find(window.contentItem, it => it.text === "level" && H.isShown(it)))
+        verify(!H.find(window.contentItem, it => it.text === "error_detail" && H.isShown(it)))
+    }
+
+    // Feedback: the refresh key shows in the status bar and in the button's tooltip.
+    // On macOS Qt's native text for F5 is a private-use glyph no font draws (an empty
+    // key cap); offscreen gives "F5" either way, so the guard is on every key cap.
+    function test_35_refreshKeyText() {
+        for (const cap of H.findAll(window.contentItem, it => it.border !== undefined && it.hasOwnProperty("text") && typeof it.text === "string" && H.isShown(it)))
+            verify(!/[\uF700-\uF8FF]/.test(cap.text), "private-use glyph in a key cap")
+        const caps = H.findAll(window.contentItem, it => it.border !== undefined && it.hasOwnProperty("text") && it.text === "F5" && H.isShown(it))
+        verify(caps.length >= 1, "F5 in the status bar")
+        const refresh = H.find(window.contentItem, it => it.text === "Обновить" && it.hasOwnProperty("variant") && H.isShown(it))
+        compare(refresh.shortcut, "F5")
+    }
+
+    // Feedback: the source picker's footer stays inside the popup.
+    function test_36_sourcePickerFooterInside() {
+        keySequence("Ctrl+K")
+        const field = () => byName(root(), "Найти namespace или приложение")
+        tryVerify(() => field() !== null)
+        waitForRendering(root())
+        let popup = field()
+        while (popup.parent && String(popup.parent).indexOf("QQuickOverlay") !== 0) popup = popup.parent
+        const box = popup.mapToItem(root(), 0, 0)
+        for (const it of H.findAll(popup, it => H.isShown(it) && it.width > 0 && it.text !== undefined && it.text !== "")) {
+            const p = it.mapToItem(root(), 0, 0)
+            verify(p.x + it.width <= box.x + popup.width + 0.5, `"${it.text}" ends at ${p.x + it.width} > ${box.x + popup.width}`)
+        }
+        keyClick(Qt.Key_Escape)
+    }
+    // Feedback: the level buttons and the step switch in the chart header are one
+    // size and one look (the switch had a dark field and stood out).
+    function test_37_chartHeaderControlsMatch() {
+        const chip = H.find(window.contentItem, it => it.hasOwnProperty("count") && it.hasOwnProperty("active") && H.isShown(it))
+        const step = byName(window.contentItem, "Шаг гистограммы")
+        verify(chip && step)
+        compare(step.height, chip.height)
+        compare(step.height, Theme.chipHeight)
+        compare(Math.round(step.mapToItem(root(), 0, 0).y + step.height / 2), Math.round(chip.mapToItem(root(), 0, 0).y + chip.height / 2))
+        compare(step.background.color.a, 0)
+        compare(step.background.radius, chip.background.radius)
+        // Feedback: the header got too small; names in sentence case at the step's size.
+        const name = H.find(chip.contentItem, it => it.text === "Error" || it.text === "Warn")
+        verify(name)
+        verify(chip.height >= 26)
+        const option = H.find(step, it => it.text === "Авто")
+        compare(name.font.pixelSize, option.font.pixelSize)
+        compare(option.font.pixelSize, Theme.fontSm)
+    }
+    // Feedback: the top bar's buttons show their labels (period, refresh).
+    function test_38_buttonsShowTheirLabels() {
+        for (const text of [Session.timeRangeLabel, "Обновить"]) {
+            const b = H.find(window.contentItem, it => it.text === text && it.hasOwnProperty("variant") && H.isShown(it))
+            verify(b, text)
+            const label = H.find(b.contentItem, it => it.text === text && it !== b)
+            compare(label.width, label.implicitWidth, text)
+        }
+    }
+    // Feedback: a multi-line search spread over the recent searches and their neighbours.
+    function test_39_multiLineSearchOnOneLineInHistory() {
+        harness.scriptLogs(3)
+        Session.searchText = 'msg:"failed:\n{\n  code : 1\n}"'
+        Session.search()
+        tryCompare(Session, "loading", false)
+        mouseClick(byName(window.contentItem, "Недавние поиски"))
+        let label = null
+        // A label (a row of the list or the chip), not the search field holding the query.
+        tryVerify(() => (label = H.find(root(), it => it.hasOwnProperty("lineCount") && String(it.text).indexOf('msg:"failed:') === 0
+                                                      && H.isShown(it))) !== null)
+        compare(label.text, 'msg:"failed: ↵ { ↵ code : 1 ↵ }"')
+        compare(label.lineCount, 1)
+        keyClick(Qt.Key_Escape)
+        // The condition chip keeps to one line too (it spread over the neighbours).
+        const chip = H.find(window.contentItem, it => it.hasOwnProperty("pill") && String(it.text).indexOf('msg:"failed:') === 0 && H.isShown(it))
+        compare(chip.text, 'msg:"failed: ↵ { ↵ code : 1 ↵ }"')
+        Session.searchText = ""
+    }
 }

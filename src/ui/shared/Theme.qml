@@ -36,6 +36,8 @@ QtObject {
     // Control heights: pointer (desktop) and touch (≥ 44 px targets).
     readonly property int controlHeight: 32
     readonly property int touchHeight: 44
+    // Small controls side by side in a header row (level buttons, the chart's step).
+    readonly property int chipHeight: 26
     readonly property int inputHeight: 36
 
     // ── Surfaces ──

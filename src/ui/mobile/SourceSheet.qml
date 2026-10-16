@@ -13,6 +13,7 @@ BottomSheet {
     id: root
 
     signal settingsRequested()
+    signal addEnvironmentRequested()
 
     property string query
     property string openNamespace                 // the expanded one in the full list
@@ -87,7 +88,7 @@ BottomSheet {
                     implicitHeight: 40
                     implicitWidth: addRow.implicitWidth + 24
                     Accessible.name: qsTr("Add an environment")
-                    onClicked: { root.close(); root.settingsRequested() }
+                    onClicked: { root.close(); root.addEnvironmentRequested() }
                     background: Rectangle {
                         radius: 20
                         color: addEnv.pressed ? Theme.subtle : "transparent"

@@ -13,7 +13,8 @@ Control {
     signal removeRequested()
 
     implicitHeight: touch ? 32 : 24
-    implicitWidth: label.implicitWidth + removeButton.implicitWidth + leftPadding + 2
+    // The label as laid out: a long one is cut at 320 and the chip ends with it.
+    implicitWidth: label.width + removeButton.implicitWidth + leftPadding + 2
     leftPadding: touch ? 10 : 9
     font.family: Theme.mono
     font.pixelSize: Theme.fontSm

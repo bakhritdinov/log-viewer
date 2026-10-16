@@ -11,6 +11,7 @@ FocusScope {
     property alias text: input.text
     property var suggestions            // model: kind, field, value, count, completedText, exclude
     property var history: []            // recent search texts
+    property var historyLabels: []      // the same on one line, as shown
     property bool touch: false
     property bool invalid: false        // the text was refused (red frame)
     property string placeholder: qsTr("Search: word, key:value, key:~regex, -key:value")
@@ -205,6 +206,7 @@ FocusScope {
                 model: list.count === 0 ? root.history.slice(0, 8) : []
                 delegate: ItemDelegate {
                     id: recent
+                    required property int index
                     // Basic's 12 px vertical padding pushes the content below the row's centre.
                     topPadding: 0
                     bottomPadding: 0
@@ -222,7 +224,8 @@ FocusScope {
                         Icon { name: "history"; size: 14; color: Theme.textMuted }
                         Text {
                             Layout.fillWidth: true
-                            text: recent.modelData
+                            text: root.historyLabels[recent.index] ?? recent.modelData
+                            maximumLineCount: 1
                             font.family: Theme.mono
                             font.pixelSize: Theme.fontMd
                             color: Theme.text

@@ -376,6 +376,7 @@ Popup {
                         delegate: AbstractButton {
                             id: recent
                             required property string modelData
+                            required property int index
                             Layout.fillWidth: true
                             implicitHeight: 44
                             Accessible.name: modelData
@@ -386,7 +387,8 @@ Popup {
                                 Icon { Layout.leftMargin: 4; name: "history"; size: 16; color: Theme.textMuted }
                                 Text {
                                     Layout.fillWidth: true
-                                    text: recent.modelData
+                                    text: Session.historyLabels[recent.index] ?? recent.modelData
+                                    maximumLineCount: 1
                                     elide: Text.ElideRight
                                     font.family: Theme.mono
                                     font.pixelSize: Theme.fontMd

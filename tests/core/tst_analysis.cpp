@@ -72,6 +72,20 @@ private slots:
         QVERIFY(!f.contains("empty"));
         QVERIFY(!f.contains("message"));
     }
+    // Feedback: fields holding free text (multi-line, very long) are not offered as filters.
+    void facetsLeaveOutFreeText()
+    {
+        const LogEntries list{
+            entry(0, "a", Level::Error, { { "service", "api" }, { "error_detail", "short" }, { "body", "ok" } }),
+            entry(1, "b", Level::Error, { { "service", "api" }, { "error_detail", "line one\nline two" },
+                                          { "body", QString(201, QLatin1Char('x')) } }),
+            entry(2, "c", Level::Error, { { "service", "gw" }, { "error_detail", "short" }, { "body", "ok" } }),
+        };
+        const FieldValueCounts f = computeFacets(list);
+        QCOMPARE(f.value("service").value("api"), 2);
+        QVERIFY(!f.contains("error_detail"));
+        QVERIFY(!f.contains("body"));
+    }
 
     void templateMessage_data()
     {

@@ -192,15 +192,22 @@ Item {
                         color: Theme.dangerText
                     }
                     // Period first, then the conditions; scrolls sideways, never wraps.
-                    // What does not fit: a fade on the right and "+N".
+                    // What does not fit: a fade on the right and "+N". Scrolls from
+                    // screen edge to screen edge: cut at the column's margin, the
+                    // chips lost their rounded ends.
                     Item {
                         id: chipsBox
+                        readonly property int edge: 12      // the column's side margin
                         Layout.fillWidth: true
+                        Layout.leftMargin: -edge
+                        Layout.rightMargin: -edge
                         implicitHeight: 32
                         Flickable {
                             id: chipsFlick
                             anchors.fill: parent
                             implicitHeight: 32
+                            leftMargin: chipsBox.edge
+                            rightMargin: chipsBox.edge
                             contentWidth: chipsRow.implicitWidth
                             flickableDirection: Flickable.HorizontalFlick
                             boundsBehavior: Flickable.StopAtBounds
@@ -262,7 +269,7 @@ Item {
                             for (let i = 0; i < chipBar.children.length; ++i) {
                                 const c = chipBar.children[i]
                                 if (!c.hasOwnProperty("exclude")) continue
-                                if (c.mapToItem(chipsFlick, 0, 0).x + c.width > chipsFlick.width + 1) ++n
+                                if (c.mapToItem(chipsFlick, 0, 0).x + c.width > chipsFlick.width - chipsBox.edge + 1) ++n
                             }
                             return n
                         }
@@ -280,6 +287,7 @@ Item {
                             Text {
                                 id: moreLabel
                                 anchors.right: parent.right
+                                anchors.rightMargin: chipsBox.edge
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: "+" + chipsBox.hiddenChips
                                 font.family: Theme.sans

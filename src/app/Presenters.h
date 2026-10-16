@@ -16,7 +16,7 @@
 namespace lv::presenters {
 
 // ── Filter chips: one per search term ──
-// roles: text, kind ("word"|"filter"), field, value, exclude, regex
+// roles: text (on one line, see oneLineQuery), kind ("word"|"filter"), field, value, exclude, regex
 QByteArrayList chipRoles();
 QList<QVariantMap> chipRows(const QString& searchText);
 
@@ -43,7 +43,7 @@ QList<QVariantMap> facetRows(const FieldValueCounts& facets, const QString& filt
 // ── Message patterns ──
 // roles: templateText, level, count, share, firstSeen, lastSeen, examples, trend, trendMax
 // roles: templateText, templateParts (literal/variable alternating, variables at odd
-//        indexes), level, count, share, firstSeen, lastSeen, examples, trend, trendMax
+//        indexes), firstLineParts (the same for the first line only), moreLines, level, count, share, firstSeen, lastSeen, examples, trend, trendMax
 QByteArrayList patternRoles();
 QList<QVariantMap> patternRows(const QList<MessagePattern>& patterns);
 // Orders patterns: "count" (most frequent first), "first" (earliest first
@@ -101,6 +101,9 @@ QString jsonStyled(const QString& json, const JsonColors& colors);
 // character (some services log a line break and deep indentation first).
 // Details and copying keep the original.
 QString listMessage(const QString& message);
+// A search on one line (recent searches): every line break with the spaces
+// around it becomes " ↵ "; running it uses the original text.
+QString oneLineQuery(const QString& text);
 
 // ── Highlighting ──
 // `text` as Qt StyledText with every case-insensitive occurrence of `terms`

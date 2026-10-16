@@ -5,8 +5,11 @@ import LogViewer.Ui
 
 // A screen behind a row of Settings: "‹ Settings" and the title on top, the
 // content scrolling below, an optional action pinned to the bottom.
-Item {
+// Opaque: during a push or pop the screen slides over the previous one, which
+// showed through and seemed to vanish late.
+Rectangle {
     id: root
+    color: Theme.bg
 
     property string title
     property string backLabel: qsTr("Settings")

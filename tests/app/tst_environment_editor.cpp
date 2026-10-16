@@ -1,5 +1,6 @@
 #include <QSignalSpy>
 #include <QTest>
+#include <QTimer>
 
 #include "app/AppServices.h"
 #include "app/EnvironmentEditor.h"
@@ -17,6 +18,14 @@ struct Harness {
     AppServices services{ http, kv, secrets, makeInlineParseExecutor() };
     Session session{ services };
     EnvironmentEditor editor{ session };
+};
+// Like the OS keychain: a write finishes later, a read may be answered first.
+class SlowWriteSecretStore : public MemorySecretStore {
+public:
+    void write(const QString& key, const QString& value, DoneCallback done) override
+    {
+        QTimer::singleShot(20, [this, key, value, done] { MemorySecretStore::write(key, value, done); });
+    }
 };
 } // namespace
 
@@ -91,6 +100,27 @@ private slots:
         QVERIFY(envChanged.count() >= 1);
         QCOMPARE(h.http.requests.size(), 1);                      // rediscovery started
         QVERIFY(!h.editor.isNew());
+    }
+
+    // Feedback: after re-entering the password nothing loaded — the session read
+    // the keychain before the new password was written.
+    void sessionUsesThePasswordJustSaved()
+    {
+        FakeHttpClient http;
+        MemoryStore kv;
+        SlowWriteSecretStore secrets;
+        AppServices services{ http, kv, secrets, makeInlineParseExecutor() };
+        Session session{ services };
+        EnvironmentEditor editor{ session };
+        editor.load("dev");
+        editor.setProperty("url", "https://grafana.dev");
+        editor.setProperty("datasourceUid", "uid");
+        editor.setProperty("user", "alice");
+        editor.setProperty("password", "pw");
+        http.script(std::nullopt);
+        QVERIFY(editor.save());
+        QTRY_COMPARE(http.requests.size(), 1);
+        QCOMPARE(header(http.requests.first(), "Authorization"), "Basic " + QByteArray("alice:pw").toBase64());
     }
 
     void loadReadsSecretsAndRemoves()

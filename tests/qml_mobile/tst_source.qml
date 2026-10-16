@@ -45,6 +45,26 @@ TestCase {
         }
     }
 
+    // Feedback: "Add" in the source sheet opened the settings, not a new environment.
+    function test_00_addEnvironmentOpensTheForm() {
+        sourceSheet().open()
+        tryCompare(sourceSheet(), "opened", true)
+        tap(byName("Добавить окружение"))
+        tryCompare(sourceSheet(), "opened", false)
+        let form = null
+        tryVerify(() => (form = H.find(root(), it => it.hasOwnProperty("initialName") && H.isShown(it))) !== null)
+        compare(form.environmentId, "")
+        window.section = 0
+        waitForRendering(window.contentItem)
+    }
+
+    // Feedback: a straight line ran over the sheets' rounded top corners.
+    function test_00b_sheetEdgeFollowsCorners() {
+        const bg = sourceSheet().background
+        compare(bg.border.width, 1)
+        compare(bg.children.length, 0)
+    }
+
     function test_01_barOpensTheSourceSheet() {
         tap(byName("Источник: prod-core / billing-api"))
         tryCompare(sourceSheet(), "opened", true)

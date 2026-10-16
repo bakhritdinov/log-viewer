@@ -2,6 +2,7 @@
 
 #include <QHash>
 #include <QRegularExpression>
+#include <QSet>
 #include <algorithm>
 
 #include "core/query/Query.h"
@@ -66,13 +67,23 @@ qint64 autoBucketMs(qint64 rangeSeconds)
 
 FieldValueCounts computeFacets(const LogEntries& entries)
 {
+    // Free text (stack traces, exception bodies, request dumps) is read in the
+    // entry, not filtered by: such a field is left out whole.
+    constexpr qsizetype filterableLength = 200;
     FieldValueCounts out;
+    QSet<QString> freeText;
     for (const LogEntry& e : entries) {
         for (auto it = e.fields.cbegin(); it != e.fields.cend(); ++it) {
             const QString& k = it.key();
             if (k == u"Line" || k == u"message" || k == u"Time" || k == u"ts") continue;
+            if (freeText.contains(k)) continue;
             const QString v = formatFieldValue(it.value());
             if (v.isEmpty()) continue;
+            if (v.size() > filterableLength || v.contains(QLatin1Char('\n'))) {
+                freeText.insert(k);
+                out.remove(k);
+                continue;
+            }
             ++out[k][v];
         }
     }

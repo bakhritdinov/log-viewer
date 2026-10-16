@@ -47,7 +47,7 @@ ApplicationWindow {
 
     readonly property var shortcutList: [
         { header: qsTr("General") },
-        { keys: [refreshShortcut.nativeText, refreshShortcutAlt.nativeText].filter((k, i, all) => k !== "" && all.indexOf(k) === i), text: qsTr("Refresh") },
+        { keys: [refreshKeyF5.portableText, refreshShortcutAlt.nativeText], text: qsTr("Refresh") },
         { keys: [sourceShortcut.nativeText], text: qsTr("Choose the source") },
         { keys: [timeShortcut.nativeText], text: qsTr("Choose the period") },
         { keys: [shareShortcut.nativeText], text: qsTr("Share a link") },
@@ -103,6 +103,10 @@ ApplicationWindow {
     Shortcut { id: refreshShortcut; sequences: ["F5", "Ctrl+R"]; enabled: window.mainMode; onActivated: Session.search() }
     // Only for its text in the shortcut list (never enabled, so never ambiguous).
     Shortcut { id: refreshShortcutAlt; sequence: "Ctrl+R"; enabled: false }
+    // F5 as text for hints. Its portable text, not the native one: on macOS Qt
+    // writes function keys as Apple's private-use glyphs (U+F704…), which no font
+    // draws — the key cap came out empty.
+    Shortcut { id: refreshKeyF5; sequence: "F5"; enabled: false }
     Shortcut { id: findShortcut; sequence: "Ctrl+F"; enabled: !window.focusMode; onActivated: searchBar.focusSearch() }
     Shortcut { id: sourceShortcut; sequence: "Ctrl+K"; onActivated: topBar.openSourcePicker() }
     Shortcut { id: timeShortcut; sequence: "Ctrl+T"; enabled: window.mainMode; onActivated: topBar.openTimePicker() }
@@ -175,7 +179,7 @@ ApplicationWindow {
             liveMode: window.liveMode
             findShortcut: findShortcut.nativeText
             saveShortcut: saveShortcut.nativeText
-            refreshShortcut: refreshShortcut.nativeText
+            refreshShortcut: refreshKeyF5.portableText
             // The placeholder already explains the syntax; live mode says what the filter does.
             hint: window.liveMode ? qsTr("The filter applies to the stream on the fly") : ""
         }
@@ -247,7 +251,7 @@ ApplicationWindow {
         StatusBar {
             Layout.fillWidth: true
             hints: [
-                { keys: [refreshShortcut.nativeText], text: qsTr("refresh") },
+                { keys: [refreshKeyF5.portableText], text: qsTr("refresh") },
                 { keys: [findShortcut.nativeText], text: qsTr("search") },
                 { keys: [sourceShortcut.nativeText], text: qsTr("source") },
                 { keys: ["[", "]"], text: qsTr("pages") },

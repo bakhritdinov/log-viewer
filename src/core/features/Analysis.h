@@ -36,7 +36,8 @@ qint64 autoBucketMs(qint64 rangeSeconds);
 // ── Facets ──────────────────────────────────────────────────────────────────
 
 // field → value → occurrences over the entries (values via formatFieldValue;
-// empty values skipped).
+// empty values skipped). A field with free text (a multi-line value or one over
+// 200 characters) is left out: it is read in the entry, not filtered by.
 FieldValueCounts computeFacets(const LogEntries& entries);
 
 // ── Patterns ────────────────────────────────────────────────────────────────
