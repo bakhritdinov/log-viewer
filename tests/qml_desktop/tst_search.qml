@@ -477,4 +477,21 @@ TestCase {
         }
         keyClick(Qt.Key_Escape)
     }
+    // Feedback: while loading, "Stop" (spinner, text, Esc) fits its button —
+    // nothing spills behind the auto-refresh button.
+    function test_32_stopButtonFits() {
+        Session.search()                                  // no scripted answer: stays loading
+        tryCompare(Session, "loading", true)
+        const stop = H.find(window.contentItem, it => it.Accessible.name === "Остановить загрузку" && H.isShown(it))
+        verify(stop)
+        waitForRendering(window.contentItem)
+        for (const it of H.findAll(stop.contentItem, it => H.isShown(it) && it.width > 0)) {
+            const p = it.mapToItem(stop, 0, 0)
+            verify(p.x >= 0 && p.x + it.width <= stop.width + 0.5, `${it} ends at ${p.x + it.width} > ${stop.width}`)
+        }
+        const auto = H.find(window.contentItem, it => String(it.Accessible.name).indexOf("Автообновление") === 0 && H.isShown(it))
+        verify(stop.mapToItem(root(), 0, 0).x + stop.width <= auto.mapToItem(root(), 0, 0).x)
+        harness.completeLast(5)
+        tryCompare(Session, "loading", false)
+    }
 }

@@ -11,6 +11,8 @@ log-viewer.desktop
 CMakeFiles/
 CMakeCache.txt
 *.cmake
+# …but the build's own scripts are sources.
+!src/**/*.cmake
 Makefile
 
 # IDEs

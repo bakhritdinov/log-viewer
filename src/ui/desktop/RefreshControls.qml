@@ -39,7 +39,10 @@ Row {
         visible: root.loading
         Accessible.name: qsTr("Stop loading")
         onClicked: Session.stopLoading()
+        // Sized by its own row: the spinner, "Stop" and the Esc key cap.
+        implicitWidth: stopRow.implicitWidth + leftPadding + rightPadding
         contentItem: Row {
+            id: stopRow
             spacing: 6
             Icon {
                 anchors.verticalCenter: parent.verticalCenter
