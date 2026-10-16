@@ -103,4 +103,21 @@ TestCase {
         tap(H.findAll(window.contentItem, it => it.Accessible && it.Accessible.name === "Настройки" && it.hasOwnProperty("checkable") && H.isShown(it)).pop())
         tryVerify(() => stackDepth() === 1)
     }
+
+    // A device with files (the browser): export and import in "Version and data".
+    function test_07_exportAndImport() {
+        Session.saveCurrentQuery("Q1")
+        harness.plugDevice()
+        tap(byName("Версия и данные"))
+        tryVerify(() => stackDepth() === 2)
+        tap(H.find(root(), it => it.text === "Экспорт" && it.hasOwnProperty("variant") && H.isShown(it)))
+        verify(harness.lastSaved.startsWith("logviewer-queries.json|"))
+        const json = harness.lastSaved.slice(harness.lastSaved.indexOf("|") + 1)
+        Session.removeSavedQuery(Session.savedQueries.get(0).id)
+        tap(H.find(root(), it => it.text === "Импорт из файла" && it.hasOwnProperty("variant") && H.isShown(it)))
+        compare(harness.fileRequests, 1)
+        harness.deliverFile(json)
+        tryCompare(Session.savedQueries, "count", 1)
+        tryVerify(() => shownText("Добавлен 1 запрос"))
+    }
 }

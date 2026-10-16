@@ -23,6 +23,7 @@ namespace lv {
 
 class FocusSession;
 class LiveSession;
+class DeviceBridge;
 
 // The state of the log search shared by every design: environment, source
 // (namespace/app), time range, search text, loaded entries and everything
@@ -112,6 +113,7 @@ class Session : public QObject {
     // Sub-sessions
     Q_PROPERTY(lv::FocusSession* focus READ focus CONSTANT)
     Q_PROPERTY(lv::LiveSession* live READ live CONSTANT)
+    Q_PROPERTY(lv::DeviceBridge* device READ device CONSTANT)   // share sheet, files (platform)
 
 public:
     explicit Session(AppServices& services, QObject* parent = nullptr);
@@ -207,6 +209,9 @@ public:
     // Saved queries to / from a file; the number written or added, -1 on failure.
     Q_INVOKABLE int exportSavedQueries(const QUrl& file) const;
     Q_INVOKABLE int importSavedQueries(const QUrl& file, bool replace);
+    // The same as text, for a file the device saves or opens (Session.device).
+    Q_INVOKABLE QString savedQueriesJson() const;
+    Q_INVOKABLE int importSavedQueriesJson(const QString& json, bool replace);
 
     // Sharing
     void setShareBaseUrl(const QString& url);
@@ -289,6 +294,7 @@ public:
     bool openedFromLink() const { return m_openedFromLink; }
     FocusSession* focus() const { return m_focus; }
     LiveSession* live() const { return m_live; }
+    DeviceBridge* device() const { return m_device; }
 
     // For FocusSession / LiveSession.
     AppServices& services() const { return m_services; }
@@ -417,6 +423,7 @@ private:
     Preferences* m_prefs = nullptr;
     FocusSession* m_focus;
     LiveSession* m_live;
+    DeviceBridge* m_device;
 };
 
 } // namespace lv

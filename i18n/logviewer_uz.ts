@@ -223,6 +223,25 @@
         <source>Search history cleared</source>
         <translation>Qidiruv tarixi tozalandi</translation>
     </message>
+    <message>
+        <source>Export</source>
+        <translation>Eksport</translation>
+    </message>
+    <message>
+        <source>Import from a file</source>
+        <translation>Fayldan import</translation>
+    </message>
+    <message>
+        <source>The file is not a list of saved queries</source>
+        <translation>Faylda saqlangan soʻrovlar roʻyxati yoʻq</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n query(-ies) added</source>
+        <translation>
+            <numerusform>%n ta soʻrov qoʻshildi</numerusform>
+            <numerusform />
+        </translation>
+    </message>
 </context>
 <context>
     <name>AbsoluteRangeForm</name>
@@ -3691,6 +3710,10 @@ hamkasbingiz aynan shuni koʻradi</translation>
     <message>
         <source>Link copied</source>
         <translation>Havola nusxalandi</translation>
+    </message>
+    <message>
+        <source>Send…</source>
+        <translation>Yuborish…</translation>
     </message>
 </context>
 <context>

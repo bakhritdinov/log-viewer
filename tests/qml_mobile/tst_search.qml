@@ -159,4 +159,16 @@ TestCase {
         tryCompare(Session, "loading", false)
         tryVerify(() => H.find(window.contentItem, it => it.text !== undefined && /^\+\d$/.test(String(it.text)) && H.isShown(it)))
     }
+
+    // A device with a share sheet: "Send…" first, "Copy" still there.
+    function test_10_sendWithTheShareSheet() {
+        harness.plugDevice()
+        const sheet = popup("fixedRange")
+        sheet.open()
+        tryCompare(sheet, "opened", true)
+        tap(byName("Отправить…"))
+        tryCompare(sheet, "opened", false)
+        verify(harness.lastShared.startsWith(Session.app + "|"))
+        verify(harness.lastShared.indexOf("logviewer://open?") > 0)
+    }
 }

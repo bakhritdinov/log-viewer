@@ -229,6 +229,26 @@
         <source>Search history cleared</source>
         <translation>История поиска очищена</translation>
     </message>
+    <message>
+        <source>Export</source>
+        <translation>Экспорт</translation>
+    </message>
+    <message>
+        <source>Import from a file</source>
+        <translation>Импорт из файла</translation>
+    </message>
+    <message>
+        <source>The file is not a list of saved queries</source>
+        <translation>В файле нет списка сохранённых запросов</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n query(-ies) added</source>
+        <translation>
+            <numerusform>Добавлен %n запрос</numerusform>
+            <numerusform>Добавлено %n запроса</numerusform>
+            <numerusform>Добавлено %n запросов</numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>AbsoluteRangeForm</name>
@@ -3723,6 +3743,10 @@ a colleague sees exactly the same</source>
     <message>
         <source>Link copied</source>
         <translation>Ссылка скопирована</translation>
+    </message>
+    <message>
+        <source>Send…</source>
+        <translation>Отправить…</translation>
     </message>
 </context>
 <context>

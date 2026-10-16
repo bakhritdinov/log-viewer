@@ -4,8 +4,8 @@ import LogViewer.App
 import LogViewer.Ui
 
 // A link to the current selection: fixed or relative period, optionally the
-// selected entry. No Grafana address or passwords in it. (A system "Send…"
-// comes with the Android build; in the browser "Copy" is the main action.)
+// selected entry. No Grafana address or passwords in it. "Send…" opens the
+// system share sheet where the device has one; otherwise "Copy" is the action.
 BottomSheet {
     id: root
 
@@ -69,14 +69,25 @@ BottomSheet {
         }
     }
 
-    footer: AppButton {
-        Layout.fillWidth: true
-        touch: true
-        variant: "primary"
-        iconName: "copy"
-        text: qsTr("Copy")
-        onClicked: { clipboard.copy(root.link); root.close(); root.notice(qsTr("Link copied"), "", null) }
-    }
+    footer: [
+        AppButton {
+            Layout.fillWidth: true
+            visible: Session.device.canShare
+            touch: true
+            variant: "primary"
+            iconName: "share"
+            text: qsTr("Send…")
+            onClicked: { const link = root.link; root.close(); Session.device.share(Session.app, link) }
+        },
+        AppButton {
+            Layout.fillWidth: true
+            touch: true
+            variant: Session.device.canShare ? "secondary" : "primary"
+            iconName: "copy"
+            text: qsTr("Copy")
+            onClicked: { clipboard.copy(root.link); root.close(); root.notice(qsTr("Link copied"), "", null) }
+        }
+    ]
 
     Clipboard { id: clipboard }
 

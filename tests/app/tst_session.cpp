@@ -4,6 +4,7 @@
 #include <QTemporaryDir>
 #include <QTest>
 
+#include "app/DeviceBridge.h"
 #include "app/AppServices.h"
 #include "app/FocusSession.h"
 #include "app/LiveSession.h"
@@ -453,6 +454,38 @@ private slots:
         broken.close();
         QCOMPARE(h.session->importSavedQueries(QUrl::fromLocalFile(broken.fileName()), false), -1);
         QCOMPARE(h.session->importSavedQueries(QUrl::fromLocalFile(dir.filePath("missing.json")), false), -1);
+
+        // As text, for a file the device saves or opens.
+        const QString json = h.session->savedQueriesJson();
+        QVERIFY(json.contains("\"A\""));
+        h.session->removeSavedQuery(h.session->savedQueries()->get(1).value("id").toString());
+        QCOMPARE(h.session->importSavedQueriesJson(json, false), 1);
+        QCOMPARE(h.session->importSavedQueriesJson("not json", false), -1);
+    }
+
+    void deviceBridge()
+    {
+        Harness h;
+        DeviceBridge* device = h.session->device();
+        QVERIFY(!device->canShare());                  // nothing plugged in: copy only
+        QVERIFY(!device->canExchangeFiles());
+        device->share("t", "u");                       // no-ops without a platform
+        QString shared, saved;
+        bool opened = false;
+        device->setShareHandler([&](const QString& title, const QString& url) { shared = title + " " + url; });
+        device->setFileHandlers([&](const QString& name, const QString& content) { saved = name + ":" + content; },
+                                [&] { opened = true; });
+        QVERIFY(device->canShare());
+        QVERIFY(device->canExchangeFiles());
+        device->share("LogViewer", "logviewer://open?x");
+        QCOMPARE(shared, "LogViewer logviewer://open?x");
+        device->saveFile("q.json", "[]");
+        QCOMPARE(saved, "q.json:[]");
+        QSignalSpy file(device, &DeviceBridge::fileOpened);
+        device->openFile();
+        QVERIFY(opened);
+        device->deliverFile("{}");
+        QCOMPARE(file.first().first().toString(), "{}");
     }
 
     void savedQueryEditing()

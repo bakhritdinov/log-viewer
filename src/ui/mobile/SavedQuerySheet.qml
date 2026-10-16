@@ -42,7 +42,13 @@ BottomSheet {
     ActionRow { text: qsTr("Run"); iconName: "play"; onTriggered: { Session.runSavedQuery(root.queryId); root.close(); root.ran() } }
     ActionRow {
         text: qsTr("Share the link"); iconName: "link"
-        onTriggered: { clipboard.copy(Session.savedQueryLink(root.queryId)); root.close(); root.notice(qsTr("Link copied"), "", null) }
+        onTriggered: {
+            const link = Session.savedQueryLink(root.queryId)
+            const name = root.query.name
+            root.close()
+            if (Session.device.canShare) Session.device.share(name, link)
+            else { clipboard.copy(link); root.notice(qsTr("Link copied"), "", null) }
+        }
     }
     ActionRow { text: qsTr("Rename"); iconName: "pencil"; onTriggered: { root.close(); root.renameRequested(root.queryId) } }
     ActionRow {

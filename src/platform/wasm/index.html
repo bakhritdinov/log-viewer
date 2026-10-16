@@ -135,6 +135,25 @@
     window.addEventListener("online", () => { setOffline(); app?.logviewerOnline?.(); });
     // Another share link opened while the app runs.
     window.addEventListener("hashchange", () => app?.logviewerOpenLink?.(location.href));
+    // The system share sheet (WebShell, where navigator.share exists).
+    window.logviewerShare = data => navigator.share(data).catch(() => { /* closed by the user */ });
+    // Files: a download for saving, a file picker for opening (the app gets the text).
+    window.logviewerSaveFile = file => {
+      const url = URL.createObjectURL(new Blob([file.content], { type: "application/json" }));
+      const a = Object.assign(document.createElement("a"), { href: url, download: file.name });
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    };
+    window.logviewerOpenFile = () => {
+      const input = Object.assign(document.createElement("input"), { type: "file", accept: ".json,application/json" });
+      input.onchange = async () => {
+        const file = input.files && input.files[0];
+        if (file) app?.logviewerFileOpened?.(await file.text());
+      };
+      input.click();
+    };
     // Live tail keeps the screen on while the app is visible (WebShell).
     let keepAwake = false, wakeLock = null;
     const holdScreen = async () => {

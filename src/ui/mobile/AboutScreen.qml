@@ -41,6 +41,35 @@ SettingsScreen {
     SettingRow {
         title: qsTr("Saved queries")
         hint: qsTr("%n saved", "", Session.savedQueries.count)
+        // To another phone or the desktop app, and back (a JSON file).
+        GridLayout {
+            Layout.fillWidth: true
+            visible: Session.device.canExchangeFiles
+            columns: 2
+            columnSpacing: 8
+            AppButton {
+                Layout.fillWidth: true
+                touch: true
+                iconName: "download"
+                text: qsTr("Export")
+                enabled: Session.savedQueries.count > 0
+                onClicked: Session.device.saveFile("logviewer-queries.json", Session.savedQueriesJson())
+            }
+            AppButton {
+                Layout.fillWidth: true
+                touch: true
+                text: qsTr("Import from a file")
+                onClicked: Session.device.openFile()
+            }
+        }
+    }
+    Connections {
+        target: Session.device
+        function onFileOpened(content) {
+            const added = Session.importSavedQueriesJson(content, false)
+            root.notice(added < 0 ? qsTr("The file is not a list of saved queries")
+                                  : qsTr("%n query(-ies) added", "", added))
+        }
     }
     SettingRow {
         title: qsTr("Search history")

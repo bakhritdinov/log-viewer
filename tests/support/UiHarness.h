@@ -9,6 +9,7 @@
 #include <QQmlEngine>
 
 #include "app/AppServices.h"
+#include "app/DeviceBridge.h"
 #include "app/Language.h"
 #include "app/Session.h"
 #include "support/FakeHttp.h"
@@ -20,6 +21,9 @@ using namespace lv;
 class Harness : public QObject {
     Q_OBJECT
     Q_PROPERTY(int requestCount READ requestCount)
+    Q_PROPERTY(QString lastShared MEMBER lastShared)
+    Q_PROPERTY(QString lastSaved MEMBER lastSaved)
+    Q_PROPERTY(int fileRequests MEMBER fileRequests)
 
 public:
     explicit Harness(bool configured)
@@ -55,6 +59,15 @@ public:
     Q_INVOKABLE void scriptStatus(int code, const QString& body = {}) { http.script(status(code, body.toUtf8())); }
     Q_INVOKABLE void completeLast(int count) { http.complete(http.calls.size() - 1, ok(logsBody(rows(count)))); }
     Q_INVOKABLE void start() { session->start(); }
+    // A device with a share sheet and files (the browser's, say), recording
+    // what the app asked of it; deliverFile() answers openFile().
+    Q_INVOKABLE void plugDevice()
+    {
+        session->device()->setShareHandler([this](const QString& title, const QString& url) { lastShared = title + "|" + url; });
+        session->device()->setFileHandlers([this](const QString& name, const QString& content) { lastSaved = name + "|" + content; },
+                                           [this] { ++fileRequests; });
+    }
+    Q_INVOKABLE void deliverFile(const QString& content) { session->device()->deliverFile(content); }
     Q_INVOKABLE QString lastExpr() const
     {
         if (http.requests.isEmpty()) return {};
@@ -77,6 +90,9 @@ public:
     }
 
     qint64 baseMs = 0;
+    QString lastShared;
+    QString lastSaved;
+    int fileRequests = 0;
     FakeHttpClient http;
     MemoryStore kv;
     MemorySecretStore secrets;

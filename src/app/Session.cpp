@@ -1,3 +1,4 @@
+#include "app/DeviceBridge.h"
 #include "app/Session.h"
 
 #include "app/Preferences.h"
@@ -71,6 +72,7 @@ Session::Session(AppServices& services, QObject* parent)
 
     m_focus = new FocusSession(*this, this);
     m_live = new LiveSession(*this, this);
+    m_device = new DeviceBridge(this);
 
     refreshEnvironments();
     refreshSavedQueries();
@@ -1081,6 +1083,18 @@ int Session::importSavedQueries(const QUrl& file, bool replace)
     QFile in(file.isLocalFile() ? file.toLocalFile() : file.toString());
     if (!in.open(QIODevice::ReadOnly)) return -1;
     const int added = m_services.savedQueries().importJson(in.readAll(), replace);
+    if (added >= 0) refreshSavedQueries();
+    return added;
+}
+
+QString Session::savedQueriesJson() const
+{
+    return QString::fromUtf8(m_services.savedQueries().exportJson());
+}
+
+int Session::importSavedQueriesJson(const QString& json, bool replace)
+{
+    const int added = m_services.savedQueries().importJson(json.toUtf8(), replace);
     if (added >= 0) refreshSavedQueries();
     return added;
 }
