@@ -83,7 +83,10 @@ jobs:
         cmake --build build --config Release -j "$(sysctl -n hw.logicalcpu)"
         # Install to trigger deployment and signing
         mkdir -p dist/bundle
-        DESTDIR=$PWD/dist/bundle cmake --install build --prefix / --component app
+        # Install straight into the bundle dir (from 2.9.0's fix). `DESTDIR=... --prefix /`
+        # broke with the CMake on the 2026-08 macos-14 image: "/" + BUNDLE DESTINATION "."
+        # collapsed to an empty path ("file INSTALL given no DESTINATION").
+        cmake --install build --prefix "$PWD/dist/bundle" --component app
         # Final sign for safety
         codesign --force --deep --sign - dist/bundle/LogViewer.app
         # Package
