@@ -21,9 +21,11 @@ if(NOT EMSCRIPTEN AND NOT ANDROID AND NOT IOS)
         GIT_SHALLOW ON)
     FetchContent_MakeAvailable(qtkeychain)
     unset(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME)
-    target_sources(LogViewer PRIVATE KeychainSecretStore.cpp KeychainSecretStore.h)
-    target_link_libraries(LogViewer PRIVATE qt6keychain)
-    target_compile_definitions(LogViewer PRIVATE LOGVIEWER_KEYCHAIN)
+    target_sources(LogViewer PRIVATE KeychainSecretStore.cpp KeychainSecretStore.h
+                                     LinkHandler.cpp LinkHandler.h)
+    target_link_libraries(LogViewer PRIVATE qt6keychain Qt6::Network)
+    # The keychain, and logviewer:// links with one app at a time.
+    target_compile_definitions(LogViewer PRIVATE LOGVIEWER_KEYCHAIN LOGVIEWER_DESKTOP_LINKS)
 endif()
 qt_add_resources(LogViewer "logviewer_icon"
     PREFIX /logviewer
@@ -45,6 +47,7 @@ endif()
 # in main.cpp: QSettings, the Homebrew cask's `quit:` and `zap` paths and 2.x's
 # settings all use this reverse-DNS identifier.
 set_target_properties(LogViewer PROPERTIES
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.plist.in
     MACOSX_BUNDLE_GUI_IDENTIFIER com.logviewer.LogViewer
     MACOSX_BUNDLE_BUNDLE_NAME LogViewer
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}

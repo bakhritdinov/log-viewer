@@ -16,6 +16,9 @@
 #ifdef LOGVIEWER_KEYCHAIN
 #include "KeychainSecretStore.h"
 #endif
+#ifdef LOGVIEWER_DESKTOP_LINKS
+#include "LinkHandler.h"
+#endif
 #include "core/data/QtHttpClient.h"
 #include "core/storage/KeyValueStore.h"
 #include "core/storage/SecretStore.h"
@@ -35,6 +38,16 @@ int main(int argc, char* argv[])
     app.setApplicationName(QStringLiteral("LogViewer"));
     app.setApplicationVersion(QStringLiteral(APP_VERSION));
     app.setWindowIcon(QIcon(QStringLiteral(":/logviewer/icon.png")));
+
+    // A share link on the command line; one app at a time (a second start
+    // hands its link to the running one).
+    QString startLink;
+#ifdef LOGVIEWER_DESKTOP_LINKS
+    lv::LinkHandler links;
+    startLink = lv::LinkHandler::linkFromArguments(app.arguments());
+    if (links.handedToRunningApp(startLink)) return 0;
+    lv::LinkHandler::registerScheme();
+#endif
 
 #ifdef LOGVIEWER_UI_PHONE
     lv::Preferences::setDefaults(lv::Preferences::Defaults::phone());
@@ -69,6 +82,9 @@ int main(int argc, char* argv[])
     if (window) window->showFullScreen();
 #endif
     lv::webshell::attach(window, session);
+#ifdef LOGVIEWER_DESKTOP_LINKS
+    links.listen(session, window);
+#endif
 
     // The update check at start-up (throttled inside; off in Settings → Version).
     if (auto* updates = engine.singletonInstance<lv::UpdateService*>("LogViewer.App", "Updates"); updates && updates->autoCheck())
@@ -76,8 +92,10 @@ int main(int argc, char* argv[])
 
     lv::runLegacyMigration(services, [&](bool) {
         session.environmentsEdited();
-        // Opened from a share link (the browser page's address): that view.
-        if (!lv::webshell::openInitialLink(session)) session.start();
+        // Opened from a share link (the command line or the browser page's
+        // address): that view; otherwise the last one.
+        const bool linked = startLink.isEmpty() ? lv::webshell::openInitialLink(session) : session.openLink(startLink);
+        if (!linked) session.start();
     });
     return app.exec();
 }

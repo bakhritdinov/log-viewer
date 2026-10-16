@@ -125,6 +125,9 @@ elseif(WIN32)
     # to overwrite cleanly rather than accumulating ghost entries.
     set(CPACK_NSIS_PACKAGE_NAME "${CPACK_PACKAGE_NAME}")
     set(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_NAME}")
+    # The app registers logviewer:// for the user at start; the uninstaller
+    # takes it away again.
+    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "DeleteRegKey HKCU 'Software\\\\Classes\\\\logviewer'")
 elseif(UNIX AND NOT APPLE)
     # Linux ships as an AppImage that carries its Qt (the distributions' Qt is
     # older than the 6.8 the app needs); `cmake --build <dir> --target appimage`.
