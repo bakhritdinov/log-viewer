@@ -40,7 +40,8 @@ public:
     // Leaves the pause and jumps to the newest entries.
     Q_INVOKABLE void resume() { setPaused(false); }
     // Tests use a short interval.
-    void setIntervalMs(int ms) { m_tail->setIntervalMs(ms); }
+    // Fixed interval instead of the preference (tests use a short one); 0 = preference.
+    void setIntervalMs(int ms) { m_intervalOverrideMs = ms; m_tail->setIntervalMs(ms); }
 
     bool isRunning() const { return m_tail->isRunning(); }
     bool isPaused() const { return m_buffer.isPaused(); }
@@ -67,6 +68,7 @@ private:
     ErrorInfo m_error;
     QElapsedTimer m_rateClock;
     int m_rateCount = 0;
+    int m_intervalOverrideMs = 0;
     double m_rate = 0;
 };
 

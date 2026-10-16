@@ -28,8 +28,9 @@ LiveSession::~LiveSession() = default;
 void LiveSession::start()
 {
     stop();
-    // Interval and buffer size as set in the preferences, read at each start.
-    m_tail->setIntervalMs(m_session.prefs().liveIntervalMs());
+    // Interval and buffer size as set in the preferences, read at each start
+    // (unless an interval was fixed with setIntervalMs()).
+    m_tail->setIntervalMs(m_intervalOverrideMs > 0 ? m_intervalOverrideMs : m_session.prefs().liveIntervalMs());
     m_buffer.setCapacity(m_session.prefs().liveBuffer());
     m_logs->setPageSize(m_buffer.capacity());
     m_buffer.clear();

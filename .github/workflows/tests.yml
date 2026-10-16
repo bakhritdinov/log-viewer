@@ -131,6 +131,8 @@ jobs:
 
     - name: Build
       run: |
+        # The cross Qt's qt-cmake comes without the executable bit.
+        chmod +x "$QT_ROOT_DIR/bin/qt-cmake"
         "$QT_ROOT_DIR/bin/qt-cmake" -S . -B build-wasm -G Ninja -DCMAKE_BUILD_TYPE=Release \
           -DQT_HOST_PATH="$QT_HOST_DIR" -Wno-dev
         cmake --build build-wasm --target LogViewer
