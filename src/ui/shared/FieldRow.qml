@@ -129,10 +129,12 @@ Control {
             radius: Theme.radiusMd
             color: overlay.cover
         }
+        // Created on first hover / focus: a panel of fields rebuilt on every ↓
+        // would otherwise make four buttons per row that are rarely seen.
         Loader {
             id: desktopActions
             x: fade.width
-            active: !root.touch
+            active: !root.touch && root.actionsShown
             sourceComponent: actionsComponent
         }
     }

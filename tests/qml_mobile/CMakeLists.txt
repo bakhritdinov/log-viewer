@@ -12,7 +12,12 @@ target_compile_definitions(tst_ui_mobile PRIVATE
     LOGVIEWER_FIXTURES_DIR="${LOGVIEWER_FIXTURES_DIR}")
 set_target_properties(tst_ui_mobile PROPERTIES MACOSX_BUNDLE OFF WIN32_EXECUTABLE OFF)
 
-foreach(scenario first_run feed search source details live settings)
+set(scenarios first_run feed search source details live settings)
+# Timings with 5 000+ entries: meaningful in an optimised build only.
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    list(APPEND scenarios perf)
+endif()
+foreach(scenario ${scenarios})
     add_test(NAME tst_ui_mobile_${scenario}
              COMMAND tst_ui_mobile -input ${CMAKE_CURRENT_SOURCE_DIR}/tst_${scenario}.qml)
     set_tests_properties(tst_ui_mobile_${scenario} PROPERTIES ENVIRONMENT

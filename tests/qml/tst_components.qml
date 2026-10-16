@@ -339,25 +339,27 @@ Item {
         }
 
         // The value takes the row's width; the actions show over it while the
-        // row is hovered and stay while the pointer is on them.
+        // row is hovered and stay while the pointer is on them; they are not made
+        // before that (the details panel rebuilds its rows on every ↓).
         function test_fieldRowActionsOnHover() {
             const row = createTemporaryObject(fieldRow, host)
             waitForRendering(row)
             const value = findItem(row, it => it.text === "abc" && it.wrapMode !== undefined)
             verify(value.width > row.width - 112 - 40, value.width)
             const copy = () => findItem(row, it => it.iconName === "copy")
-            verify(!copy().visible)
+            const shown = () => !!copy() && copy().visible
+            verify(!copy())
             mouseMove(row, 20, row.height / 2)
-            tryVerify(() => copy().visible)
+            tryVerify(shown)
             // The actions cover the value, not the other way round.
             let cover = copy()
             while (cover.parent !== row && cover.parent) cover = cover.parent
             verify(cover.z > row.contentItem.z, "actions above the value")
             mouseMove(copy(), copy().width / 2, copy().height / 2)
             wait(50)
-            verify(copy().visible)
+            verify(shown())
             mouseMove(host, 1, host.height - 1)
-            tryVerify(() => !copy().visible)
+            tryVerify(() => !shown())
         }
 
         // Long names and values wrap instead of being cut off.

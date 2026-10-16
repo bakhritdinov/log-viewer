@@ -57,6 +57,38 @@ jobs:
     - name: Run tests
       run: ctest --test-dir build --output-on-failure
 
+  perf:
+    name: Performance with 5 000 entries (${{ matrix.ui }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ui: [desktop, mobile]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ninja-build libsecret-1-dev libgl1-mesa-dev libegl1-mesa-dev           libxkbcommon-dev libfontconfig1-dev
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        cache: true
+
+    - name: Configure
+      run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DLOGVIEWER_TESTS=ON -DLOGVIEWER_UI=${{ matrix.ui }} -Wno-dev
+
+    - name: Build
+      run: cmake --build build --target tst_ui_${{ matrix.ui }}
+
+    # Prints "PERF <step> <ms>" for each step; fails past generous budgets.
+    - name: Run
+      run: ctest --test-dir build -R perf --output-on-failure --verbose | grep -E "PERF|FAIL|tests passed"
+
   web:
     name: WebAssembly (PWA)
     runs-on: ubuntu-24.04

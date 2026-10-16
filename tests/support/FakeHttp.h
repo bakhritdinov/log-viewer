@@ -85,6 +85,32 @@ inline QByteArray logsBody(const QList<Row>& rows)
     return QJsonDocument(body).toJson(QJsonDocument::Compact);
 }
 
+// A logs response whose rows carry their own labels (all fields of an entry).
+struct LabeledRow {
+    qint64 ms;
+    QJsonObject labels;
+    QString message;
+};
+
+inline QByteArray labeledLogsBody(const QList<LabeledRow>& rows)
+{
+    QJsonArray labels, times, lines;
+    for (const LabeledRow& r : rows) {
+        labels.append(r.labels);
+        times.append(r.ms);
+        lines.append(r.message);
+    }
+    const QJsonObject frame{
+        { "schema", QJsonObject{ { "fields", QJsonArray{ QJsonObject{ { "name", "labels" } },
+                                                          QJsonObject{ { "name", "Time" } },
+                                                          QJsonObject{ { "name", "Line" } } } } } },
+        { "data", QJsonObject{ { "values", QJsonArray{ labels, times, lines } } } },
+    };
+    const QJsonObject body{ { "results", QJsonObject{ { "A", QJsonObject{ { "status", 200 },
+                                                                         { "frames", QJsonArray{ frame } } } } } } };
+    return QJsonDocument(body).toJson(QJsonDocument::Compact);
+}
+
 // `count` unique rows going back from `newestMs` every `stepMs`.
 inline QByteArray logsBody(qint64 newestMs, int count, int stepMs = 10, const QString& prefix = QStringLiteral("m"))
 {

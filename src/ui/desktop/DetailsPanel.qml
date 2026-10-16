@@ -225,11 +225,13 @@ Rectangle {
             Layout.margins: 14
             Layout.topMargin: 8
             clip: true
+            // Built only while shown: colouring and laying out the whole entry
+            // on every ↓ cost more than the rest of the panel.
             MessageView {
                 width: root.width - 28
                 fontSize: Session.prefs.logFontSize
-                text: root.entry.rawJson
-                richText: root.styled(root.entry.rawJson)
+                text: root.tab === 1 ? root.entry.rawJson : ""
+                richText: root.tab === 1 ? root.styled(root.entry.rawJson) : ""
             }
         }
 
