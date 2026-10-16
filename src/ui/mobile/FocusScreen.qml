@@ -261,7 +261,7 @@ Popup {
                     color: Theme.text
                 }
                 AppButton {
-                    implicitHeight: 40
+                    touch: true
                     text: qsTr("Open as search")
                     onClicked: { root.session.openAsSearch(); root.close(); root.searchOpened() }
                 }

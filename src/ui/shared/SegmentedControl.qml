@@ -37,7 +37,7 @@ Control {
 
     padding: 2
     focusPolicy: Qt.StrongFocus
-    implicitHeight: (touch ? 40 : compact ? 18 : 26) + 2 * padding
+    implicitHeight: (touch ? 44 : compact ? 18 : 26) + 2 * padding
     implicitWidth: row.implicitWidth + 2 * padding
     Accessible.role: Accessible.PageTabList
     Accessible.name: accessibleName

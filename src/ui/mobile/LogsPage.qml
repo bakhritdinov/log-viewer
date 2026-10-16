@@ -313,14 +313,15 @@ Item {
             AbstractButton {
                 Layout.fillWidth: true
                 visible: root.view === "skeleton" || (root.view === "feed" && root.trend.values.length > 0)
-                implicitHeight: 34
+                // 44 px to tap; the line itself stays 22 px high.
+                implicitHeight: 44
                 Accessible.name: qsTr("WARN and ERROR over the period, open the chart")
                 enabled: root.view === "feed"
                 onClicked: root.chartRequested()
                 leftPadding: 12
                 rightPadding: 12
-                topPadding: 8
-                bottomPadding: 4
+                topPadding: 13
+                bottomPadding: 9
                 background: null
                 contentItem: Item {
                     Sparkline {
@@ -374,6 +375,7 @@ Item {
                 // The order of the patterns (their tab only).
                 IconButton {
                     visible: Session.patternsEnabled
+                    Layout.fillHeight: true
                     touch: true
                     iconName: "sort"
                     label: qsTr("Sort the patterns")
@@ -381,6 +383,7 @@ Item {
                 }
                 AppButton {
                     id: liveButton
+                    Layout.fillHeight: true             // as tall as the tabs beside it
                     touch: true
                     text: "Live"
                     onClicked: Session.live.start()
@@ -797,12 +800,12 @@ Item {
 
     component ToTopButton: AbstractButton {
         id: toTop
-        implicitHeight: 32
-        implicitWidth: toTopRow.implicitWidth + 24
+        implicitHeight: 44
+        implicitWidth: toTopRow.implicitWidth + 28
         Accessible.name: qsTr("To the top")
         onClicked: root.scrollToTop()
         background: Rectangle {
-            radius: 16
+            radius: 22
             color: toTop.pressed ? Theme.hover : Theme.subtle
             border.width: 1
             border.color: Theme.border

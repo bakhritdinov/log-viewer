@@ -58,6 +58,7 @@ Popup {
             Icon { name: "search"; color: Theme.accent }
             TextInput {
                 id: searchField
+                activeFocusOnTab: true
                 Layout.fillWidth: true
                 text: root.query
                 onTextEdited: root.query = text

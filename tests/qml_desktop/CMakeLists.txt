@@ -12,7 +12,7 @@ target_compile_definitions(tst_ui_desktop PRIVATE
     LOGVIEWER_FIXTURES_DIR="${LOGVIEWER_FIXTURES_DIR}")
 set_target_properties(tst_ui_desktop PROPERTIES MACOSX_BUNDLE OFF WIN32_EXECUTABLE OFF)
 
-set(scenarios first_run search)
+set(scenarios first_run search a11y)
 # Timings with 5 000+ entries: meaningful in an optimised build only.
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     list(APPEND scenarios perf)

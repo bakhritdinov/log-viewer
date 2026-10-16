@@ -59,6 +59,7 @@ FocusScope {
                 selectedTextColor: Theme.textOnAccent
                 selectByMouse: true
                 clip: true
+                activeFocusOnTab: true          // TextInput is skipped by Tab otherwise
                 inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
                 Accessible.role: Accessible.EditableText
                 Accessible.name: qsTr("Search logs")
@@ -66,9 +67,11 @@ FocusScope {
                 Keys.onEnterPressed: { popup.close(); root.submitted() }
                 Keys.onEscapePressed: popup.close()
                 Keys.onDownPressed: if (popup.opened) list.forceActiveFocus()
-                // Tab completes the first suggestion without searching.
+                // Tab completes the first suggestion without searching — once
+                // something is typed: in an empty field it moves on, so the
+                // keyboard is not trapped here.
                 Keys.onTabPressed: event => {
-                    if (popup.opened && list.count > 0) root.suggestionActivated(0, false)
+                    if (popup.opened && list.count > 0 && input.text !== "") root.suggestionActivated(0, false)
                     else event.accepted = false
                 }
                 onActiveFocusChanged: if (activeFocus) root._showPopup()

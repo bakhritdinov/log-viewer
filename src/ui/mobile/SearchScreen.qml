@@ -96,6 +96,7 @@ Popup {
                         Icon { name: "search"; size: 18; color: Theme.accentText }
                         TextInput {
                             id: input
+                            activeFocusOnTab: true
                             Layout.fillWidth: true
                             clip: true
                             text: Session.searchText
@@ -254,7 +255,7 @@ Popup {
                                 required property string modelData
                                 readonly property bool on: root.levelOn(modelData)
                                 Layout.fillWidth: true
-                                implicitHeight: 40
+                                implicitHeight: 44
                                 checkable: false
                                 Accessible.name: modelData.toUpperCase()
                                 Accessible.checked: on
@@ -430,7 +431,7 @@ Popup {
                         id: symbol
                         required property string modelData
                         implicitWidth: 44
-                        implicitHeight: 40
+                        implicitHeight: 44
                         focusPolicy: Qt.NoFocus
                         Accessible.name: modelData === "-" ? qsTr("Minus (exclude)") : modelData
                         onClicked: root.insert(modelData)
@@ -447,7 +448,7 @@ Popup {
                 }
                 Item { Layout.fillWidth: true }
                 AppButton {
-                    implicitHeight: 40
+                    implicitHeight: 44
                     variant: "primary"
                     text: qsTr("Find")
                     focusPolicy: Qt.NoFocus

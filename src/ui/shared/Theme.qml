@@ -48,7 +48,7 @@ QtObject {
     readonly property color borderMuted: dark ? "#21262d" : "#eaeef2"
     readonly property color overlay: dark ? Qt.rgba(0.004, 0.016, 0.035, 0.72) : Qt.rgba(0.12, 0.14, 0.16, 0.45)
 
-    // ── Text (≥ 4.5:1 on bg and surface) ──
+    // ── Text (≥ 4.5:1 on bg, surface and subtle; checked by tst_components) ──
     readonly property color text: dark ? "#c9d1d9" : "#1f2328"
     readonly property color textStrong: dark ? "#f0f6fc" : "#1f2328"
     readonly property color textMuted: dark ? "#8b949e" : "#59636e"
@@ -73,8 +73,7 @@ QtObject {
     readonly property color success: dark ? "#3fb950" : "#1a7f37"
     readonly property color successStrong: dark ? "#238636" : "#1f883d"
     readonly property color successBorder: dark ? "#2ea043" : "#1a7f37"
-    readonly property color successText: dark ? "#7ee787" : "#1a7f37"
-    readonly property color successPressed: dark ? "#1a7f37" : "#1a7f37"
+    readonly property color successText: dark ? "#7ee787" : "#116329"
     readonly property color successSoft: dark ? Qt.rgba(0.18, 0.627, 0.263, 0.18) : Qt.rgba(0.102, 0.498, 0.216, 0.12)
 
     readonly property color danger: dark ? "#f85149" : "#cf222e"
@@ -89,17 +88,17 @@ QtObject {
     readonly property color warnText: dark ? "#e3b341" : "#7d4e00"
     readonly property color warnSoft: dark ? Qt.rgba(0.824, 0.6, 0.133, 0.14) : Qt.rgba(0.831, 0.655, 0.173, 0.16)
 
-    readonly property color variable: dark ? "#d2a8ff" : "#8250df"     // pattern placeholders
+    readonly property color variable: dark ? "#d2a8ff" : "#6639ba"     // pattern placeholders
     readonly property color variableSoft: dark ? Qt.rgba(0.639, 0.443, 0.969, 0.15) : Qt.rgba(0.51, 0.314, 0.875, 0.10)
     readonly property color highlight: dark ? Qt.rgba(0.824, 0.6, 0.133, 0.35) : Qt.rgba(1, 0.827, 0.239, 0.55)
 
     // JSON syntax colours for message views.
-    readonly property color jsonKey: dark ? "#e3b341" : "#9a6700"
+    readonly property color jsonKey: dark ? "#e3b341" : "#7d4e00"
     readonly property color jsonString: dark ? "#7ee787" : "#116329"
     readonly property color jsonNumber: dark ? "#79c0ff" : "#0550ae"
     readonly property color jsonBoolean: dark ? "#ff7b72" : "#cf222e"
-    readonly property color jsonNull: dark ? "#d2a8ff" : "#8250df"
-    readonly property color jsonPunctuation: dark ? "#8b949e" : "#6e7781"
+    readonly property color jsonNull: dark ? "#d2a8ff" : "#6639ba"
+    readonly property color jsonPunctuation: dark ? "#8b949e" : "#59636e"
     // The same as names, for Session.jsonStyled.
     readonly property var jsonColors: ({
         key: String(jsonKey), string: String(jsonString), number: String(jsonNumber),

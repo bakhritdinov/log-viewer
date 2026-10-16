@@ -73,10 +73,11 @@ Button {
                 return control.variant === "ghost" || control.variant === "link" || control.variant === "danger"
                      ? "transparent" : Theme.surface
             switch (control.variant) {
+            // Hovered and pressed fills get darker, not lighter: white text keeps ≥ 4.5:1.
             case "primary":
-                return control.down ? Theme.successPressed : (control.hovered ? Theme.successBorder : Theme.successStrong)
+                return control.down ? Qt.darker(Theme.successStrong, 1.25) : (control.hovered ? Qt.darker(Theme.successStrong, 1.12) : Theme.successStrong)
             case "dangerSolid":
-                return control.down ? Qt.darker(Theme.dangerStrong, 1.2) : (control.hovered ? Theme.danger : Theme.dangerStrong)
+                return control.down ? Qt.darker(Theme.dangerStrong, 1.25) : (control.hovered ? Qt.darker(Theme.dangerStrong, 1.12) : Theme.dangerStrong)
             case "ghost":
                 return control.down ? Theme.hover : (control.hovered ? Theme.subtle : "transparent")
             case "link":

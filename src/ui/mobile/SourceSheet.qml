@@ -128,6 +128,7 @@ BottomSheet {
                 Icon { name: "search"; size: 18; color: Theme.textMuted }
                 TextInput {
                     id: searchField
+                    activeFocusOnTab: true
                     Layout.fillWidth: true
                     clip: true
                     font.family: Theme.sans

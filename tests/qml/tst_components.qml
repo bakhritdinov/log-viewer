@@ -322,6 +322,39 @@ Item {
             Theme.dark = wasDark
         }
 
+        // WCAG AA in both themes: text ≥ 4.5:1 on the surfaces it is drawn on,
+        // white on filled buttons (also hovered and pressed), level names.
+        function test_textContrast() {
+            const lin = v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+            const lum = c => 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b)
+            const over = (fg, bg) => Qt.rgba(fg.r * fg.a + bg.r * (1 - fg.a), fg.g * fg.a + bg.g * (1 - fg.a),
+                                             fg.b * fg.a + bg.b * (1 - fg.a), 1)
+            const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
+            const wasDark = Theme.dark
+            const failures = []
+            for (const dark of [true, false]) {
+                Theme.dark = dark
+                const check = (name, fg, bg) => {
+                    const r = ratio(fg, over(bg, Theme.bg))
+                    if (r < 4.5) failures.push((dark ? "dark " : "light ") + name + " " + r.toFixed(2))
+                }
+                const texts = ["text", "textStrong", "textMuted", "accentText", "successText", "dangerText", "warnText",
+                               "variable", "jsonKey", "jsonString", "jsonNumber", "jsonBoolean", "jsonNull", "jsonPunctuation"]
+                for (const t of texts)
+                    for (const b of ["bg", "surface", "subtle", "inputBg"]) check(t + " on " + b, Theme[t], Theme[b])
+                for (const level of ["ERROR", "WARN", "INFO", "DEBUG"])
+                    for (const b of ["bg", "surface"]) check(level + " on " + b, Theme.levelTextColor(level), Theme[b])
+                for (const [t, soft] of [["accentText", "accentSoft"], ["dangerText", "dangerSoft"], ["warnText", "warnSoft"],
+                                         ["successText", "successSoft"], ["variable", "variableSoft"], ["text", "highlight"]])
+                    for (const b of ["bg", "surface"]) check(t + " on " + soft + "/" + b, Theme[t], over(Theme[soft], Theme[b]))
+                for (const fill of ["successStrong", "dangerStrong", "accentStrong"])
+                    for (const f of [1, 1.12, 1.25]) check("white on " + fill + "×" + f, Theme.textOnAccent, Qt.darker(Theme[fill], f))
+                check("tooltip", Theme.tooltipText, Theme.tooltipBg)
+            }
+            Theme.dark = wasDark
+            compare(failures.join(", "), "")
+        }
+
         // Radio and check boxes start flush with the text around them.
         function test_togglesHaveNoLeadingInset() {
             compare(createTemporaryObject(radio, host).indicator.x, 0)

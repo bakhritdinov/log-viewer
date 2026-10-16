@@ -73,7 +73,7 @@ tests/{characterization,core,app,qml}, tests/fixtures/
 | 6 ui/desktop | done — `LogViewer.Desktop`, `logviewer-next` executable (`src/platform`), scenario tests over a fake Grafana, qmllint clean |
 | 7 ui/mobile + PWA | done — `LogViewer.Mobile` (feed, search, sheets, details / focus, chart, live, patterns, settings), phone preference defaults, scenario tests; WebAssembly build with a PWA shell (`src/platform/wasm`: page, manifest, service worker, update and install notices, wake lock in live tail) and a page ↔ app bridge (`WebShell`). Left for stage 8: system "Send…", file export/import on the phone (the last result kept offline — dropped) |
 | 8 Platforms and release | done — LogViewer 3.0.0 with 2.x's settings (environments and passwords taken once, 2.x keys kept, Ecotone's dropped); legacy code removed; passwords in the system keychain (QtKeychain); `logviewer://` links with one app at a time; the phone's share sheet and file export / import; Linux as AppImage only (PPA / DEB dropped: the distributions' Qt is older than 6.8); CI on Windows / macOS / Linux, the mobile design and WebAssembly; the PWA published to GitHub Pages on release (docs/PWA.md); the last result kept offline — dropped |
-| 9 Stabilization | in progress — 5 000-row performance scenarios for both designs (`tst_perf.qml`, Release builds and a CI job; ↓ in the details panel 23 → 6 ms) |
+| 9 Stabilization | in progress — 5 000-row performance scenarios for both designs (`tst_perf.qml`, Release builds and a CI job; ↓ in the details panel 23 → 6 ms); accessibility tests for both designs (`tst_a11y.qml`: names, Tab order, 44 px touch targets) and a WCAG AA contrast test of the theme |
 
 ## Stages
 

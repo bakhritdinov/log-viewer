@@ -154,6 +154,7 @@ Popup {
                     }
                     SegmentedControl {
                         compact: false
+                        touch: true
                         accessibleName: qsTr("Format")
                         model: [{ label: root.valid && root.entry.isJson ? "JSON" : qsTr("Text"), value: 0 }, { label: "Raw", value: 1 }]
                         value: root.tab

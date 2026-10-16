@@ -35,3 +35,31 @@ function windowRoot(window) {
     while (item.parent) item = item.parent
     return item
 }
+
+// Controls a screen reader could not announce: buttons, fields and click
+// areas, shown, with neither an accessible name nor text. Returns
+// descriptions ("Type at x,y") for a readable failure. `accessibleName(item)`
+// comes from the test: attached properties are not visible to a library script.
+function unnamedControls(root, accessibleName) {
+    const out = []
+    findAll(root, it => {
+        if (!isShown(it) || it.width <= 0 || it.height <= 0) return false
+        const button = it.hasOwnProperty("pressed") && it.hasOwnProperty("checkable") && it.hasOwnProperty("autoRepeat")
+        const field = it.hasOwnProperty("cursorPosition") && it.hasOwnProperty("readOnly") && !it.readOnly
+        const clickArea = it.hasOwnProperty("pressed") && it.hasOwnProperty("containsMouse") && it.hasOwnProperty("acceptedButtons")
+                          && it.enabled && !it.hasOwnProperty("checkable")
+        if (!button && !field && !clickArea) return false
+        if (clickArea) {
+            // A click area inside a named control is fine (the control is announced).
+            for (let p = it.parent; p; p = p.parent) if (accessibleName(p)) return false
+            if (it.cursorShape === Qt.SizeHorCursor || it.cursorShape === Qt.SizeVerCursor) return false   // resize handles
+            return !accessibleName(it)
+        }
+        const name = accessibleName(it) || it.text || it.placeholderText || ""
+        return String(name).trim() === ""
+    }).forEach(it => {
+        const p = it.mapToItem(null, 0, 0)
+        out.push(String(it).replace(/_QMLTYPE_\d+/, "").replace(/\(0x[0-9a-f]+\)/, "") + " at " + Math.round(p.x) + "," + Math.round(p.y))
+    })
+    return out
+}
