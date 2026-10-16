@@ -14,6 +14,11 @@ function(logviewer_add_test name)
     target_compile_definitions(${name} PRIVATE
         LOGVIEWER_FIXTURES_DIR="${LOGVIEWER_FIXTURES_DIR}")
     set_target_properties(${name} PROPERTIES MACOSX_BUNDLE OFF WIN32_EXECUTABLE OFF)
+    # MSVC's incremental linking has left test executables that crash at start
+    # after large rebuilds; a full link is cheap for these small programs.
+    if(MSVC)
+        target_link_options(${name} PRIVATE /INCREMENTAL:NO)
+    endif()
     add_test(NAME ${name} COMMAND ${name})
     # Headless: no window system needed for core/app tests.
     set_tests_properties(${name} PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

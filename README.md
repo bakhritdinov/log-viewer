@@ -1,21 +1,20 @@
 # LogViewer
 
-Высокопроизводительное десктопное приложение для просмотра и анализа логов из **Grafana** с источниками данных **Loki** и **VictoriaLogs**. Написано на **C++20** и **Qt 6 (QML)**.
+Приложение для просмотра и анализа логов из **Grafana** (источники **VictoriaLogs** и **Loki**): на компьютере (Windows, macOS, Linux) и на телефоне (PWA). Написано на **C++20** и **Qt 6 (QML)**.
 
 ## 🚀 Возможности
 
-- **Поиск с подсветкой**: LogsQL/LogQL, моментальный поиск через debounce, подсветка совпадений прямо в строке.
-- **История поиска**: автозапись последних 10 запросов, выпадашка с быстрым восстановлением.
-- **Inline-раскрытие деталей**: клик по строке плавно показывает полное сообщение и все поля с действиями `🔍` (фильтр) и `📋` (копировать).
-- **Адаптивная таблица**: колонки Time/Level/Service/Message сами подстраиваются под ширину окна, message переходит в multi-line на узких экранах. Колонки можно тащить за разделители — ширина запоминается.
-- **Пагинация по времени**: page-based, кнопки `« First / ‹ Newer / Older › / Last »` + индикатор страницы.
-- **Обзор полей (Available Fields)**: overlay-сайдбар с фасетами всех значений за выбранный диапазон, клик → toggle-фильтр.
-- **Auto-refresh и Tail-режим**: split-кнопка `↻ + ▾` рядом с поиском — выбрать `5s / 10s / 30s / 1m` или `Tail` (= `tail -f`, прыжок на самую свежую страницу).
-- **Time-range picker (Grafana-стиль)**: presets `Last 5 min — 7 days, Today` + absolute From/To с календарём.
-- **Темы Dark / Light**: переключение `🌙 / ☀` в тулбаре, выбор сохраняется.
-- **Discovery namespace/app**: автоматическое определение метов (`_namespace`, `namespace`, `env`, `project` для NS; `_appName`, `app`, `service`, `job` для App), полное перечисление через LogsQL stats.
-- **Persistence**: запоминается последний выбранный namespace, app, time range, ширины колонок, тема, история поиска.
-- **Keyboard shortcuts**: `j/k`/`↑↓` навигация, `Enter` раскрыть, `[/]` страница назад/вперёд, `Shift+[/]` First/Last, `F5` refresh, `⌘F` поиск, `Esc` сброс.
+- **Поиск** словами и условиями `key:value`, `key:~regex`, `-key:value`, части через `AND`; подсказки полей и значений по загруженным записям; подсветка найденного; недавние и сохранённые запросы (`Ctrl+1…9`).
+- **Источник и период**: namespace и приложение с поиском и недавними, пресеты от 5 минут до 7 дней, «Сегодня», «Вчера» и свой интервал.
+- **Загрузка пакетами** до выбранного предела с «Загрузить ещё» и остановкой; обновление не стирает показанные записи, пока не пришли новые; автообновление.
+- **Гистограмма** ERROR / WARN по времени: клик по столбцу или уровню сужает выборку.
+- **Детали записи**: сообщение (красивый JSON или запись целиком), поля с «показать только» / «исключить» / «копировать», поле как колонка таблицы.
+- **Контекст и трейс** вокруг записи (±30 с / ±1 мин / ±5 мин, записи того же `trace_id` во всех сервисах).
+- **Шаблоны**: похожие WARN и ERROR сгруппированы (числа, id и время становятся `*`), с количеством, трендом и значениями переменных.
+- **Live tail**: новые строки сверху, пауза, буфер.
+- **Ссылки «Поделиться»** на выборку (`logviewer://…` на компьютере, адрес PWA на телефоне) с фиксированным или относительным периодом и выделенной записью.
+- **Окружения** (DEV, PROD и свои) с проверкой подключения; пароли и токены — в системном хранилище ключей.
+- **Языки**: русский, oʻzbekcha, English. **Темы**: тёмная, светлая, как в системе.
 
 ## 📦 Установка
 
@@ -23,109 +22,98 @@
 ```powershell
 choco install log-viewer
 ```
-Обновление до последней версии:
-```powershell
-choco upgrade log-viewer
-```
+Обновление: `choco upgrade log-viewer`.
 
 ### macOS (Homebrew)
 ```bash
 brew install --cask bakhritdinov/tap/log-viewer
 ```
-Обновление:
-```bash
-brew upgrade --cask log-viewer
-```
+Обновление: `brew upgrade --cask log-viewer`.
 
 ### Linux (AppImage)
-Скачайте `LogViewer-Linux.AppImage` со страницы релизов, сделайте его исполняемым и запустите — Qt внутри, установка не нужна:
+Скачайте `LogViewer-Linux.AppImage` со страницы релизов, сделайте исполняемым и запустите — Qt внутри, установка не нужна:
 ```bash
 chmod +x LogViewer-Linux.AppImage
 ./LogViewer-Linux.AppImage
 ```
 Пакеты PPA и `.deb` выпускались для версий 2.x: системный Qt в Ubuntu 22.04/24.04 старше нужного 3.x Qt 6.8.
 
+### Телефон (PWA)
+Откройте **https://bakhritdinov.github.io/log-viewer/** в Chrome (Android) или Safari (iOS) и установите на экран — приложение предложит это само. Grafana должна разрешить этот адрес (CORS) — см. [docs/PWA.md](docs/PWA.md).
+
 ### Прямая загрузка
-Установщики и portable-сборки для всех платформ доступны на странице релизов:
+Все сборки — на странице релизов: 👉 **[github.com/bakhritdinov/log-viewer/releases/latest](https://github.com/bakhritdinov/log-viewer/releases/latest)**
 
-👉 **[github.com/bakhritdinov/log-viewer/releases/latest](https://github.com/bakhritdinov/log-viewer/releases/latest)**
-
-- Windows: `LogViewer-Windows-x64.exe` (NSIS-installer) или `LogViewer-Windows-Portable.zip`.
+- Windows: `LogViewer-Windows-x64.exe` (установщик) или `LogViewer-Windows-Portable.zip`.
 - macOS: `LogViewer-macOS-Universal.dmg` (Intel + Apple Silicon).
-- Linux: `LogViewer-Linux.AppImage` (никакая установка не нужна).
+- Linux: `LogViewer-Linux.AppImage`.
+- PWA для своего сервера: `LogViewer-PWA.zip`.
 
-## 🛠 Технологический стек
-
-- **Язык**: C++ 20
-- **Фреймворк**: Qt 6.8+ (Core, Quick, Quick Controls, Quick Shapes, Network, Linguist Tools)
-- **UI**: QML + Qt Quick Controls 2 (singleton-Theme, переиспользуемые компоненты)
-- **Сборка**: CMake 3.16+
-- **Стиль**: GitHub Dark / Light themes
-
-## 📦 Сборка проекта
-
-### Требования
-- CMake 3.16 или выше
-- Qt 6.8 или новее (модули: Core, Quick, Quick Controls 2, Quick Shapes, Network, Linguist Tools)
-- Компилятор с поддержкой C++ 20 (GCC 10+, Clang 11+, MSVC 2019+)
-
-### Инструкция по сборке
-
-```bash
-git clone https://github.com/bakhritdinov/log-viewer.git
-cd log-viewer
-
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
-
-# Запуск
-./build/LogViewer            # Linux
-open build/LogViewer.app     # macOS
-build\LogViewer.exe          # Windows
-```
+### Переход с 2.x
+При первом запуске 3.x берёт окружения, логины, пароли и токены, последний источник, период и тему версии 2.x — вводить заново ничего не нужно. Настройки 2.x остаются на месте: кто не обновился, продолжает работать как раньше. Настройки Ecotone (его больше нет) удаляются.
 
 ## 🖥 Использование
 
-### Настройка подключения
-1. Запустите приложение.
-2. Нажмите `⚙ Settings` в правом верхнем углу.
-3. Заполните для DEV и/или PROD:
-   - **Grafana URL** — базовый URL вашего Grafana, например `https://grafana.example.com`.
-   - **Datasource UID** — UID источника данных Loki/VictoriaLogs.
-   - **API Token** — рекомендуется (Bearer-токен сервис-аккаунта Grafana).
-   - **Login / Password** — fallback Basic auth, если не используете токен.
-4. **Save** → переключайтесь между DEV и PROD сегментами в верхней панели.
+### Первый запуск
+1. Откройте **Настройки → Подключения** (`Ctrl+,`).
+2. Для окружения (DEV, PROD или нового) укажите:
+   - **URL Grafana**, например `https://grafana.example.com`;
+   - **UID источника логов** (Grafana → Connections → Data sources → последняя часть URL);
+   - авторизацию: **логин и пароль**, **API-токен** сервис-аккаунта или без неё.
+3. **Проверить подключение** → **Сохранить и подключиться**. Namespace и приложения находятся автоматически.
 
 ### Сочетания клавиш
 
 | Клавиша | Действие |
 |---|---|
-| `⌘F` / `Ctrl+F` | Фокус на поле поиска |
-| `Esc` | Очистить поиск, вернуть фокус таблице |
-| `F5` | Обновить запрос |
-| `j` / `↓` | Следующая строка |
-| `k` / `↑` | Предыдущая строка |
-| `Enter` / `Space` | Раскрыть/свернуть детали строки |
-| `[` / `]` | Page Newer / Older |
-| `Shift+[` / `Shift+]` | First / Last page |
+| `F5` / `Ctrl+R` | Обновить |
+| `Ctrl+K` | Выбрать источник |
+| `Ctrl+T` | Выбрать период |
+| `Ctrl+L` | Поделиться ссылкой |
+| `Ctrl+,` | Настройки |
+| `?` | Все сочетания клавиш |
+| `Ctrl+F` | Поиск |
+| `Ctrl+S` | Сохранить запрос |
+| `Ctrl+1…9` | Запустить сохранённый запрос |
+| `Tab` | Принять подсказку |
+| `↑` / `↓` | Предыдущая / следующая запись |
+| `[` / `]` | Страница новее / старее |
+| `Shift+[` / `Shift+]` | Первая / последняя страница |
+| `Esc` | Закрыть детали или фокус; остановить загрузку |
+| `Space` | Пауза / продолжение live tail |
 
-## 📊 Структура данных (Loki / VictoriaLogs)
+## 📊 Логи
 
-Для корректной работы фильтрации логи должны иметь определённые метки:
+Namespace и приложение определяются автоматически по меткам потока (`_namespace` / `namespace` / …, `_appName` / `app` / `service` / `job` …); если в ваших логах другие метки, задайте их в окружении (на компьютере — раздел «Дополнительно», на телефоне — «Свои метки»). Желательны поля `level` (цвета и фильтры по уровню) и `trace_id` (трейс вокруг записи).
 
-### Обязательные (автоопределение)
-- **Namespace label** — для группировки по окружению (по умолчанию `_namespace`, fallback: `namespace`, `env`, `project`).
-- **App label** — для идентификации сервиса (по умолчанию `_appName`, fallback: `app`, `service`, `job`).
+## 🛠 Сборка
 
-### Рекомендуемые
-- `level` — для цветовой индикации (ERROR красный, WARN жёлтый, INFO нейтрально). Если метки нет — пытается найти в теле сообщения.
-- `trace_id` / `traceId` — клик правой кнопкой → «Fetch Trace Context (±5m)».
-- `pod` / `host.name` — отображается как источник.
+### Требования
+- CMake 3.16+, компилятор с C++20 (MSVC 2022, GCC 11+, Clang 14+).
+- Qt 6.8+: Core, Quick, Quick Controls 2, Quick Shapes, Network, Linguist Tools.
+- Linux: `libsecret-1-dev` (пароли в Secret Service). QtKeychain скачивается при конфигурации.
 
-### Структура сообщения
-- **Time** / **ts** — временная метка.
-- **Line** / **message** — текст сообщения.
+### Компьютер
+```bash
+git clone https://github.com/bakhritdinov/log-viewer.git
+cd log-viewer
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
 
----
+./build/LogViewer          # Linux
+open build/LogViewer.app   # macOS
+build\LogViewer.exe        # Windows
+```
 
-Разработано для эффективного мониторинга и отладки микросервисов.
+Тесты: `-DLOGVIEWER_TESTS=ON`, затем `ctest --test-dir build`. Мобильный интерфейс на компьютере (для разработки): `-DLOGVIEWER_UI=mobile`.
+
+### Браузер (PWA)
+Qt 6.8 для WebAssembly (`wasm_singlethread`) и Emscripten 3.1.56:
+```bash
+<qt-wasm>/bin/qt-cmake -S . -B build-wasm -DCMAKE_BUILD_TYPE=Release -DQT_HOST_PATH=<qt-desktop>
+cmake --build build-wasm --target LogViewer
+```
+Страница, манифест, service worker и иконки появляются рядом с `LogViewer.wasm` в `build-wasm/src/platform`.
+
+### Устройство кода
+`src/core` (логика, без UI) → `src/app` (view-модели) → `src/ui/shared` (общие компоненты) → `src/ui/desktop` или `src/ui/mobile` (дизайн выбирается при сборке) → `src/platform` (запуск, хранилище ключей, ссылки, страница PWA). План и решения переписывания — [docs/REWRITE_PLAN.md](docs/REWRITE_PLAN.md).
