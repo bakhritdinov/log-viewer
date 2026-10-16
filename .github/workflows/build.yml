@@ -132,9 +132,60 @@ jobs:
         name: LogViewer-Linux
         path: dist/LogViewer-Linux.AppImage
 
+  build-web:
+    name: Build WebAssembly (PWA)
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Ninja
+      run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+    - name: Install Qt (host)
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.2'
+        host: 'linux'
+        target: 'desktop'
+        arch: 'linux_gcc_64'
+        cache-key-prefix: qt-host
+
+    - name: Remember the host Qt
+      run: echo "QT_HOST_DIR=$QT_ROOT_DIR" >> "$GITHUB_ENV"
+
+    - name: Install Qt (WebAssembly)
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.8.2'
+        host: 'all_os'
+        target: 'wasm'
+        arch: 'wasm_singlethread'
+        cache-key-prefix: qt-wasm
+
+    - name: Install Emscripten
+      uses: mymindstorm/setup-emsdk@v14
+      with:
+        version: '3.1.56'
+
+    - name: Build and Package
+      run: |
+        "$QT_ROOT_DIR/bin/qt-cmake" -S . -B build-wasm -G Ninja -DCMAKE_BUILD_TYPE=Release           -DQT_HOST_PATH="$QT_HOST_DIR" -Wno-dev
+        cmake --build build-wasm --target LogViewer
+        out=build-wasm/src/platform
+        mkdir -p dist/pwa
+        cp -r "$out"/index.html "$out"/manifest.webmanifest "$out"/sw.js "$out"/qtloader.js               "$out"/LogViewer.js "$out"/LogViewer.wasm "$out"/icons dist/pwa/
+        (cd dist/pwa && zip -r ../LogViewer-PWA.zip .)
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LogViewer-PWA
+        path: dist/LogViewer-PWA.zip
+
   release:
     name: Create GitHub Release
-    needs: [build-windows, build-macos, build-linux]
+    needs: [build-windows, build-macos, build-linux, build-web]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
@@ -155,6 +206,7 @@ jobs:
           artifacts/LogViewer-Windows-Portable.zip
           artifacts/LogViewer-macOS-Universal.dmg
           artifacts/LogViewer-Linux.AppImage
+          artifacts/LogViewer-PWA.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
