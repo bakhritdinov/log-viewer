@@ -3,6 +3,28 @@
 find_package(Qt6 6.8 REQUIRED COMPONENTS Gui Quick)
 
 qt_add_executable(LogViewer MACOSX_BUNDLE main.cpp WebShell.cpp WebShell.h)
+
+# Passwords in the system keychain (QtKeychain, built from source); the browser
+# and phone builds keep them in the settings (SettingsSecretStore).
+if(NOT EMSCRIPTEN AND NOT ANDROID AND NOT IOS)
+    include(FetchContent)
+    set(BUILD_WITH_QT6 ON CACHE BOOL "" FORCE)
+    set(BUILD_TRANSLATIONS OFF CACHE BOOL "" FORCE)
+    set(BUILD_TEST_APPLICATION OFF CACHE BOOL "" FORCE)
+    set(BUILD_SHARED_LIBS OFF)
+    # Its own install rules (library, headers, CMake files) go to a component
+    # of their own that is never installed or packaged (CPACK_COMPONENTS_ALL).
+    set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME qtkeychain-dev)
+    FetchContent_Declare(qtkeychain
+        GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain.git
+        GIT_TAG 0.15.0
+        GIT_SHALLOW ON)
+    FetchContent_MakeAvailable(qtkeychain)
+    unset(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME)
+    target_sources(LogViewer PRIVATE KeychainSecretStore.cpp KeychainSecretStore.h)
+    target_link_libraries(LogViewer PRIVATE qt6keychain)
+    target_compile_definitions(LogViewer PRIVATE LOGVIEWER_KEYCHAIN)
+endif()
 qt_add_resources(LogViewer "logviewer_icon"
     PREFIX /logviewer
     BASE ${PROJECT_SOURCE_DIR}/src/resources
@@ -77,8 +99,8 @@ endif()
 if(NOT EMSCRIPTEN AND NOT ANDROID AND NOT IOS)
     include(GNUInstallDirs)
     install(TARGETS LogViewer
-        BUNDLE DESTINATION .
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+        BUNDLE DESTINATION . COMPONENT app
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT app)
     # windeployqt / macdeployqt copy the Qt libraries and the QML modules the
     # designs import (scanned from src/ui). On Linux CPack DEB relies on the
     # system Qt and the AppImage target runs linuxdeploy-qt instead.
@@ -92,6 +114,6 @@ if(NOT EMSCRIPTEN AND NOT ANDROID AND NOT IOS)
             OUTPUT_SCRIPT deploy_script
             DEPLOY_TOOL_OPTIONS ${deploy_args}
             NO_UNSUPPORTED_PLATFORM_ERROR)
-        install(SCRIPT ${deploy_script})
+        install(SCRIPT ${deploy_script} COMPONENT app)
     endif()
 endif()

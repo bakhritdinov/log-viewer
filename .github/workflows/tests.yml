@@ -25,7 +25,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y ninja-build libgl1-mesa-dev libegl1-mesa-dev \
+        sudo apt-get install -y ninja-build libsecret-1-dev libgl1-mesa-dev libegl1-mesa-dev \
           libxkbcommon-dev libfontconfig1-dev
 
     - name: Install system dependencies (macOS)

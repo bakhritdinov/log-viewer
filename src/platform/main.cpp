@@ -13,6 +13,9 @@
 #include "app/Session.h"
 #include "app/UpdateService.h"
 #include "WebShell.h"
+#ifdef LOGVIEWER_KEYCHAIN
+#include "KeychainSecretStore.h"
+#endif
 #include "core/data/QtHttpClient.h"
 #include "core/storage/KeyValueStore.h"
 #include "core/storage/SecretStore.h"
@@ -37,8 +40,13 @@ int main(int argc, char* argv[])
     lv::Preferences::setDefaults(lv::Preferences::Defaults::phone());
 #endif
     lv::QSettingsStore settings;
-    // Stage 8 replaces this with the OS keychain (QtKeychain).
+#ifdef LOGVIEWER_KEYCHAIN
+    // Passwords and tokens in the system keychain (the settings where there is none).
+    lv::KeychainSecretStore secrets(settings, QStringLiteral("LogViewer"));
+#else
+    // Browser and phone builds: the settings (the environment form says so).
     lv::SettingsSecretStore secrets(settings);
+#endif
     lv::QtHttpClient http;
     lv::AppServices services(http, settings, secrets, lv::makeDefaultParseExecutor());
 

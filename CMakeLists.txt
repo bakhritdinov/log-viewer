@@ -92,8 +92,8 @@ if(UNIX AND NOT APPLE)
         "[Desktop Entry]\nType=Application\nName=LogViewer\nComment=Logs from Grafana (VictoriaLogs / Loki)\nExec=LogViewer %u\nIcon=LogViewer\nCategories=Development;\nTerminal=false\nMimeType=x-scheme-handler/logviewer;\n"
     )
     file(WRITE ${CMAKE_BINARY_DIR}/log-viewer.desktop ${DESKTOP_FILE_CONTENT})
-    install(FILES ${CMAKE_BINARY_DIR}/log-viewer.desktop DESTINATION share/applications)
-    install(FILES src/resources/icon.png DESTINATION share/icons/hicolor/256x256/apps RENAME LogViewer.png)
+    install(FILES ${CMAKE_BINARY_DIR}/log-viewer.desktop DESTINATION share/applications COMPONENT app)
+    install(FILES src/resources/icon.png DESTINATION share/icons/hicolor/256x256/apps RENAME LogViewer.png COMPONENT app)
 endif()
 
 # --- CPack Configuration ---
@@ -106,6 +106,13 @@ set(CPACK_PACKAGE_VENDOR "Bobur Bakhritdinov")
 # Add/Remove Programs entry, leaving duplicates after upgrades.
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}")
 set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}")
+# Only the app: dependencies built from source (QtKeychain) install their
+# development files into components of their own.
+set(CPACK_COMPONENTS_ALL app)
+set(CPACK_COMPONENTS_GROUPING ALL_COMPONENTS_IN_ONE)
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+set(CPACK_COMPONENT_APP_DISPLAY_NAME "LogViewer")
+set(CPACK_COMPONENT_APP_REQUIRED ON)
 
 if(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
@@ -127,7 +134,7 @@ elseif(UNIX AND NOT APPLE)
 
     add_custom_target(appimage
         COMMAND mkdir -p ${CMAKE_BINARY_DIR}/AppDir
-        COMMAND DESTDIR=${CMAKE_BINARY_DIR}/AppDir cmake --install ${CMAKE_BINARY_DIR} --prefix /usr
+        COMMAND DESTDIR=${CMAKE_BINARY_DIR}/AppDir cmake --install ${CMAKE_BINARY_DIR} --prefix /usr --component app
         COMMAND test -f linuxdeploy-x86_64.AppImage || (wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage && chmod +x linuxdeploy-x86_64.AppImage)
         COMMAND test -f linuxdeploy-plugin-qt-x86_64.AppImage || (wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage && chmod +x linuxdeploy-plugin-qt-x86_64.AppImage)
         COMMAND env QMAKE=${QT_QMAKE_EXECUTABLE} EXTRA_QT_PLUGINS=iconengines QML_SOURCES_PATHS=${CMAKE_CURRENT_SOURCE_DIR}/src/ui ./linuxdeploy-x86_64.AppImage --appdir ${CMAKE_BINARY_DIR}/AppDir --plugin qt --output appimage --desktop-file ${CMAKE_BINARY_DIR}/log-viewer.desktop --icon-file ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/icon.png
