@@ -112,10 +112,9 @@ ColumnLayout {
             readonly property bool fresh: row.timeMs > root.newerThanMs
             readonly property bool selected: row.index === root.currentRow
             readonly property bool anchored: row.index === root.anchorRow
-            // One line in the table; the rest of a multi-line message is counted.
-            readonly property int firstBreak: row.message.indexOf("\n")
-            readonly property string firstLine: firstBreak < 0 ? row.message : row.message.slice(0, firstBreak)
-            readonly property int moreLines: firstBreak < 0 ? 0 : row.message.split("\n").length - 1
+            // One line in the table: every line of the message, " ↵ " between them, elided.
+            required property string oneLine
+            required property int moreLines
 
             // Taller for wrapped messages; the anchored row (focus mode) a bit taller still.
             width: ListView.view.width
@@ -191,7 +190,7 @@ ColumnLayout {
                     spacing: 8
                     Text {
                         id: messageText
-                        readonly property string shown: root.lines > 1 ? row.message : row.firstLine
+                        readonly property string shown: root.lines > 1 ? row.message : row.oneLine
                         Layout.fillWidth: true
                         textFormat: root.highlightTerms.length > 0 ? Text.StyledText : Text.PlainText
                         text: root.highlightTerms.length > 0 ? Session.highlight(shown, root.highlightTerms, Theme.warnText) : shown

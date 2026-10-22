@@ -37,6 +37,8 @@ public:
         ServiceRole,                      // app/service label value
         FieldsRole,
         TraceIdRole,
+        OneLineRole,                      // message on one line (" ↵ " between lines)
+        MoreLinesRole,                    // lines after the first
     };
 
     explicit LogListModel(const LogStore* store = nullptr, QObject* parent = nullptr);

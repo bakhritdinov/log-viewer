@@ -300,6 +300,24 @@ Item {
             compare(spy.count, 2)
         }
 
+        // Feedback: hovering or picking an interval outlined the whole column
+        // (top to bottom), not the bar.
+        function test_histogramOutlinesTheBarOnly() {
+            const h = createTemporaryObject(histogram, host, { model: createTemporaryObject(sparseModel, host), maxTotal: 8 })
+            waitForRendering(h)
+            const bar = findAll(h, it => it.hasOwnProperty("hasEntries"))[0]
+            const outline = findAll(bar, it => it.objectName === "barOutline")[0]
+            h.selectedIndex = 0
+            verify(outline.visible)
+            const warnHeight = h.height * 2 / 8
+            fuzzyCompare(outline.height, warnHeight + 1, 0.5)
+            fuzzyCompare(outline.mapToItem(h, 0, 0).y + outline.height, h.height, 0.5)
+            h.selectedIndex = -1
+            verify(!outline.visible)
+            mouseMove(bar, bar.width / 2, bar.height - 2)
+            tryVerify(() => outline.visible)
+        }
+
         // A bucket without WARN/ERROR is not a target: no hover, tooltip or click.
         function test_histogramIgnoresEmptyBuckets() {
             const h = createTemporaryObject(histogram, host, { model: createTemporaryObject(sparseModel, host), maxTotal: 2 })

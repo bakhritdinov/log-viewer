@@ -100,7 +100,7 @@ private slots:
         QCOMPARE(row.value("level").toString(), "INFO");   // page 2 starts at entry 200 (even → INFO)
         QVERIFY(model.rowData(999).isEmpty());
         QVERIFY(!model.entryAt(-1));
-        QCOMPARE(model.roleNames().size(), 8);
+        QCOMPARE(model.roleNames().size(), 10);
 
         model.setPageSize(1000);
         QCOMPARE(model.rowCount(), 250);

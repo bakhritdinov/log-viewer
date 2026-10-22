@@ -660,4 +660,18 @@ TestCase {
         compare(chip.text, 'msg:"failed: ↵ { ↵ code : 1 ↵ }"')
         Session.searchText = ""
     }
+    // Feedback: a multi-line message (RESPONSE\nStatus code = …) showed only its
+    // first word in the table; the row carries every line, " ↵ " between them.
+    function test_40_multiLineMessageOnOneRow() {
+        harness.scriptRealisticLogs(400)
+        Session.search()
+        tryCompare(Session, "loading", false)
+        waitForRendering(window.contentItem)
+        const row = rows().find(r => r.moreLines > 0)
+        verify(row, "the realistic data has a multi-line message")
+        const text = H.find(row, it => it.hasOwnProperty("shown"))
+        verify(text.shown.indexOf(" ↵ java.net.SocketTimeoutException") > 0, text.shown)
+        compare(text.lineCount, 1)
+        verify(H.find(row, it => String(it.text).indexOf("↵ +") === 0 && H.isShown(it)))
+    }
 }

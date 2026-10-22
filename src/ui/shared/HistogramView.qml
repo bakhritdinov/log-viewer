@@ -52,12 +52,8 @@ Item {
                 width: (bars.width - bars.spacing * (repeater.count - 1)) / Math.max(1, repeater.count)
                 height: bars.height
 
-                Rectangle {
-                    anchors.fill: parent
-                    color: hover.hovered || bar.index === root.selectedIndex ? Theme.subtle : "transparent"
-                    radius: 2
-                }
                 Column {
+                    id: stack
                     anchors.bottom: parent.bottom
                     width: parent.width
                     // A picked interval keeps its colour; the rest steps back.
@@ -73,12 +69,15 @@ Item {
                         }
                     }
                 }
+                // Hover and the picked interval outline the bar itself, not the whole column.
                 Rectangle {
-                    anchors.fill: parent
-                    visible: bar.index === root.selectedIndex
+                    objectName: "barOutline"
+                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                    height: stack.height + 1
+                    visible: bar.hasEntries && (hover.hovered || bar.index === root.selectedIndex)
                     color: "transparent"
                     border.width: 1
-                    border.color: Theme.textStrong
+                    border.color: bar.index === root.selectedIndex ? Theme.textStrong : Theme.hoverBorder
                     radius: 2
                 }
 

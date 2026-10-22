@@ -326,7 +326,7 @@ QString Session::historySource(const QString& text) const
 QStringList Session::historyLabels() const
 {
     QStringList labels = history();
-    for (QString& text : labels) text = presenters::oneLineQuery(text);
+    for (QString& text : labels) text = presenters::oneLine(text);
     return labels;
 }
 

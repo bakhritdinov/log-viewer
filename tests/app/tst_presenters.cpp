@@ -28,10 +28,10 @@ private slots:
     // Feedback (broker-api): messages starting with a line break and deep
     // indentation showed as an empty row with "+5 lines".
     // Feedback: a multi-line search spread over the recent searches.
-    void oneLineQueryJoinsLines()
+    void oneLineJoinsLines()
     {
-        QCOMPARE(oneLineQuery("level:error"), QString("level:error"));
-        QCOMPARE(oneLineQuery("msg:\"failed:\n{\n  \\\"code\\\" : 1\r\n}\"\n"),
+        QCOMPARE(oneLine("level:error"), QString("level:error"));
+        QCOMPARE(oneLine("msg:\"failed:\n{\n  \\\"code\\\" : 1\r\n}\"\n"),
                  QString("msg:\"failed: ↵ { ↵ \\\"code\\\" : 1 ↵ }\""));
     }
     void listMessageDropsLeadingBlanksAndIndentation()
@@ -45,6 +45,14 @@ private slots:
         QCOMPARE(listMessage("a\n\n  b"), QString("a\n\n  b"));
         QCOMPARE(listMessage("   \n  \t "), QString());
         QCOMPARE(listMessage(""), QString());
+    }
+    // Feedback: the table showed only the first line of a multi-line message.
+    void oneLineMessageKeepsEveryLine()
+    {
+        const QString msg = listMessage("RESPONSE\nStatus code = [200]\nBody = [{\n  \"pinfl\" : 1\n}]\n");
+        QCOMPARE(oneLine(msg), QString("RESPONSE ↵ Status code = [200] ↵ Body = [{ ↵ \"pinfl\" : 1 ↵ }]"));
+        QCOMPARE(moreLines(msg), 4);
+        QCOMPARE(moreLines(listMessage("one line")), 0);
     }
 
     void highlightEscapesAndMarksEveryMatch()

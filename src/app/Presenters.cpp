@@ -21,11 +21,16 @@ QString localTime(qint64 ms, const QString& format)
 
 QByteArrayList chipRoles() { return { "text", "kind", "field", "value", "exclude", "regex" }; }
 
-QString oneLineQuery(const QString& text)
+QString oneLine(const QString& text)
 {
     if (!text.contains(u'\n') && !text.contains(u'\r')) return text;
     static const QRegularExpression lineBreak(QStringLiteral("\\s*[\\r\\n]\\s*"));
     return text.trimmed().replace(lineBreak, QStringLiteral(" ↵ "));
+}
+
+int moreLines(const QString& listMessage)
+{
+    return int(listMessage.count(u'\n'));
 }
 
 QList<QVariantMap> chipRows(const QString& searchText)
@@ -34,11 +39,11 @@ QList<QVariantMap> chipRows(const QString& searchText)
     const Query query = Query::parse(searchText);   // keep alive: terms() returns a reference
     for (const QueryTerm& t : query.terms()) {
         if (t.kind == QueryTerm::Kind::Word) {
-            rows << QVariantMap{ { "text", oneLineQuery(t.word) }, { "kind", "word" }, { "field", QString() },
+            rows << QVariantMap{ { "text", oneLine(t.word) }, { "kind", "word" }, { "field", QString() },
                                  { "value", t.word }, { "exclude", false }, { "regex", false } };
         } else {
             const FieldFilter& f = t.filter;
-            rows << QVariantMap{ { "text", oneLineQuery(f.toText()) }, { "kind", "filter" }, { "field", f.field },
+            rows << QVariantMap{ { "text", oneLine(f.toText()) }, { "kind", "filter" }, { "field", f.field },
                                  { "value", f.value }, { "exclude", f.exclude }, { "regex", f.regex } };
         }
     }

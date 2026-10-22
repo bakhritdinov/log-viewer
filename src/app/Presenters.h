@@ -16,7 +16,7 @@
 namespace lv::presenters {
 
 // ── Filter chips: one per search term ──
-// roles: text (on one line, see oneLineQuery), kind ("word"|"filter"), field, value, exclude, regex
+// roles: text (on one line, see oneLine), kind ("word"|"filter"), field, value, exclude, regex
 QByteArrayList chipRoles();
 QList<QVariantMap> chipRows(const QString& searchText);
 
@@ -101,9 +101,11 @@ QString jsonStyled(const QString& json, const JsonColors& colors);
 // character (some services log a line break and deep indentation first).
 // Details and copying keep the original.
 QString listMessage(const QString& message);
-// A search on one line (recent searches): every line break with the spaces
-// around it becomes " ↵ "; running it uses the original text.
-QString oneLineQuery(const QString& text);
+// Text on one line (recent searches, single-line table rows): every line break
+// with the spaces around it becomes " ↵ "; running or copying uses the original.
+QString oneLine(const QString& text);
+// Lines after the first in a list message (see listMessage).
+int moreLines(const QString& listMessage);
 
 // ── Highlighting ──
 // `text` as Qt StyledText with every case-insensitive occurrence of `terms`

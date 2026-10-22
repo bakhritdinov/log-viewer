@@ -59,6 +59,8 @@ QVariant LogListModel::data(const QModelIndex& index, int role) const
         case ServiceRole: return serviceOf(e);
         case FieldsRole: return e.fields;
         case TraceIdRole: return traceIdOf(e);
+        case OneLineRole: return presenters::oneLine(presenters::listMessage(e.message));
+        case MoreLinesRole: return presenters::moreLines(presenters::listMessage(e.message));
     }
     return {};
 }
@@ -67,7 +69,8 @@ QHash<int, QByteArray> LogListModel::roleNames() const
 {
     return { { TimeTextRole, "timeText" }, { DateTimeTextRole, "dateTimeText" }, { TimeMsRole, "timeMs" },
              { MessageRole, "message" }, { LevelRole, "level" }, { ServiceRole, "service" },
-             { FieldsRole, "fields" }, { TraceIdRole, "traceId" } };
+             { FieldsRole, "fields" }, { TraceIdRole, "traceId" },
+             { OneLineRole, "oneLine" }, { MoreLinesRole, "moreLines" } };
 }
 
 void LogListModel::setProgressive(bool on)
